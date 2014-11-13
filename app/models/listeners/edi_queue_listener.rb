@@ -12,10 +12,6 @@ module Listeners
       submitted_timestamp = properties.headers["submitted_timestamp"]
       event_name = properties.headers["event_name"]
       return_status = properties.headers["return_status"]
-      error_list = {}
-      if error?(delivery_info)
-         error_list = JSON.load(payload)
-      end
       EdiOpsTransaction.create!({
         :event_key => event_key,
         :event_name => event_name,
@@ -23,7 +19,7 @@ module Listeners
         :submitted_timestamp => submitted_timestamp,
         :enrollment_group_uri => enrollment_group_uri,
         :return_status => properties.headers["return_status"],
-        :errors => error_list,
+        :errors => payload,
         :status => "new"
       })
       channel.acknowledge(delivery_info.delivery_tag, false) 

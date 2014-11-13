@@ -89,7 +89,7 @@ module Amqp
               $stderr.puts payload
               publish_processing_failed(delivery_info, properties, payload, e)
             else
-              new_properties = redelivery_properties(existing_retry_count, properties)
+              new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
               queue.publish(payload, new_properties)
               channel.acknowledge(delivery_info.delivery_tag, false)
             end

@@ -2,39 +2,33 @@ module Parsers::Xml::Reports
   class Policy
 
     include NodeUtils
-    attr_reader :root_elements, :responsible_party, :comments
+    attr_reader :root, :root_elements, :responsible_party, :comments
     
     def initialize(parser = nil)
       @root = parser
-      @root.remove_namespaces!
-      parse_full_xml
-    end
-
-    def parse_full_xml
+      build_namespaces
       root_level_elements
-      [:responsible_party, :financial_reports, :health].each do |attr|
-        self.send("policy_#{attr.to_s}")
-      end
+      policy_responsible_party
     end
 
     def enrollees
-      @root.xpath('enrollees/enrollee').inject([]) do |data, node|
-        data << Enrollee.new(node)
+      @root.xpath('n1:enrollees/n1:enrollee', @namespaces).inject([]) do |data, node|
+        data << Enrollee.new(node, @namespaces)
       end
     end
 
     def policy_responsible_party
-      @responsible_party = extract_elements(@root.at_xpath('responsible_party'))
+      @responsible_party = extract_elements(@root.at_xpath('n1:responsible_party', @namespaces))
     end
 
     def enrollment
-      @root.xpath('enrollment/plan').inject([]) do |data, node|
-        data << PolicyPlan.new(node)
+      @root.xpath('n1:enrollment/n1:plan', @namespaces).inject([]) do |data, node|
+        data << PolicyPlan.new(node, @namespaces)
       end
     end
 
     def policy_comments
-      @comments = extract_elements(@root.at_xpath('comments'))
+      @comments = extract_elements(@root.at_xpath('n1:comments', @namespaces))
     end
 
     # def covered_individuals

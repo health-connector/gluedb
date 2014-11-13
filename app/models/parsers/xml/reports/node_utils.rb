@@ -39,5 +39,18 @@ module Parsers::Xml::Reports
       end
       value
     end
+
+    def build_namespaces
+      counter = 1
+      @namespaces = @root.namespaces.inject({}) do |data, (key, value)|
+        prefix = key.sub(/^xmlns(:)?/, '')
+        if prefix.blank?
+          prefix = "n#{counter}"
+          counter += 1
+        end
+        data[prefix] = value
+        data
+      end
+    end
   end
 end

@@ -20,7 +20,7 @@ module Parsers::Xml::Reports
       }
     end
 
-    def demograpics
+    def demographics
       {
         :sex => :gender,
         :birth_date => :dob

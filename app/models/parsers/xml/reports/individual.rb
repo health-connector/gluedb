@@ -4,7 +4,7 @@ module Parsers::Xml::Reports
   class Individual
 
     include NodeUtils
-    attr_reader :root_elements, :member_ids, :demographics, :financial_reports, :relationships, :health, :person
+    attr_reader :root_elements, :hbx_ids, :person, :demographics, :financial_reports, :relationships, :health
 
     CITIZENSHIP_MAPPING = {
        "U.S. Citizen" => %W(us_citizen naturalized_citizen indian_tribe_member),
@@ -18,27 +18,24 @@ module Parsers::Xml::Reports
       # @root = parser.root
       @root = data_xml
       parse_full_xml
-      person_member_ids
-      parse_person
     end
 
     def parse_full_xml
       root_level_elements
-      [ :member_ids, :demographics, :relationships, :financial_reports, :health].each do |attr|
+      [:hbx_ids, :elements, :demographics, :relationships, :financial_reports, :health].each do |attr|
         self.send("person_#{attr.to_s}")
       end
     end
 
-    def person_member_ids
-      @member_ids = extract_elements(@root.at_xpath("n1:id"))
+    def person_hbx_ids
+      @hbx_ids = extract_elements(@root.at_xpath("n1:id"))
     end
 
-    def parse_person
+    def person_elements
       @person = @root.at_xpath("n1:person").elements.inject({}) do |data, node|
         data[node.name.to_sym] = (node.elements.count.zero? ? node.text().strip() : extract_elements(node))
         data
       end
-
       @person.merge!(@person.delete(:person_name))
     end
 
@@ -46,25 +43,25 @@ module Parsers::Xml::Reports
       @demographics = extract_elements(@root.at_xpath("n1:person_demographics"))
     end
 
-    def person_financial_reports
-      @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports"))
-    end
-
     def person_relationships
       @relationships = extract_elements(@root.at_xpath("n1:person_relationships"))
+    end
+
+    def person_financial_reports
+      @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports"))
     end
 
     def person_health
       @health = extract_elements(@root.at_xpath("n1:person_health"))     
     end
 
-    def id
-      person_id = root_elements.id
-      person_id.nil? ? nil : person_id.match(/\w+$/)[0]
-    end
+    # def id
+    #   person_id = root_elements.id
+    #   person_id.nil? ? nil : person_id.match(/\w+$/)[0]
+    # end
 
     def dob
-      parse_date(@demographics.birth_date)
+      parse_date(@demographics[:birth_date])
     end
 
     def age
@@ -72,20 +69,20 @@ module Parsers::Xml::Reports
     end
 
     def incarcerated
-      @demographics.is_incarcerated == 'true' ? 'Yes' : 'No'
+      @demographics[:is_incarcerated] == 'true' ? 'Yes' : 'No'
     end
 
     def residency
       return if @addresses[0].nil?
-      @addresses[0].state.strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
+      @addresses[0][:state].strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
     end
 
     def citizenship
-      if @demographics.citizen_status.nil?
+      if @demographics[:citizen_status].nil?
         raise "Citizenship status missing for person #{self.name_first} #{self.name_last}"
       end
 
-      citizen_status = @demographics.citizen_status.split("#")[1]
+      citizen_status = @demographics[:citizen_status]
       CITIZENSHIP_MAPPING.each do |key, value|
         return key if value.include?(citizen_status)
       end
@@ -93,7 +90,7 @@ module Parsers::Xml::Reports
 
     def tax_status
       return @financial_reports.empty?
-      tax_status = @financial_reports[0].tax_filing_status
+      tax_status = @financial_reports[0][:tax_filing_status]
       case tax_status
       when 'non_filer'
         'Non-filer'
@@ -107,12 +104,12 @@ module Parsers::Xml::Reports
 
     def tax_filer_status
       return 'Single' unless married?
-      @financial_reports[0].is_tax_filing_together ? 'Married Filing Jointly' : 'Married Filing Separately'
+      @financial_reports[0][:is_tax_filing_together] ? 'Married Filing Jointly' : 'Married Filing Separately'
     end
 
     def married?
       relationship = @relationships.detect do |relationship|
-        relation_str = relationship.relationship_uri.split("#")[1]
+        relation_str = relationship.relationship_uri
         ['spouse', 'life partner'].include?(relation_str)
       end
       relationship.blank? ? false : true

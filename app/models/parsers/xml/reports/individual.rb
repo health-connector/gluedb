@@ -4,7 +4,7 @@ module Parsers::Xml::Reports
   class Individual
 
     include NodeUtils
-    attr_reader :root, :namespaces, :root_elements, :hbx_ids, :person, :demographics, :financial_reports, :relationships, :health
+    attr_reader :root, :root_elements, :hbx_ids, :person, :demographics, :financial_reports, :relationships, :health
 
     CITIZENSHIP_MAPPING = {
        "U.S. Citizen" => %W(us_citizen naturalized_citizen indian_tribe_member),
@@ -18,42 +18,27 @@ module Parsers::Xml::Reports
       # @root = parser.root
       @root = data_xml
       build_namespaces
-      parse_full_xml
+      parse_individual_xml
     end
 
-    def parse_full_xml
-      root_level_elements
-      [:hbx_ids, :elements, :demographics, :relationships, :financial_reports, :health].each do |attr|
-        self.send("person_#{attr.to_s}")
+    def parse_individual_xml
+      @root_elements = @root.elements.inject({}) do |data, node|
+        data[node.name.to_sym] = parse_uri(node.text().strip()) if node.elements.count.zero?
+        data
       end
-    end
-
-    def person_hbx_ids
+      
       @hbx_ids = extract_elements(@root.at_xpath("n1:id", @namespaces))
-    end
-
-    def person_elements
       @person = @root.at_xpath("n1:person", @namespaces).elements.inject({}) do |data, node|
         data[node.name.to_sym] = (node.elements.count.zero? ? node.text().strip() : extract_elements(node))
         data
       end
+
       @person.merge!(@person.delete(:id))
       @person.merge!(@person.delete(:person_name))
-    end
-
-    def person_demographics
+  
       @demographics = extract_elements(@root.at_xpath("n1:person_demographics", @namespaces))
-    end
-
-    def person_relationships
       @relationships = extract_elements(@root.at_xpath("n1:person_relationships", @namespaces))
-    end
-
-    def person_financial_reports
       @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports", @namespaces))
-    end
-
-    def person_health
       @health = extract_elements(@root.at_xpath("n1:person_health", @namespaces))     
     end
 

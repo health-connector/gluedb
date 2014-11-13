@@ -2,62 +2,27 @@ class UpdatePerson
 
   def initialize
     @create_person_factory = CreatePerson.new
-    @person_repo = Person
-    address_changer = ChangeMemberAddress.new(nil)
-    @update_person_address_factory = UpdatePersonAddress.new(Person, address_changer, ChangeAddressRequest)
   end
 
   def validate(request, listener)
     fail = false
-
     begin
-      options = {
-        member_id: request[:member_id],
-        name_first: request[:names][:name_first],
-        name_last: request[:names][:name_last],
-        ssn: request[:members][0][:ssn],
-        dob: request[:members][0][:dob]
-      }
-
-      person, member = PersonMatchStrategies::Finder.find_person_and_member(options)
-
-      if person.blank?
-        return @create_person_factory.validate(request, listener)
-      end
-
-      person.assign_attributes(request[:names])
-      person.attributes = { 
-        job_title: request[:job_title], 
-        department: request[:department],
-        is_active: request[:is_active]
-      }
-
-      return false unless person.valid?
-
-      member ||= person.members.new
-      member.attributes = request[:members][0]
-      return false unless member.valid?
-
-      fail = !@update_person_address_factory.validate(request, listener)
-
-      request[:emails].each do |email|
-        if !person.emails.new(email).valid?
-          return false
+      person, member = person_and_member_match(request)
+      if person
+        person.assign_attributes(request[:person])
+        if !person.valid?
+          listener.invalid_person(person.errors.to_hash)
+          fail = true
         end
-      end
-
-      request[:phones].each do |phone|
-        if !person.phones.new(phone).valid?
-          return false
+        member ||= person.members.new
+        member.attributes = request[:demographics]
+        if !member.valid?
+          listener.invalid_member(member.errors.to_hash)
+          fail = true
         end
+      else
+        fail = !@create_person_factory.validate(request, listener)
       end
-      
-      request[:relationships].each do |relationship|
-        if !person.person_relationships.new(relationship).valid?
-          return false
-        end
-      end
-
     rescue PersonMatchStrategies::AmbigiousMatchError => error
       listener.person_match_error(error.message)
     end
@@ -71,9 +36,34 @@ class UpdatePerson
       listener.success
     else
       listener.fail
+      endx
     end
   end
 
+  def person_and_member_match(request)
+    options = {
+      member_id: request[:hbx_member_id],
+      name_first: request[:person][:name_first],
+      name_last: request[:person][:name_last],
+      ssn: request[:demographics][:ssn],
+      dob: request[:demographics][:dob]
+    }
+
+    PersonMatchStrategies::Finder.find_person_and_member(options)
+  end
+
   def commit(request)
+    person, member = person_and_member_match(request)
+    if person
+      member ||= person.members.new
+      member.attributes = request[:demographics]
+      member.save
+      # update person
+      # update emails
+      # update phones
+      # update addresses
+    else
+      @create_person_factory.commit(request)
+    end
   end
 end

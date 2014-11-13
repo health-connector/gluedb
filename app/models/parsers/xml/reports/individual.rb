@@ -4,7 +4,7 @@ module Parsers::Xml::Reports
   class Individual
 
     include NodeUtils
-    attr_reader :root, :root_elements, :person, :demographics, :financial_reports, :relationships, :health
+    attr_reader :root_elements, :member_ids, :demographics, :financial_reports, :relationships, :health, :person
 
     CITIZENSHIP_MAPPING = {
        "U.S. Citizen" => %W(us_citizen naturalized_citizen indian_tribe_member),
@@ -17,17 +17,29 @@ module Parsers::Xml::Reports
       # parser = Nokogiri::XML(xml_file)
       # @root = parser.root
       @root = data_xml
+      parse_full_xml
+      person_member_ids
+      parse_person
     end
 
     def parse_full_xml
       root_level_elements
-      [ :details, :demographics, :relationships, :financial_reports, :health ].each do |attr|
+      [ :member_ids, :demographics, :relationships, :financial_reports, :health].each do |attr|
         self.send("person_#{attr.to_s}")
       end
     end
 
-    def person_details
-      @person = extract_elements(@root.at_xpath("n1:person"))
+    def person_member_ids
+      @member_ids = extract_elements(@root.at_xpath("n1:id"))
+    end
+
+    def parse_person
+      @person = @root.at_xpath("n1:person").elements.inject({}) do |data, node|
+        data[node.name.to_sym] = (node.elements.count.zero? ? node.text().strip() : extract_elements(node))
+        data
+      end
+
+      @person.merge!(@person.delete(:person_name))
     end
 
     def person_demographics
@@ -154,5 +166,6 @@ module Parsers::Xml::Reports
     # def dental_plan
     #   plan_by_coverage_type("dental")
     # end
+
   end
 end

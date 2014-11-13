@@ -61,7 +61,7 @@ class NewEnrollment
     enrollees = pol_hash[:enrollees]
     updated_enrollees = enrollees.map do |en|
       updated_en = en.dup
-      updated_en[:m_id] = listener.person_map[en[:m_id]].hbx_member_id
+      updated_en[:m_id] = listener.person_map[en[:m_id]].last.hbx_member_id
       updated_en
     end
     pol_hash[:enrollees] = updated_enrollees

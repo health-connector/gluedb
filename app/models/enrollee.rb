@@ -13,8 +13,8 @@ class Enrollee
   field :m_id, as: :hbx_member_id, type: String
 
   field :ds, as: :disabled_status, type: Boolean, default: false
-  field :ben_stat, as: :benefit_status_code, type: String
-  field :emp_stat, as: :employment_status_code, type: String
+  field :ben_stat, as: :benefit_status_code, type: String, default: "active"
+  field :emp_stat, as: :employment_status_code, type: String, default: "active"
   field :rel_code, as: :relationship_status_code, type: String
 
   field :c_id, as: :carrier_member_id, type: String

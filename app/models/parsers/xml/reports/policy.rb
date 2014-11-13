@@ -2,12 +2,39 @@ module Parsers::Xml::Reports
   class Policy
 
     include NodeUtils
-    attr_reader :root, :root_elements, :enrollees, :responsible_party, :enrollment, :comments
+    attr_reader :root_elements, :responsible_party, :comments
     
     def initialize(parser = nil)
       @root = parser
-      # @individuals = []
-      # covered_individuals
+      @root.remove_namespaces!
+      parse_full_xml
+    end
+
+    def parse_full_xml
+      root_level_elements
+      [:responsible_party, :financial_reports, :health].each do |attr|
+        self.send("policy_#{attr.to_s}")
+      end
+    end
+
+    def enrollees
+      @root.xpath('enrollees/enrollee').inject([]) do |data, node|
+        data << Enrollee.new(node)
+      end
+    end
+
+    def policy_responsible_party
+      @responsible_party = extract_elements(@root.at_xpath('responsible_party'))
+    end
+
+    def enrollment
+      @root.xpath('enrollment/plan').inject([]) do |data, node|
+        data << PolicyPlan.new(node)
+      end
+    end
+
+    def policy_comments
+      @comments = extract_elements(@root.at_xpath('comments'))
     end
 
     # def covered_individuals
@@ -19,39 +46,6 @@ module Parsers::Xml::Reports
     #     @individuals << individual
     #   end
     # end
-
-    def parse_full_xml
-      root_level_elements
-      [ :enrollees, :responsible_party, :enrollment_details, :financial_reports, :health ].each do |attr|
-        self.send("policy_#{attr.to_s}")
-      end
-    end
-
-    def policy_enrollees
-      node = @root.at_xpath('n1:enrollees')
-      @enrollees = node.elements.inject([]) do |data, node|
-        data << policy_enrollee(node)
-      end
-    end
-
-    def policy_enrollee(node)
-      @root.elements.inject({}) do |data, node|
-        data[node.name.to_sym] = (node.name == 'member') ? Individual.new(node) : node.text().strip()
-        data
-      end
-    end
-
-    def policy_responsible_party
-      @responsible_party = extract_elements(@root.at_xpath('n1:responsible_party'))
-    end
-
-    def policy_enrollment_details
-      @enrollment = extract_elements(@root.at_xpath('n1:enrollment'))
-    end
-
-    def policy_comments
-      @comments = extract_elements(@root.at_xpath('n1:comments'))
-    end
 
     # def id
     #   @root.at_xpath("n1:id").text

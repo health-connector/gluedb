@@ -21,11 +21,13 @@ module Parsers::Xml::Reports
     end
 
     def type
-      @root.at_xpath('n1:type').text.strip
+      node = @root.at_xpath('n1:type', @namespaces)
+      node.blank? ? nil : node.text.strip
     end
 
     def market
-      @root.at_xpath('n1:market').text.strip
+      node = @root.at_xpath('n1:market', @namespaces)
+      node.blank? ? nil : node.text.strip
     end
   end
 end

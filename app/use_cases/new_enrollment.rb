@@ -13,7 +13,7 @@ class NewEnrollment
   end
 
 
-  def initialize(update_person_uc, create_policy_uc = Policies::CreatePolicy)
+  def initialize(update_person_uc = UpdatePerson, create_policy_uc = Policies::CreatePolicy)
     @update_person_use_case = update_person_uc
     @create_policy_use_case = create_policy_uc
   end

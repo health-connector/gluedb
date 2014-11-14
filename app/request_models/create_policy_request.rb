@@ -1,5 +1,5 @@
 class CreatePolicyRequest
-  def from_xml(payload = nil)
+  def self.from_xml(payload = nil)
     @policy = Parsers::Xml::Reports::Policy.new(payload)
     plan = @policy.enrollment[:plan]
 
@@ -16,7 +16,9 @@ class CreatePolicyRequest
     request
   end
 
-  def serialize_enrollees
+  private
+
+  def self.serialize_enrollees
     @policy.enrollees.inject([]) do |data, enrollee|
       relationship = enrollee.member.relationships[0]
       rel_code = (relationship.nil? ? 'self' : relationship[:relationship_uri])

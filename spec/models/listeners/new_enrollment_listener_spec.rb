@@ -4,17 +4,17 @@ describe Listeners::NewEnrollmentListener do
   let(:responder) { double }
   let(:errors) { { :policies => [], :individuals => [] } }
   let(:success_information) { }
-  let(:qualifying_reason) { double }
+  let(:other_details) { double }
   
-  subject { Listeners::NewEnrollmentListener.new(qualifying_reason, responder) }
+  subject { Listeners::NewEnrollmentListener.new(other_details, responder) }
 
   it "should notify the responder of failure" do
-    expect(responder).to receive(:handle_failure).with(errors)
+    expect(responder).to receive(:handle_failure).with(other_details, errors)
     subject.fail
   end
 
   it "should handle success" do
-    expect(responder).to receive(:handle_success).with(qualifying_reason, [])
+    expect(responder).to receive(:handle_success).with(other_details, [])
     subject.success
   end
 
@@ -26,7 +26,7 @@ describe Listeners::NewEnrollmentListener do
     end
 
     it "should tell the listener about successfully creating policies" do
-      expect(responder).to receive(:handle_success).with(qualifying_reason, [policy_id])
+      expect(responder).to receive(:handle_success).with(other_details, [policy_id])
       subject.success
     end
   end

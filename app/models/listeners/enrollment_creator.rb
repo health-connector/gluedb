@@ -14,7 +14,6 @@ module Listeners
     def on_message(delivery_info, properties, payload)
       event_key = delivery_info.routing_key
       qr_uri = properties.headers["qualifying_reason_uri"]
-      submitted_timestamp = properties.headers["submitted_timestamp"]
       reply_to = properties.reply_to
       body = payload
 

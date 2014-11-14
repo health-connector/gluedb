@@ -34,12 +34,16 @@ module Parsers::Xml::Reports
       end
 
       @person.merge!(@person.delete(:id))
-      @person.merge!(@person.delete(:person_name))
+      @person.merge!(@person.delete(:person_name)[0])
   
       @demographics = extract_elements(@root.at_xpath("n1:person_demographics", @namespaces))
       @relationships = extract_elements(@root.at_xpath("n1:person_relationships", @namespaces))
       @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports", @namespaces))
       @health = extract_elements(@root.at_xpath("n1:person_health", @namespaces))     
+    end
+
+    def member_id
+      @hbx_ids[:id]
     end
 
     def dob

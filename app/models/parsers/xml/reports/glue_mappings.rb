@@ -26,5 +26,9 @@ module Parsers::Xml::Reports
         :birth_date => :dob
       }
     end
+
+    def enrollee_benefit
+      {}
+    end
   end
 end

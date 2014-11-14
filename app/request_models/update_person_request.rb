@@ -1,8 +1,8 @@
 class UpdatePersonRequest
-  def from_cv(payload = nil)
+  def from_xml(payload = nil)
     # payload = File.open(Rails.root.to_s + "/individual_test.xml")
-    parser = Nokogiri::XML(payload)
-    individual = Parsers::Xml::Reports::Individual.new(parser.root)
+    # parser = Nokogiri::XML(payload)
+    individual = Parsers::Xml::Reports::Individual.new(payload)
     @glue_mapping = Parsers::Xml::Reports::GlueMappings.new
 
     {
@@ -14,10 +14,11 @@ class UpdatePersonRequest
 
   def serialize_person(individual)
     person = individual.person
+    puts person.inspect
     person[:id] = individual.person[:id]
-    person[:phones] = individual.person[:phones].map { |e| map_with_glue(e, @glue_mapping.phone) }
-    person[:addresses] = individual.person[:addresses].map { |e| map_with_glue(e, @glue_mapping.address)  }
-    person[:emails] = individual.person[:emails].map { |e| map_with_glue(e, @glue_mapping.email) }
+    person[:phones] = person[:phones].map{|e| map_with_glue(e, @glue_mapping.phone)} if person[:phones]
+    person[:addresses] = person[:addresses].map{|e| map_with_glue(e, @glue_mapping.address)} if person[:addresses]
+    person[:emails] = person[:emails].map{|e| map_with_glue(e, @glue_mapping.email)} if person[:emails]
     person
   end
 

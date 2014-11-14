@@ -15,6 +15,8 @@ describe Policies::CreatePolicy do
   let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors) }
   let(:valid_policy) { true }
   let(:policy_errors) { { "an error" => "a reason" } }
+  let(:policy_id) { double }
+  let(:policy) { double(:id => policy_id) }
 
   subject { Policies::CreatePolicy.new(policy_factory) }
 
@@ -99,8 +101,9 @@ describe Policies::CreatePolicy do
     }
 
     it "should create the policy" do
-      expect(policy_factory).to receive(:create!).with(create_params)
-      subject.commit(request)
+      expect(policy_factory).to receive(:create!).with(create_params).and_return(policy)
+      expect(listener).to receive(:policy_created).with(policy_id)
+      subject.commit(request, listener)
     end
 
     describe "with a broker" do
@@ -114,8 +117,9 @@ describe Policies::CreatePolicy do
       end
 
       it "should create the policy" do
-        expect(policy_factory).to receive(:create!).with(broker_create_params)
-        subject.commit(broker_request)
+        expect(policy_factory).to receive(:create!).with(broker_create_params).and_return(policy)
+        expect(listener).to receive(:policy_created).with(policy_id)
+        subject.commit(broker_request, listener)
       end
     end
   end

@@ -24,22 +24,28 @@ class NewEnrollment
     individuals = request[:individuals]
     policies = request[:policies]
     if individuals.blank?
-      listener.no_enrollees
+      listener.no_individuals
       listener.fail
       return
     else
-      failed = failed || !(individuals.all? do |ind|
-        @update_person_use_case.validate(ind, listener)
-      end)
+      people_failed = false
+      individuals.each_with_index do |ind, idx|
+        listener.set_current_person(idx)
+        people_failed = people_failed || !@update_person_use_case.validate(ind, listener)
+      end
+      failed = failed || people_failed
     end
     if policies.blank?
       listener.no_policies
       listener.fail
       return
     else
-      failed = failed || !(policies.all? do |ind|
-        @create_policy_use_case.validate(ind, listener)
-      end)
+      policies_failed = false
+      policies.each_with_index do |pol, idx|
+        listener.set_current_policy(idx)
+        policies_failed = policies_failed || !@create_policy_use_case.validate(pol, listener)
+      end
+      failed = failed || policies_failed
     end
 
     if failed
@@ -50,7 +56,7 @@ class NewEnrollment
       end
       policies.each do |pol|
         pol_properties = remap_enrollees(pol, listener)
-        @create_policy_use_case.commit(pol_properties)
+        @create_policy_use_case.commit(pol_properties, listener)
       end
       listener.success
     end

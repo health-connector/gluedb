@@ -39,7 +39,8 @@ describe Listeners::CarefirstPolicyUpdate do
         :policy_id => policy_id,
         :batch_index => batch_index,
         :error_list => failure_messages,
-        :body => file_string
+        :body => file_string,
+        :submitted_at => nil
       }
     }
     let(:failure_details) {
@@ -92,7 +93,8 @@ describe Listeners::CarefirstPolicyUpdate do
         :policy_id => policy_id,
         :batch_index => batch_index,
         :error_list => [],
-        :body => file_string
+        :body => file_string,
+        :submitted_at => nil
       }
     }
 

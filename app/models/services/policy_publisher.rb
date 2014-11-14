@@ -10,7 +10,7 @@ module Services
       policy = Policy.where(:id => p_id).first
       xml_body = serialize(policy, operation, reason)
       with_channel do |channel|
-        channel.default_exchange.publish(xml_body, {
+        channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
           :routing_key => routing_key,
           :headers => {
             :file_name => "#{p_id}.xml",

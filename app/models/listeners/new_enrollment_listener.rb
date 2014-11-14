@@ -1,12 +1,27 @@
 module Listeners
   class NewEnrollmentListener
 
-    def initialize()
+    def initialize(q_reason, responder)
       @errors = {}
       @errors[:policies] = []
       @errors[:individuals] = []
       @current_person = 0
       @currnet_policy = 0
+      @responder = responder
+      @qualifying_reason = q_reason
+      @policy_ids = []
+    end
+
+    def fail
+      @responder.handle_failure(@errors)
+    end
+
+    def success
+      @responder.handle_success(@qualifying_reason, @policy_ids)
+    end
+
+    def policy_created(p_id)
+      @policy_ids << p_id
     end
 
     def set_current_policy(idx)

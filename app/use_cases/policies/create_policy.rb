@@ -45,7 +45,7 @@ module Policies
       !fail
     end
 
-    def commit(request)
+    def commit(request, listener)
       hios_id = request[:hios_id]
       plan_year = request[:plan_year]
       broker_npn = request[:broker_npn]
@@ -56,11 +56,12 @@ module Policies
         broker = Broker.find_by_npn(broker_npn)
       end
 
-      @policy_factory.create!(request.merge({
+      policy = @policy_factory.create!(request.merge({
         :plan => plan,
         :carrier => plan.carrier,
         :broker => broker
       }))
+      listener.policy_created(policy.id)
     end
   end
 end

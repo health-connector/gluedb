@@ -56,7 +56,7 @@ class NewEnrollment
       end
       policies.each do |pol|
         pol_properties = remap_enrollees(pol, listener)
-        @create_policy_use_case.commit(pol_properties)
+        @create_policy_use_case.commit(pol_properties, listener)
       end
       listener.success
     end

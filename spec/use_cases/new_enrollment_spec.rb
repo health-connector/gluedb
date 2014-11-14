@@ -25,7 +25,7 @@ describe NewEnrollment do
 
   it "should notify the listener of success" do
       expect(update_person_use_case).to receive(:commit).with(person1, person_mapper_listener)
-      expect(create_policy_use_case).to receive(:commit).with(policy1)
+      expect(create_policy_use_case).to receive(:commit).with(policy1, person_mapper_listener)
       expect(listener).to receive(:success)
       subject.execute(request, listener)
   end

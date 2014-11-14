@@ -27,6 +27,9 @@ class EdiQueueSetup
     edi_q = queue(Listeners::EdiQueueListener.queue_name)
     edi_q.bind(ev_exchange, :routing_key => "enrollment.*.sep")
     edi_q.bind(req_exchange, :routing_key => "enrollment.error")
+    
+    emake_q = queue(Listeners::EnrollmentCreator.queue_name)
+    emake_q.bind(req_exchange, :routing_key => "enrollment.create")
 
     other_queue = logging_queue(ec, "initial_and_renewal")
     other_queue.bind(ev_exchange, {

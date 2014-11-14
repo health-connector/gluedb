@@ -18,6 +18,11 @@ class EdiQueueSetup
     @ch.queue(q_name, :durable => true)
   end
 
+  def gate_queue(ec, name)
+    q_name = "#{ec.hbx_id}.#{ec.environment}.q.gateing.#{name}"
+    @ch.queue(q_name, :durable => true)
+  end
+
   def run
     ec = ExchangeInformation
     ev_exchange = exchange(:topic, ec.event_exchange)
@@ -38,6 +43,13 @@ class EdiQueueSetup
     other_queue.bind(ev_exchange, {
       :routing_key => "enrollment.*.renewal"
     })
+
+    # Gateing cues for legacy items
+    ie_cv_q = gate_queue(ec, "legacy.policy.initial_enrollment")
+    ie_cv_q.bind(req_exchange, { :routing_key => "policy.initial_enrollment" })
+
+    ren_cv_q = gate_queue(ec, "legacy.policy.renewals")
+    ren_cv_q.bind(req_exchange, { :routing_key => "policy.renewal" })
   end
 end
 

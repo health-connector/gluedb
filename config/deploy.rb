@@ -48,6 +48,7 @@ namespace :deploy do
   task :restart, :except => { :no_release => true } do
     sudo "service nginx restart"
     sudo "service unicorn restart"
+    sudo "service bluepill_glue restart"
   end
 
   desc "Start nginx and unicorn"

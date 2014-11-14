@@ -33,6 +33,10 @@ module Listeners
 
     def handle_success(details, policy_ids)
       # TODO: Add serialization of the policies for the right reason
+      qr_uri = details[:qualifying_reason]
+      policy_ids.each do |p_id|
+        Services::PolicyPublisher.publish(qr_uri, p_id)
+      end
       channel.default_exchange.publish(
         "",
         {

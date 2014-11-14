@@ -1,10 +1,13 @@
 <enrollment xmlns='http://openhbx.org/api/terms/1.0'>
-<policy>
-<enrollees>
-<enrollee>
-<member>
-<id>
-<id>122070</id>
+	<policy>
+		<id>
+			<id>-4601383594475126784</id>
+		</id>
+		<enrollees>
+			<enrollee>
+				<member>
+					<id>
+						<id>122070</id>
 					</id>
 					<person>
 						<id>

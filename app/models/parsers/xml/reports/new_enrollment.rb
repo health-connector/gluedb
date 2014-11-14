@@ -1,7 +1,7 @@
 module Parsers::Xml::Reports
   class NewEnrollment
 
-    inclue NodeUtils
+    include NodeUtils
     
     def initialize(data_xml = nil)  
       @root = data_xml

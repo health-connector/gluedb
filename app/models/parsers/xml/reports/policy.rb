@@ -2,7 +2,7 @@ module Parsers::Xml::Reports
   class Policy
 
     include NodeUtils
-    attr_reader :root, :root_elements, :enrollees, :enrollment, :responsible_party, :comments
+    attr_reader :root, :root_elements, :enrollees, :enrollment, :responsible_party, :comments, :broker
     
     def initialize(parser = nil)
       @root = parser
@@ -20,12 +20,22 @@ module Parsers::Xml::Reports
         data << Enrollee.new(node, @namespaces)
       end
 
+      broker = @root.at_xpath('n1:broker', @namespaces)
+      if broker
+        @broker =  {
+          id: @root.at_xpath('n1:broker/n1:id/n1:id').text.strip,
+          name: @root.at_xpath('n1:broker/n1:name').text.strip,
+          is_active: @root.at_xpath('n1:broker/n1:is_active').text.strip
+        }
+      end
+
       @responsible_party = extract_elements(@root.at_xpath('n1:responsible_party', @namespaces))
 
-      @enrollment = @root.xpath('n1:enrollment/n1:plan', @namespaces).inject([]) do |data, node|
-        data << PolicyPlan.new(node, @namespaces)
+      @enrollment = @root.at_xpath('n1:enrollment', @namespaces).elements.inject({}) do |data, node|
+        data[node.name.to_sym] = ((node.name == 'plan') ? PolicyPlan.new(node, @namespaces) : node.text.strip)
+        data
       end
-      
+
       @comments = extract_elements(@root.at_xpath('n1:comments', @namespaces))
     end
 

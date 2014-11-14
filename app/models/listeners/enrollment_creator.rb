@@ -24,8 +24,11 @@ module Listeners
           :reply_to => reply_to
         },
         self)
-# Don't enable this until we are done!
-#      channel.acknowledge(delivery_info.delivery_tag, false) 
+
+      request = NewEnrollmentRequest.from_xml(payload)
+      NewEnrollment.new.execute(request, uc_listener)
+       # Don't enable this until we are done!
+            # channel.acknowledge(delivery_info.delivery_tag, false) 
     end
 
     def handle_success(details, policy_ids)

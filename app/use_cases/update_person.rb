@@ -60,7 +60,7 @@ class UpdatePerson
         member_attributes.merge({:hbx_member_id => request[:hbx_member_id]})
       end
       member ||= person.members.new
-      member.attributes = member_attributes
+      member.assign_attributes(member_attributes)
       member.save!
 
       person_attributes = request[:person].inject({}) do |person, (k, v)|

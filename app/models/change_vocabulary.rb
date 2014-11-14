@@ -84,7 +84,7 @@ class ChangeVocabulary
       ["reenrollment", "reenrollment"],
       ["non_payment", "non_payment"],
       ["relationship_change", "relationship_change"],
-      ["notification_only", "notification_only"]
+      ["notification_only", "notification_only"],
       ["renewal", "renewal"]
     ]
   end

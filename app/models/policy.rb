@@ -29,7 +29,7 @@ class Policy
   field :updated_by, type: String
 
   validates_presence_of :eg_id
-  validates_presence_of :plan_id
+#  validates_presence_of :plan_id
   validates_presence_of :pre_amt_tot
   validates_presence_of :tot_res_amt
 

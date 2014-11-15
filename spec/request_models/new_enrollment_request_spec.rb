@@ -2,7 +2,6 @@ require "rails_helper"
 
 describe NewEnrollmentRequest do
 
-
   let(:xml) { File.open(file_path).read }
 
   subject { NewEnrollmentRequest.from_xml(xml) }
@@ -19,6 +18,10 @@ describe NewEnrollmentRequest do
       expect(subject[:individuals].length).to eql 1
     end
 
+    describe "the single individual" do
+
+    end
+
     describe "the single policy inside" do
       let(:policy) { subject[:policies].first }
 
@@ -31,7 +34,7 @@ describe NewEnrollmentRequest do
       end
 
       it "should have the correct plan_year" do
-        expect(policy[:hios_id]).to eql("2014")
+        expect(policy[:plan_year]).to eql("2014")
       end
 
       it "should have the correct applied_aptc" do

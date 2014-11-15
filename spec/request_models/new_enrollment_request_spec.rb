@@ -52,6 +52,10 @@ describe NewEnrollmentRequest do
         expect(policy[:carrier_to_bill]).to eql("true")
       end
 
+      it "should have no broker" do
+        expect(policy[:broker_npn]).to be_blank
+      end
+
       it "should have a single enrollee" do
         expect(policy[:enrollees].length).to eql(1)
       end

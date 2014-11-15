@@ -35,7 +35,15 @@ module Parsers
         @carrier_to_bill ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:individual_market/cv:is_carrier_to_bill",namespaces)).content.split("#").last.value
       end
 
+      def enrollees
+        @enrollees ||= @xml.xpath("cv:enrollees/cv:enrollee",namespaces).map do |node|
+          ::Parsers::Cv::Enrollee.new(node)
+        end
+      end
 
+      def broker_npn
+        @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).content.split("#").last.value
+      end
 
       def to_hash
         { 
@@ -45,7 +53,9 @@ module Parsers
           :tot_res_amt => tot_res_amt,
           :pre_amt_tot => pre_amt_tot,
           :applied_aptc => applied_aptc,
-          :carrier_to_bill => carrier_to_bill
+          :carrier_to_bill => carrier_to_bill,
+          :broker_npn => broker_npn,
+          :enrollees => enrollees.map(&:to_hash)
         }
       end
     end

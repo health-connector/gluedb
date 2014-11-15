@@ -24,19 +24,51 @@ describe NewEnrollmentRequest do
       it "should have no name_pfx" do
         expect(person[:name_pfx]).to be_blank
       end
-      it "should have the correct name_first"
+      it "should have the correct name_first" do
+        expect(person[:name_first]).to eql("Daniel")
+      end
       it "should have no name_middle" do
         expect(person[:name_middle]).to be_blank
       end
-      it "should have the correct name_last"
+      it "should have the correct name_last" do
+        expect(person[:name_last]).to eql("Tharper")
+      end
       it "should have no name_sfx" do
         expect(person[:name_sfx]).to be_blank
       end
 
-      it "should have the correct ssn"
-      it "should have the correct dob"
-      it "should have the correct gender"
-      it "should have the correct hbx_member_id"
+      it "should have no emails" do
+        expect(person[:emails]).to be_empty
+      end
+
+      it "should have no phones" do
+        expect(person[:phones]).to be_empty
+      end
+
+      it "should have the correct ssn" do
+        expect(person[:ssn]).to eql("633702503")
+      end
+      it "should have the correct dob" do
+        expect(person[:dob]).to eql("19640613")
+      end
+      it "should have the correct gender" do
+        expect(person[:gender]).to eql("male")
+      end
+      it "should have the correct hbx_member_id" do
+        expect(person[:hbx_member_id]).to eql("122070")
+      end
+
+      it "should have one address" do
+        expect(person[:addresses].length).to eql(1)
+      end
+
+      describe "with an address" do
+        let(:address) { person[:addresses].first }
+
+        it "should be a home address" do
+          expect(address[:address_type]).to eql("home")
+        end
+      end
     end
 
     describe "the single policy inside" do

@@ -19,7 +19,24 @@ describe NewEnrollmentRequest do
     end
 
     describe "the single individual" do
+      let(:person) { subject[:individuals].first }
 
+      it "should have no name_pfx" do
+        expect(person[:name_pfx]).to be_blank
+      end
+      it "should have the correct name_first"
+      it "should have no name_middle" do
+        expect(person[:name_middle]).to be_blank
+      end
+      it "should have the correct name_last"
+      it "should have no name_sfx" do
+        expect(person[:name_sfx]).to be_blank
+      end
+
+      it "should have the correct ssn"
+      it "should have the correct dob"
+      it "should have the correct gender"
+      it "should have the correct hbx_member_id"
     end
 
     describe "the single policy inside" do

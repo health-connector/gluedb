@@ -15,16 +15,16 @@ module Services
           :headers => {
             :file_name => "#{p_id}.xml",
             :submitted_by => "trey.evans@dchbx.info",
-            :vocabulary_destination => v_dest
+            :vocabulary_destination => v_destination
           }
         })
       end
     end
 
     def self.serialize(pol, operation, reason)
-      member_ids = policy.enrollees.map(&:m_id)
+      member_ids = pol.enrollees.map(&:m_id)
       serializer = CanonicalVocabulary::MaintenanceSerializer.new(
-        policy,
+        pol,
         operation,
         reason,
         member_ids,

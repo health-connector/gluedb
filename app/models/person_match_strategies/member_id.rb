@@ -3,7 +3,7 @@ module PersonMatchStrategies
     def match(options = {})
       if (!options[:hbx_member_id].blank?)
         people = Person.find_for_members([options[:hbx_member_id]])
-        raise AmbiguiousMatchError.new("Multiple people with same member id: #{options[:hbx_member_id]}")
+        raise AmbiguiousMatchError.new("Multiple people with same member id: #{options[:hbx_member_id]}") if people.length > 1
         return([nil,nil]) if people.empty?
         person = people.first
         if !person.authority_member.present?

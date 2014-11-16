@@ -1,5 +1,5 @@
 class CreateOrUpdatePerson
-  def initialize(p_finder, p_factory, m_factory)
+  def initialize(p_finder = PersonMatchStrategies::Finder, p_factory = Person, m_factory = Member)
     @person_finder = p_finder
     @person_factory = p_factory
     @member_factory = m_factory

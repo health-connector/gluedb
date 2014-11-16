@@ -1,27 +1,29 @@
 module PersonMatchStrategies
   class MemberSsn
     def match(options = {})
-      found_people = Person.where({"members.ssn" => options[:ssn]})
-      if found_people.any?
-        if found_people.many?
-          filters = [
-           [:name_last, false],
-           [:name_first, true]
-          ]
-          person = run_filters(found_people, options, filters)
-          return select_authority_member(person.first, options)
-        else
-          return select_authority_member(found_people.first, options)
+      if !options[:ssn].blank?
+        found_people = Person.where({"members.ssn" => options[:ssn]})
+        if found_people.any?
+          if found_people.many?
+            filters = [
+              [:name_last, false],
+              [:name_first, true]
+            ]
+            person = run_filters(found_people, options, filters)
+            return select_authority_member(person.first, options)
+          else
+            return select_authority_member(found_people.first, options)
+          end
         end
       end
       [nil, nil]
     end
 
     def select_authority_member(person, options)
-       if !person.authority_member.present?
-         raise AmbiguiousMatchError.new("No authority member for ssn #{options[:ssn]}, person #{person.id}")
-       end
-       return [person, person.authority_member]
+      if !person.authority_member.present?
+        raise AmbiguiousMatchError.new("No authority member for ssn #{options[:ssn]}, person #{person.id}")
+      end
+      return [person, person.authority_member]
     end
 
     def run_filters(people, props, filters)
@@ -38,19 +40,19 @@ module PersonMatchStrategies
       if !val.blank?
         filtered = plist.select { |per| per.send(sym.to_sym).downcase == val.downcase }
         if filtered.empty?
-          raise AmbiguiousMatchError.new("Multiple people with same ssn: #{options[:ssn]}")
+          raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
         elsif filtered.length == 1
           throw(:person_found, filtered.first)
         else
           if error_on_many
-            raise AmbiguiousMatchError.new("Multiple people with same ssn: #{options[:ssn]}")
+            raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
           else
             filtered
           end
         end
       end
       if plist.many? && error_on_many
-        raise AmbiguiousMatchError.new("Multiple people with same ssn: #{options[:ssn]}")
+        raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
       end
       plist
     end

@@ -55,6 +55,12 @@ module Parsers
         end
       end
 
+      def phones
+        @phones ||= @xml.xpath("cv:member/cv:person/cv:phones/cv:phone", namespaces).map do |node|
+          ::Parsers::Cv::PersonPhone.new(node)
+        end
+      end
+
       def to_hash
         {
           :name_pfx => name_pfx,
@@ -69,7 +75,8 @@ module Parsers
           :emails => ["a"],
           :phones => ["a"],
           :addresses => addresses.map(&:to_hash),
-          :emails => emails.map(&:to_hash)
+          :emails => emails.map(&:to_hash),
+          :phones => phones.map(&:to_hash)
         }
       end
     end

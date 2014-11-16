@@ -68,6 +68,25 @@ describe NewEnrollmentRequest do
         it "should be a home address" do
           expect(address[:address_type]).to eql("home")
         end
+
+        it "should have the correct address_1" do
+          expect(address[:address_1]).to eql("2255 Wisconsin Ave NW")
+        end
+        it "should have no address_2" do
+          expect(address[:address_2]).to be_blank
+        end
+        it "should have no address_3" do
+          expect(address[:address_3]).to be_blank
+        end
+        it "should have the correct city" do
+          expect(address[:city]).to eql("Washington")
+        end
+        it "should have the correct zip" do
+          expect(address[:zip]).to eql("20015")
+        end
+        it "should have the correct state" do
+          expect(address[:state]).to eql("DC")
+        end
       end
     end
 

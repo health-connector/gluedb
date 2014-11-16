@@ -23,7 +23,7 @@
 								<type>urn:openhbx:terms:v1:address_type#home</type>
 								<address_line_1>2255 Wisconsin Ave NW</address_line_1>
 								<location_city_name>Washington</location_city_name>
-								<location_state_name>urn:openhbx:terms:v1:us_state#district_of_columbia</location_state_name>
+								<location_state_code>dc</location_state_code>
 								<postal_code>20015</postal_code>
 							</address>
 						</addresses>

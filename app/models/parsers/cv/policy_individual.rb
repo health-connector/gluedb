@@ -23,17 +23,46 @@ module Parsers
         @hbx_member_id ||= Maybe.new(@xml.at_xpath("cv:member/cv:id/cv:id",namespaces)).content.split("#").last.value
       end
 
+      def name_first
+        @name_first ||= Maybe.new(@xml.at_xpath("cv:member/cv:person/cv:person_name/cv:person_given_name",namespaces)).content.value
+      end
+
+      def name_last
+        @name_last ||= Maybe.new(@xml.at_xpath("cv:member/cv:person/cv:person_name/cv:person_surname",namespaces)).content.value
+      end
+
+      def name_middle
+        @name_middle ||= Maybe.new(@xml.at_xpath("cv:member/cv:person/cv:person_name/cv:person_middle_name",namespaces)).content.value
+      end
+
+      def name_pfx
+        @name_pfx ||= Maybe.new(@xml.at_xpath("cv:member/cv:person/cv:person_name/cv:person_name_prefix_text",namespaces)).content.value
+      end
+
+      def name_sfx
+        @name_sfx ||= Maybe.new(@xml.at_xpath("cv:member/cv:person/cv:person_name/cv:person_name_suffix_text",namespaces)).content.value
+      end
+
+      def addresses
+        @addresses ||= @xml.xpath("cv:member/cv:person/cv:addresses/cv:address", namespaces).map do |node|
+          ::Parsers::Cv::PersonAddress.new(node)
+        end
+      end
+
       def to_hash
         {
-          :name_pfx => "a",
-          :name_first=> "a",
-          :name_middle => "a",
-          :name_first => "a",
-          :name_sfx => "a",
+          :name_pfx => name_pfx,
+          :name_first=> name_first,
+          :name_middle => name_middle,
+          :name_last => name_last,
+          :name_sfx => name_sfx,
           :dob => dob,
           :ssn => ssn,
           :hbx_member_id => hbx_member_id,
-          :gender => gender
+          :gender => gender,
+          :emails => ["a"],
+          :phones => ["a"],
+          :addresses => addresses.map(&:to_hash)
         }
       end
     end

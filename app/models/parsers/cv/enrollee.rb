@@ -17,7 +17,7 @@ module Parsers
 
       def rel_code
         return "self" if subscriber?
-        @rel_code ||= Maybe.new(@xml.at_xpath("cv:member/cv:person_relationships/cv:person_relationships/cv:relationship/cv:relationship_uri",namespaces)).content.split("#").last.value
+        @rel_code ||= Maybe.new(@xml.at_xpath("cv:member/cv:person_relationships/cv:relationship/cv:relationship_uri",namespaces)).content.split("#").last.value
       end
 
       def pre_amt

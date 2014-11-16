@@ -38,7 +38,78 @@ class CreateOrUpdatePerson
     true
   end
 
+  def member_keys
+    [:ssn, :dob, :gender, :hbx_member_id]
+  end
+
+  def other_keys
+    [:addresses, :emails, :phones]
+  end
+
+  def extract_person_properties(request)
+    request.reject { |k, _| member_keys.include?(k) || other_keys.include?(k) }
+  end
+
+  def extract_member_properties(request)
+    request.select { |k, _| member_keys.include?(k) }
+  end
+
+  def member_update_properties_from(request)
+    member_update_keys = [:ssn, :dob, :gender]
+    request.select { |k, _| member_update_keys.include?(k) }
+  end
+
+  def extract_and_merge_addresses(person, request)
+    address_data = request[:addresses]
+    address_data.each do |addy|
+      person.update_address(Address.new(addy))
+    end
+  end
+
+  def extract_and_merge_emails(person, request)
+    address_data = request[:emails]
+    address_data.each do |addy|
+      person.update_email(Email.new(addy))
+    end
+  end
+
+  def extract_and_merge_phones(person, request)
+    address_data = request[:phones]
+    address_data.each do |addy|
+      person.update_phone(Phone.new(addy))
+    end
+  end
+
   def commit(request, listener)
     person, member = @person_finder.find_person_and_member(request)
+
+    member_id = request[:hbx_member_id]
+
+    if person.blank?
+      new_person = @person_factory.new(request)
+      new_member = @member_factory.new(extract_member_properties(request))
+      new_person.members << new_member
+      new_person.authority_member_id = member_id
+      new_person.save!
+      listener.register_person(member_id, new_person, new_member)
+    elsif member.blank?
+      new_member = @member_factory.new(extract_member_properties(request))
+      person.assign_attributes(extract_person_properties(request))
+      extract_and_merge_addresses(person, request)
+      extract_and_merge_phones(person, request)
+      extract_and_merge_emails(person, request)
+      person.members << new_member
+      person.authority_member_id = member_id
+      person.save!
+      listener.register_person(member_id, person, new_member)
+    else
+      person.assign_attributes(extract_person_properties(request))
+      member.update_attributes(member_update_properties_from(request))
+      extract_and_merge_addresses(person, request)
+      extract_and_merge_phones(person, request)
+      extract_and_merge_emails(person, request)
+      person.save!
+      listener.register_person(member_id, person, member)
+    end
   end
 end

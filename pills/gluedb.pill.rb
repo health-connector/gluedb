@@ -25,7 +25,7 @@ def define_multi_worker(app, worker_n, worker_path, directory, number)
     app.process(worker_name) do |process|
       worker_directory = directory
       # puts ENV.inspect
-      process.start_command = "/bin/bash -l -c \"#{unset_list} && cd #{worker_directory} && export RBENV_GEMSETS=`cat #{worker_directory}/.rbenv-gemsets` && echo `env` > #{LOG_DIRECTORY}/#{worker_name}_envs.log && rbenv exec rails r #{worker_path}\""
+      process.start_command = "/bin/bash -l -c \"#{unset_list} && cd #{worker_directory} && export RBENV_GEMSETS=`cat #{worker_directory}/.rbenv-gemsets` && echo `env` > #{LOG_DIRECTORY}/#{worker_name}_envs.log && rbenv exec rails r -e production #{worker_path}\""
       process.stop_command = "/bin/kill -9 {{PID}}"
       process.start_grace_time 10.seconds
       process.pid_file = File.join(PID_DIRECTORY, "#{worker_name}.pid")

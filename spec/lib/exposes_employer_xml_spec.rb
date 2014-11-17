@@ -110,8 +110,8 @@ describe ExposesEmployerXml do
 
   it 'exposes plans' do
     parser = Nokogiri::XML("<employer #{namespace}><plans><plan>yoo</plan></plans></employer>")
-    employer = ExposesEmployerXml.new(parser)
-    expect(employer.plans.count).to eq 1
+    employer = ExposesEmployerXml.new(parser.root)
+    expect(employer.plans.length).to eq 1
   end
 
   it 'exposes employer contact' do

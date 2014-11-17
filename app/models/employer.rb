@@ -205,6 +205,7 @@ class Employer
       EmployerElectedPlansMerger.merge(existing, incoming)
       update_carriers(existing)
     else
+      update_carriers(incoming)
       incoming.employer = self
       incoming.save!
     end

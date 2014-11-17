@@ -9,49 +9,49 @@ class ExposesEmployerXml
   end
 
   def name
-    @parser.at_xpath('//ns1:name', namespaces).text
+    @parser.at_xpath('ns1:name', namespaces).text
   end
 
   def fein
-    @parser.at_xpath('//ns1:fein', namespaces).text
+    @parser.at_xpath('ns1:fein', namespaces).text
   end
 
   def employer_exchange_id
-    @parser.at_xpath('//ns1:employer_exchange_id', namespaces).text
+    @parser.at_xpath('ns1:employer_exchange_id', namespaces).text
   end
 
   def sic_code
-    node = @parser.at_xpath('//ns1:sic_code', namespaces)
+    node = @parser.at_xpath('ns1:sic_code', namespaces)
     (node.nil?)? '' : node.text
   end
 
   def fte_count
-    @parser.at_xpath('//ns1:fte_count', namespaces).text
+    @parser.at_xpath('ns1:fte_count', namespaces).text
   end
 
   def pte_count
-    @parser.at_xpath('//ns1:pte_count', namespaces).text
+    @parser.at_xpath('ns1:pte_count', namespaces).text
   end
 
   def broker_npn_id
-    node = @parser.at_xpath('//ns1:broker/ns1:npn_id', namespaces)
+    node = @parser.at_xpath('ns1:broker/ns1:npn_id', namespaces)
     (node.nil?)? '' : node.text
   end
 
   def open_enrollment_start
-    @parser.at_xpath('//ns1:open_enrollment_start', namespaces).text
+    @parser.at_xpath('ns1:open_enrollment_start', namespaces).text
   end
 
   def open_enrollment_end
-    @parser.at_xpath('//ns1:open_enrollment_end', namespaces).text
+    @parser.at_xpath('ns1:open_enrollment_end', namespaces).text
   end
 
   def plan_year_start
-    @parser.at_xpath('//ns1:plan_year_start', namespaces).text
+    @parser.at_xpath('ns1:plan_year_start', namespaces).text
   end
 
   def plan_year_end
-    node = @parser.at_xpath('//ns1:plan_year_end', namespaces)
+    node = @parser.at_xpath('ns1:plan_year_end', namespaces)
     (node.nil?)? '' : node.text
   end
 
@@ -64,19 +64,19 @@ class ExposesEmployerXml
   end
 
   def exchange_id
-    @parser.at_xpath('//ns1:exchange_id', namespaces).text
+    @parser.at_xpath('ns1:exchange_id', namespaces).text
   end
 
   def exchange_status
-    @parser.at_xpath('//ns1:exchange_status', namespaces).text
+    @parser.at_xpath('ns1:exchange_status', namespaces).text
   end
 
   def exchange_version
-    @parser.at_xpath('//ns1:exchange_version', namespaces).text
+    @parser.at_xpath('ns1:exchange_version', namespaces).text
   end
 
   def notes
-    node = @parser.at_xpath('//ns1:notes', namespaces)
+    node = @parser.at_xpath('ns1:notes', namespaces)
     (node.nil?) ? '' : node.text
   end
 

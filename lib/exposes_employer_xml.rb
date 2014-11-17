@@ -81,13 +81,12 @@ class ExposesEmployerXml
   end
 
   def contact
-    # namespace = determine_vcard_namespace
-    # node = @parser.at_css('ns2|vcard', ns2: namespace )
-    node = nil
+    namespace = determine_vcard_namespace
+    node = @parser.at_css('ns2|vcard', ns2: namespace )
     if(node.nil?)
       NullExposesContactXml.new
     else
-      # ExposesContactXml.new(node, namespace)
+      ExposesContactXml.new(node, namespace)
     end
   end
 

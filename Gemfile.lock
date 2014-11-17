@@ -41,7 +41,7 @@ GEM
       actionpack
       activesupport
     blue-daemons (1.1.11)
-    bluepill (0.0.69)
+    bluepill (0.0.68)
       activesupport (>= 3, < 5)
       blue-daemons (~> 1.1.11)
       i18n (~> 0.5)
@@ -303,7 +303,7 @@ DEPENDENCIES
   aasm (~> 3.0.25)
   american_date
   bh
-  bluepill
+  bluepill (= 0.0.68)
   bootstrap-kaminari-views (= 0.0.5)
   bunny (= 1.4.1)
   cancancan (~> 1.9)

@@ -7,11 +7,11 @@ module PolicyStatus
     end
 
     def query
-      active_as_of_expression.merge(other_params)
+      active_as_of_expression.merge(@other_params)
     end
 
     def active_as_of_expression
-      target_date = as_of_date
+      target_date = @as_of_date
       {
         "$or" => [
           { :aasm_state => { "$ne" => "canceled"},

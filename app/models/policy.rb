@@ -371,15 +371,11 @@ class Policy
   end
 
   def self.find_terminated_in_range(start_d, end_d, other_params = {})
-    Policy.where({
-      :aasm_state => { "$ne" => "canceled" },
-      :enrollees => { "$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => { "$ne" => nil },
-          :coverage_end => {"$lte" => end_d, "$gte" => start_d}
-      }
-      }
-    }.merge(other_params)
+    Policy.where(
+      PolicyStatus::Terminated.during(
+        start_d, 
+        end_d
+        ).query
     )
   end
 
@@ -405,24 +401,24 @@ class Policy
         { :aasm_state => { "$ne" => "canceled"},
           :eg_id => { "$not" => /DC0.{32}/ },
           :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$gt" => target_date}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$exists" => false}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => nil
-        }}}
+            :rel_code => "self",
+            :coverage_start => {"$lte" => target_date},
+            :coverage_end => {"$gt" => target_date}
+          }}},
+          { :aasm_state => { "$ne" => "canceled"},
+            :eg_id => { "$not" => /DC0.{32}/ },
+            :enrollees => {"$elemMatch" => {
+              :rel_code => "self",
+              :coverage_start => {"$lte" => target_date},
+              :coverage_end => {"$exists" => false}
+            }}},
+            { :aasm_state => { "$ne" => "canceled"},
+              :eg_id => { "$not" => /DC0.{32}/ },
+              :enrollees => {"$elemMatch" => {
+                :rel_code => "self",
+                :coverage_start => {"$lte" => target_date},
+                :coverage_end => nil
+              }}}
       ]
     }
   end
@@ -494,26 +490,26 @@ class Policy
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
   end
 
-protected
+  protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end
 
-private
-    def format_money(val)
-      sprintf("%.02f", val)
-    end
+  private
+  def format_money(val)
+    sprintf("%.02f", val)
+  end
 
-    def filter_delimiters(str)
-      str.to_s.gsub(',','') if str.present?
-    end
+  def filter_delimiters(str)
+    str.to_s.gsub(',','') if str.present?
+  end
 
-    def filter_non_numbers(str)
-      str.to_s.gsub(/\D/,'') if str.present?
-    end
+  def filter_non_numbers(str)
+    str.to_s.gsub(/\D/,'') if str.present?
+  end
 
-    def query_proxy
-      @query_proxy ||= Queries::PolicyAssociations.new(self)
-    end
+  def query_proxy
+    @query_proxy ||= Queries::PolicyAssociations.new(self)
+  end
 
 end

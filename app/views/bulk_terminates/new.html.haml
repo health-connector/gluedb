@@ -1,7 +1,7 @@
 .page-header
   %h4
     Bulk Terminations
-= form_tag(mass_silent_cancels_path, { :multipart => true, :method => :post}) do |f|
+= form_tag(bulk_terminates_path, { :multipart => true, :method => :post}) do |f|
   .row
     .col-md-4
       = file_field_tag "bulk_terminates_file", :class => "file form-control"

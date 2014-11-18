@@ -26,7 +26,7 @@ Gluedb::Application.routes.draw do
   resources :member_address_changes, :only => [:new, :create]
   resources :effective_date_changes, :only => [:new, :create]
   resources :mass_silent_cancels, :only => [:new, :create]
-
+  resources :bulk_terminates, :only => [:new, :create]
 
   resources :enrollment_transmission_updates, :only => :create
 

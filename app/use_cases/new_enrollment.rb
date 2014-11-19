@@ -13,9 +13,10 @@ class NewEnrollment
   end
 
 
-  def initialize(update_person_uc = CreateOrUpdatePerson.new, create_policy_uc = Policies::CreatePolicy.new)
+  def initialize(update_person_uc = CreateOrUpdatePerson.new, create_policy_uc = Policies::CreatePolicy.new, r_det = RenewalDetermination.new)
     @update_person_use_case = update_person_uc
     @create_policy_use_case = create_policy_uc
+    @renewal_determination = r_det
   end
 
   def execute(request, orig_listener)
@@ -51,6 +52,8 @@ class NewEnrollment
         return
       end
     end
+
+    failed = failed || !@renewal_determination.validate(request, listener)
 
     if failed
       listener.fail

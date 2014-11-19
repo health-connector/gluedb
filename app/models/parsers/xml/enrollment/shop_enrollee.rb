@@ -6,7 +6,7 @@ module Parsers::Xml::Enrollment
     end
 
     def rate_period_date
-      @employer.plan_year_start
+      @employer.plan_year_start ||= @employer.plan_years.last.start_date
     end
   end
 end

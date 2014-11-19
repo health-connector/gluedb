@@ -46,6 +46,10 @@ class NewEnrollment
         policies_failed = policies_failed || !@create_policy_use_case.validate(pol, listener)
       end
       failed = failed || policies_failed
+      if failed
+        listener.fail
+        return
+      end
     end
 
     if failed

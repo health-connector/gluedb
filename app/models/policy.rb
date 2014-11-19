@@ -469,6 +469,13 @@ class Policy
     subscriber.coverage_start > now
   end
 
+  def active_as_of?(date)
+    return false if subscriber.nil?
+    return false if (subscriber.coverage_start == subscriber.coverage_end)
+    return false if (!subscriber.coverage_end.nil? && subscriber.coverage_end < date)
+    subscriber.coverage_start <= date
+  end
+
   def future_active_for?(member_id)
     en = enrollees.detect { |enr| enr.m_id == member_id }
     now = Date.today

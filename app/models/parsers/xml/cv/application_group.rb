@@ -1,5 +1,21 @@
 module Parsers::Xml::Cv
   class ApplicationGroup
+    include HappyMapper
+
+    register_namespace "cv", "http://openhbx.org/api/terms/1.0"
+
+    tag 'application_group'
+    namespace 'cv'
+
+    element :primary_applicant_id, String, xpath: "cv:primary_applicant_id/cv:id"
+
+    element :submitted_date, String, :tag=> "submitted_date"
+
+    element :e_case_id, String, xpath: "cv:id/cv:id"
+
+    has_many :people, Parsers::Xml::Cv::PersonParser, :tag => 'applicants'
+
+=begin
     def initialize(parser)
       @parser = parser
     end
@@ -33,7 +49,6 @@ module Parsers::Xml::Cv
 
       elements = @parser.xpath('./ns1:applicants/ns1:applicant', NAMESPACES)
       elements.each { |e| results << Parsers::Xml::Cv::Individual.new(e) }
-
       results.reject(&:empty?)
     end
 
@@ -69,5 +84,6 @@ module Parsers::Xml::Cv
         relationships: relationships
       }
     end
+=end
   end
 end

@@ -4,33 +4,43 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
   let(:application_group) {
     f = File.open(File.join(Rails.root, "spec", "data", "application_group.xml"))
-    Nokogiri::XML(f).root
+    f.read
   }
 
   subject {
-    Parsers::Xml::Cv::ApplicationGroup.new(application_group)
+    Parsers::Xml::Cv::ApplicationGroup.parse(application_group, :single => true)
   }
 
-  let(:individual) {double}
+  let(:individual1) {double(name_last:"Ramirez", name_first:"vroom", name_full:"vroom Ramirez", id:"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542")}
 
-  let(:individuals) {[individual, individual]}
+  let(:individual2) {double(name_last:"Pandu De Leon", name_first:"Vicky", name_full:"Vicky De Leon", id:"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004818")}
+
+  let(:individuals) {[individual1, individual2]}
 
   let(:primary_applicant_id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
 
-  let(:coverage_renewal_year) {""}
+  let(:submitted_date) {"20131204"}
 
-  it 'should be a valid xml' do
-    expect(subject.class).to eq(Parsers::Xml::Cv::ApplicationGroup)
+  let(:e_case_id) {"urn:openhbx:hbx:dc0:resources:v1:curam:integrated_case#2063332"}
+
+  it 'should return e_case_id' do
+    expect(subject.e_case_id).to eql(e_case_id)
   end
 
-  it 'should return the list of individuals' do
-
-    puts subject.individuals.inspect
-    expect(subject.individuals).to eq(individuals)
+  it 'should have 2 people' do
+    expect(subject.people.length).to eql(2)
   end
 
-  it "should return the primary_applicant_id" do
-    expect(subject.primary_applicant_id).to eq(primary_applicant_id)
+  it 'should have the right applicants(mathing name attribute)' do
+    expect(subject.people.first.name_first).to eql(individual1.name_first)
+  end
+
+  describe "the first applicant" do
+
+  end
+
+  describe "the second applicant" do
+
   end
 
   it "should return the primary_applicant_id" do
@@ -41,7 +51,4 @@ describe Parsers::Xml::Cv::ApplicationGroup do
     expect(subject.submitted_date).to eq(submitted_date)
   end
 
-  it "should return the coverage_renewal_year" do
-    expect(subject.coverage_renewal_year).to eq(coverage_renewal_year)
-  end
 end

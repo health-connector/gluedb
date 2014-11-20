@@ -60,6 +60,12 @@ class EdiQueueSetup
 
     can_cv_q = gate_queue(ec, "legacy.policy.cancels")
     can_cv_q.bind(req_exchange, { :routing_key => "policy.cancel" })
+
+    ob_cv_q = gate_queue(ec, "legacy.policy.outbound")
+    ob_cv_q.bind(req_exchange, { :routing_key => "policy.initial_enrollment" })
+    ob_cv_q.bind(req_exchange, { :routing_key => "policy.renewal" })
+    ob_cv_q.bind(req_exchange, { :routing_key => "policy.cancel" })
+
   end
 end
 

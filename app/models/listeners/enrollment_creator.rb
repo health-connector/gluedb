@@ -36,6 +36,9 @@ module Listeners
       policy_ids.each do |p_id|
         Services::PolicyPublisher.publish(qr_uri, p_id)
       end
+      canceled_policies.each do |p_id|
+        Services::PolicyPublisher.publish_cancel(p_id)
+      end
       channel.default_exchange.publish(
         "",
         {

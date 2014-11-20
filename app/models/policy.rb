@@ -497,7 +497,19 @@ class Policy
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
   end
 
-  protected
+  def cancel_via_hbx!
+    self.aasm_state = "hbx_canceled"
+    self.enrollees.each do |en|
+      en.coverage_end = en.coverage_start
+      en.coverage_status = 'inactive'
+      en.touch
+      self.touch
+      en.save!
+    end
+    self.save!
+  end
+
+protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end

@@ -23,6 +23,13 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
   let(:e_case_id) {"urn:openhbx:hbx:dc0:resources:v1:curam:integrated_case#2063332"}
 
+  let(:subject_person_id) {"urn:openhbx:hbx:dc0:dcas:individual#2004542"}
+
+  let(:object_person_id) {"urn:openhbx:hbx:dc0:dcas:individual#2004818"}
+
+  let(:relationship_kind) {"urn:openhbx:terms:v1:individual_relationship#spouse"}
+
+
   it 'should return e_case_id' do
     expect(subject.e_case_id).to eql(e_case_id)
   end
@@ -51,4 +58,15 @@ describe Parsers::Xml::Cv::ApplicationGroup do
     expect(subject.submitted_date).to eq(submitted_date)
   end
 
+  it "should return subject person id" do
+    expect(subject.person_relationships.first.subject_person_id).to eq(subject_person_id)
+  end
+
+  it "should return object_person_id" do
+    expect(subject.person_relationships.first.object_person_id).to eq(object_person_id)
+  end
+
+  it "should return relationship_uri" do
+    expect(subject.person_relationships.first.relationship_kind).to eq(relationship_kind)
+  end
 end

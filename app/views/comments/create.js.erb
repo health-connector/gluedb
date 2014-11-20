@@ -1,0 +1,17 @@
+    var theDiv = document.getElementById("<%=@commentable.id%>");
+    newDiv = document.createElement('div');
+
+    <% if @comment.high?  %>
+        newDiv.setAttribute('class', "bs-callout bs-callout-danger");
+    <% else %>
+        newDiv.setAttribute('class', "bs-callout");
+    <% end %>
+    <% t = @comment.updated_at.strftime('%b %e, %Y %l:%M%P') %>
+    html_code =  '<p><%=@comment.content%></p>'
+    html_code += '<p class="text-right"><small><%=@comment.user%>-<%= t%></small></p>'
+    html_code += '<span><%= link_to " ", commentable_url(@commentable, @comment), class: "btn btn-xs btn-warning glyphicon glyphicon-pencil" if can? :edit, @person %></span>'
+    html_code += ' <span><%= link_to " ", commentable_url(@commentable, @comment), controller: "comment", method: "delete", class: "btn btn-xs btn-danger glyphicon glyphicon-remove" if can? :edit, @user %></span>';
+    newDiv.innerHTML = html_code 
+    theDiv.appendChild(newDiv);
+   
+    document.getElementById("comment_content").value = '';

@@ -1,3 +1,4 @@
+<div id="<%=commentable.id%>">
 <% commentable.comments.each do |comment| %>
   <% if comment.high? %>
     <div class="bs-callout bs-callout-danger">
@@ -13,3 +14,4 @@
     <%#= link_to 'delete', commentable_url(commentable, comment), controller: "comment", method: "delete", class: "btn btn-xs btn-danger" if can? :edit, @user %>
   </div>
 <% end %>
+</div>

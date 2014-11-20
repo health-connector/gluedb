@@ -45,6 +45,7 @@ module Policies
       !fail
     end
 
+    # TODO: Cancel the policies we should be cancelling
     def commit(request, listener)
       hios_id = request[:hios_id]
       plan_year = request[:plan_year]
@@ -62,6 +63,23 @@ module Policies
         :broker => broker
       }))
       listener.policy_created(policy.id)
+      cancel_others(policy, listener)
+    end
+
+    def cancel_others(policy, listener)
+      sub = policy.subscriber
+      sub_person = sub.person
+      coverage_start = sub.coverage_start
+      cancel_policies = sub_person.policies.select do |pol|
+        (pol.coverage_type == policy.coverage_type) &&
+          (pol.policy_start == coverage_start) &&
+          pol.active_as_of?(coverage_start) &&
+          (pol.id != policy.id)
+      end
+      cancel_policies.each do |cpol|
+        cpol.cancel_via_hbx!
+        listener.policy_canceled(cpol.id)
+      end
     end
   end
 end

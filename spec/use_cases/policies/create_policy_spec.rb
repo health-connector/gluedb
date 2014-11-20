@@ -9,14 +9,19 @@ describe Policies::CreatePolicy do
   let(:plan_year) { "2015" }
   let(:carrier) { double }
   let(:plan) { double(:carrier => carrier) }
-  let(:subscriber) { double }
+  let(:subscriber) { double(:person => person, :coverage_start => coverage_start) }
   let(:enrollees) { [subscriber] }
   let(:policy_factory) { double(:new => new_policy) }
   let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors) }
   let(:valid_policy) { true }
   let(:policy_errors) { { "an error" => "a reason" } }
   let(:policy_id) { double }
-  let(:policy) { double(:id => policy_id) }
+  let(:policy) { double(:id => policy_id, :subscriber => subscriber, :coverage_type => coverage_type) }
+  let(:person) { double(:policies => existing_policies) }
+  let(:coverage_start) { nil }
+  let(:coverage_type) { "health" }
+
+  let(:existing_policies) { [] }
 
   subject { Policies::CreatePolicy.new(policy_factory) }
 
@@ -104,6 +109,19 @@ describe Policies::CreatePolicy do
       expect(policy_factory).to receive(:create!).with(create_params).and_return(policy)
       expect(listener).to receive(:policy_created).with(policy_id)
       subject.commit(request, listener)
+    end
+
+    describe "with an existing policy that qualifies for cancellation" do
+      let(:to_be_cancelled_policy) { double(:policy_start => coverage_start, :coverage_type => coverage_type, :id => "1234", :active_as_of? => true) } 
+      let(:existing_policies) { [to_be_cancelled_policy] }
+
+      it "should tell the listener to cancel that policy" do
+        expect(policy_factory).to receive(:create!).and_return(policy)
+        expect(listener).to receive(:policy_created).with(policy_id)
+        expect(to_be_cancelled_policy).to receive(:cancel_via_hbx!)
+        expect(listener).to receive(:policy_canceled).with("1234")
+        subject.commit(request, listener)
+      end
     end
 
     describe "with a broker" do

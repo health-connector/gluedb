@@ -10,6 +10,11 @@ module Listeners
       @responder = responder
       @other_details = other_details
       @policy_ids = []
+      @canceled_policies = []
+    end
+
+    def policy_canceled(p_id)
+      @canceled_policies << p_id
     end
 
     def fail
@@ -17,7 +22,7 @@ module Listeners
     end
 
     def success
-      @responder.handle_success(@other_details, @policy_ids)
+      @responder.handle_success(@other_details, @policy_ids, @canceled_policies)
     end
 
     def policy_created(p_id)

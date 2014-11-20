@@ -30,7 +30,7 @@ module Listeners
       channel.acknowledge(delivery_info.delivery_tag, false) 
     end
 
-    def handle_success(details, policy_ids)
+    def handle_success(details, policy_ids, canceled_policies)
       # TODO: Add serialization of the policies for the right reason
       qr_uri = details[:qualifying_reason]
       policy_ids.each do |p_id|

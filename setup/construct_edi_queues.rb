@@ -57,6 +57,9 @@ class EdiQueueSetup
 
     ren_cv_q = gate_queue(ec, "legacy.policy.renewals")
     ren_cv_q.bind(req_exchange, { :routing_key => "policy.renewal" })
+
+    can_cv_q = gate_queue(ec, "legacy.policy.cancels")
+    can_cv_q.bind(req_exchange, { :routing_key => "policy.cancel" })
   end
 end
 

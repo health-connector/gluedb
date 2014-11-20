@@ -6,7 +6,7 @@ module Listeners
       @errors[:policies] = []
       @errors[:individuals] = []
       @current_person = 0
-      @currnet_policy = 0
+      @current_policy = 0
       @responder = responder
       @other_details = other_details
       @policy_ids = []
@@ -25,11 +25,11 @@ module Listeners
     end
 
     def set_current_policy(idx)
-      @current_policy = 0
+      @current_policy = idx
     end
 
     def set_current_person(idx)
-      @current_person = 0
+      @current_person = idx
     end
 
     # Enrollment errors
@@ -41,6 +41,13 @@ module Listeners
       add_error(:enrollment, "has no policies")
     end
 
+    def no_subscriber_for_policies
+      add_error(:enrollment, "has no subscriber")
+    end
+
+    def carrier_switch_renewal
+      add_error(:enrollment, "requires a carrier switch")
+    end
 
     # Policy Errors
     def policy_already_exists(details)

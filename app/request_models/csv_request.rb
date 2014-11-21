@@ -28,6 +28,3 @@ class CsvRequest
     @row.fields
   end
 end
-
-
-  

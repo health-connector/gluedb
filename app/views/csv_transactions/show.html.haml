@@ -34,7 +34,7 @@
             &nbsp;
           CSV Data
       .panel-body
-        %pre= @csv_transaction.body.read
+        %pre= @csv_transaction.json_body
 
 - if @csv_transaction.rejected?
   .row

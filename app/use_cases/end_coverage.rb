@@ -27,6 +27,42 @@ class EndCoverage
     action.execute(action_request)
   end
 
+  def execute_csv(request, listener)
+    @request = request
+    @policy = @policy_repo.where({"_id" => request[:policy_id]}).first
+
+    if (@policy.nil?)
+      listener.no_such_policy(policy_id: request[:policy_id])
+      listener.fail
+      return
+    end
+
+    affected_enrollee_ids = @request[:affected_enrollee_ids]
+
+    if (affected_enrollee_ids.nil?)
+      listener.no_subscriber_id(subscriber: request[:affected_enrollee_ids])
+      listener.fail
+      return
+    end
+
+    enrollees_not_already_canceltermed= @policy.enrollees.select { |e| !e.canceled? && !e.terminated? }
+
+    update_policy(affected_enrollee_ids)
+
+    action = @action_factory.create_for(request)
+
+    action_request = {
+      policy_id: @policy.id,
+      operation: request[:operation],
+      reason: request[:reason],
+      affected_enrollee_ids: request[:affected_enrollee_ids],
+      include_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
+      current_user: request[:current_user]
+    }
+    action.execute(action_request)
+    listener.success
+  end
+
   private
 
   def update_policy(affected_enrollee_ids)

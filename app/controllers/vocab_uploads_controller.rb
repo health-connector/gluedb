@@ -10,10 +10,11 @@ class VocabUploadsController < ApplicationController
     @vocab_upload.bypass_validation = params[:vocab_upload][:bypass_validation] == "1"
 
     if @vocab_upload.save(self)
-      flash_message(:success, "Upload successful.")
+      flash_message(:success, "\"#{params[:vocab_upload][:vocab].original_filename}\" - Uploaded successfully.")
       redirect_to new_vocab_upload_path
     else
-      flash_message_now(:error, "Upload failed.")
+      flash_message_now(:error, "\"#{params[:vocab_upload][:vocab].original_filename}\" - Failed to Upload.") if params[:vocab_upload][:vocab]
+      flash_message_now(:error, "Please select \"Initial enrollment\" or \"Maintenance\"") unless params[:vocab_upload][:kind].present?
       render :new
     end
   end

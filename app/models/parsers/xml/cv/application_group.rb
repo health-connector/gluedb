@@ -5,6 +5,7 @@ module Parsers::Xml::Cv
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"
 
     tag 'application_group'
+
     namespace 'cv'
 
     element :primary_applicant_id, String, xpath: "cv:primary_applicant_id/cv:id"
@@ -13,7 +14,11 @@ module Parsers::Xml::Cv
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 
-    has_many :people, Parsers::Xml::Cv::PersonParser, :tag => 'applicants'
+    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, :tag => 'applicants'
+
+    has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, :tag => 'person_relationships'
+
+    element :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
 
 =begin
     def initialize(parser)

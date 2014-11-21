@@ -9,8 +9,9 @@ class EdiOpsTransaction
   field :submitted_timestamp, type: DateTime
   field :event_key, type: String
   field :event_name, type: String
-  field :errors, type: String
   field :return_status, type: Integer
+  field :headers, type: String
+  field :payload, type: String
 
   field :assigned_to, type: String
   field :resolved_by, type: String

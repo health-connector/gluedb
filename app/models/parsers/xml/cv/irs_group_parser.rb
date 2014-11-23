@@ -6,5 +6,8 @@ module Parsers::Xml::Cv
     tag 'irs_group'
     namespace 'cv'
 
+    element :id, String, tag: 'id'
+    has_many :tax_households_ids, String, tag:'tax_household_id'
+
   end
 end

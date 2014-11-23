@@ -20,6 +20,9 @@ module Parsers::Xml::Cv
 
     element :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
 
+    element :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+
+
 =begin
     def initialize(parser)
       @parser = parser

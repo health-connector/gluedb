@@ -29,21 +29,31 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
   let(:relationship_kind) {"urn:openhbx:terms:v1:individual_relationship#spouse"}
 
+  let(:applicant_id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
 
   it 'should return e_case_id' do
     expect(subject.e_case_id).to eql(e_case_id)
   end
 
   it 'should have 2 people' do
-    expect(subject.people.length).to eql(2)
+    expect(subject.applicants.length).to eql(2)
   end
 
-  it 'should have the right applicants(mathing name attribute)' do
-    expect(subject.people.first.name_first).to eql(individual1.name_first)
-  end
+
+
 
   describe "the first applicant" do
+    it 'should have the right applicants id)' do
+      expect(subject.applicants.first.id).to eql(applicant_id)
+    end
 
+    it 'should have person name first' do
+      expect(subject.applicants.first.person.name_first).to eql(individual1.name_first)
+    end
+
+    it 'should have person name full' do
+      expect(subject.applicants.first.person.name_full).to eql(individual1.name_full)
+    end
   end
 
   describe "the second applicant" do

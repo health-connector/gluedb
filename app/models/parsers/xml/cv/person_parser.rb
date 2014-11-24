@@ -3,16 +3,18 @@ module Parsers::Xml::Cv
     include HappyMapper
 
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"
-    tag 'applicant'
+    tag 'person'
     namespace 'cv'
 
-    element :name_first, String,  xpath: "cv:applicant/cv:person/cv:person_name/cv:person_given_name"
+    element :name_first, String,  tag: "person_name/cv:person_given_name"
 
-    element :name_last, String, xpath: "cv:applicant/cv:person/cv:person_name/cv:person_surname"
+    element :name_last, String, tag: "person_name/cv:person_surname"
 
-    element :name_full, String, xpath: "cv:applicant/cv:person/cv:person_name/cv:person_full_name"
+    element :name_full, String, tag: "person_name/cv:person_full_name"
 
-    element :id, String, xpath: "cv:applicant/cv:person/cv:id", :on_save => lambda {|id| id.gsub(/\n/,"").rstrip }
+    element :id, String, tag: "id/cv:id", :on_save => lambda {|id| id.gsub(/\n/,"").rstrip }
+
+    #has_one :addresses, Parsers::Xml::Cv::AddressParser, tag: "addresses" TODO
 
   end
 end

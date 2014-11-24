@@ -2,8 +2,8 @@ require 'rails_helper'
 
 describe Parsers::Xml::Cv::PersonParser do
   before(:all) do
-    xml_file = File.open(File.join(Rails.root, "spec", "data", "application_group.xml"))
-    @subject = Parsers::Xml::Cv::PersonParser.parse(xml_file.read).first
+    xml_file = File.open(File.join(Rails.root, "spec", "data", "person.xml")).read
+    @subject = Parsers::Xml::Cv::PersonParser.parse(xml_file)
   end
 
   let(:name_last){ "Ramirez" }
@@ -14,7 +14,7 @@ describe Parsers::Xml::Cv::PersonParser do
 
   let(:id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
 
-=begin
+
   it 'returns the name_last' do
     expect(@subject.name_last).to eq(name_last)
   end
@@ -30,5 +30,5 @@ describe Parsers::Xml::Cv::PersonParser do
   it 'returns the id' do
     expect(@subject.id).to eq(id)
     end
-=end
+
 end

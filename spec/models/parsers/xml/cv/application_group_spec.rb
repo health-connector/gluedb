@@ -66,7 +66,7 @@ describe Parsers::Xml::Cv::ApplicationGroup do
     end
 
     it "should return the primary_applicant_id" do
-      expect(subject.applicants.first.person.addresses).to eq(is_primary_applicant)
+      expect(subject.applicants.first).to eq(is_primary_applicant)
     end
 
   end

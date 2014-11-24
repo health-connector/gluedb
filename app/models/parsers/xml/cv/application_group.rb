@@ -18,9 +18,11 @@ module Parsers::Xml::Cv
 
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, :tag => 'person_relationships'
 
-    element :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
+    has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
 
-    element :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+    has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, tag: 'eligibility_determinations'
 
 
 =begin

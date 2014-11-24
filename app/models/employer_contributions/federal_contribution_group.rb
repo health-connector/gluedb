@@ -6,5 +6,8 @@ module EmployerContributions
 
     field :enrollee_count, type: Integer
     field :contribution_amount, type: BigDecimal
+
+    validates_presence_of :enrollee_count
+    validates_presence_of :contribution_amount
   end
 end

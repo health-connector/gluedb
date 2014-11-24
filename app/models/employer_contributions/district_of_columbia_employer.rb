@@ -4,5 +4,8 @@ module EmployerContributions
 
     field :employee_max_percent, type: BigDecimal
     field :dependent_max_percent, type: BigDecimal
+
+    validates_presence_of :employee_max_percent
+    validates_presence_of :dependent_max_percent
   end
 end

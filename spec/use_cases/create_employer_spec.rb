@@ -97,6 +97,10 @@ describe CreateEmployer do
     }
   end
 
+  before :each do
+    allow(employer).to receive(:merge_plan_year).with(plan_year)
+  end
+
   it 'makes an employer' do
     expect(factory).to receive(:make).with(request)
     subject.execute(request)
@@ -124,15 +128,16 @@ describe CreateEmployer do
       pte_count: request[:pte_count]
     }).and_return(plan_year)
 
-    expect(plan_years).to receive(:<<).with(plan_year)
+    # expect(plan_years).to receive(:<<).with(plan_year)
+    expect(employer).to receive(:merge_plan_year).with(plan_year)
     subject.execute(request)
   end
-
+=begin
   it 'associates with with carriers' do
     expect(employer).to receive(:update_carriers).with(plan_year)
     subject.execute(request)
   end
-
+=end
   it 'assigns contact name' do
     name = request[:contact][:name]
     expect(employer).to receive(:name_pfx=).with(name[:prefix])

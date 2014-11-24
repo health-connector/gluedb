@@ -58,6 +58,7 @@ def import_spreadsheet(file_path, dates_by_sheet)
 
       hios_id = plan_details['Standard Component ID'].gsub(/[[:space:]]/,'')
       plans = Plan.where({:hios_plan_id => /#{hios_id}/, :year => YEAR})
+      puts "WARNING: No Plan found for hios: #{hios_id} from #{YEAR}" if plans.length == 0
       plans.to_a.each do |plan|
         plan.premium_tables.concat(premiums_to_add)
         plan.save!

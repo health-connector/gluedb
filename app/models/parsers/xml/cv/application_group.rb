@@ -14,13 +14,13 @@ module Parsers::Xml::Cv
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 
-    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, :tag => 'applicants'
+    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, xpath: "cv:applicants"
 
-    has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, :tag => 'person_relationships'
+    has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
 
-    element :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
+    has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
 
-    element :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, tag: 'eligibility_determinations'
 
 
 =begin

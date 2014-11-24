@@ -40,14 +40,14 @@ module Parsers
 
       def persist!
         @group_responses.each do |gr|
-          found_transmission = Protocols::X12::Transmission.where(
+          found_transmissions = Protocols::X12::Transmission.where(
             :isa08 => gr.isa08,
             :gs01 => gr.gs01,
             :gs06 => gr.gs06,
             :gs08 => gr.gs08,
             :gs03 => gr.gs03
-          ).first
-          if !found_transmission.nil?
+          )
+          found_transmissions.each do |found_transmission|
             tses = found_transmission.transaction_set_enrollments
             gr.responses.each_pair do |k, v|
               ts = tses.detect { |ts| ts.st02 == k }

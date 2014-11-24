@@ -7,7 +7,7 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :id, String, tag: 'id'
-    has_many :tax_households_ids, String, tag:'tax_household_id'
+    has_many :tax_households_ids, String, tag:'tax_households_ids'
 
   end
 end

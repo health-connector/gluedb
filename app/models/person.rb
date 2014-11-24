@@ -293,6 +293,10 @@ class Person
     addresses.detect { |adr| adr.address_type == "home" }
   end
 
+  def mailing_address
+    addresses.detect { |adr| adr.address_type == "mailing"} || home_address
+  end
+
   def home_phone
     phones.detect { |adr| adr.phone_type == "home" }
   end

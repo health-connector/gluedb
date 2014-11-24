@@ -14,7 +14,11 @@ module Parsers::Xml::Cv
 
     element :id, String, tag: "id/cv:id", :on_save => lambda {|id| id.gsub(/\n/,"").rstrip }
 
-    #has_one :addresses, Parsers::Xml::Cv::AddressParser, tag: "addresses" TODO
+    has_many :addresses, Parsers::Xml::Cv::AddressParser, xpath: "cv:addresses"
+
+    has_many :emails, String, xpath: "cv:email"
+
+    has_many :phones, String, xpath: "cv:phones"
 
   end
 end

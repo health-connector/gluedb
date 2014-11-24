@@ -105,6 +105,10 @@ class Enrollee
     self.relationship_status_code == "self"
   end
 
+  def reference_premium_for(plan, rate_date)
+    plan.rate(rate_date, coverage_start, member.dob)
+  end
+
   def coverage_ended?
     !coverage_end.blank?
   end

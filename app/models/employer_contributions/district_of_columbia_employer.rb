@@ -20,7 +20,7 @@ module EmployerContributions
 
     def reference_contribution_for(enrollee)
       reference_percent = enrollee.subscriber? ? employee_max_percent : dependent_max_percent
-      enrollee.reference_premium * reference_percent * 0.01
+      enrollee.reference_premium_for(reference_plan, plan_year.start_date) * reference_percent * 0.01
     end
   end
 end

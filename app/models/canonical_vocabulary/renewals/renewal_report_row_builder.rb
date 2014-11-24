@@ -9,12 +9,12 @@ module CanonicalVocabulary
       end
 
       def append_integrated_case_number
-        @data_set << @application_group.integrated_case
+        @data_set << @application_group.e_case_id
       end
 
       def append_name_of(member)
-        @data_set << member.name_first
-        @data_set << member.name_last
+        @data_set << member.person.name_first
+        @data_set << member.person.name_last
       end
 
       def append_notice_date(notice_date)
@@ -22,12 +22,13 @@ module CanonicalVocabulary
       end
 
       def append_household_address
-        @data_set << @primary.addresses[0][:address_1]
-        @data_set << @primary.addresses[0][:address_2]
-        @data_set << @primary.addresses[0][:apt]
-        @data_set << @primary.addresses[0][:city]
-        @data_set << @primary.addresses[0][:state]
-        @data_set << @primary.addresses[0][:postal_code]
+        address = @primary.person.addresses[0]
+        @data_set << address[:address_1]
+        @data_set << address[:address_2]
+        @data_set << address[:apt]
+        @data_set << address[:city]
+        @data_set << address[:state]
+        @data_set << address[:postal_code]
       end
 
       def append_aptc
@@ -63,11 +64,11 @@ module CanonicalVocabulary
       end
 
       def append_citizenship_of(member)
-        @data_set << member.citizenship
+        @data_set << citizenship(member)
       end
 
       def append_tax_status_of(member)
-        @data_set << member.tax_status
+        @data_set << tax_status(member)
       end
 
       def append_mec_of(member)
@@ -75,7 +76,7 @@ module CanonicalVocabulary
       end
 
       def append_app_group_size
-        @data_set << @application_group.size
+        @data_set << @application_group.applicants.count
       end
 
       def append_yearwise_income_of(member)
@@ -87,15 +88,61 @@ module CanonicalVocabulary
       end
 
       def append_incarcerated(member)
-        @data_set << member.incarcerated
+        @data_set << incarcerated?(member)
       end
 
-      private 
+      private
 
       def residency(member)
-        return member.residency unless member.residency.blank?
-        return "No Status" if @primary.addresses[0].nil?
-        @primary.addresses[0][:state].strip == "DC" ? "D.C. Resident" : "Not a D.C Resident"
+        if member.person.addresses.blank?
+          member = @primary
+        end
+        member.person.addresses[0][:state].strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
+      end
+
+      def citizenship(applicant)
+        return if applicant.person_demographics.blank?
+        demographics = applicant.person_demographics
+        if demographics.citizen_status.blank?
+          raise "Citizenship status missing for person #{self.name_first} #{self.name_last}"
+        end
+
+        citizenship_mapping = {
+          "U.S. Citizen" => %W(us_citizen naturalized_citizen indian_tribe_member),
+          "Lawfully Present" => %W(alien_lawfully_present lawful_permanent_resident),
+          "Not Lawfully Present" => %W(undocumented_immigrant not_lawfully_present_in_us)
+        }
+        citizen_status = demographics.citizen_status
+        citizenship_mapping.each do |key, value|
+          return key if value.include?(citizen_status)
+        end
+      end
+
+      def tax_status(applicant)
+        return if applicant.financial_statements.blank?
+        financial_statement = applicant.financial_statements[0]
+        tax_status = financial_statement.tax_filing_status
+        case tax_status
+        when 'non_filer'
+          'Non-filer'
+        when 'tax_dependent'
+          'Tax Dependent'
+        when 'tax_filer'
+          tax_filer_status(applicant, financial_statement)
+        end
+      end
+
+      def tax_filer_status(applicant, financial_statement)
+        relationship = applicant.person_relationships.detect{|i| ['spouse', 'life partner'].include?(i.relationship_uri)}
+        if relationship.nil?
+          return 'Single'
+        end
+        financial_statement.is_tax_filing_together ? 'Married Filing Jointly' : 'Married Filing Separately'
+      end
+
+      def incarcerated?(member)
+        return 'No' if member.person_demographics.blank?
+        member.person_demographics.is_incarcerated == 'true' ? 'Yes' : 'No'
       end
     end
   end

@@ -12,6 +12,8 @@ module Parsers::Xml::Cv
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, tag:'person_relationships'
     #element :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics' TODO
-    element :is_primary_applicant, String, tag:'is_primary_applicant'
+    element :is_primary_applicant, String, tag: 'is_primary_applicant'
+
+
   end
 end

@@ -14,9 +14,7 @@ module Parsers::Xml::Cv
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 
-    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, :tag => 'applicants'
-
-    has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, :tag => 'person_relationships'
+    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, xpath: "cv:applicants"
 
     has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
 

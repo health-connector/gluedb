@@ -1,0 +1,9 @@
+<ns0:person_relationship xmlns:ns0="http://openhbx.org/api/terms/1.0">
+  <ns0:subject_individual>
+    <ns0:id>urn:openhbx:hbx:dc0:dcas:individual#2004542</ns0:id>
+  </ns0:subject_individual>
+  <ns0:relationship_uri>urn:openhbx:terms:v1:individual_relationship#spouse</ns0:relationship_uri>
+  <ns0:object_individual>
+    <ns0:id>urn:openhbx:hbx:dc0:dcas:individual#2004818</ns0:id>
+  </ns0:object_individual>
+</ns0:person_relationship>

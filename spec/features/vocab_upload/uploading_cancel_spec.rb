@@ -30,7 +30,7 @@ feature 'uploading a cancel/term CV' do
 
     click_button "Upload"
 
-    expect(page).to have_content 'Upload successful.'
+    expect(page).to have_content 'Uploaded successfully.'
   end
 
   scenario 'subscriber member canceled' do
@@ -43,7 +43,7 @@ feature 'uploading a cancel/term CV' do
 
     click_button "Upload"
 
-    expect(page).to have_content 'Upload successful.'
+    expect(page).to have_content 'Uploaded successfully.'
   end
 
   scenario 'incorrect premium total' do
@@ -56,7 +56,7 @@ feature 'uploading a cancel/term CV' do
 
     click_button "Upload"
 
-    expect(page).to have_content 'Upload failed.'
+    expect(page).to have_content 'Failed to Upload.'
     expect(page).to have_content 'premium_amount_total is incorrect'
   end
 end

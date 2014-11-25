@@ -33,6 +33,12 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
   let(:is_primary_applicant) {"true"}
 
+  let(:sex) {"urn:openhbx:terms:v1:gender#female"}
+
+  let(:ssn) {"171765423"}
+
+  let(:birth_date) {"19890110"}
+
   it 'should return e_case_id' do
     expect(subject.e_case_id).to eql(e_case_id)
   end
@@ -55,18 +61,21 @@ describe Parsers::Xml::Cv::ApplicationGroup do
       expect(subject.applicants.first.person.name_full).to eql(individual1.name_full)
     end
 
-    it 'should have 1 person relationship' do
-
-      puts "#{subject.applicants.first.person_relationships.first.subject_individual_id}"
+    it 'should have 1 person relationship with relationship_uri, subject_individual_id, object_individual_id' do
       expect(subject.applicants.first.person_relationships.size).to eq(1)
+      expect(subject.applicants.first.person_relationships.first.subject_individual_id).to eq(subject_individual_id)
+      expect(subject.applicants.first.person_relationships.first.relationship_uri).to eq(relationship_uri)
+      expect(subject.applicants.first.person_relationships.first.object_individual_id).to eq(object_individual_id)
+    end
+
+    it 'should have 1 person demographics with ssn, sex, date of birth..' do
+      expect(subject.applicants.first.person_demographics.sex).to eq(sex)
+      expect(subject.applicants.first.person_demographics.ssn).to eq(ssn)
+      expect(subject.applicants.first.person_demographics.birth_date).to eq(birth_date)
     end
 
     it "should return the primary_applicant_id" do
       expect(subject.applicants.first.is_primary_applicant).to eq(is_primary_applicant)
-    end
-
-    it "should return the primary_applicant_id" do
-      expect(subject).to eq(is_primary_applicant)
     end
 
   end

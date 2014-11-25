@@ -16,7 +16,7 @@ module Parsers::Xml::Cv
 
     has_many :applicants, Parsers::Xml::Cv::ApplicantParser, xpath: "cv:applicants"
 
-    has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, tag:'tax_households'
+    has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, xpath:'cv:tax_households'
 
     has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
 

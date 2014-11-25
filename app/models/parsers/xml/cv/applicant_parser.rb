@@ -15,5 +15,13 @@ module Parsers::Xml::Cv
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, tag:'financial_statements'
 
+
+    def dob
+      Date.parse(person_demographics.birth_date)
+    end
+
+    def age
+      Ager.new(dob).age_as_of(Date.parse("2015-1-1"))
+    end
   end
 end

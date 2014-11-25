@@ -14,6 +14,14 @@ module BulkCancelTerms
       @errors << "Policy #{details[:policy_id]} does not exist"
     end
 
+    def policy_inactive(details = {})
+      @errors << "Policy #{details[:policy_id]} was already inactive"
+    end
+
+    def end_date_invalid(details = {})
+      @errors <<  "End date of #{details[:end_date]} is invalid"
+    end
+
     def fail(details = {})
       @csv << (@request.to_a + ["#{details[:subscriber]}"] + ["error", @errors.join])
     end

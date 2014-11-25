@@ -19,8 +19,7 @@ module Parsers::Xml::Cv
     element :is_active, String, tag: 'is_active'
 
     def to_individual_request
-      person.name_request.merge({
-        :hbx_member_id => "",
+      person.individual_request.merge({
         :dob => "",
         :ssn => "",
         :email => "",

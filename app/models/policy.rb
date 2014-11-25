@@ -30,6 +30,9 @@ class Policy
   field :updated_by, type: String
 
   validates_presence_of :eg_id
+#  validates_presence_of :plan_id
+  validates_presence_of :pre_amt_tot
+  validates_presence_of :tot_res_amt
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
@@ -345,7 +348,8 @@ class Policy
   end
 
   def self.find_active_and_unterminated_for_members_in_range(m_ids, start_d, end_d, other_params = {})
-    Policy.where(self.active_as_of_expression(end_d).merge(
+    Policy.where(
+      PolicyStatus::Active.as_of(end_d,
       {"enrollees" => {
         "$elemMatch" => {
           "m_id" => { "$in" => m_ids },
@@ -356,26 +360,22 @@ class Policy
             {:coverage_end => nil}
           ]
         }
-      } }
-    ).merge(other_params))
+      } }).query
+    )
   end
 
   def self.find_active_and_unterminated_in_range(start_d, end_d, other_params = {})
     Policy.where(
-      self.active_as_of_expression(end_d).merge(other_params)
+      PolicyStatus::Active.as_of(end_d, other_params).query
     )
   end
 
   def self.find_terminated_in_range(start_d, end_d, other_params = {})
-    Policy.where({
-      :aasm_state => { "$ne" => "canceled" },
-      :enrollees => { "$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => { "$ne" => nil },
-          :coverage_end => {"$lte" => end_d, "$gte" => start_d}
-      }
-      }
-    }.merge(other_params)
+    Policy.where(
+      PolicyStatus::Terminated.during(
+        start_d, 
+        end_d
+        ).query
     )
   end
 
@@ -401,24 +401,24 @@ class Policy
         { :aasm_state => { "$ne" => "canceled"},
           :eg_id => { "$not" => /DC0.{32}/ },
           :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$gt" => target_date}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$exists" => false}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => nil
-        }}}
+            :rel_code => "self",
+            :coverage_start => {"$lte" => target_date},
+            :coverage_end => {"$gt" => target_date}
+          }}},
+          { :aasm_state => { "$ne" => "canceled"},
+            :eg_id => { "$not" => /DC0.{32}/ },
+            :enrollees => {"$elemMatch" => {
+              :rel_code => "self",
+              :coverage_start => {"$lte" => target_date},
+              :coverage_end => {"$exists" => false}
+            }}},
+            { :aasm_state => { "$ne" => "canceled"},
+              :eg_id => { "$not" => /DC0.{32}/ },
+              :enrollees => {"$elemMatch" => {
+                :rel_code => "self",
+                :coverage_start => {"$lte" => target_date},
+                :coverage_end => nil
+              }}}
       ]
     }
   end
@@ -466,6 +466,13 @@ class Policy
     subscriber.coverage_start > now
   end
 
+  def active_as_of?(date)
+    return false if subscriber.nil?
+    return false if (subscriber.coverage_start == subscriber.coverage_end)
+    return false if (!subscriber.coverage_end.nil? && subscriber.coverage_end < date)
+    subscriber.coverage_start <= date
+  end
+
   def future_active_for?(member_id)
     en = enrollees.detect { |enr| enr.m_id == member_id }
     now = Date.today
@@ -494,27 +501,38 @@ class Policy
     currently_active?
   end
 
+  def cancel_via_hbx!
+    self.aasm_state = "hbx_canceled"
+    self.enrollees.each do |en|
+      en.coverage_end = en.coverage_start
+      en.coverage_status = 'inactive'
+      en.touch
+      self.touch
+      en.save!
+    end
+    self.save!
+  end
 
 protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end
 
-private
-    def format_money(val)
-      sprintf("%.02f", val)
-    end
+  private
+  def format_money(val)
+    sprintf("%.02f", val)
+  end
 
-    def filter_delimiters(str)
-      str.to_s.gsub(',','') if str.present?
-    end
+  def filter_delimiters(str)
+    str.to_s.gsub(',','') if str.present?
+  end
 
-    def filter_non_numbers(str)
-      str.to_s.gsub(/\D/,'') if str.present?
-    end
+  def filter_non_numbers(str)
+    str.to_s.gsub(/\D/,'') if str.present?
+  end
 
-    def query_proxy
-      @query_proxy ||= Queries::PolicyAssociations.new(self)
-    end
+  def query_proxy
+    @query_proxy ||= Queries::PolicyAssociations.new(self)
+  end
 
 end

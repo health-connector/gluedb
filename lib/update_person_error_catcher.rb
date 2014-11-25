@@ -13,9 +13,7 @@ class UpdatePersonErrorCatcher
   end
 
   def too_many_addresses_of_type(details)
-    # raise 'hi'.inspect
     @person.errors.add(:address_type, " -- Too many #{details[:address_type]} addresses. Only #{details[:max]} allowed.")
-    # raise @person.errors.inspect
   end
 
   def no_such_person(details)

@@ -1,38 +1,30 @@
-= render 'shared/v2/identity', id: api_v1_people_url(hbx_id: person.authority_member_id), obj: person
+= render 'shared/v2/identity', id: api_v2_people_url(hbx_id: person.authority_member_id), obj: person
 - if person.application_group_id.present?
-  %n1:application_group_id= render 'shared/v2/identity', id: api_v1_application_group_url(person.application_group_id), obj: nil
+  %n1:application_group_id= api_v2_application_group_url(person.application_group_id)
 - if false #TODO
   %n1:tax_household_id
 %n1:person
   = render 'shared/v2/person', person: person
-
-
-
-
-
+- unless person.person_relationships.empty?
+  = render 'shared/v2/relationships', person: person
 - authority_member = person.authority_member
-%n1:is_authoritative= person.is_authoritative?
-- unless person.members.empty?
-  %n1:aliases
-    - person.members.each do |member|
-      %n1:alias
-        = render 'shared/v2/identity', id: api_v1_people_url(hbx_id:member.hbx_member_id), obj: person
-        %n1:is_authoritative= member.authority?
-
-= render 'shared/v2/relationships', person: person
-= render 'shared/v2/person_demographics', member: person.authority_member
-= render 'shared/v2/roles', person: person
-- unless person.responsible_parties.empty?
-  %n1:responsible_party_roles
-    - person.responsible_parties.each do |responsible_party|
-      %n1:responsible_party
-        %n1:entity_identifier= responsible_party.entity_identifier
-        %n1:organization_id= responsible_party.organization_name
-        - policies = responsible_party.policies
-        - if policies.present?
-          %n1:policies
-            - policies.each do |policy|
-              %n1:policy= render 'shared/v2/policy_link_type', policy: policy, member: member
+= render 'shared/v2/person_demographics', member: authority_member
+- if false #TODO
+  %n1:is_primary_applicant
+- if false #TODO
+  %n1:is_coverage_applicant
+- if person.employer.present?
+  %n1:employer= render 'shared/v2/employer_link_type', employer: person.employer
+- if false #TODO
+  %n1:is_head_of_household
+- if false #TODO
+  %n1:is_without_assistance
+- if false #TODO
+  %n1:is_enrolled_in_employer_sponsored_coverage
+- if false #TODO
+  %n1:is_insurance_assistance_eligible
+- if false #TODO
+  %n1:is_medicaid_chip_eligible
 - if authority_member.hlh.present?
   %n1:person_health
     %n1:tobacco_user= authority_member.hlh
@@ -94,4 +86,5 @@
 %n1:is_active= person.is_active
 - unless person.comments.empty?
   = render 'shared/v2/comments', object: person
-= render 'shared/v2/timestamp', record: person
+- if person.version.present?
+  = render 'shared/v2/timestamp', record: person

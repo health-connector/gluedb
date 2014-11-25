@@ -1,4 +1,4 @@
-= render 'shared/v2/identity', id: api_v1_person_url(person.id), obj: person
+= render 'shared/v2/identity', id: api_v2_person_url(person.id), obj: person
 %n1:person_name
   = render 'shared/v2/name', object: person
 - if person.job_title.present?

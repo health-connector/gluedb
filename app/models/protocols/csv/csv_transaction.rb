@@ -30,6 +30,15 @@ module Protocols::Csv
       rejected? ? "rejected" : "acknowledged"
     end
 
+    def json_body
+      json_obj = nil
+      begin
+        json_obj = Oj.safe_load(body.read)
+      rescue Oj::ParseError
+      end
+      JSON.pretty_generate(json_obj)
+    end
+
     def self.create_transaction(details)
       self.create!(details)
     end

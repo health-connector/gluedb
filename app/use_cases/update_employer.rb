@@ -8,13 +8,13 @@ class UpdateEmployer
   end
 
   def execute(request)
-    @employer = @repository.find_for_fein(request[:fein]) 
+    @employer = @repository.find_for_fein(request[:fein])
     @request = request
     @requested_contact = request[:contact]
 
     @employer.name = request[:name] unless (request[:name].nil? || request[:name].empty?)
     @employer.hbx_id = request[:hbx_id] unless (request[:hbx_id].nil? || request[:hbx_id].empty?)
-    
+
     @employer.fein = request[:fein] unless (request[:fein].nil? || request[:fein].empty?)
     @employer.sic_code = request[:sic_code] unless (request[:sic_code].nil? || request[:sic_code].empty?)
     @employer.notes = request[:notes] unless (request[:notes].nil? || request[:notes].empty?)

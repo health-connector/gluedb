@@ -11,15 +11,22 @@ module Listeners
       qualifying_reason_uri = properties.headers["qualifying_reason_uri"]
       submitted_timestamp = properties.headers["submitted_timestamp"]
       event_name = properties.headers["event_name"]
+      return_status = properties.headers["return_status"]
       EdiOpsTransaction.create!({
         :event_key => event_key,
         :event_name => event_name,
         :qualifying_reason_uri => qualifying_reason_uri,
         :submitted_timestamp => submitted_timestamp,
         :enrollment_group_uri => enrollment_group_uri,
+        :return_status => properties.headers["return_status"],
+        :errors => payload,
         :status => "new"
       })
       channel.acknowledge(delivery_info.delivery_tag, false) 
+    end
+
+    def error?(delivery_info)
+      "enrollment.error" == delivery_info.routing_key 
     end
 
     def self.run

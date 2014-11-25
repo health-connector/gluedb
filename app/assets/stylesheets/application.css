@@ -14,5 +14,6 @@
  *= require flatuipro
  *= require flatuipro_overrides
  *= require static_hamburger_menu
+ *= require highlight/default
  *= require_tree .
  */

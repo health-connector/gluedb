@@ -4,7 +4,7 @@ module Parsers::Xml::Reports
   class Individual
 
     include NodeUtils
-    attr_reader :root, :root_elements, :person, :demographics, :financial_reports, :relationships, :health
+    attr_reader :root, :root_elements, :hbx_ids, :person, :demographics, :financial_reports, :relationships, :health
 
     CITIZENSHIP_MAPPING = {
        "U.S. Citizen" => %W(us_citizen naturalized_citizen indian_tribe_member),
@@ -12,47 +12,42 @@ module Parsers::Xml::Reports
        "Not Lawfully Present" => %W(undocumented_immigrant not_lawfully_present_in_us)
     }
 
-    def initialize(data_xml = nil, *args)  
-      # xml_file = File.open(Rails.root.to_s + "/sample_xmls/individual_address.xml")
+    def initialize(data_xml = nil)  
+      # xml_file = File.open(Rails.root.to_s + "/individual_test.xml")
       # parser = Nokogiri::XML(xml_file)
       # @root = parser.root
       @root = data_xml
+      build_namespaces
+      parse_individual_xml
     end
 
-    def parse_full_xml
-      root_level_elements
-      [ :details, :demographics, :relationships, :financial_reports, :health ].each do |attr|
-        self.send("person_#{attr.to_s}")
+    def parse_individual_xml
+      @root_elements = @root.elements.inject({}) do |data, node|
+        data[node.name.to_sym] = parse_uri(node.text().strip()) if node.elements.count.zero?
+        data
       end
+      
+      @hbx_ids = extract_elements(@root.at_xpath("n1:id", @namespaces))
+      @person = @root.at_xpath("n1:person", @namespaces).elements.inject({}) do |data, node|
+        data[node.name.to_sym] = (node.elements.count.zero? ? node.text().strip() : extract_elements(node))
+        data
+      end
+
+      @person.merge!(@person.delete(:id))
+      @person.merge!(@person.delete(:person_name)[0])
+  
+      @demographics = extract_elements(@root.at_xpath("n1:person_demographics", @namespaces))
+      @relationships = extract_elements(@root.at_xpath("n1:person_relationships", @namespaces))
+      @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports", @namespaces))
+      @health = extract_elements(@root.at_xpath("n1:person_health", @namespaces))     
     end
 
-    def person_details
-      @person = extract_elements(@root.at_xpath("n1:person"))
-    end
-
-    def person_demographics
-      @demographics = extract_elements(@root.at_xpath("n1:person_demographics"))
-    end
-
-    def person_financial_reports
-      @financial_reports = extract_elements(@root.at_xpath("n1:financial_reports"))
-    end
-
-    def person_relationships
-      @relationships = extract_elements(@root.at_xpath("n1:person_relationships"))
-    end
-
-    def person_health
-      @health = extract_elements(@root.at_xpath("n1:person_health"))     
-    end
-
-    def id
-      person_id = root_elements.id
-      person_id.nil? ? nil : person_id.match(/\w+$/)[0]
+    def member_id
+      @hbx_ids[:id]
     end
 
     def dob
-      parse_date(@demographics.birth_date)
+      parse_date(@demographics[:birth_date])
     end
 
     def age
@@ -60,50 +55,52 @@ module Parsers::Xml::Reports
     end
 
     def incarcerated
-      @demographics.is_incarcerated == 'true' ? 'Yes' : 'No'
+      @demographics[:is_incarcerated] == 'true' ? 'Yes' : 'No'
     end
 
     def residency
       return if @addresses[0].nil?
-      @addresses[0].state.strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
+      @addresses[0][:state].strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
     end
 
     def citizenship
-      if @demographics.citizen_status.nil?
+      if @demographics[:citizen_status].nil?
         raise "Citizenship status missing for person #{self.name_first} #{self.name_last}"
       end
 
-      citizen_status = @demographics.citizen_status.split("#")[1]
+      citizen_status = @demographics[:citizen_status]
       CITIZENSHIP_MAPPING.each do |key, value|
         return key if value.include?(citizen_status)
       end
     end
 
     def tax_status
-      return @financial_reports.empty?
-      tax_status = @financial_reports[0].tax_filing_status
-      case tax_status
-      when 'non_filer'
-        'Non-filer'
-      when 'tax_dependent'
-        'Tax Dependent'
-      when 'tax_filer'
-        tax_filer_status
+      if @financial_reports.empty?
+        return
       else
+        tax_status = @financial_reports[0][:tax_filing_status]
+        case tax_status
+        when 'non_filer'
+          'Non-filer'
+        when 'tax_dependent'
+          'Tax Dependent'
+        when 'tax_filer'
+          tax_filer_status
+        end
       end
     end
 
     def tax_filer_status
-      return 'Single' unless married?
-      @financial_reports[0].is_tax_filing_together ? 'Married Filing Jointly' : 'Married Filing Separately'
+      if relationship.nil?
+        return 'Single'
+      end
+      @financial_reports[0][:is_tax_filing_together] ? 'Married Filing Jointly' : 'Married Filing Separately'
     end
 
-    def married?
-      relationship = @relationships.detect do |relationship|
-        relation_str = relationship.relationship_uri.split("#")[1]
-        ['spouse', 'life partner'].include?(relation_str)
+    def relationship
+      @relationships.detect do |relationship| 
+        ['spouse', 'life partner'].include?(relationship[:relationship_uri])
       end
-      relationship.blank? ? false : true
     end
 
     def projected_income
@@ -154,5 +151,6 @@ module Parsers::Xml::Reports
     # def dental_plan
     #   plan_by_coverage_type("dental")
     # end
+
   end
 end

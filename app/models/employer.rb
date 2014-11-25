@@ -204,7 +204,9 @@ class Employer
       EmployerElectedPlansMerger.merge(existing, incoming)
       update_carriers(existing)
     else
-      self.plan_years << incoming
+      update_carriers(incoming)
+      incoming.employer = self
+      incoming.save!
     end
   end
 

@@ -2,6 +2,11 @@ require 'roo'
 require 'spreadsheet'
 
 puts "Loading: 2015 Premiums"
+
+Plan.where(year: 2015).each do |p|
+  p.premium_tables.delete_all
+end
+
 YEAR = 2015
 dates_by_sheet = [
   Date.new(YEAR, 1, 1)..Date.new(YEAR, 12, 31),
@@ -58,6 +63,7 @@ def import_spreadsheet(file_path, dates_by_sheet)
 
       hios_id = plan_details['Standard Component ID'].gsub(/[[:space:]]/,'')
       plans = Plan.where({:hios_plan_id => /#{hios_id}/, :year => YEAR})
+      puts "WARNING: No Plan found for hios: #{hios_id} from #{YEAR}" if plans.length == 0
       plans.to_a.each do |plan|
         plan.premium_tables.concat(premiums_to_add)
         plan.save!

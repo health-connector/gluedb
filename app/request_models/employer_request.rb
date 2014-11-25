@@ -4,9 +4,10 @@ require 'nokogiri'
 class EmployerRequest
   def self.many_from_xml(xml)
     requests = []
-    elements = Nokogiri::XML(xml).css('employers employer')
-    elements.each { |e| requests << EmployerRequest.from_xml(ExposesEmployerXml.new(e)) }
-    requests
+    elements = Nokogiri::XML(xml).xpath('//cv:employers/cv:employer', {
+      :cv => "http://dchealthlink.com/vocabulary/20131030/employer"                                  
+    })
+    elements.map { |e| EmployerRequest.from_xml(ExposesEmployerXml.new(e)) }
   end
 
   def self.from_xml(xml)

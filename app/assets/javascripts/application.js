@@ -20,4 +20,5 @@
 //= require flatuipro
 //= require jquery_ujs
 //= require twitter/bootstrap
+//= require highlight/highlight.pack
 //= require_tree .

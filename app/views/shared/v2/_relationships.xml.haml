@@ -1,8 +1,8 @@
-%n1:relationships
+%n1:person_relationships
   - person.person_relationships.each do |relationship|
     %n1:relationship
-      %n1:subject_individual= api_v1_person_url(relationship.subject_person_id)
+      %n1:subject_individual= api_v2_person_url(relationship.subject_person_id)
       %n1:relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{relationship.relationship_kind}"
-      - if false #todo
-        %n1:inverse_relationship
-      %n1:object_individual= api_v1_person_url(relationship.object_person_id)
+      - if person.inverse.present?
+        %n1:inverse_relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{person.inverse}"
+      %n1:object_individual= api_v2_person_url(relationship.object_person_id)

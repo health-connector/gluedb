@@ -21,7 +21,7 @@ class UpdatePolicyStatus
     end
 
     attestation_date = (Maybe.new(request[:attestation_date]).fmap do |val|
-      Date.parse(val) rescue nil
+      Date.parse(val) 
     end).value
 
     subscriber = policy.subscriber

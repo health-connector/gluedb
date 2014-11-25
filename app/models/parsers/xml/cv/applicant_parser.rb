@@ -13,7 +13,7 @@ module Parsers::Xml::Cv
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, xpath:'cv:person_relationships'
     has_one :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics'
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
-    has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, tag:'financial_statements'
+    has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
 
   end
 end

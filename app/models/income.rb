@@ -36,7 +36,7 @@ class Income
   field :start_date, type: Date
   field :end_date, type: Date
   field :is_projected, type: Boolean, default: false
-  field :submission_date, type: Date
+  field :submission_date, type: DateTime
 
   embedded_in :assistance_eligibility, :inverse_of => :incomes
 

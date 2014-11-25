@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe ImportCuramData do
-  subject { ImportCuramData.new(person_factory, app_group_repo, person_finder, app_group_factory, relationship_factory, qualification_factory, assistance_eligibilities_importer, member_factory) }
+  subject { ImportCuramData.new(person_factory, app_group_repo, person_finder, app_group_factory, relationship_factory, qualification_factory, financial_statements_importer, member_factory) }
   let(:member_factory) { double(new: new_member) }
   let(:new_member) { double(hbx_member_id: '666') }
   
@@ -81,7 +81,7 @@ describe ImportCuramData do
       :e_person_id => e_person_id,
       :e_concern_role_id => e_concern_role_id,
       :aceds_id => aceds_id,
-      :assistance_eligibilities => assistance_eligibilities
+      :financial_statements => financial_statements
     }
   end
   let(:ssn) { "12345678911"}
@@ -162,14 +162,14 @@ describe ImportCuramData do
     end
   end
 
-  let(:assistance_eligibilities_importer) { double(import!: nil) }
-  let(:assistance_eligibilities) { [double] }
+  let(:financial_statements_importer) { double(import!: nil) }
+  let(:financial_statements) { [double] }
   it 'should import the assistance eligibility information' do
-    expect(assistance_eligibilities_importer).to receive(:import!).with(
+    expect(financial_statements_importer).to receive(:import!).with(
       person,
-      assistance_eligibilities
+      financial_statements
     )
-    expect(assistance_eligibilities_importer).to receive(:import!).with(
+    expect(financial_statements_importer).to receive(:import!).with(
       child,
       []
     )

@@ -7,14 +7,16 @@ module Parsers::Xml::Cv
     tag 'applicant'
     namespace 'cv'
 
-
     element :id, String, tag: "id/cv:id"
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, xpath:'cv:person_relationships'
     has_one :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics'
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
-    has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, tag:'financial_statements'
-
+    element :tax_household_id, String, tag: 'tax_household_id'
+    element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
+    element :is_head_of_household, String, tag: 'is_head_of_household'
+    has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
+    element :is_active, String, tag: 'is_active'
 
     def dob
       Date.parse(person_demographics.birth_date)
@@ -22,6 +24,10 @@ module Parsers::Xml::Cv
 
     def age
       Ager.new(dob).age_as_of(Date.parse("2015-1-1"))
+    end
+
+    def to_individual_request
+      person.individual_request.merge(person_demographics.individual_request)
     end
   end
 end

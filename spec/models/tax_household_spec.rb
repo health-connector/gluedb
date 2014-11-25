@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Household do
+describe TaxHousehold do
 =begin
   describe "validate associations" do
 #	  it { should have_and_belong_to_many  :people }

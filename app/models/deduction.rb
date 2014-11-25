@@ -2,14 +2,7 @@ class Deduction
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  FREQUENCIES = %W(
-	  	biweekly
-	  	half_yearly
-	  	monthly
-	  	quarterly
-	  	weekly
-	  	yearly
-  	)
+  FREQUENCIES = %W(biweekly daily half_yearly monthly quarterly weekly yearly)
 
   KINDS = %W(
 	  	alimony_paid
@@ -30,7 +23,7 @@ class Deduction
   field :frequency, type: String
   field :start_date, type: Date
   field :end_date, type: Date
-  field :submission_date, type: Date
+  field :submission_date, type: DateTime
 
   embedded_in :assistance_eligibility, inverse_of: :deductions
 

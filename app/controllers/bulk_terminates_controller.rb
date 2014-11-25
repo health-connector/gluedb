@@ -15,7 +15,7 @@ class BulkTerminatesController < ApplicationController
     end_coverage = EndCoverage.new(EndCoverageAction)
 
     out_stream = CSV.generate do |csv|
-      csv << ["Last Name", "First Name", "Middle Name" "End Date", "Policy id", "Subscriber id", "errors"]
+      csv << ["Last Name", "First Name", "Middle Name", "Policy id", "End Date", "Subscriber id", "errors", "details"]
       requests.each do |csv_request|
         error_logger = BulkCancelTerms::Csv.new(csv_request, csv)
         request = EndCoverageRequest.for_bulk_terminates(csv_request.to_hash, current_user.email)

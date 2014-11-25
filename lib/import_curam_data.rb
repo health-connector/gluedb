@@ -21,7 +21,7 @@ class ImportCuramData
     app_group_factory = ApplicationGroup, 
     relationship_factory = RelationshipUpdate, 
     qualification_factory = QualificationUpdate, 
-    assistance_eligibilities_importer = AddEligibilities,
+    financial_statements_importer = AddStatements,
     member_factory = Member)
     @app_group_repo = app_group_repo
     @person_finder = person_finder
@@ -29,7 +29,7 @@ class ImportCuramData
     @app_group_factory = app_group_factory
     @relationship_factory = relationship_factory
     @qualification_factory = qualification_factory
-    @assistance_eligibilities_importer = assistance_eligibilities_importer
+    @financial_statements_importer = financial_statements_importer
     @member_factory = member_factory
   end
 
@@ -84,9 +84,9 @@ class ImportCuramData
           :aceds_id => p_hash[:aceds_id],
           :is_applicant => p_hash[:is_applicant]
       }).save!
-      @assistance_eligibilities_importer.import!(
+      @financial_statements_importer.import!(
         person,
-        Array(p_hash[:assistance_eligibilities])
+        Array(p_hash[:financial_statements])
       )
 
       person.save!

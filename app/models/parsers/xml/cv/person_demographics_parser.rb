@@ -15,5 +15,12 @@ module Parsers::Xml::Cv
     element :is_state_resident, String, tag: "is_state_resident"
 
 
+    def individual_request
+      {
+          :dob => birth_date,
+          :ssn => ssn,
+          :gender => sex.split("#").last
+      }
+    end
   end
 end

@@ -11,6 +11,7 @@ module Parsers::Xml::Cv
     element :address_line_1, String, tag: "address_line_1"
     element :address_line_2, String, tag: "address_line_2"
     element :location_state, String, tag: "location_state"
+    element :location_city_name, String, tag: "location_city_name"
     element :location_state_code, String, tag: "location_state_code"
     element :location_postal_code, String, tag: "location_postal_code"
     element :location_postal_extension_code, String, tag: "location_postal_extension_code"

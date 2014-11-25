@@ -40,8 +40,19 @@ class EndCoverage
     affected_enrollee_ids = @request[:affected_enrollee_ids]
 
     if (affected_enrollee_ids.nil?)
-      listener.no_subscriber_id(subscriber: request[:affected_enrollee_ids])
-      listener.fail
+      listener.fail(subscriber: request[:affected_enrollee_ids])
+      return
+    end
+
+    if @policy.subscriber.coverage_ended?
+      listener.policy_inactive(policy_id: request[:policy_id])
+      listener.fail(subscriber: request[:affected_enrollee_ids])
+      return
+    end
+
+    if @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
+      listener.end_date_invalid(end_date: request[:coverage_end])
+      listener.fail(subscriber: request[:affected_enrollee_ids])
       return
     end
 
@@ -60,7 +71,7 @@ class EndCoverage
       current_user: request[:current_user]
     }
     action.execute(action_request)
-    listener.success
+    listener.success(subscriber: request[:affected_enrollee_ids])
   end
 
   private

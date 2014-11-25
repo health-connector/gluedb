@@ -39,6 +39,18 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
   let(:birth_date) {"19890110"}
 
+  let(:tax_filing_status) {"urn:openhbx:terms:v1:tax_filer#non-filer"}
+
+  let(:is_tax_filing_together) {"false"}
+
+  let(:address_line_1) {"21180 SW 59 Terrace"}
+  let(:address_line_2) {""}
+  let(:location_city_name) {"Nice city"}
+  let(:location_state) {"urn:openhbx:terms:v1:us_state#district_of_columbia"}
+  let(:location_state_code) {"FL"}
+  let(:location_postal_code) {"13171"}
+  let(:type) {"urn:openhbx:terms:v1:address_type#home"}
+
   it 'should return e_case_id' do
     expect(subject.e_case_id).to eql(e_case_id)
   end
@@ -49,8 +61,19 @@ describe Parsers::Xml::Cv::ApplicationGroup do
 
 
   describe "the first applicant" do
-    it 'should have the right applicants id)' do
+    it 'should have the person object)' do
       expect(subject.applicants.first.person.id).to eql(applicant_id)
+      expect(subject.applicants.first.person.name_first).to eql(individual1.name_first)
+      expect(subject.applicants.first.person.name_last).to eql(individual1.name_last)
+      expect(subject.applicants.first.person.name_full).to eql(individual1.name_full)
+      expect(subject.applicants.first.person.addresses.first.address_line_1).to eql(address_line_1)
+      expect(subject.applicants.first.person.addresses.first.location_city_name).to eql(location_city_name)
+      expect(subject.applicants.first.person.addresses.first.location_state).to eql(location_state)
+      expect(subject.applicants.first.person.addresses.first.location_state_code).to eql(location_state_code)
+      expect(subject.applicants.first.person.addresses.first.location_postal_code).to eql(location_postal_code)
+      expect(subject.applicants.first.person.addresses.first.type).to eql(type)
+      #expect(subject.applicants.first.person.emails).to eql(emails)
+      #expect(subject.applicants.first.person.phones).to eql(phones)
     end
 
     it 'should have person name first' do
@@ -72,6 +95,16 @@ describe Parsers::Xml::Cv::ApplicationGroup do
       expect(subject.applicants.first.person_demographics.sex).to eq(sex)
       expect(subject.applicants.first.person_demographics.ssn).to eq(ssn)
       expect(subject.applicants.first.person_demographics.birth_date).to eq(birth_date)
+    end
+
+
+    it 'should have 1 financial statement with tax_filing_status, is_tax_filing_together, incomes, deductions, alternative_benefits' do
+      expect(subject.applicants.first.financial_statements.size).to eq(1)
+      expect(subject.applicants.first.financial_statements.first.tax_filing_status).to eq(tax_filing_status)
+      expect(subject.applicants.first.financial_statements.first.is_tax_filing_together).to eq(is_tax_filing_together)
+      expect(subject.applicants.first.financial_statements.first.incomes.size).to eq(0)
+      expect(subject.applicants.first.financial_statements.first.deductions.size).to eq(0)
+      expect(subject.applicants.first.financial_statements.first.alternative_benefits.size).to eq(0)
     end
 
     it "should return the primary_applicant_id" do

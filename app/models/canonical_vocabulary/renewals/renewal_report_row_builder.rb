@@ -71,8 +71,9 @@ module CanonicalVocabulary
         @data_set << tax_status(member)
       end
 
+      # TODO
       def append_mec_of(member)
-        @data_set << member.mec
+        @data_set << member_mec(member)
       end
 
       def append_app_group_size
@@ -144,6 +145,16 @@ module CanonicalVocabulary
         return 'No' if member.person_demographics.blank?
         member.person_demographics.is_incarcerated == 'true' ? 'Yes' : 'No'
       end
+
+      # def member_mec(member)
+      #   if es_coverage = assistance_eligibility.at_xpath("n1:is_enrolled_for_es_coverage").text
+      #     return 'Yes'
+      #   end
+      #   benefit = assistance_eligibility.xpath("n1:alternate_benefits/n1:alternate_benefit").detect do |benefit|
+      #     Date.strptime(benefit.at_xpath("n1:end_date"), "%Y%m%d") <= Date.parse("2015-1-1")
+      #   end
+      #   benefit.blank? ? 'No' : 'Yes'      
+      # end
     end
   end
 end

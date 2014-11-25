@@ -7,7 +7,8 @@ module CanonicalVocabulary
       def initialize(app_group, coverage_type)
         @coverage_type = coverage_type
         @current = app_group.current_insurance_plan(coverage_type)
-        @future_plan_name = future_plan_name_by_hios(app_group.future_insurance_plan(coverage_type))
+        @future = app_group.future_insurance_plan(coverage_type)
+        @future_plan_name = future_plan_name_by_hios(@future)
         @quoted_premium = app_group.quoted_insurance_premium(coverage_type)
       end
 
@@ -81,11 +82,12 @@ module CanonicalVocabulary
       def setup(application_group)
         @application_group = application_group
 
-        individuals = find_many_individuals_by_id(@application_group.applicant_person_ids)
-        @primary = individuals.detect { |i| (i.id == @application_group.primary_applicant_id || individuals.count == 1) }
-        raise "Primary Applicant Address Not Present" if @primary.addresses[0].nil?
+        # individuals = find_many_individuals_by_id(@application_group.applicant_person_ids)
+        # @primary = individuals.detect { |i| (i.id == @application_group.primary_applicant_id || individuals.count == 1) }
+        @primary = @application_group.primary_applicant
+        raise "Primary Applicant Address Not Present" if @primary.person.addresses.empty?
 
-        @other_members = individuals.reject { |i| i == @primary }
+        @other_members = @application_group.applicants.reject { |i| i == @primary }
 
         @dental = PolicyProjection.new(@application_group, "dental")
         @health = PolicyProjection.new(@application_group, "health")

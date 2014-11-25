@@ -7,8 +7,8 @@ module Parsers::Xml::Cv
     tag 'incomes'
     namespace 'cv'
 
-    xpath_income_prefix = "cv:income"
-    xpath_total_income_by_year_prefix = "cv:total_income_by_year"
+    xpath_income_prefix = " income"
+    xpath_total_income_by_year_prefix = "total_income_by_year"
 
     element :calendar_year, String, tag:"#{xpath_total_income_by_year_prefix}/cv:calender_year"
     element :total_amount, String, tag:"#{xpath_total_income_by_year_prefix}/cv:total_amount"

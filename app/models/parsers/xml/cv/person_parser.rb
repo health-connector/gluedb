@@ -20,5 +20,15 @@ module Parsers::Xml::Cv
 
     has_many :phones, String, xpath: "cv:phones"
 
+    def name_request
+      {
+        :name_first => name_first,
+        :name_last => name_last,
+        :name_middle => name_middle,
+        :name_pfx => name_pfx,
+        :name_sfx => name_sfx
+      }
+    end
+
   end
 end

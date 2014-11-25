@@ -17,5 +17,15 @@ module Parsers::Xml::Cv
     element :is_head_of_household, String, tag: 'is_head_of_household'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
+
+    def to_individual_request
+      person.name_request.merge({
+        :hbx_member_id => "",
+        :dob => "",
+        :ssn => "",
+        :email => "",
+        :gender => ""
+      })
+    end
   end
 end

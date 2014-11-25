@@ -1,0 +1,49 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><%= prepend_glyph_to_name("Member Information") %></h3>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right  static-hamburger-menu">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            <span class="fui-list"> </span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Manage Members</a></li>
+            <li><a href="#">Another action</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel-body">
+    <h6><%= person.full_name %></h6>
+    <dl class="dl-horizontal">  
+      <dt>Exchange ID</dt>
+      <dd><%= person.authority_member.hbx_member_id %></dd>
+    </dl>
+    <% person.addresses.each do |address| %>
+      <dl class="dl-horizontal">  
+        <dt><%= address.address_type.capitalize %></dt>
+        <dd><%= address.formatted_address %></dd>
+      </dl>
+    <% end %>
+    <% person.phones.each do |phone| %>
+      <dl class="dl-horizontal">  
+        <dt><%= phone.phone_type.capitalize %></dt>
+        <dd><%= phone.phone_number %></dd>
+      </dl>
+    <% end %>
+    <% person.emails.each do |email| %>
+      <dl class="dl-horizontal">
+        <dt><%= email.email_type.capitalize %></dt>
+        <dd><%= mail_to email.email_address %></a></dd>
+      </dl>
+    <% end %>
+    <% if application_group.applicants.size < 2 %>
+      <p><%= "There is #{ application_group.applicants.size } member in this group" %></p>
+    <% else %>
+      <p><%= "There are #{ application_group.applicants.size } members in this group" %></p>
+    <% end %>
+  </div>
+</div>

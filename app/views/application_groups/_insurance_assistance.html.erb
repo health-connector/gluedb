@@ -1,0 +1,87 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Insurance Assistance</h3>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right  static-hamburger-menu">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            <span class="fui-list"> </span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">See insurance assistance details</a></li>
+            <li><a href="#">Update financial information</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="panel-body">
+  <% person.financial_statements.each do |fs| %>
+  <% end %>
+
+  <h6>Eligibility Determinations</h6>
+  <% application_group.eligibility_determinations.each do |ed| %>
+    <dl class="dl-horizontal">
+      <dt>Head of Household</dt>
+      <dd><%= ed.primary_applicant %></dd>
+      <dt>Household size</dt>
+      <dd><%= ed.applicant_links.size %></dd>
+      <dt>Eligible APTC</dt>
+      <dd><%= ed.max_aptc_dollars %></dd>
+      <dt>Eligible CSR</dt>
+      <dd><%= ed.csr_percent %></dd>
+      <dt>Determination date</dt>
+      <dd><%= ed.determination_date %></dd>
+    </dl>  
+  <% end %>
+
+
+  <% application_group.tax_households.each do |fs| %>
+  <% end %>
+
+
+
+  <% @active_policies = person.active_policies %>
+  <% @future_policies = person.future_active_policies %>
+
+  <% application_group.hbx_enrollments.each do |e| %>
+
+    <% policy    = e.policy %>
+
+    <% plan       = e.policy.plan %>
+    <% carrier    = e.policy.carrier %>
+    <% employer   = e.policy.employer %>
+    <% broker     = e.policy.broker %>
+    <% subscriber = e.policy.subscriber %>
+    <% enrollees  = e.policy.enrollees %>
+
+    <h6><%= plan.coverage_type.capitalize %></h6>
+    <dl class="dl-horizontal">
+      <dt>Carrier</dt>
+      <dd><%= link_to carrier.name, carriers_path(carrier) %></dd>
+      <dt>Plan name</dt>
+      <dd><%= plan.name %></dd>
+      <dt>Plan ID</dt>
+      <dd><%= plan.hios_plan_id %></dd>
+      <dt>Coverage Level</dt>
+      <dd><%= plan.metal_level %></dd>
+      <dt>Metal Level</dt>
+      <dd><%= plan.metal_level %></dd>
+      <dt>Effective Date</dt>
+      <dd><%= subscriber.coverage_start %></dd>
+      <% unless subscriber.c_id.blank? %>
+        <dt>Carrier Member ID</dt>
+        <dd><%= subscriber.c_id %></dd>
+      <% end %>
+      <% unless employer.blank? %>
+        <dt>Employer</dt>
+        <dd><%= link_to e.policy.employer.name, employers_path(employer) %></dd>
+      <% end %>
+      <% unless broker.blank? %>
+        <dt>Broker</dt>
+        <dd><%= broker.full_name %></dd>
+      <% end %>
+    </dl>
+  <% end %>
+  </div>
+</div>

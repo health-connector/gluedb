@@ -1,11 +1,11 @@
 require 'rails_helper'
 require 'active_support/time'
 
-describe AssistanceEligibility do
+describe FinancialStatement do
 
   before(:all) do
 
-    @assistance_eligibility = AssistanceEligibility.new
+    @financial_statement = FinancialStatement.new
 
     alternate_benefit = AlternateBenefit.new
     alternate_benefit.start_date = Date.new(2011, 01, 01)
@@ -48,11 +48,11 @@ describe AssistanceEligibility do
     income4.frequency = "monthly"
 
 
-    @assistance_eligibility.incomes << income1 << income2 << income3 << income4
+    @financial_statement.incomes << income1 << income2 << income3 << income4
 
-    @assistance_eligibility.deductions << deduction1
+    @financial_statement.deductions << deduction1
 
-    @assistance_eligibility.alternate_benefits << alternate_benefit << alternate_benefit2
+    @financial_statement.alternate_benefits << alternate_benefit << alternate_benefit2
 
 
 end
@@ -62,7 +62,7 @@ end
     it "should compute the income hash" do
 
 
-      income_hash = @assistance_eligibility.compute_yearwise(@assistance_eligibility.incomes)
+      income_hash = @financial_statement.compute_yearwise(@financial_statement.incomes)
 
       expect(((income_hash[2014]) - 5553600).abs).to be < 1000
     end
@@ -73,7 +73,7 @@ end
     it "should compute the deductions hash" do
 
 
-      deduction_hash = @assistance_eligibility.compute_yearwise(@assistance_eligibility.deductions)
+      deduction_hash = @financial_statement.compute_yearwise(@financial_statement.deductions)
 
       expect(((deduction_hash[2014]) - 470).abs).to be < 1000
     end
@@ -82,7 +82,7 @@ end
   it "should check for benifits in current year" do
 
 
-    expect(@assistance_eligibility.is_receiving_benefit?).to be_true
+    expect(@financial_statement.is_receiving_benefit?).to be_true
   end
 
 end

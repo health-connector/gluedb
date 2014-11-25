@@ -33,28 +33,15 @@ class Policy
   validates_presence_of :pre_amt_tot
   validates_presence_of :tot_res_amt
 
-  index({:eg_id => 1})
-  index({:aasm_state => 1})
-  index({:eg_id => 1, :carrier_id => 1, :plan_id => 1})
-
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
-  index({ "enrollees.m_id" => 1 })
-  index({ "enrollees.hbx_member_id" => 1 })
-  index({ "enrollees.carrier_member_id" => 1})
-  index({ "enrollees.carrier_policy_id" => 1})
-  index({ "enrollees.rel_code" => 1})
-  index({ "enrollees.coverage_start" => 1})
-  index({ "enrollees.coverage_end" => 1})
 
+  belongs_to :hbx_enrollment_policy, class_name: "ApplicationGroup", inverse_of: :hbx_enrollment_policies, index: true
   belongs_to :carrier, counter_cache: true, index: true
   belongs_to :broker, counter_cache: true, index: true # Assumes that broker change triggers new enrollment group
   belongs_to :plan, counter_cache: true, index: true
   belongs_to :employer, counter_cache: true, index: true
   belongs_to :responsible_party
-  belongs_to :household
-  belongs_to :application_group
-  index({:application_group_id => 1})
 
   has_many :transaction_set_enrollments,
               class_name: "Protocols::X12::TransactionSetEnrollment",
@@ -62,6 +49,18 @@ class Policy
   has_many :premium_payments, order: { paid_at: 1 }
 
   has_many :csv_transactions, :class_name => "Protocols::Csv::CsvTransaction"
+
+  index({:eg_id => 1})
+  index({:aasm_state => 1})
+  index({:eg_id => 1, :carrier_id => 1, :plan_id => 1})
+  index({ "enrollees.person_id" => 1 })
+  index({ "enrollees.m_id" => 1 })
+  index({ "enrollees.hbx_member_id" => 1 })
+  index({ "enrollees.carrier_member_id" => 1})
+  index({ "enrollees.carrier_policy_id" => 1})
+  index({ "enrollees.rel_code" => 1})
+  index({ "enrollees.coverage_start" => 1})
+  index({ "enrollees.coverage_end" => 1})
 
   before_create :generate_enrollment_group_id
   before_save :invalidate_find_cache
@@ -495,6 +494,10 @@ class Policy
 
   def transaction_list
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
+  end
+
+  def is_active?
+    currently_active?
   end
 
   def cancel_via_hbx!

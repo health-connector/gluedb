@@ -1,5 +1,5 @@
 module Parsers::Xml::Cv
-  class AssistanceEligibility
+  class FinancialStatement
     include NodeUtils
     TAX_FILING_STATUS_MAP = {
       "non filer" => "non_filer",

@@ -1,0 +1,29 @@
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>HBX ID</th>
+      <th>Gender</th>
+      <th>Date of Birth</th>
+      <th>SSN</th>
+      <th>Citizen Status</th>
+      <th>Marital Status</th>
+      <th>Disabled?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= table_empty_to_human if applicants.size < 1 %>
+    <% applicants.each do |a| %>
+    <tr>
+      <td><span class="fui-credit-card">&nbsp;</span> <%= a.full_name %></td>
+      <td><%= a.hbx_member_id %></td>
+      <td><%= a.gender %></td>
+      <td><%= a.dob %></td>
+      <td><%= a.ssn %></td>
+      <td><%= a.citizen_status %></td>
+      <td><%= a.marital_status %></td>
+      <td><%= boolean_to_human(a.disabled) %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

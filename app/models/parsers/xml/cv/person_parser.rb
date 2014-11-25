@@ -29,7 +29,7 @@ module Parsers::Xml::Cv
     has_many :phones, String, xpath: "cv:phones"
 
     def hbx_member_id
-      return nil unless id_is_for_member?
+      return person_id_tag unless id_is_for_member?
       Maybe.new(person_id_tag).split("#").last.value
     end
 
@@ -46,15 +46,20 @@ module Parsers::Xml::Cv
       self.id.blank? ? "" : self.id 
     end
 
-    def individual_request
+    def individual_request(member_id_generator)
       {
         :name_first => name_first,
         :name_last => name_last,
         :name_middle => name_middle,
         :name_pfx => name_pfx,
         :name_sfx => name_sfx,
-        :hbx_member_id => hbx_member_id
+        :hbx_member_id => get_or_generate_member_id(member_id_generator),
+        :applicant_id => id
       }
+    end
+
+    def get_or_generate_member_id(m_id_gen)
+      hbx_member_id.blank? ? m_id_gen.generate_member_id : hbx_member_id
     end
 
   end

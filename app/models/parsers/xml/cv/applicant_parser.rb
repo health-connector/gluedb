@@ -18,8 +18,12 @@ module Parsers::Xml::Cv
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
 
-    def to_individual_request
-      person.individual_request.merge(person_demographics.individual_request)
+    def to_individual_request(member_id_generator)
+      person.individual_request(member_id_generator).merge(person_demographics.individual_request).merge({
+        :emails => [],
+        :addresses => [],
+        :phones => []
+      })
     end
   end
 end

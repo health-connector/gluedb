@@ -42,7 +42,7 @@ module PersonMatchStrategies
         if filtered.empty?
           raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
         elsif filtered.length == 1
-          throw(:person_found, [filtered.first])
+          throw(:person_found, filtered)
         else
           if error_on_many
             raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")

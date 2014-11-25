@@ -35,7 +35,7 @@
       <% end %>
       <dt><%= model_class.human_attribute_name(:submitted_at) %>:</dt>
       <dd><%= @edi_transmission.submitted_at.strftime("%m-%d-%Y") if @edi_transmission.submitted_at.present? %> </dd>
-      <dt><%= model_class.human_attribute_name(:control_number) %>:</dt>
+      <dt>IS Control number:</dt>
       <dd><%= @edi_transmission.isa13 %></dd>
       <dt><%= model_class.human_attribute_name(:usage) %>:</dt>
       <dd><%= @edi_transmission.ic_usage_indicator == "T" ? "Test" : "Production" %></dd>
@@ -48,10 +48,12 @@
       <dd><%= @edi_transmission.fg_application_senders_code %></dd>
       <dt><%= model_class.human_attribute_name(:receivers_code) %>:</dt>
       <dd><%= @edi_transmission.fg_application_receivers_code %></dd>
-      <dt><%= model_class.human_attribute_name(:control_number) %>:</dt>
+      <dt>GS Control number:</dt>
       <dd><%= @edi_transmission.fg_control_number %></dd>
       <dt><%= model_class.human_attribute_name(:x12_standard) %>:</dt>
       <dd><%= @edi_transmission.fg_x12_standards_reference_code %></dd>
+      <dt>File Name:</dt>
+      <dd><%= @edi_transmission.file_name %></dd>
     </dl>
   </div>
   </div>

@@ -3,11 +3,10 @@ class Employer
   include Mongoid::Timestamps
   include Mongoid::Versioning
   include Mongoid::Paranoia
+  include AASM
   include MergingModel
 
   extend Mongorder
-
-  include AASM
 
   field :name, type: String
   field :hbx_id, as: :hbx_organization_id, type: String
@@ -21,10 +20,6 @@ class Employer
   field :plan_year_end, type: Date
   field :fte_count, type: Integer
   field :pte_count, type: Integer
-  belongs_to :broker, counter_cache: true, index: true
-  embeds_many :elected_plans
-  ######
-  has_many :plan_years
 
   field :aasm_state, type: String
   field :msp_count, as: :medicare_secondary_payer_count, type: Integer
@@ -43,12 +38,16 @@ class Employer
   index({ hbx_id: 1 })
   index({ fein: 1 })
 
-  has_many :employees, class_name: 'Person', order: {name_last: 1, name_first: 1}
   has_many :premium_payments, order: { paid_at: 1 }
+  belongs_to :broker, counter_cache: true, index: true
+
+  has_many :plan_years
+  embeds_many :elected_plans
+
+  # has_and_belongs_to_many :employees, class_name: 'Person', inverse_of: :employers, order: {name_last: 1, name_first: 1}
+  has_many :employees, class_name: 'Person', inverse_of: :employer, order: {name_last: 1, name_first: 1}
   has_and_belongs_to_many :carriers, order: { name: 1 }, inverse_of: nil
   has_and_belongs_to_many :plans, order: { name: 1, hios_plan_id: 1 }
-
-  has_many :policies
 
   index({"elected_plans.carrier_employer_group_id" => 1})
   index({"elected_plans.hbx_plan_id" => 1})

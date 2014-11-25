@@ -7,13 +7,19 @@
 <table class="table table-condensed">
   <thead>
     <tr>
-      <th>Applicant</th>
+      <th>Primary Applicant</th>
+      <th>No. Applicants</th>
+      <th>No. Enrollments</th>
+      <th>Submitted Date</th>
     </tr>
   </thead>
-  <% @application_groups.each do |application_group| %>
+  <% @application_groups.each do |ag| %>
     <tbody>
       <tr>
-        <td><%= link_to prepend_glyph_to_name(application_group.primary_applicant_id), application_group_path(application_group) %></td>
+        <td><%= link_to prepend_glyph_to_name(ag.primary_applicant_id), application_group_path(ag) %> </td>
+        <td><%= ag.applicants.size %></td>
+        <td><%= ag.hbx_enrollments.size %></td>
+        <td><%= ag.submitted_date %></td>
       </tr>
     </tbody>
   <% end %>

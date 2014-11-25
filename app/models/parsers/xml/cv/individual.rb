@@ -37,10 +37,10 @@ module Parsers::Xml::Cv
       "incarcerated" == is_inc
     end
 
-    def assistance_eligibilities
+    def financial_statements
       results = []
-      nodes = @parser.xpath('./ns1:assistance_eligibilities/ns1:assistance_eligibility', NAMESPACES)
-      nodes.each { |i| results << Parsers::Xml::Cv::AssistanceEligibility.new(i) }
+      nodes = @parser.xpath('./ns1:financial_statements/ns1:assistance_eligibility', NAMESPACES)
+      nodes.each { |i| results << Parsers::Xml::Cv::FinancialStatement.new(i) }
       results
     end
 
@@ -108,7 +108,7 @@ module Parsers::Xml::Cv
         :e_person_id => e_person_id,
         :e_concern_role_id => e_concern_role_id,
         :aceds_id => aceds_id,
-        :assistance_eligibilities => assistance_eligibilities.map(&:to_request)
+        :financial_statements => financial_statements.map(&:to_request)
       })
     end
   end

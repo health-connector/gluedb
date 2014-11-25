@@ -27,27 +27,30 @@
   %n1:is_medicaid_chip_eligible
 - if authority_member.hlh.present?
   %n1:person_health
-    %n1:is_tobacco_user= authority_member.hlh
-    - if false #TODO
-      %n1:is_disabled
-- unless person.responsible_parties.empty? && true #MAJOR TODO
-  %n1:responsible_parties
-    - person.responsible_parties.each do |rp|
-      %n1:responsible_party
-        = render 'shared/v2/person', person: rp
-- unless person.assistance_eligibilities.empty?
-  %n1:financial_reports
-    - person.assistance_eligibilities.each do |assistance_eligibility|
-      %n1:financial_report
-        %n1:tax_filing_status= "urn:openhbx:terms:v1:tax_filer##{assistance_eligibility.tax_filing_status}"
-        %n1:is_tax_filing_together= assistance_eligibility.is_tax_filing_together
-        - unless assistance_eligibility.incomes.empty?
+    %n1:tobacco_user= authority_member.hlh
+%n1:application_group_id= api_v1_application_group_url(person.application_groups.first.id)
+- if authority_member.is_applicant.present?
+  %n1:is_coverage_applicant= authority_member.is_applicant
+- if authority_member.is_incarcerated.present?
+  %n1:incarcerated_flag= authority_member.is_incarcerated
+- unless person.financial_statements.empty?
+  %n1:financial_statements
+    - person.financial_statements.each do |financial_statement|
+      %n1:financial_statement
+        %n1:is_primary_applicant= financial_statement.is_primary_applicant
+        %n1:tax_filing_status= "urn:openhbx:terms:v1:tax_filer##{financial_statement.tax_filing_status}"
+        %n1:is_tax_filing_together= financial_statement.is_tax_filing_together
+        %n1:is_enrolled_for_es_coverage= financial_statement.is_enrolled_for_es_coverage
+        %n1:is_without_assistance= financial_statement.is_without_assistance
+        %n1:is_ia_eligible= financial_statement.is_ia_eligible
+        %n1:is_medicaid_chip_eligible= financial_statement.is_medicaid_chip_eligible
+        - unless financial_statement.incomes.empty?
           %n1:incomes
-            - assistance_eligibility.compute_yearwise(assistance_eligibility.incomes).each do |k, v|
-              %n1:total_income_by_year
+            - financial_statement.compute_yearwise(financial_statement.incomes).each do |k, v|
+              %n1:total_income
                 %n1:calendar_year= k
                 %n1:total_income= v
-            - assistance_eligibility.incomes.each do |income|
+            - financial_statement.incomes.each do |income|
               %n1:income
                 %n1:amount= income.amount_in_dollars
                 %n1:type= "urn:openhbx:terms:v1:income##{income.income_type}"
@@ -56,13 +59,13 @@
                 - if income.end_date.present?
                   %n1:end_date= income.end_date.try(:strftime,"%Y%m%d")
                 %n1:submitted_date= income.submission_date.try(:strftime,"%Y%m%d")
-        - unless assistance_eligibility.deductions.empty?
+        - unless financial_statement.deductions.empty?
           %n1:deductions
-            - assistance_eligibility.compute_yearwise(assistance_eligibility.deductions).each do |k, v|
-              %n1:total_income_by_year
+            - financial_statement.compute_yearwise(financial_statement.deductions).each do |k, v|
+              %n1:total_income
                 %n1:calendar_year= k
                 %n1:total_income= v
-            - assistance_eligibility.deductions.each do |deduction|
+            - financial_statement.deductions.each do |deduction|
               %n1:deduction
                 %n1:amount= deduction.amount_in_dollars
                 %n1:type= "urn:openhbx:terms:v1:deduction##{deduction.deduction_type}"
@@ -71,16 +74,16 @@
                 - if deduction.end_date.present?
                   %n1:end_date= deduction.end_date.try(:strftime,"%Y%m%d")
                 %n1:submitted_date= deduction.submission_date.try(:strftime,"%Y%m%d")
-        %n1:alternate_benefits
-          - assistance_eligibility.alternate_benefits.each do |alternate_benefit|
-            %n1:alternate_benefit
-              %n1:type= alternate_benefit.kind
-              %n1:start_date= alternate_benefit.start_date
-              %n1:end_date= alternate_benefit.end_date
-              %n1:submitted_date= alternate_benefit.submission_date
-        = render 'shared/v2/timestamp', record: assistance_eligibility
-- if person.is_active.present?
-  %n1:is_active= person.is_active
+        - unless financial_statement.alternate_benefits.empty?
+          %n1:alternate_benefits
+            - financial_statement.alternate_benefits.each do |alternate_benefit|
+              %n1:alternate_benefit
+                %n1:type= alternate_benefit.kind
+                %n1:start_date= alternate_benefit.start_date
+                %n1:end_date= alternate_benefit.end_date
+                %n1:submitted_date= alternate_benefit.submission_date
+        %n1:submission_date=financial_statement.submission_date
+%n1:is_active= person.is_active
 - unless person.comments.empty?
   = render 'shared/v2/comments', object: person
 - if person.version.present?

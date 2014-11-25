@@ -4,9 +4,10 @@ require 'rails_helper'
 module CanonicalVocabulary::Renewals
   describe RenewalReportRowBuilder do
     subject { RenewalReportRowBuilder.new(app_group, primary) }
-    let(:app_group) { double(e_case_id: '1234', yearwise_incomes: "250000", irs_consent: nil, size: 2) }
+    let(:app_group) { double(e_case_id: '1234', yearwise_incomes: "250000", irs_consent: nil, size: 2, applicants: applicants) }
+    let(:applicants) { [primary, member]}
     let(:primary) { double(person: person)}
-    let(:member) { double(person: person, person_demographics: person_demographics)}
+    let(:member) { double(person: person, person_demographics: person_demographics, age: 30, tax_status: 'Single', mec: nil)}
     let(:person) { double(name_first: 'Joe', name_last: 'Riden', age: 30, tax_status: 'Single', mec: nil, yearwise_incomes: '120000', incarcerated: false, addresses: addresses) }
     let(:policy) { double(current: current, future_plan_name: 'Best Plan', quoted_premium: "12.21") }
     let(:current) { {plan: double} }
@@ -17,7 +18,7 @@ module CanonicalVocabulary::Renewals
     let(:response_date) { double }
     let(:aptc) { nil }
     let(:post_aptc_premium) { nil }
-    let(:person_demographics) { double(citizen_status: 'us_citizen', is_incarcerated: 'true') }
+    let(:person_demographics) { double(citizen_status: 'us_citizen', is_incarcerated: 'true', birth_date: '1983-26-12') }
 
     it 'can append integrated case numbers' do
       subject.append_integrated_case_number
@@ -78,29 +79,20 @@ module CanonicalVocabulary::Renewals
     #   expect(subject.data_set).to eq [app_group.yearwise_incomes, nil, app_group.irs_consent]
     # end
 
-    # it 'can append age' do 
-    #   subject.append_age_of(member)
-    #   expect(subject.data_set).to include member.age
-    # end
-
-    # context 'when there is residency' do
-    #   let(:member) { double(residency: 'D.C. Resident')}
-    #   it 'appends residency' do
-    #     subject.append_residency_of(member)
-    #     expect(subject.data_set).to include member.residency 
-    #   end
-    # end
-
+    it 'can append age' do 
+      subject.append_age_of(member)
+      expect(subject.data_set).to include member.age
+    end
 
     context 'residency status' do
-      context 'when member address is a D.C address' do 
+      context 'when member is a D.C resident' do 
         it 'appends dc resident status' do
          subject.append_residency_of(member)
          expect(subject.data_set).to include 'D.C. Resident'
         end
       end
 
-      context 'when member address is not a D.C address' do
+      context 'when member is not a D.C resident' do
         let(:address) { {address_1: '3000 Park Drive', apt: 'Suite 10', city: 'Alexandria', state: 'VA', postal_code: '22302'} }
         it 'appends non dc resident status' do
          subject.append_residency_of(member)
@@ -112,16 +104,16 @@ module CanonicalVocabulary::Renewals
         let(:member) { double(person: person1)}
         let(:person1) { double(addresses: nil)}
 
-        context 'primary address is a D.C addresses' do 
-          it 'appends dc resident status for dc address' do
+        context 'primary member is a D.C resident' do 
+          it 'appends dc resident status' do
             subject.append_residency_of(member)
             expect(subject.data_set).to include 'D.C. Resident'         
           end
         end
 
-        context 'primary address is not a D.C address' do
+        context 'primary member is not a D.C resident' do
           let(:address) { {address_1: '3000 Park Drive', apt: 'Suite 10', city: 'Alexandria', state: 'VA', postal_code: '22302'} }
-          it 'appends non dc resident status for dc address' do
+          it 'appends non dc resident status' do
             subject.append_residency_of(member)
             expect(subject.data_set).to include 'Not a D.C. Resident'          
           end      
@@ -135,8 +127,8 @@ module CanonicalVocabulary::Renewals
     end
 
     # it 'can append tax status' do
-    #  subject.append_tax_status_of(member)
-    #  expect(subject.data_set).to include member.tax_status
+    #   subject.append_tax_status_of(member)
+    #   expect(subject.data_set).to include member.tax_status
     # end
    
     # it 'can append mec' do
@@ -144,20 +136,20 @@ module CanonicalVocabulary::Renewals
     #   expect(subject.data_set).to include member.mec
     # end
 
-    # it 'can append group size' do
-    #   subject.append_app_group_size
-    #   expect(subject.data_set).to include app_group.size 
-    # end
+    it 'can append group size' do
+      subject.append_app_group_size
+      expect(subject.data_set).to include app_group.size 
+    end
 
     # it 'can append yearly income' do
     #   subject.append_yearwise_income_of(member)
     #   expect(subject.data_set).to include member.yearwise_incomes 
     # end
 
-    # it 'can append blank' do
-    #   subject.append_blank
-    #   expect(subject.data_set).to include nil
-    # end
+    it 'can append blank' do
+      subject.append_blank
+      expect(subject.data_set).to include nil
+    end
 
     it 'can append incarcerated status' do
       subject.append_incarcerated(member)

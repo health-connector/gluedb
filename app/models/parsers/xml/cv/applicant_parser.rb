@@ -25,5 +25,12 @@ module Parsers::Xml::Cv
         :phones => []
       })
     end
+    def dob
+      Date.parse(person_demographics.birth_date)
+    end
+
+    def age
+      Ager.new(dob).age_as_of(Date.parse("2015-1-1"))
+    end
   end
 end

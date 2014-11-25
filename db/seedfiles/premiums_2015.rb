@@ -2,6 +2,11 @@ require 'roo'
 require 'spreadsheet'
 
 puts "Loading: 2015 Premiums"
+
+Plan.where(year: 2015).each do |p|
+  p.premium_tables.delete_all
+end
+
 YEAR = 2015
 dates_by_sheet = [
   Date.new(YEAR, 1, 1)..Date.new(YEAR, 12, 31),

@@ -20,9 +20,9 @@ module Parsers::Xml::Cv
 
     def to_individual_request(member_id_generator)
       person.individual_request(member_id_generator).merge(person_demographics.individual_request).merge({
-        :emails => [],
-        :addresses => [],
-        :phones => []
+        :emails => email_requests,
+        :addresses => address_requests,
+        :phones => phone_requests
       })
     end
     def dob
@@ -30,7 +30,19 @@ module Parsers::Xml::Cv
     end
 
     def age
-      Ager.new(dob).age_as_of(Date.parse("2015-1-1"))
+      Age.new(dob).age_as_of(Date.parse("2015-1-1"))
+    end
+
+    def address_requests
+      person.address_requests
+    end
+
+    def email_requests
+      person.email_requests
+    end
+
+    def phone_requests
+      person.phone_requests
     end
   end
 end

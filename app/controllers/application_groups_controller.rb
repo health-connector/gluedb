@@ -24,6 +24,11 @@ class ApplicationGroupsController < ApplicationController
     @application_group.save
   end
 
+  def applicant_links
+    @application_group = ApplicationGroup.find(params[:id])
+    @applicants = @application_group.active_applicants
+  end
+
   private
     def people_to_remove
       ppl_hash = params[:edit_application_group_form].fetch(:people_attributes) { {} }

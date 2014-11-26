@@ -80,6 +80,12 @@ class ApplicationGroup
   index({"applicant_links.applicant_id" => 1})
 
 
+  def active_applicants
+    self.applicants
+    # Use following after data is populated
+    # applicant_links.inject([]) { |al, a| p << a.person if a.person.is_active? } || []
+  end
+
   def employers
     hbx_enrollments.inject([]) { |em, e| p << e.employer unless e.employer.blank? } || []
   end

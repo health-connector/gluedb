@@ -8,7 +8,6 @@
       <th>SSN</th>
       <th>Citizen Status</th>
       <th>Marital Status</th>
-      <th>Disabled?</th>
     </tr>
   </thead>
   <tbody>
@@ -16,13 +15,12 @@
     <% applicants.each do |a| %>
     <tr>
       <td><span class="fui-credit-card">&nbsp;</span> <%= a.full_name %></td>
-      <td><%= a.hbx_member_id %></td>
-      <td><%= a.gender %></td>
-      <td><%= a.dob %></td>
-      <td><%= a.ssn %></td>
-      <td><%= a.citizen_status %></td>
-      <td><%= a.marital_status %></td>
-      <td><%= boolean_to_human(a.disabled) %></td>
+      <td><%= a.authority_member.hbx_member_id %></td>
+      <td><%= a.authority_member.gender %></td>
+      <td><%= a.authority_member.dob %></td>
+      <td><%= a.authority_member.ssn %></td>
+      <td><%= a.authority_member.citizen_status %></td>
+      <td><%= a.authority_member.marital_status %></td>
     </tr>
     <% end %>
   </tbody>

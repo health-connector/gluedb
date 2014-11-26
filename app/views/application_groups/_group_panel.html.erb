@@ -1,0 +1,61 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+
+    <nav class="navbar" id="member-panel-nav" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#member-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+
+        <div class="collapse navbar-collapse" id="member-nav">
+          <ul class="nav navbar-nav navbar-right ">
+            <li class="dropdown">
+              <a href="member-nav" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <i class="fa fa-bars"></i></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">View Member Detail</a></li>
+                <li><a href="#">Update Contact Information</a></li>
+                <li><a href="#">Add/Remove Members</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div class="panel-body">
+      <h3 class="panel-title">Group Information</h3>
+
+    <h6><%= person.full_name %></h6>
+    <dl class="dl-horizontal">  
+      <dt>Exchange ID</dt>
+      <dd><%= person.authority_member.hbx_member_id %></dd>
+    </dl>
+    <% person.addresses.each do |address| %>
+      <dl class="dl-horizontal">  
+        <dt><%= address.address_type.capitalize %></dt>
+        <dd><%= address.formatted_address %></dd>
+      </dl>
+    <% end %>
+    <% person.phones.each do |phone| %>
+      <dl class="dl-horizontal">  
+        <dt><%= phone.phone_type.capitalize %></dt>
+        <dd><%= number_to_phone(phone.phone_number, area_code: true) if phone.phone_number %></dd>
+      </dl>
+    <% end %>
+    <% person.emails.each do |email| %>
+      <dl class="dl-horizontal">
+        <dt><%= email.email_type.capitalize %></dt>
+        <dd><%= mail_to email.email_address %></a></dd>
+      </dl>
+    <% end %>
+    <% if application_group.applicants.size < 2 %>
+      <p><%= "There is #{ application_group.applicants.size } person in this #{ link_to "group", application_group_applicants_path() }group" %></p>
+    <% else %>
+      <p><%= "There are #{ application_group.applicants.size } people in this group" %></p>
+    <% end %>
+  </div>
+</div>

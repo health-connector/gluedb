@@ -56,7 +56,27 @@ module ApplicationHelper
 
   # Formats a string into HTML, concatenating it with a person glyph
   def prepend_glyph_to_name(name)
-    content_tag(:span, raw("&nbsp;"), class: "fui-user") + name
+    content_tag(:span, raw("&nbsp;"), class: "glyphicon glyphicon-user") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a male glyph
+  def prepend_male_glyph_to_name(name)
+    content_tag(:i, class: "fa fa-male") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a female glyph
+  def prepend_female_glyph_to_name(name)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-female") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a child glyph
+  def prepend_child_glyph_to_name(name)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-child") + name
+  end
+
+  # Formats a Font Awesome icon in HTML
+  def prepend_fa_icon(fa_icon, str)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-#{fa_icon}") + str
   end
 
   def active_menu_item(label, path, controller = nil)

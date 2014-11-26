@@ -16,8 +16,6 @@
 
   </div>
   <div class="panel-body">
-  <% person.financial_statements.each do |fs| %>
-  <% end %>
 
   <% @active_policies = person.active_policies %>
   <% @future_policies = person.future_active_policies %>
@@ -35,6 +33,8 @@
 
     <h6><%= plan.coverage_type.capitalize %></h6>
     <dl class="dl-horizontal">
+      <dt>Kind</dt>
+      <dd><%= e.kind.humanize %></dd>
       <dt>Carrier</dt>
       <dd><%= link_to carrier.name, carriers_path(carrier) %></dd>
       <dt>Plan name</dt>

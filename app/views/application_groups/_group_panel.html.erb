@@ -16,9 +16,9 @@
               <a href="member-nav" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <i class="fa fa-bars"></i></a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="#">View Member Detail</a></li>
+                <li><a href="#">View Group Detail</a></li>
                 <li><a href="#">Update Contact Information</a></li>
-                <li><a href="#">Add/Remove Members</a></li>
+                <li><a href="#">Add/Remove Group Members</a></li>
               </ul>
             </li>
           </ul>
@@ -53,9 +53,9 @@
       </dl>
     <% end %>
     <% if application_group.applicants.size < 2 %>
-      <p><%= "There is #{ application_group.applicants.size } person in this #{ link_to "group", application_group_applicants_path() }group" %></p>
+      <p><%#= "There is #{ application_group.applicants.size } person in this #{ link_to "group", application_group_applicants_path() }" %></p>
     <% else %>
-      <p><%= "There are #{ application_group.applicants.size } people in this group" %></p>
+      <p><%#= "There are #{ application_group.applicants.size } people in this #{ link_to "group", application_group_applicants_path() }" %></p>
     <% end %>
   </div>
 </div>

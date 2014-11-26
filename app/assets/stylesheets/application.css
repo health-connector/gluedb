@@ -9,11 +9,11 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
+ *= require font-awesome
  *= require twitter/bootstrap
  *= require bootstrap_and_overrides
  *= require flatuipro
  *= require flatuipro_overrides
- *= require static_hamburger_menu
  *= require highlight/default
  *= require_tree .
  */

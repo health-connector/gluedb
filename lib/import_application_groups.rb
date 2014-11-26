@@ -49,6 +49,10 @@ class ImportApplicationGroups
     def register_person(p_uri, person, member)
       @people_map[p_uri] = [person, member]
     end
+
+    def [](uri)
+      @people_map[uri]
+    end
   end
 
   class MemberIdGen

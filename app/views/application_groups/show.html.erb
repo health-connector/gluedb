@@ -19,42 +19,14 @@
     </div>
 
     <div class="row">
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title"><%= prepend_glyph_to_name("Member Information") %></h3>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-              <ul class="nav navbar-nav navbar-right  static-hamburger-menu">
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <span class="fui-list"> </span></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Manage Members</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">Separated link</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="panel-body">
-            <h4><%= @primary_applicant.full_name %></h4>
-            <address>
-              (Exchange-assigned ID: <%= @primary_applicant.authority_member.hbx_member_id %>)<br/>
-              <%= @primary_applicant.addresses.first.formatted_address %><br/>
-              <abbr title="Phone">P:</abbr> (123) 456-7890<br/>
-              <a href="mailto:#"><%= @primary_applicant.emails.first.email_address %></a>
-            </address>
-            <p><%= "There are #{ @application_group.applicants.size } members on this plan" %></p>
-          </div>
-        </div>
+      <div class="col-md-5">
+        <%= render 'group_panel', person: @primary_applicant, application_group: @application_group   %>
       </div>
 
-      <div class="col-md-4">
+      <div class="col-md-5">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title"><span class="fui-list"> Life Events </span></h3>
+            <h3 class="panel-title">Life Events</h3>
           </div>
           <div class="panel-body">
             <ul>
@@ -72,115 +44,12 @@
 
 
     <div class="row">
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Enrolled Plans</h3>
-          </div>
-          <div class="panel-body">
-          <% @primary_applicant.financial_statements.each do |fs| %>
-          <% end %>
-
-          <% @active_policies = @primary_applicant.active_policies %>
-          <% @future_policies = @primary_applicant.future_active_policies %>
-
-          <% @application_group.hbx_enrollments.each do |e| %>
-
-            <% policy    = e.policy %>
-
-            <% plan      = e.policy.plan %>
-            <% carrier   = e.policy.carrier %>
-            <% broker    = e.policy.broker %>
-            <% enrollees = e.policy.enrollees %>
-
-            <h6><%= plan.name %></h6>
-            <dl class="dl-horizontal">
-              <dt>Carrier</dt>
-              <dd><%= e.policy.carrier.name %></dd>
-              <dt>Plan ID</dt>
-              <dd><%= plan.hios_plan_id %></dd>
-              <dt>Coverage Type</dt>
-              <dd><%= plan.coverage_type.capitalize %></dd>
-              <dt>Coverage Level</dt>
-              <dd><%= plan.metal_level %></dd>
-              <dt>Metal Level</dt>
-              <dd><%= plan.metal_level %></dd>
-              <dt>Broker</dt>
-              <dd><%= policy.broker.full_name unless policy.broker.blank? %></dd>
-              <dt>Effective Date</dt>
-              <dd><%#= effective_date %></dd>
-            </dl>
-          <% end %>
-          </div>
-          <div class="panel-footer"><p><small>New Life Event | Access Life Event History</small></p></div>
-        </div>
+      <div class="col-md-5">
+        <%= render 'enrolled_plans_panel', person: @primary_applicant, application_group: @application_group   %>
       </div>
 
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Insurance Assistance</h3>
-          </div>
-          <div class="panel-body">
-            <ul>
-              <li>Head of Household Member Name 1</li>
-              <ul>
-                <li>aptc</li>
-                <li>csr</li>
-                <li>total_income</li>
-                <li>total_expenses</li>
-                <li>alternative_benefits</li>
-              </ul>
-            </ul>
-            <ul>
-              <li>Head of Household Member Name 1</li>
-              <ul>
-                <li>aptc</li>
-                <li>csr</li>
-                <li>total_income</li>
-                <li>total_expenses</li>
-                <li>alternative_benefits</li>
-              </ul>
-            </ul>
-          </div>
-          <div class="panel-footer"><p><small>Apply for Assistance | Update Financial Information</small></p></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Broker</h3>
-          </div>
-          <div class="panel-body">
-            <ul>
-              <li>Name</li>
-              <li>Exchange ID</li>
-              <li>Address</li>
-              <li>Phone</li>
-              <li>Email</li>
-            </ul>
-          </div>
-          <div class="panel-footer"><p><small>Manage Members</small></p></div>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Employer</h3>
-          </div>
-          <div class="panel-body">
-            <ul>
-              <li>name</li>
-              <li>exchange_id</li>
-              <li>elected_plans</li>
-            </ul>
-          </div>
-          <div class="panel-footer"><p><small>Manage Members</small></p></div>
-        </div>
+      <div class="col-md-5">
+        <%= render 'insurance_assistance_panel', person: @primary_applicant, application_group: @application_group   %>
       </div>
     </div>
 

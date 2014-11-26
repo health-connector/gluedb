@@ -30,6 +30,9 @@ class ApplicationGroup
   has_many :hbx_enrollment_policies, class_name: "Policy", inverse_of: :hbx_enrollment_policy
   accepts_nested_attributes_for :hbx_enrollment_policies
  
+  embeds_many :applicant_links, cascade_callbacks: true
+  accepts_nested_attributes_for :applicant_links
+
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
@@ -76,6 +79,12 @@ class ApplicationGroup
   index({submitted_date:  1})
   index({"applicant_links.applicant_id" => 1})
 
+
+  def active_applicants
+    self.applicants
+    # Use following after data is populated
+    # applicant_links.inject([]) { |al, a| p << a.person if a.person.is_active? } || []
+  end
 
   def employers
     hbx_enrollments.inject([]) { |em, e| p << e.employer unless e.employer.blank? } || []

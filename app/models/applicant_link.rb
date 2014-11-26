@@ -1,19 +1,13 @@
 class ApplicantLink
   include Mongoid::Document
 
-  embedded_in :tax_household
-  belongs_to :financial_statement
-  embedded_in :eligibility_determination
-  embedded_in :hbx_enrollment
-  embedded_in :hbx_enrollment_exemption
-  embedded_in :qualifying_life_event
+  embedded_in :application_group
 
   field :person_id, type: Moped::BSON::ObjectId
   # field :tax_household_id, type: Moped::BSON::ObjectId
   # field :financial_statement_id, type: Moped::BSON::ObjectId
 
   field :is_primary_applicant, type: Boolean, default: false
-  field :premium_amount_in_cents, type: Integer
 
   field :is_ia_eligible, type: Boolean, default: false
   field :is_medicaid_chip_eligible, type: Boolean, default: false

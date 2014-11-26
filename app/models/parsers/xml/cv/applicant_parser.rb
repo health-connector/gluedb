@@ -44,5 +44,11 @@ module Parsers::Xml::Cv
     def phone_requests
       person.phone_requests
     end
+
+    def to_relationships
+      person_relationships.map do |person_relationships|
+        person_relationships.to_relationship
+      end
+    end
   end
 end

@@ -388,4 +388,15 @@ class Person
   def query_proxy
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
+
+  def merge_relationship(new_rel)
+    old_relationships = self.person_relationships.select do |rel|
+      rel.relative_id == new_rel.relative_id
+    end
+    old.relationships.each do |old_rel|
+      self.relationships.delete(old_rel)
+    end
+    self.relationships.add(new_rel)
+    self.touch
+  end
 end

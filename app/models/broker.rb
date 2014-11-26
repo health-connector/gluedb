@@ -16,6 +16,7 @@ class Broker
   field :name_full, type: String
   field :alternate_name, type: String, default: ""
   field :npn, type: String
+  field :is_active, type: Boolean, default: true
 
   has_many :policies, order: {name_last: 1, name_first: 1}
   has_many :people
@@ -24,7 +25,7 @@ class Broker
   has_many :employers
   #####
   has_many :plan_years
-  
+
   has_and_belongs_to_many :carriers
 
   embeds_many :addresses

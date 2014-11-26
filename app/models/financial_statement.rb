@@ -12,6 +12,7 @@ class FinancialStatement
   field :is_tax_filing_together, type: Boolean
 
   field :eligibility_determination_id, type: Moped::BSON::ObjectId
+  field :applicant_link_id, type: Moped::BSON::ObjectId
 
 
   # Has access to employer-sponsored coverage that meets ACA minimum standard value and 
@@ -19,8 +20,6 @@ class FinancialStatement
   field :is_enrolled_for_es_coverage, type: Boolean, default: false
   field :is_without_assistance, type: Boolean, default: true
   field :submitted_date, type: DateTime
-
-  include ApplicantLinking
 
   index({submitted_date:  1})
 
@@ -40,6 +39,15 @@ class FinancialStatement
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
     self.application_group
+  end
+
+  def applicant_link=(al_instance)
+    return unless al_instance.is_a? Applicantlink
+    self.applicant_link_id = al_instance._id
+  end
+
+  def applicant_link
+    parent.applicant_links.find(self.applicant_link_id) unless self.applicant_link_id.blank?
   end
 
   def eligibility_determination=(ed_instance)

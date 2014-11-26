@@ -54,8 +54,6 @@ class ApplicationGroup
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  embeds_many :applicant_links
-
   validates :renewal_consent_through_year, 
               presence: true,
               numericality: { only_integer: true, inclusion: 2014..2025 }

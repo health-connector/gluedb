@@ -17,7 +17,6 @@ class EligibilityDetermination
   field :csr_percent_as_integer, type: Integer, default: 0  #values in DC: 0, 73, 87, 94
 
   field :determination_date, type: DateTime
-  include ApplicantGrouping
 
   validates_presence_of :determination_date, :max_aptc_in_cents, :csr_percent_as_integer
   validates :csr_percent_as_integer,
@@ -37,6 +36,15 @@ class EligibilityDetermination
   # embedded has_many :financial_statement
   def financial_statements
     parent.financial_statements.where(:eligibility_determination_id => self.id)
+  end
+
+  def primary_applicant=(person_instance)
+    return unless person_instance.is_a? Person
+    self.primary_applicant_id = person_instance._id
+  end
+
+  def primary_applicant
+    Person.find(self.primary_applicant_id) unless self.primary_applicant_id.blank?
   end
 
   def benchmark_plan=(benchmark_plan_instance)

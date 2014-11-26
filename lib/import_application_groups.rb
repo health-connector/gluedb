@@ -89,6 +89,23 @@ class ImportApplicationGroups
           listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
           uc.commit(ig_request, listener)
       end
+
+      #applying person objects in person relationships for each applicant
+      ag.applicants.each do |applicant|
+        applicant.to_relationships.each do |relationship_hash|
+
+          subject_person = p_tracker[relationship_hash[:subject_person_id]].first
+
+          person_relationship = PersonRelationship.new
+          person_relationship.relative = p_tracker[relationship_hash[:object_person_id]].first
+          person_relationship.kind = relationship_hash.relationship
+
+          subject_person.person_relationships << person_relationship
+        end
+      end
+
     end
+
+
   end
 end

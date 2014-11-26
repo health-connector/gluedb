@@ -25,7 +25,7 @@ class Deduction
   field :end_date, type: Date
   field :submission_date, type: DateTime
 
-  embedded_in :assistance_eligibility, inverse_of: :deductions
+  embedded_in :financial_statement, inverse_of: :deductions
 
   validates :amount_in_cents, presence: true,
   														numericality: { only_integer: true, greater_than_or_equal_to: 0 }

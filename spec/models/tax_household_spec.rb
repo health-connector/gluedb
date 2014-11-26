@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe TaxHousehold do
 =begin
@@ -9,7 +9,7 @@ describe TaxHousehold do
 =end
 
   it "should have no people" do
-    expect(subject.people).to be_empty
+    expect(subject.applicant_links).to be_empty
   end
 =begin
 

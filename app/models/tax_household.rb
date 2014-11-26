@@ -16,7 +16,7 @@ class TaxHousehold
 
   index({_id: 1})
 
-  embeds_many :applicant_links
+  include ApplicantGrouping
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
@@ -45,15 +45,6 @@ class TaxHousehold
 
   def irs_group
     parent.irs_groups.find(self.irs_group_id)
-  end
-
-  def primary_applicant=(person_instance)
-    return unless person_instance.is_a? Person
-    self.primary_applicant_id = person_instance._id
-  end
-
-  def primary_applicant
-    Person.find(self.primary_applicant_id) unless self.primary_applicant_id.blank?
   end
 
   # Income sum of all tax filers in this Household for specified year

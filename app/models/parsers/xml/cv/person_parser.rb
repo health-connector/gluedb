@@ -18,18 +18,16 @@ module Parsers::Xml::Cv
 
     element :name_sfx, String, tag: "person_name/cv:person_name_suffix_text"
 
-    element :id, String, tag: "id/cv:id", :on_save => lambda {|id| id.gsub(/\n/,"").rstrip }
+    element :id, String, tag: "id/cv:id"
 
     has_many :addresses, Parsers::Xml::Cv::AddressParser, xpath: "cv:addresses"
 
+    has_many :emails, Parsers::Xml::Cv::EmailParser, xpath: "cv:emails"
 
-
-    has_many :emails, String, xpath: "cv:email"
-
-    has_many :phones, String, xpath: "cv:phones"
+    has_many :phones, Parsers::Xml::Cv::PhoneParser, xpath: "cv:phones"
 
     def hbx_member_id
-      return nil unless id_is_for_member?
+      return person_id_tag unless id_is_for_member?
       Maybe.new(person_id_tag).split("#").last.value
     end
 
@@ -46,15 +44,32 @@ module Parsers::Xml::Cv
       self.id.blank? ? "" : self.id 
     end
 
-    def individual_request
+    def individual_request(member_id_generator)
       {
         :name_first => name_first,
         :name_last => name_last,
         :name_middle => name_middle,
         :name_pfx => name_pfx,
         :name_sfx => name_sfx,
-        :hbx_member_id => hbx_member_id
+        :hbx_member_id => get_or_generate_member_id(member_id_generator),
+        :applicant_id => id
       }
+    end
+
+    def get_or_generate_member_id(m_id_gen)
+      hbx_member_id.blank? ? m_id_gen.generate_member_id : hbx_member_id
+    end
+
+    def address_requests
+      addresses.map(&:request_hash)
+    end
+
+    def phone_requests
+      phones.map(&:request_hash)
+    end
+
+    def email_requests
+      emails.map(&:request_hash)
     end
 
   end

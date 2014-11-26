@@ -1,0 +1,23 @@
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>Primary Applicant</th>
+      <th>Applicant Ct</th>
+      <th>Enrollment Ct</th>
+      <th>Submitted Date</th>
+    </tr>
+  </thead>
+    <tbody>
+      <%= table_empty_to_human if application_groups.count < 1 %>
+      <% application_groups.each do |ag| %>
+      <tr>
+        <% label_ref = ag.primary_applicant ? ag.primary_applicant.full_name : ag.id %>
+        <td><%= link_to prepend_glyph_to_name(label_ref), application_group_path(ag) %> </td>
+        <td><%= ag.applicants.size %></td>
+        <td><%= ag.hbx_enrollments.size %></td>
+        <td><%= ag.submitted_date %></td>
+      </tr>
+    </tbody>
+  <% end %>
+  </table>
+

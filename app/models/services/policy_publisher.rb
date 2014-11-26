@@ -11,6 +11,7 @@ module Services
       with_channel do |channel|
         channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
           :routing_key => routing_key,
+          :reply_to => v_destination,
           :headers => {
             :file_name => "#{p_id}.xml",
             :submitted_by => "trey.evans@dchbx.info",
@@ -32,6 +33,7 @@ module Services
       with_channel do |channel|
         channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
           :routing_key => routing_key,
+          :reply_to => v_destination,
           :headers => {
             :file_name => "#{p_id}.xml",
             :submitted_by => "trey.evans@dchbx.info",

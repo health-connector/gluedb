@@ -18,16 +18,31 @@ module Parsers::Xml::Cv
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
 
+    def to_individual_request(member_id_generator)
+      person.individual_request(member_id_generator).merge(person_demographics.individual_request).merge({
+        :emails => email_requests,
+        :addresses => address_requests,
+        :phones => phone_requests
+      })
+    end
     def dob
       Date.parse(person_demographics.birth_date)
     end
 
     def age
-      Ager.new(dob).age_as_of(Date.parse("2015-1-1"))
+      Age.new(dob).age_as_of(Date.parse("2015-1-1"))
     end
 
-    def to_individual_request
-      person.individual_request.merge(person_demographics.individual_request)
+    def address_requests
+      person.address_requests
+    end
+
+    def email_requests
+      person.email_requests
+    end
+
+    def phone_requests
+      person.phone_requests
     end
   end
 end

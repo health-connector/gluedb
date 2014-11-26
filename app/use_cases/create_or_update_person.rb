@@ -112,4 +112,13 @@ class CreateOrUpdatePerson
       listener.register_person(member_id, person, member)
     end
   end
+
+  def execute(request, listener)
+    if validate(request, listener)
+      commit(request, listener)
+      listener.success
+    else
+      listener.fail
+    end
+  end
 end

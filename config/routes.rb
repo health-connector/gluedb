@@ -51,7 +51,14 @@ Gluedb::Application.routes.draw do
   end
 
   resources :application_groups do
-    resources :households
+    member do
+      get :applicant_links
+    end
+    resources :enrollments
+    resources :enrollment_exemptions
+    resources :eligibility_determinations
+    resources :financial_statements
+    resources :tax_households
     get 'page/:page', :action => :index, :on => :collection
   end
 

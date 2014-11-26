@@ -4,27 +4,14 @@
   <%= render 'shared/breadcrumb', crumbs: ['Application Groups'] %>
 </div>
 
-<table class="table table-condensed">
-  <thead>
-    <tr>
-      <th>Primary Applicant</th>
-      <th>No. Applicants</th>
-      <th>No. Enrollments</th>
-      <th>Submitted Date</th>
-    </tr>
-  </thead>
-  <% @application_groups.each do |ag| %>
-    <tbody>
-      <tr>
-        <td><%= link_to prepend_glyph_to_name(ag.primary_applicant_id), application_group_path(ag) %> </td>
-        <td><%= ag.applicants.size %></td>
-        <td><%= ag.hbx_enrollments.size %></td>
-        <td><%= ag.submitted_date %></td>
-      </tr>
-    </tbody>
-  <% end %>
-  </table>
+  <div class="row">
+    <div class="col-md-offset-8 col-md-4">
+      <%= render 'shared/search', url: people_path, q: @q, placeholder: "Name, HBX ID, SSN" %>
+    </div>
+  </div>
+</div>
 
+<%= render "application_group_list", application_groups: @application_groups %>
 
 <div class="row">
   <div class="col-md-8">

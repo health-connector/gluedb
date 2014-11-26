@@ -100,7 +100,7 @@ class ImportApplicationGroups
           person_relationship.relative = p_tracker[relationship_hash[:object_person_id]].first
           person_relationship.kind = relationship_hash.relationship
 
-          subject_person.person_relationships << person_relationship
+          subject_person.merge_relationship(person_relationship)
         end
       end
 

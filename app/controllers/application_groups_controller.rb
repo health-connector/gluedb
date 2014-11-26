@@ -11,7 +11,6 @@ class ApplicationGroupsController < ApplicationController
   def show
     @application_group = ApplicationGroup.find(params[:id])
 
-    @application_group = ApplicationGroup.first
     @primary_applicant = @application_group.primary_applicant
   end
 

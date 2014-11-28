@@ -103,6 +103,22 @@ class CreateOrUpdatePerson
       person.save!
       listener.register_person(member_id, person, new_member)
     else
+=begin
+      if request[:member_hbx_id] != person.authority_member_id
+        new_member = @member_factory.new(extract_member_properties(request))
+        person.members << new_member
+      else
+        member.update_attributes(member_update_properties_from(request))
+        extract_and_merge_addresses(person, request)
+        extract_and_merge_phones(person, request)
+        extract_and_merge_emails(person, request)
+      end
+      extract_and_merge_addresses(person, request)
+      extract_and_merge_phones(person, request)
+      extract_and_merge_emails(person, request)
+      person.save!
+      listener.register_person(member_id, person, member)
+=end
       person.assign_attributes(extract_person_properties(request))
       member.update_attributes(member_update_properties_from(request))
       extract_and_merge_addresses(person, request)

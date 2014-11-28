@@ -90,7 +90,7 @@ class ImportApplicationGroups
           uc.commit(ig_request, listener)
       end
 
-      #applying person objects in person relationships for each applicant
+      #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
         applicant.to_relationships.each do |relationship_hash|
 

@@ -162,8 +162,10 @@ plans_2014.each do |pl|
   renewal_plan = map_for_2015[get_map_hios(pl.hios_plan_id, hios_2014_to_2015)]
   if renewal_plan.blank?
     failed_maps << pl.hios_plan_id
+  else
+    pl.renewal_plan = renewal_plan
+    pl.save!
   end
-#  pl.save!
 end
 
 puts failed_maps.inspect

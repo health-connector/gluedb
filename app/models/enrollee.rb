@@ -48,6 +48,10 @@ class Enrollee
     Queries::MemberByHbxIdQuery.new(m_id).execute
   end
 
+  def calculate_premium_using(plan, rate_start_date)
+    self.pre_amt = plan.rate(rate_start_date, self.coverage_start, self.member.dob)
+  end
+
   def merge_enrollee(m_enrollee, p_action)
     merge_without_blanking(
       m_enrollee,

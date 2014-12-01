@@ -1,7 +1,7 @@
 module Premiums
   class PolicyCalculator
     def initialize(member_cache = nil)
-      @member_cache = nil
+      @member_cache = member_cache
     end
 
     def apply_calculations(policy)
@@ -38,13 +38,15 @@ module Premiums
 
     def apply_group_discount(policy)
       children_under_21 = policy.enrollees.select do |en|
-        ager = Ager.new(en.member.dob)
+        member = get_member(en)
+        ager = Ager.new(member.dob)
         age = ager.age_as_of(en.coverage_start)
         (age < 21) && (en.rel_code == "child")
       end
       return(nil) unless children_under_21.length > 3
       orderly_children = (children_under_21.sort_by do |en|
-        ager = Ager.new(en.member.dob)
+        member = get_member(en)
+        ager = Ager.new(member.dob)
         ager.age_as_of(en.coverage_start)
       end).reverse
       orderly_children.drop(3).each do |en|

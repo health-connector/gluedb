@@ -104,7 +104,7 @@ module CanonicalVocabulary
 
     def serialize_person(en, xml)
       member = member_lookup(en)
-      person = en.person
+      person = member.person
       serialize_contact(person, xml)
       xml['ins'].exchange_member_id(en.m_id)
       xml['ins'].individual_relationship_code(en.rel_code.capitalize)

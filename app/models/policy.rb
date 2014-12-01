@@ -536,7 +536,7 @@ class Policy
     pol
   end
 
-protected
+  protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end

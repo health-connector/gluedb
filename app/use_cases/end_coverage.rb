@@ -66,7 +66,7 @@ class EndCoverage
       policy_id: @policy.id,
       operation: request[:operation],
       reason: request[:reason],
-      affected_enrollee_ids: request[:affected_enrollee_ids],
+      affected_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
       include_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
       current_user: request[:current_user]
     }

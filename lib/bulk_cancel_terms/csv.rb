@@ -1,5 +1,7 @@
 module BulkCancelTerms
   class Csv
+    attr_reader :errors
+
     def initialize(req, out_csv)
       @request = req
       @errors = []

@@ -49,7 +49,7 @@ class Enrollee
   end
 
   def calculate_premium_using(plan, rate_start_date)
-    self.pre_amt = plan.rate(rate_start_date, self.coverage_start, self.member.dob)
+    self.pre_amt = sprintf("%.2f", plan.rate(rate_start_date, self.coverage_start, self.member.dob).amount)
   end
 
   def merge_enrollee(m_enrollee, p_action)

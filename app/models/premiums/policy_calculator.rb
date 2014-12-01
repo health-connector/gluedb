@@ -37,13 +37,14 @@ module Premiums
         ager.age_as_of(en.coverage_start)
       end).reverse
       orderly_children.drop(3) do |en|
-        en.pre_amt = "0.00"
+        en.pre_amt = BigDecimal.new("0.00")
       end
     end
 
     def apply_totals(policy)
       premium = policy.enrollees.inject(BigDecimal.new("0.00")) do |acc, en|
-        acc + en
+        prem = acc.to_f + en.pre_amt.to_f
+        BigDecimal.new(sprintf("%.2f", prem))
       end
       policy.pre_amt_tot = BigDecimal.new(sprintf("%.2f", premium))
     end

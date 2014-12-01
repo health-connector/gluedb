@@ -174,7 +174,7 @@ module CanonicalVocabulary
         end
         xml['ins'].plan_id(plan._id)
         xml['ins'].premium_amount_total(@policy.pre_amt_tot)
-        if @policy.employer.nil?
+        if @policy.employer_id.blank?
           xml['ins'].aptc_amount(@policy.applied_aptc)
         else
           xml['ins'].total_employer_responsibility_amount(@policy.tot_emp_res_amt)
@@ -221,11 +221,11 @@ module CanonicalVocabulary
     end
 
     def select_root_tag
-      @policy.employer.nil? ? "individual_market_enrollment_group" : "shop_market_enrollment_group"
+      @policy.employer_id.blank? ? "individual_market_enrollment_group" : "shop_market_enrollment_group"
     end
 
     def profile_suffix
-      @policy.employer.nil? ? "IND" : "SHP"
+      @policy.employer_id.blank? ? "IND" : "SHP"
     end
   end
 end

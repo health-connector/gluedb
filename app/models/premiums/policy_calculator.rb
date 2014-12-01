@@ -73,10 +73,15 @@ module Premiums
       end
     end
 
+    def get_employer(policy)
+      Caches::MongoidCache.lookup(Employer, policy.employer_id) { policy.employer }
+    end
+
     def determine_shop_plan_year(policy)
       coverage_start_date = policy.subscriber.coverage_start
-      employer = policy.employer
-      employer.plan_years.detect do |py|
+      employer = get_employer(policy)
+      plan_years = employer.plan_years.to_a
+      plan_years.detect do |py|
         (py.start_date <= coverage_start_date) &&
           (py.end_date >= coverage_start_date)
       end

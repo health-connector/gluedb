@@ -1,6 +1,7 @@
 module Premiums
   class PolicyCalculator
-    def initialize
+    def initialize(member_cache = nil)
+      @member_cache = nil
     end
 
     def apply_calculations(policy)
@@ -16,13 +17,23 @@ module Premiums
         plan_year = determine_shop_plan_year(policy)
         rate_begin_date = plan_year.start_date
         policy.enrollees.each do |en|
-          en.calculate_premium_using(plan, rate_begin_date)
+          en.pre_amt = calculate_cached_premium(plan, en, rate_begin_date, en.coverage_start)
         end
       else
         policy.enrollees.each do |en|
-          en.calculate_premium_using(plan, en.coverage_start)
+          en.pre_amt = calculate_cached_premium(plan, en, en.coverage_start, en.coverage_start)
         end
       end
+    end
+
+    def calculate_cached_premium(plan, enrollee, rate_start_date, coverage_start)
+      member = get_member(enrollee)
+      sprintf("%.2f", plan.rate(rate_start_date, coverage_start, member.dob).amount)
+    end
+
+    def get_member(enrollee)
+      return enrollee.member unless @member_cache
+      @member_cache.lookup(enrollee.m_id)
     end
 
     def apply_group_discount(policy)

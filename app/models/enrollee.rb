@@ -89,6 +89,23 @@ class Enrollee
     end
   end
 
+  def clone_for_renewal(start_date)
+    Enrollee.new(
+      self.attributes.dup.merge({
+        :coverage_start => start_date,
+        :coverage_end => nil,
+        :pre_amt => nil,
+        :coverage_status => "active",
+        :c_id => nil,
+        :cp_id => nil,
+        :ben_stat => "active",
+        :emp_stat => "active",
+        :created_at => nil,
+        :updated_at => nil
+      })
+    )
+  end
+
   def active?
     self.coverage_status == 'active'
   end

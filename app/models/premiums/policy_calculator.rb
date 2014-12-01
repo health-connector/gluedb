@@ -36,7 +36,7 @@ module Premiums
         ager = Ager.new(en.member.dob)
         ager.age_as_of(en.coverage_start)
       end).reverse
-      orderly_children.drop(3) do |en|
+      orderly_children.drop(3).each do |en|
         en.pre_amt = BigDecimal.new("0.00")
       end
     end

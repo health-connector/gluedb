@@ -148,6 +148,10 @@ class Policy
     employer.nil? ? 'individual' : 'shop'
   end
 
+  def is_shop?
+    !employer.nil?
+  end
+
   def subscriber
     enrollees.detect { |m| m.relationship_status_code == "self" }
   end

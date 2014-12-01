@@ -16,6 +16,7 @@ end
 
 member_repo = Caches::MemberCache.new(m_ids)
 calc = Premiums::PolicyCalculator.new(member_repo)
+Caches::MongoidCache.allocate(Employer)
 Caches::MongoidCache.allocate(Plan)
 Caches::MongoidCache.allocate(Carrier)
 
@@ -36,4 +37,6 @@ pols.each do |pol|
 end
 
 Caches::MongoidCache.release(Plan)
-Caches::MongoidCache.allocate(Carrier)
+Caches::MongoidCache.release(Carrier)
+Caches::MongoidCache.release(Employer)
+

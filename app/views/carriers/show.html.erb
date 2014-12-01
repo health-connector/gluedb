@@ -22,6 +22,7 @@
 <thead>
   <tr>
     <th>Name</th>
+    <th>Year</th>
     <th>HIOS ID</th>
     <th>Type</th>
     <th>Metal Level</th>
@@ -33,6 +34,7 @@
   <% @plans.each do |plan| %>
   <tr>
     <td><%= link_to plan.name, plan_path(plan) %></td>
+    <td><%= plan.year %></td>
     <td><%= plan.hios_plan_id %></td>
     <td><%= plan.coverage_type.capitalize %></td>
     <td><%= plan.metal_level.capitalize %></td>

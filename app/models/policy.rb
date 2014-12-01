@@ -215,10 +215,10 @@ class Policy
   end
 
   def to_cv
-    CanonicalVocabulary::EnrollmentSerializer.new(self).serialize
+    CanonicalVocabulary::EnrollmentSerializer.new(self, member_ids).serialize
   end
 
-  def self.default_search_order
+  def self.default_search_orders
     [[:eg_id, 1]]
   end
 
@@ -556,6 +556,12 @@ class Policy
 
   def query_proxy
     @query_proxy ||= Queries::PolicyAssociations.new(self)
+  end
+
+  def member_ids
+    self.enrollees.map do |enrollee|
+      enrollee.m_id
+    end
   end
 
 end

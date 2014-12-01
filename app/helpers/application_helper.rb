@@ -47,6 +47,13 @@ module ApplicationHelper
     number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
   end
 
+  # Formats a number into a US Social Security Number string (nnn-nn-nnnn), hiding all but last 4 digits
+  def number_to_obscured_ssn(number)
+    return unless number
+    number_to_ssn(number)
+    number.to_s.gsub!(/\w{3}-\w{2}/, '***-**')
+  end
+
   # Formats a number into a nine-digit US Federal Entity Identification Number string (nn-nnnnnnn)
   def number_to_fein(number)
     return unless number

@@ -32,6 +32,7 @@ class Policy
 #  validates_presence_of :plan_id
   validates_presence_of :pre_amt_tot
   validates_presence_of :tot_res_amt
+  validates_presence_of :plan_id
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
@@ -510,6 +511,25 @@ class Policy
       en.save!
     end
     self.save!
+  end
+
+  def clone_for_renewal(start_date)
+    pol = Policy.new({
+      :broker => self.broker,
+      :employer => self.employer,
+      :carrier_to_bill => self.carrier_to_bill,
+      :preceding_enrollment_group_id => self.eg_id,
+      :carrier_id => self.carrier_id,
+      :responsible_party_id => self.responsible_party_id
+    })
+    cloneable_enrollees = self.enrollees.reject do |en|
+      en.canceled? || en.terminated?
+    end
+    pol.enrollees = cloneable_enrollees.map do |en|
+      en.clone_for_renewal(start_date)
+    end
+    pol.plan = self.plan.renewal_plan
+    pol
   end
 
 protected

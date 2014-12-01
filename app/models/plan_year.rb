@@ -27,6 +27,8 @@ class PlanYear
 
   embeds_many :elected_plans
 
+  has_one :contribution_strategy, :class_name => "EmployerContributions::Strategy", :inverse_of => :plan_year
+
   def self.make(data)
     plan_year = PlanYear.new
     plan_year.open_enrollment_start = data[:open_enrollment_start]

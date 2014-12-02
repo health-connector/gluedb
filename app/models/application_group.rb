@@ -24,7 +24,7 @@ class ApplicationGroup
   field :updated_by, type: String
 
   # All current and former members of this group
-  has_many :applicants, class_name: "Person", inverse_of: :application_group
+  has_many :applicants, class_name: "Person", inverse_of: nil
   accepts_nested_attributes_for :applicants
 
   has_many :hbx_enrollment_policies, class_name: "Policy", inverse_of: :hbx_enrollment_policy

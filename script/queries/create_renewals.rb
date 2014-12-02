@@ -25,16 +25,21 @@ p_id = 50000
 pols.each do |pol|
   if pol.subscriber.coverage_end.blank?
     sub_member = member_repo.lookup(pol.subscriber.m_id)
-    if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
-      r_pol = pol.clone_for_renewal(Date.new(2015,1,1))
-      calc.apply_calculations(r_pol)
-      p_id = p_id + 1
-      out_file = File.open("renewals/#{p_id}.xml", 'w')
-      member_ids = r_pol.enrollees.map(&:m_id)
-      r_pol.eg_id = p_id.to_s
-      ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
-      out_file.print(ms.serialize)
-      out_file.close
+    authority_member = sub_member.person.authority_member
+    if authority_member.blank?
+      puts "No authority member for: #{pol.subscriber.m_id}"
+    else
+      if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
+        r_pol = pol.clone_for_renewal(Date.new(2015,1,1))
+        calc.apply_calculations(r_pol)
+        p_id = p_id + 1
+        out_file = File.open("renewals/#{p_id}.xml", 'w')
+        member_ids = r_pol.enrollees.map(&:m_id)
+        r_pol.eg_id = p_id.to_s
+        ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
+        out_file.print(ms.serialize)
+        out_file.close
+      end
     end
   end
 end

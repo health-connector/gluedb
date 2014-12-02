@@ -23,6 +23,7 @@ class PeopleController < ApplicationController
   end
 
   def show
+    Caches::MongoidCache.allocate(Carrier)
 		@person = Person.find(params[:id])
 
 	  respond_to do |format|

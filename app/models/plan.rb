@@ -1,7 +1,7 @@
 class Plan
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
 
   extend Mongorder
 

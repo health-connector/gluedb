@@ -31,6 +31,8 @@ class Protocols::X12::TransactionSetEnrollment < Protocols::X12::TransactionSetH
   index({"bgn06" => 1})
   index({"bgn08" => 1})
   index({"submitted_at" => 1})
+  index({"submitted_at" => 1, "policy_id" => 1})
+  index({"policy_id" => 1})
 
   belongs_to :policy
   belongs_to :employer

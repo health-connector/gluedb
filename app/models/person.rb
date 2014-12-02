@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -43,7 +43,7 @@ class Person
 
   #TODO - create authority member index (use Mongo indexing method that expects many empty values)
 
-  belongs_to :application_group, class_name: "ApplicationGroup", inverse_of: :applicants, index: true
+  belongs_to :application_group, class_name: "ApplicationGroup", inverse_of: nil, index: true
 
   # has_and_belongs_to_many :employers, class_name: "Employer", inverse_of: :employees
   belongs_to :employer, class_name: "Employer", inverse_of: :employees, index: true

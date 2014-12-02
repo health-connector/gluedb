@@ -2,7 +2,7 @@ class Policy
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
   include AASM
 
   extend Mongorder
@@ -149,7 +149,7 @@ class Policy
   end
 
   def is_shop?
-    !employer.nil?
+    !employer_id.blank?
   end
 
   def subscriber
@@ -520,7 +520,7 @@ class Policy
   def clone_for_renewal(start_date)
     pol = Policy.new({
       :broker => self.broker,
-      :employer => self.employer,
+      :employer_id => self.employer_id,
       :carrier_to_bill => self.carrier_to_bill,
       :preceding_enrollment_group_id => self.eg_id,
       :carrier_id => self.carrier_id,
@@ -532,11 +532,12 @@ class Policy
     pol.enrollees = cloneable_enrollees.map do |en|
       en.clone_for_renewal(start_date)
     end
-    pol.plan = self.plan.renewal_plan
+    current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
+    pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
     pol
   end
 
-protected
+  protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end

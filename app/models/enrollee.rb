@@ -94,8 +94,13 @@ class Enrollee
   end
 
   def clone_for_renewal(start_date)
+    attrs = self.attributes.dup
+    attrs.delete(:_id)
+    attrs.delete("_id")
+    attrs.delete(:id)
+    attrs.delete("id")
     Enrollee.new(
-      self.attributes.dup.merge({
+      attrs.merge({
         :coverage_start => start_date,
         :coverage_end => nil,
         :pre_amt => nil,

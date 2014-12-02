@@ -2,7 +2,7 @@
     require 'csv'
     batch_id = SecureRandom.uuid.gsub("-", "")
     out_file_name = "bulk_term_results.csv"
-    file_name = "KevinTest.csv"
+    file_name = "HouseTermList20141201.csv"
     spreadsheet = File.open(file_name, 'r').read
     end_coverage = EndCoverage.new(EndCoverageAction)
 
@@ -16,6 +16,6 @@
         request = EndCoverageRequest.for_bulk_terminates(csv_req.to_hash, submitted_by)
         error_logger = BulkCancelTerms::Csv.new(csv_req, csv)
         listener.set_current_row(idx, row.to_hash, request, error_logger)
-        end_coverage.execute_csv(request.merge({:transmit => false}),listener)
+        end_coverage.execute_csv(request,listener)
       end
     end

@@ -4,7 +4,7 @@ module Parsers::Xml::Cv
     include HappyMapper
 
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"
-    tag 'total_incomes_by_year'
+    tag 'total_income_by_year'
     namespace 'cv'
 
     element :calendar_year, String, tag: 'calendar_year'

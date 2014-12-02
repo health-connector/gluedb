@@ -22,6 +22,9 @@ module Parsers::Xml::Cv
           total_count: tax_household_size_total_count,
           total_incomes_by_year: total_incomes_by_year.map do |total_income_by_year|
             total_incomes_by_year.to_hash
+          end,
+          tax_household_members: tax_household_members.map do |tax_household_member|
+            tax_household_member.to_hash
           end
       }
     end

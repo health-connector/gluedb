@@ -6,11 +6,12 @@
 </div>
 <div class="row">
 	<div class="col-md-10">
-	  <dl class="dl-horizontal">
+		<dl class="dl-horizontal">
+			<% carrier = Caches::MongoidCache.lookup(Carrier, p.carrier_id) { p.carrier } %>
 			<dt>Coverage</dt>
 			<dd>
 				<%= "#{ p.coverage_type.capitalize } | " %>
-			  <%= link_to p.carrier.name, carrier_path(p.carrier) %> |
+			  <%= link_to carrier.name, carrier_path(carrier) %> |
 				<%= link_to truncate(p.plan.name, length: 50), plan_path(p.plan), title: "Hios ID: " + p.plan.hios_plan_id, rel: 'tooltip' %>
 		  </dd>
 		  <dt>Policy ID</dt>

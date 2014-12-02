@@ -27,6 +27,8 @@ class Policy
   field :carrier_to_bill, type: Boolean, default: false
   field :aasm_state, type: String
   field :updated_by, type: String
+  field :is_active, type: Boolean, default: true
+
 
   validates_presence_of :eg_id
 #  validates_presence_of :plan_id
@@ -36,6 +38,9 @@ class Policy
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
+
+  embeds_many :comments
+  accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
   belongs_to :hbx_enrollment_policy, class_name: "ApplicationGroup", inverse_of: :hbx_enrollment_policies, index: true
   belongs_to :carrier, counter_cache: true, index: true
@@ -377,7 +382,7 @@ class Policy
   def self.find_terminated_in_range(start_d, end_d, other_params = {})
     Policy.where(
       PolicyStatus::Terminated.during(
-        start_d, 
+        start_d,
         end_d
         ).query
     )

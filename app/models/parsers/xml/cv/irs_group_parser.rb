@@ -7,13 +7,21 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :id, String, tag: 'id'
-    has_many :tax_households_ids, String, tag:'tax_households_ids'
+    has_many :tax_households_ids, String, xpath:'cv:tax_households_ids/cv:id'
+    has_many :hbx_enrollment_ids, String, xpath: 'cv:hbx_enrollment_ids/cv:id'
+    has_many :hbx_enrollment_exemption_ids, String, xpath: 'cv:hbx_enrollment_exemption_ids/cv:hbx_enrollment_exemption_id'
 
     def to_hash
       {
           id: id,
           tax_households_ids: tax_households_ids.map do |tax_households_id|
-            tax_households_id.to_hash
+            tax_households_id
+          end,
+          hbx_enrollment_ids: tax_households_ids.map do |hbx_enrollment_id|
+            hbx_enrollment_id
+          end,
+          hbx_enrollment_exemption_ids: tax_households_ids.map do |hbx_enrollment_exemption_id|
+            hbx_enrollment_exemption_id
           end
       }
     end

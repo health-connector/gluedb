@@ -14,9 +14,6 @@ module Parsers::Xml::Cv
     def to_hash
       {
           id: id,
-          tax_households_ids: tax_households_ids.map do |tax_households_id|
-            tax_households_id
-          end,
           hbx_enrollment_ids: tax_households_ids.map do |hbx_enrollment_id|
             hbx_enrollment_id
           end,

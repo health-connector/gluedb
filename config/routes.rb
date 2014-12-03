@@ -134,6 +134,7 @@ Gluedb::Application.routes.draw do
       resources :application_groups, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
+      resources :plans, :only => [:show]
     end
   end
 

@@ -2,10 +2,9 @@ class EligibilityDetermination
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  embedded_in :application_group
+  embedded_in :tax_household
 
   field :e_pdc_id, type: String
-  field :household_state, type: String
   field :benchmark_plan_id, type: Moped::BSON::ObjectId
 
   # Premium tax credit assistance eligibility.  
@@ -28,14 +27,13 @@ class EligibilityDetermination
     self.application_group
   end
 
-  # embedded has_many :hbx_enrollments
-  def hbx_enrollments
-    parent.hbx_enrollments.where(:eligibility_determination_id => self.id)
+  def tax_household=(tax_household_instance)
+    return unless tax_household_instance.is_a? TaxHousehold
+    self.tax_household_id = tax_household_instance._id
   end
 
-  # embedded has_many :financial_statement
-  def financial_statements
-    parent.financial_statements.where(:eligibility_determination_id => self.id)
+  def tax_household
+    parent.tax_household.find(self.tax_household_id)
   end
 
   def primary_applicant=(person_instance)
@@ -49,11 +47,11 @@ class EligibilityDetermination
 
   def benchmark_plan=(benchmark_plan_instance)
     return unless benchmark_plan_instance.is_a? Plan
-    self.benchmark_plan_instance_id = benchmark_plan_instance._id
+    self.benchmark_plan_id = benchmark_plan_instance._id
   end
 
   def benchmark_plan
-    Plan.find(self.benchmark_plan_instance_id) unless self.benchmark_plan_instance_id.blank?
+    Plan.find(self.benchmark_plan_id) unless self.benchmark_plan_id.blank?
   end
 
   def max_aptc_in_dollars=(dollars)

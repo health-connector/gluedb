@@ -6,13 +6,11 @@ class FinancialStatement
 
   TAX_FILING_STATUS_TYPES = %W(tax_filer tax_dependent non_filer)
 
-  embedded_in :application_group
-
   field :tax_filing_status, type: String
   field :is_tax_filing_together, type: Boolean
 
   field :eligibility_determination_id, type: Moped::BSON::ObjectId
-  field :applicant_link_id, type: Moped::BSON::ObjectId
+  field :tax_household_member_id, type: Moped::BSON::ObjectId
 
 
   # Has access to employer-sponsored coverage that meets ACA minimum standard value and 
@@ -20,6 +18,7 @@ class FinancialStatement
   field :is_enrolled_for_es_coverage, type: Boolean, default: false
   field :is_without_assistance, type: Boolean, default: true
   field :submitted_date, type: DateTime
+  field :is_active, type: Boolean, default: true
 
   index({submitted_date:  1})
 
@@ -32,6 +31,8 @@ class FinancialStatement
   embeds_many :alternate_benefits
   accepts_nested_attributes_for :alternate_benefits
 
+  validates_presence_of :tax_household_member_id
+
   validates :tax_filing_status,
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
@@ -41,13 +42,8 @@ class FinancialStatement
     self.application_group
   end
 
-  def applicant_link=(al_instance)
-    return unless al_instance.is_a? Applicantlink
-    self.applicant_link_id = al_instance._id
-  end
-
-  def applicant_link
-    parent.applicant_links.find(self.applicant_link_id) unless self.applicant_link_id.blank?
+  def applicant
+    parent.applicants.find(self.applicant_id) unless self.applicant_id.blank?
   end
 
   def eligibility_determination=(ed_instance)
@@ -148,6 +144,22 @@ class FinancialStatement
       total_incomes[y] = (income_this_year - deductions_this_year) * 0.01
     end
     total_incomes
+  end
+
+  def is_tax_filing_together?
+    self.is_tax_filing_together
+  end
+
+  def is_enrolled_for_es_coverage?
+    self.is_enrolled_for_es_coverage
+  end
+
+  def is_without_assistance?
+    self.is_without_assistance
+  end
+
+  def is_active?
+    self.is_active
   end
 
 end

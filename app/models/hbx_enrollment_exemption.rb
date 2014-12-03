@@ -4,15 +4,15 @@ class HbxEnrollmentExemption
 
   KINDS = %W[hardship health_care_ministry_member incarceration indian_tribe_member religious_conscience]
 
-  embedded_in :application_group
+  embedded_in :applicant
 
   field :kind, type: String
   field :certificate_number, type: String
   field :start_date, type: Date
   field :end_date, type: Date
-  field :irs_group_id, type: Moped::BSON::ObjectId
 
-  embeds_many :applicant_links
+  field :applicant_id, type: Moped::BSON::ObjectId
+  field :irs_group_id, type: Moped::BSON::ObjectId
 
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true

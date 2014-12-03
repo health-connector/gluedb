@@ -8,15 +8,25 @@ class TaxHousehold
 
   # embedded belongs_to :irs_group association
   field :irs_group_id, type: Moped::BSON::ObjectId
-  field :hbx_enrollment_id, type: Moped::BSON::ObjectId
-  field :primary_applicant_id, type: Moped::BSON::ObjectId
-  field :is_active, type: Boolean, default: true   # this TaxHousehold active on the Exchange?
+
+  field :allocated_aptc_in_cents, type: Integer, default: 0
+  field :is_active, type: Boolean, default: true   # this TaxHousehold valid?
+  field :is_eligibility_determined, type: Boolean, default: false
+
+  field :submitted_date, type: DateTime
+  field :effective_start_date, type: DateTime
+  field :effective_end_date, type: DateTime
   
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   index({_id: 1})
 
-  embeds_many :applicant_links
+  embeds_many :tax_household_members
+  accepts_nested_attributes_for :tax_household_members
+
+  embeds_many :hbx_enrollments
+  accepts_nested_attributes_for :hbx_enrollments
+  
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
@@ -25,17 +35,12 @@ class TaxHousehold
     self.application_group
   end
 
-  def members
-    parent.tax_household_members.where(:tax_household_id => self.id)
+  def allocated_aptc_in_dollars=(dollars)
+    self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i
   end
 
-  def hbx_enrollment=(he_instance)
-    return unless he_instance.is_a? HbxEnrollment
-    self.hbx_enrollment_id = he_instance._id
-  end
-
-  def hbx_enrollments
-    parent.hbx_enrollments.where(:tax_household_id => self.id)
+  def allocated_aptc_in_dollars
+    (Rational(allocated_aptc_in_cents) / Rational(100)).to_f if allocated_aptc_in_cents
   end
 
   def irs_group=(irs_instance)
@@ -45,15 +50,6 @@ class TaxHousehold
 
   def irs_group
     parent.irs_groups.find(self.irs_group_id)
-  end
-
-  def primary_applicant=(person_instance)
-    return unless person_instance.is_a? Person
-    self.primary_applicant_id = person_instance._id
-  end
-
-  def primary_applicant
-    Person.find(self.primary_applicant_id) unless self.primary_applicant_id.blank?
   end
 
   # Income sum of all tax filers in this Household for specified year
@@ -94,6 +90,10 @@ class TaxHousehold
   def head_of_household
     relationship = application_group.person_relationships.detect { |r| r.relationship_kind == "self" }
     Person.find_by_id(relationship.subject_person)
+  end
+
+  def is_eligibility_determined?
+    self.is_eligibility_determined
   end
 
   def is_active?

@@ -1,9 +1,9 @@
-= render 'shared/v2/identity', id: api_v2_policy_url(plan.id), obj: plan\
+= render 'shared/v2/identity', id: api_v2_plan_url(plan.id), obj: plan\
 %n1:coverage_type= "urn:openhbx:terms:v1:benefit_coverage##{plan.coverage_type}"
 %n1:carrier= render 'shared/v2/carrier_link_type', carrier: (Caches::MongoidCache.lookup(Carrier, plan.carrier_id) { plan.carrier })
 %n1:plan_year= plan.year
 %n1:name= plan.name
-%n1:is_dental_only_flag= (plan.coverage_type == 'dental')
+%n1:is_dental_only= (plan.coverage_type == 'dental')
 - unless plan.premium_tables.empty?
   %n1:rates
     - plan.premium_tables.each do |pt|

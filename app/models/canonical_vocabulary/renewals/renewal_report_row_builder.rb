@@ -110,9 +110,9 @@ module CanonicalVocabulary
       end
 
       def append_policy(policy)
-        @data_set << (policy.current.nil? ? nil : policy.current[1][:plan_name])
-        @data_set << policy.future_plan_name
-        @data_set << policy.quoted_premium
+        @data_set << policy.current.plan_name
+        @data_set << policy.current.future_plan_name
+        @data_set << policy.current.quoted_premium
       end
 
       def append_post_aptc_premium
@@ -161,7 +161,5 @@ module CanonicalVocabulary
         @data_set << incarcerated?(member)
       end
     end
-
-
   end
 end

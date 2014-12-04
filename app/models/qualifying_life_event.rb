@@ -1,7 +1,6 @@
 class QualifyingLifeEvent
   include Mongoid::Document
 	include Mongoid::Timestamps
-  include Mongoid::Versioning
   include AASM
 
   KINDS = [

@@ -1,7 +1,6 @@
 class Household
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Versioning
 
   embedded_in :application_group
 

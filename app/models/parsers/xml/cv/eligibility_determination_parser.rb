@@ -13,5 +13,21 @@ module Parsers::Xml::Cv
     element :determination_date, String, tag:'determination_date'
     has_many :applicants, Parsers::Xml::Cv::ApplicantParser, tag:'applicant'
 
+    def to_hash
+      {
+          id:id,
+          household_state: household_state,
+          maximum_aptc: maximum_aptc,
+          csr_percent: csr_percent,
+          determination_date: determination_date,
+          to_individual_requests: applicants.map do |applicant|
+            applicant.to_individual_request
+          end,
+          to_relationships: applicants.map do |applicant|
+            applicant.to_relationship
+          end
+      }
+    end
+
   end
 end

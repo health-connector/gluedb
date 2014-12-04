@@ -1,35 +1,46 @@
-= render 'shared/v2/identity', id: api_v1_policy_url(policy.id)
+= render 'shared/v2/identity', id: api_v2_policy_url(policy.id), obj: policy
 - broker = policy.broker
 - if broker.present?
   = render 'shared/v2/broker_link_type', broker: policy.broker
 %n1:enrollees
-  %n1:subscriber
-    = render 'shared/v2/enrollee', enrollee: policy.subscriber
-  - members = policy.enrollees_sans_subscriber
-  - if members.present?
-    %n1:members
-      - members.each do |enrollee|
-        %n1:member
-          = render 'shared/v2/enrollee', enrollee: enrollee
+  - policy.enrollees.each do |e|
+    %n1:enrollee
+      %n1:member= render 'shared/v2/individual_type', person: e.person
+      %n1:is_subscriber= e.subscriber?
+      %n1:benefit_status= "urn:openhbx:terms:v1:benefit_status##{e.ben_stat}"
+      %n1:benefit
+        %n1:premium_amount= e.pre_amt
+        %n1:begin_date= e.coverage_start
+        - if e.coverage_end.present?
+          %n1:end_date= e.coverage_end
+        - if e.cp_id.present?
+          %n1:carrier_assigned_policy_id= e.cp_id
+        - if e.c_id.present?
+          %n1:carrier_assigned_enrollee_id= e.c_id
+        - if false #TODO
+          %n1:coverge_level= "urn:openhbx:terms:v1:coverage_level##{}"
 - if policy.responsible_party.present?
   %n1:responsible_party
     = render 'shared/v2/person', person: policy.responsible_party.person
 %n1:enrollment
   %n1:plan
-    = render 'shared/v2/plan_link_type', plan: policy.plan, rate: nil
-  - if policy.market == 'individual'
+    = render 'shared/v2/plan_link_type', plan: policy.plan
+  - if policy.market == 'shop'
+    %n1:shop_market
+      %n1:employer_link= render 'shared/v2/employer_link_type', employer: policy.employer
+      %n1:total_employer_responsible_amount= policy.tot_emp_res_amt
+  - elsif policy.market == 'individual'
     %n1:individual_market
       %n1:carrier_to_bill_flag= policy.carrier_to_bill
       %n1:allocated_aptc_amount= policy.allocated_aptc
       %n1:elected_aptc_percent= policy.elected_aptc
       %n1:applied_aptc_amount= policy.applied_aptc
-      %n1:other_payment_amount
-  - elsif policy.market == 'shop'
-    %n1:shop_market
-      %n1:employer_link= render 'shared/v2/employer_link_type', employer: policy.employer
-      %n1:total_employer_responsible_amount= policy.tot_emp_res_amt
+      %n1:other_payment_amount= #TODO
   %n1:premium_amount_total= policy.pre_amt_tot
   %n1:total_responsible_amount= policy.tot_res_amt
 %n1:policy_state= "urn:openhbx:terms:v1:policy_state##{policy.aasm_state}"
 %n1:request_submitted_timestamp
+%n1:active_flag= policy.is_active
+- unless policy.comments.empty?
+  = render 'shared/v2/comments', object: policy
 = render 'shared/v2/timestamp', record: policy

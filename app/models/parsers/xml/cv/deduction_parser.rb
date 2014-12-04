@@ -18,5 +18,15 @@ module Parsers::Xml::Cv
     element :type, String, tag:"#{xpath_income_prefix}/cv:type"
     element :frequency, String, tag:"#{xpath_income_prefix}/cv:frequency"
 
+    def to_hash
+      {
+          calendar_year: calendar_year,
+          total_amount: total_amount,
+          amount: amount,
+          type: type,
+          frequency: frequency
+      }
+    end
+
   end
 end

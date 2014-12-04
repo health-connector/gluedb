@@ -1,5 +1,7 @@
 %n1:renewal{"xmlns:n1" => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://openhbx.org/api/terms/1.0 policy.xsd"}
-  %n1:policy
-    = render 'api/v2/policies/policy_detail', policy: @policy
+  %n1:current_policy
+    %n1:policy
+      = render 'api/v2/policies/policy_detail', policy: @policy
   %n1:renewal_policy
-    = render 'api/v2/renewal_policies/renewal_detail', policy: @renewal
+    %n1:policy
+      = render 'api/v2/renewal_policies/renewal_detail', policy: @renewal

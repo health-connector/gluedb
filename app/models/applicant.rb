@@ -7,19 +7,14 @@ class Applicant
   # Person responsible for this application group
   field :is_primary_applicant, type: Boolean, default: false
 
+  # Person is applying for coverage
+  field :is_coverage_applicant, type: Boolean, default: false
+
   # Person who authorizes auto-renewal eligibility check
   field :is_consent_applicant, type: Boolean, default: false
 
   field :person_id, type: Moped::BSON::ObjectId
-  field :broker_id,    type: Moped::BSON::ObjectId
-
-  field :coverage_household_id, type: Moped::BSON::ObjectId
-  field :tax_household_id, type: Moped::BSON::ObjectId
-  field :hbx_enrollment_exception_id, type: Moped::BSON::ObjectId
-
-  field :is_ia_eligible, type: Boolean, default: false
-  field :is_medicaid_chip_eligible, type: Boolean, default: false
-  field :is_active, type: Boolean, default: true
+  field :broker_id, type: Moped::BSON::ObjectId
 
   embeds_many :hbx_enrollment_exemptions
   embeds_many :employee_applicants
@@ -29,6 +24,7 @@ class Applicant
 
   index({person_id: 1})
   index({broker_id:  1})
+  index({is_primary_applicant: 1})
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
@@ -42,6 +38,10 @@ class Applicant
 
   def person
     Person.find(self.person_id) unless self.person_id.blank?
+  end
+
+  def households
+    # TODO parent.households.coverage_households.where()
   end
 
   def broker=(broker_instance)

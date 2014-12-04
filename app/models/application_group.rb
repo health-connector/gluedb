@@ -26,6 +26,9 @@ class ApplicationGroup
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
+  embeds_many :households, cascade_callbacks: true
+  accepts_nested_attributes_for :households
+
   embeds_many :coverage_households, cascade_callbacks: true
   accepts_nested_attributes_for :coverage_households
 

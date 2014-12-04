@@ -1,0 +1,25 @@
+= render 'shared/v2/identity', id: api_v2_policy_url(policy.id), obj: policy
+%n1:enrollees
+  - @renewal.enrollees.each do |e|
+    %n1:enrollee
+      %n1:member
+        = render 'shared/identity', id: api_v1_people_url(hbx_id: e.person.authority_member_id)
+        %n1:person
+          = render 'shared/name', object: e.person
+          - unless e.person.addresses.empty?
+            %n1:addresses
+              - e.person.addresses.each do |address|
+                = render 'shared/address', address: address
+      %n1:is_subscriber= e.subscriber?
+      %n1:benefit_status= "urn:openhbx:terms:v1:benefit_status##{e.ben_stat}"
+      %n1:benefit
+        %n1:premium_amount= e.pre_amt
+        %n1:begin_date= e.coverage_start
+        - if e.coverage_end.present?
+          %n1:end_date= e.coverage_end
+        - if e.cp_id.present?
+          %n1:carrier_assigned_policy_id= e.cp_id
+        - if e.c_id.present?
+          %n1:carrier_assigned_enrollee_id= e.c_id
+        - if false #TODO
+          %n1:coverge_level= "urn:openhbx:terms:v1:coverage_level##{}"

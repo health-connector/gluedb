@@ -1,0 +1,6 @@
+%n1:renewal_policy{"xmlns:n1" => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://openhbx.org/api/terms/1.0 policy.xsd"}
+  = render 'api/v2/renewal_policies/renewal_detail', policy: @policy, start_date: @start_date
+  %n1:plan
+    = render 'shared/v2/plan_link_type', plan: @policy.plan
+  %n1:renewal_plan
+    = render 'shared/v2/plan_link_type', plan: @policy.plan.renewal_plan

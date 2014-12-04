@@ -1,0 +1,52 @@
+<%- model_class = EdiOpsTransaction -%>
+<%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
+<div class="page-header">
+  <%= render 'shared/breadcrumb', crumbs: ['EdiIssues'] %>
+</div>
+
+
+<div class="btn-toolbar">
+  <div class="btn-btn-group">
+    <%= link_to("All", { action: "index" }, class: "active btn btn-primary") %>
+    <%= link_to("open", { action: "index", aasm_state: "open" }, class: "active btn btn-primary") %>
+    <%= link_to("Close", { action: "index", aasm_state: "close" }, class: "btn btn-primary") %>
+    <%= link_to("Assigned", { action: "index", aasm_state: "Assigned" }, class: "btn btn-primary") %>
+  </div>
+</div>
+
+
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <% h = {:sort => "enrollment_id", :direction => sort_direction} 
+      if request[:q] 
+          h[:q] = request[:q] 
+      end %>
+      <th><%= link_to "Enrollment Group Id", h %></th>
+      <th>Resource</th>
+      <th>Event name</th>
+      <th>Submitted timestamp</th>
+      <th>Status</th>
+      <th>Assigned To</th>
+      </tr>
+  </thead>
+  <tbody>
+    <% @edi_issues.each do |ed| %>
+      <tr>
+        <td><%= link_to ed.enrollment_id, edi_issue_path(ed) %></td>
+        <td><%= ed.event_key %></td>
+        <td><%= ed.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"") %></td>
+        <td><%= ed.submitted_timestamp.strftime('%m-%d-%Y') %></td>
+        <td><%= ed.aasm_state %></td>
+        <th><%= ed.assigned_to %></th>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+
+
+
+
+

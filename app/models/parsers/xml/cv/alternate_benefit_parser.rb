@@ -12,5 +12,15 @@ module Parsers::Xml::Cv
     element :end_date, String, tag:"end_date"
     element :submitted_date, String, tag:"submitted_date"
 
+
+    def to_hash
+      {
+          start_date: start_date,
+          end_date: end_date,
+          submitted_date: submitted_date,
+          type: type
+      }
+    end
+
   end
 end

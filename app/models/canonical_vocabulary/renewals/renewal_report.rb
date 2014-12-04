@@ -6,10 +6,11 @@ module CanonicalVocabulary
       attr_reader :current, :future_plan_name, :quoted_premium
       def initialize(app_group, coverage_type)
         @coverage_type = coverage_type
-        @current = app_group.current_insurance_plan(coverage_type)
-        @future = app_group.future_insurance_plan(coverage_type)
+        policy_builder = CanonicalVocabulary::Renewals::PolicyBuilder.new(app_group)
+        @current = policy_builder.current_insurance_plan(coverage_type)
+        @future = policy_builder.future_insurance_plan(coverage_type)
+        @quoted_premium = policy_builder.quoted_insurance_premium(coverage_type)
         @future_plan_name = future_plan_name_by_hios(@future)
-        @quoted_premium = app_group.quoted_insurance_premium(coverage_type)
       end
 
       def future_plan_name_by_hios(hios_id)

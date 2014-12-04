@@ -80,11 +80,7 @@ module Premiums
     def determine_shop_plan_year(policy)
       coverage_start_date = policy.subscriber.coverage_start
       employer = get_employer(policy)
-      plan_years = employer.plan_years.to_a
-      plan_years.detect do |py|
-        (py.start_date <= coverage_start_date) &&
-          (py.end_date >= coverage_start_date)
-      end
+      employer.plan_year_of(coverage_start_date)
     end
   end
 end

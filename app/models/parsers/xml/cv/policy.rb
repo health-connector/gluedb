@@ -7,7 +7,7 @@ module Parsers::Xml::Cv
     tag 'policy'
     namespace 'cv'
 
-    element :id, String, tag: "id/cv:id"
+    element :id, String, tag: "id"
 
     has_one :enrollment, Parsers::Xml::Cv::EnrollmentParser, tag:'enrollment'
 

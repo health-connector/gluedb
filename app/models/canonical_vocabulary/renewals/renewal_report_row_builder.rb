@@ -93,12 +93,12 @@ module CanonicalVocabulary
 
       def append_household_address
         address = @primary.person.addresses[0]
-        @data_set << address[:address_1]
-        @data_set << address[:address_2]
-        @data_set << address[:apt]
-        @data_set << address[:city]
-        @data_set << address[:state]
-        @data_set << address[:postal_code]
+        @data_set << address.address_line_1
+        @data_set << address.address_line_2
+        append_blank # Apt
+        @data_set << address.location_city_name
+        @data_set << address.location_state_code
+        @data_set << address.location_postal_code
       end
 
       def append_aptc
@@ -110,9 +110,13 @@ module CanonicalVocabulary
       end
 
       def append_policy(policy)
-        @data_set << policy.current.plan_name
-        @data_set << policy.current.future_plan_name
-        @data_set << policy.current.quoted_premium
+        if policy.current.blank?
+          3.times{|i| append_blank }
+        else
+          @data_set << policy.current.plan_name
+          @data_set << policy.current.future_plan_name
+          @data_set << policy.current.quoted_premium
+        end
       end
 
       def append_post_aptc_premium

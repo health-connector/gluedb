@@ -30,5 +30,12 @@ module Parsers::Xml::Cv
       end
     end
 
+    def primary_applicant
+      applicants.detect{|applicant| applicant.id == primary_applicant_id }
+    end
+
+    def policies_enrolled
+      ['772']
+    end
   end
 end

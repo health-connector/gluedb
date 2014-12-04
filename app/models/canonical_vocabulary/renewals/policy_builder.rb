@@ -1,7 +1,7 @@
 module CanonicalVocabulary
   module Renewals
-    class PolicyBuilder
 
+    class PolicyBuilder
       def initialize(application_group)
         @application_group = application_group
         generate_policy_details

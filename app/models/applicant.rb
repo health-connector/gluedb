@@ -61,6 +61,10 @@ class Applicant
     self.is_consent_applicant
   end
 
+  def is_coverage_applicant?
+    self.is_coverage_applicant
+  end
+
   def is_active?
     self.is_active
   end

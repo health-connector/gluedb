@@ -10,6 +10,13 @@ module Parsers::Xml::Cv
     element :id, String, tag: 'id'
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
 
+    def to_hash
+      {
+          id: id,
+          person: person.individual_request
+      }
+    end
+
   end
 
 end

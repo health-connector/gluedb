@@ -23,3 +23,6 @@
           %n1:carrier_assigned_enrollee_id= e.c_id
         - if false #TODO
           %n1:coverge_level= "urn:openhbx:terms:v1:coverage_level##{}"
+%n1:enrollment
+  %n1:premium_amount_total= @renewal.pre_amt_tot
+  %n1:total_responsible_amount= @renewal.tot_res_amt

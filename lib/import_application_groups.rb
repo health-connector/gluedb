@@ -110,7 +110,6 @@ class ImportApplicationGroups
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
 
-        subject_person = nil
         applicant.to_relationships.each do |relationship_hash|
 
           subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
@@ -123,19 +122,21 @@ class ImportApplicationGroups
 
           subject_person.merge_relationship(person_relationship)
 
+          new_applicant = Applicant.new(applicant.to_hash)
+          new_applicant.person = subject_person
+          new_applicant.person_id = subject_person.id
+          application_group_builder.add_applicant(new_applicant)
         end
 
-        new_applicant = Applicant.new(applicant.to_hash)
-        new_applicant.person = subject_person
-        new_applicant.person_id = subject_person.id
-        application_group_builder.add_applicant(new_applicant)
-
+        #application_group_builder.add_irsgroups(ag.irs_groups)
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
         application_group_builder.application_group.save!
 
-        application_group_builder.application_group.applicants.each do |applicant|
-          puts applicant.inspect
+        application_group_builder.application_group.households.each do |household|
+          household.tax_households.each do |tax_household|
+            puts tax_household.inspect
+          end
         end
-        puts application_group_builder.application_group.primary_applicant
       end
     end
 

@@ -94,15 +94,19 @@ class ImportApplicationGroups
       ag.applicants.each do |applicant|
         applicant.to_relationships.each do |relationship_hash|
 
-          subject_person = p_tracker[relationship_hash[:subject_person_id]].first
+          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"
+          object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:object_person_id]}"
+          subject_person = p_tracker[subject_person_id_uri].first
 
           person_relationship = PersonRelationship.new
-          person_relationship.relative = p_tracker[relationship_hash[:object_person_id]].first
-          person_relationship.kind = relationship_hash.relationship
+          person_relationship.relative = p_tracker[object_person_id_uri].first
+          person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
         end
       end
+
+      puts ag.inspect
 
     end
 

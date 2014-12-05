@@ -16,6 +16,10 @@ class HbxEnrollment
 
   field :policy_id, type: Integer
 
+  embeds_many :hbx_enrollment_members
+
+  include HasApplicants
+
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
@@ -62,6 +66,15 @@ class HbxEnrollment
 
   def is_active?
     self.is_active
+  end
+
+  def application_group
+    return nil unless household
+    household.application_group
+  end
+
+  def applicant_ids
+    hbx_enrollment_members.map(&:applicant_id)
   end
 
 end

@@ -22,6 +22,8 @@ class FinancialStatement
 
   index({submitted_date:  1})
 
+  embedded_in :application_group
+
   embeds_many :incomes
   accepts_nested_attributes_for :incomes
 

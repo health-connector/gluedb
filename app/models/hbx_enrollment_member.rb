@@ -7,14 +7,13 @@ class HbxEnrollmentMember
   field :is_subscriber, type: Boolean, default: false
   field :applicant_id, type: Moped::BSON::ObjectId
 
-  def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.hbx_enrollment.coverage_household.application_group
+  def application_group
+    hbx_enrollment.application_group
   end
 
   # many_to_many_through :tax_household
   def applicant
-    parent.applicant.where(:hbx_enrollment_member_id => self.id)
+    application_group.applicants.detect { |apl| apl._id == self.applicant_id }
   end
 
   def applicant=(applicant_instance)

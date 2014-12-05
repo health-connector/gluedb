@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -20,7 +20,8 @@ class Person
   field :department, type: String, default: ""
   field :is_active, type: Boolean, default: true
 
-  field :application_group, type: Moped::BSON::ObjectId
+  # We've moved to a many-to-many
+  # field :application_group, type: Moped::BSON::ObjectId
 
   # TODO: reference authority member by Mongo ID
   # field :application_group, type: Moped::BSON::ObjectId

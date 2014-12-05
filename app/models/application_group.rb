@@ -2,7 +2,7 @@ class ApplicationGroup
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
   include AASM
 
   auto_increment :hbx_assigned_id, seed: 9999

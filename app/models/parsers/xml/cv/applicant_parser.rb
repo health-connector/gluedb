@@ -11,7 +11,7 @@ module Parsers::Xml::Cv
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, xpath:'cv:person_relationships'
     has_one :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics'
-    has_many :alias_ids, String, xpath: 'cv:id/cv:alias_ids/cv:alias_id'
+    has_many :alias_ids, String, xpath: 'cv:id/cv:alias_ids/cv:alias_id/cv:id'
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     element :tax_household_id, String, tag: 'tax_household_id'
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'

@@ -22,9 +22,9 @@ module Parsers::Xml::Cv
 
     has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, tag: 'eligibility_determinations'
 
-    def individual_requests(member_id_generator)
+    def individual_requests(member_id_generator, p_tracker)
       applicants.map do |applicant|
-        applicant.to_individual_request(member_id_generator)
+        applicant.to_individual_request(member_id_generator, p_tracker)
       end
     end
   end

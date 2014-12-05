@@ -37,5 +37,15 @@ module Parsers::Xml::Cv
     def policies_enrolled
       ['772']
     end
+
+    def yearly_income(calender_year)
+      total_income = 0.0
+      tax_households.each do |tax_household|
+        yearly_incomes = tax_household.to_hash[:total_incomes_by_year]
+        income_record = yearly_incomes.detect{|income| income[:calendar_year] == calendar_year}
+        total_income += income_record[:total_amount].to_f if income_record
+      end
+      sprintf("%.2f", total_income)
+    end
   end
 end

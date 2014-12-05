@@ -11,10 +11,6 @@ class Api::V2::RenewalPoliciesController < ApplicationController
     @policies = Policy.where(search)
     @renewals = {}
 
-    page_number = params[:page]
-    page_number ||= 1
-    @policies = @policies.page(page_number).per(20)
-
     m_ids = []
 
     @policies.each do |mpol|

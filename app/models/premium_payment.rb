@@ -19,6 +19,7 @@ class PremiumPayment
 "REFUND"]
 
   index({paid_at: 1})
+  index({paid_at: 1, policy_id: 1})
 
 	before_create :parse_coverage_period
 

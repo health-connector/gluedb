@@ -189,17 +189,29 @@ class Employer
     end
   end
 
+  def plan_year_of(coverage_start_date)
+    # The #to_a is a caching thing.
+    plan_years.to_a.detect do |py|
+      (py.start_date <= coverage_start_date) &&
+        (py.end_date >= coverage_start_date)
+    end
+  end
+
+  def renewal_plan_year_of(coverage_start_date)
+    plan_year_of(coverage_start_date + 1.year)
+  end
+
   def merge_plan_year(incoming)
     existing = self.plan_years.detect { |py| py.match(incoming) }
     if(existing)
       existing.merge_without_blanking(incoming,
-        :open_enrollment_start,
-        :open_enrollment_end,
-        :start_date,
-        :end_date,
-        :fte_count,
-        :pte_count
-      )
+                                      :open_enrollment_start,
+                                      :open_enrollment_end,
+                                      :start_date,
+                                      :end_date,
+                                      :fte_count,
+                                      :pte_count
+                                     )
       merge_broker(existing,incoming)
       EmployerElectedPlansMerger.merge(existing, incoming)
       update_carriers(existing)

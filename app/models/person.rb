@@ -379,6 +379,17 @@ class Person
     Person.find_for_members([member_id]).first
   end
 
+  def merge_relationship(new_rel)
+    old_relationships = self.person_relationships.select do |rel|
+      rel.relative_id == new_rel.relative_id
+    end
+    old_relationships.each do |old_rel|
+      self.person_relationships.delete(old_rel)
+    end
+    self.person_relationships << new_rel
+    self.touch
+  end
+
   private
 
   def initialize_authority_member
@@ -389,14 +400,5 @@ class Person
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
 
-  def merge_relationship(new_rel)
-    old_relationships = self.person_relationships.select do |rel|
-      rel.relative_id == new_rel.relative_id
-    end
-    old.relationships.each do |old_rel|
-      self.relationships.delete(old_rel)
-    end
-    self.relationships.add(new_rel)
-    self.touch
-  end
+
 end

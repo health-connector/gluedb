@@ -1,6 +1,9 @@
 class ImportApplicationGroups
 
   class PersonImportListener
+
+    attr_reader :errors
+
     def initialize(person_id, person_tracker)
       @person_id = person_id
       @errors = {}
@@ -87,8 +90,7 @@ class ImportApplicationGroups
     puts "PARSING DONE"
     ags.each do |ag|
 
-      application_group_builder = ApplicationGroupBuilder.new
-      ig_requests = ag.individual_requests(member_id_generator)
+      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash)
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
@@ -103,6 +105,8 @@ class ImportApplicationGroups
 
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
+
+        subject_person = nil
         applicant.to_relationships.each do |relationship_hash|
 
           subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"
@@ -114,13 +118,21 @@ class ImportApplicationGroups
           person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
+
         end
 
-        application_group_builder.add_applicant(applicant)
+        new_applicant = Applicant.new(applicant.to_hash)
+        new_applicant.person = subject_person
+        new_applicant.person_id = subject_person.id
+        application_group_builder.add_applicant(new_applicant)
+
+        application_group_builder.application_group.save!
+
+        application_group_builder.application_group.applicants.each do |applicant|
+          puts applicant.inspect
+        end
+        puts application_group_builder.application_group.primary_applicant
       end
-
-      puts application_group_builder.application_group.inspect
-
     end
 
 

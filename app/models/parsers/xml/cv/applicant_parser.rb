@@ -54,5 +54,14 @@ module Parsers::Xml::Cv
         person_relationships.to_relationship
       end
     end
+
+    def to_hash
+     {
+         is_primary_applicant: is_primary_applicant,
+         is_coverage_applicant: is_coverage_applicant,
+         is_head_of_household:is_head_of_household,
+         person_demographics: person_demographics.to_hash
+     }
+    end
   end
 end

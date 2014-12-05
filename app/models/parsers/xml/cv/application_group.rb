@@ -37,5 +37,12 @@ module Parsers::Xml::Cv
     def policies_enrolled
       ['772']
     end
+
+    def to_hash
+      response = {
+          e_case_id:e_case_id,
+          submitted_date:submitted_date
+      }
+    end
   end
 end

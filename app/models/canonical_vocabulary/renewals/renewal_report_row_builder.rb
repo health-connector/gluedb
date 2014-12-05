@@ -12,7 +12,7 @@ module CanonicalVocabulary
       end
 
       def append_integrated_case_number
-        @data_set << @application_group.e_case_id
+        @data_set << @application_group.e_case_id.split('#')[1]
       end
 
       def append_name_of(member)

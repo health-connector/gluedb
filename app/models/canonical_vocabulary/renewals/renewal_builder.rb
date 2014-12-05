@@ -6,14 +6,14 @@ module CanonicalVocabulary
         if member.person.addresses.blank?
           member = @primary
         end
-        member.person.addresses[0][:state].strip == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
+        member.person.addresses[0].location_state_code == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
       end
 
       def citizenship(applicant)
         return if applicant.person_demographics.blank?
         demographics = applicant.person_demographics
         if demographics.citizen_status.blank?
-          raise "Citizenship status missing for person #{self.name_first} #{self.name_last}"
+          raise "Citizenship status missing for person #{applicant.person.name_first} #{applicant.person.name_last}"
         end
 
         citizenship_mapping = {

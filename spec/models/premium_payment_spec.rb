@@ -1,10 +1,7 @@
 require 'rails_helper'
 
 describe PremiumPayment do
-  p = Policy.create!(eg_id: "yut321")
-  c = Carrier.create!(name: "acme health")
-
-	PremiumPayment.create!(
+	subject { PremiumPayment.new(
 			payment_amount_in_cents: 427.13 * 100,
 			paid_at: "20140310",
 			hbx_payment_type: "INTPREM",
@@ -13,12 +10,10 @@ describe PremiumPayment do
 			hbx_policy_id: "3099617286944718848",
 			hios_plan_id: "78079DC0230008-01",
 			hbx_carrier_id: "999999999",
-			employer_id: "010569723",
-			policy: p,
-			carrier: c
+			employer_id: "010569723"
 		)
-
-	pp = PremiumPayment.first
+  }
+	let(:pp) { subject }
 
   describe "properly instantiates object." do
 		it "sets and gets all basic model fields" do

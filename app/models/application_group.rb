@@ -29,6 +29,8 @@ class ApplicationGroup
   embeds_many :households, cascade_callbacks: true
   accepts_nested_attributes_for :households
 
+  embeds_many :financial_statements
+
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 

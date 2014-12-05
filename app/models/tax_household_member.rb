@@ -12,12 +12,12 @@ class TaxHouseholdMember
   field :is_medicaid_chip_eligible, type: Boolean, default: false
   field :is_subscriber, type: Boolean, default: false
 
-  def parent
-    self.tax_household.application_group
+  def application_group
+    tax_household.application_group
   end
 
   def applicant
-    parent.applicant.find(self.applicant_id) unless self.applicant_id.blank?
+    application_group.applicants.detect { |apl| apl._id == self.applicant_id }
   end
 
   def applicant=(applicant_instance)

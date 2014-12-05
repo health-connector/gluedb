@@ -6,7 +6,7 @@ module Parsers
       end
 
       def by_subkeys(subkeys)
-        policy = Policy.find_by_subkeys(subkeys[:eg_id], subkeys[:carrier_id], subkeys[:hios_plan_id])
+        policy = Policy.find_for_group_and_hios(subkeys[:eg_id], subkeys[:hios_plan_id])
 
         if(policy)
           @listener.policy_found(policy)

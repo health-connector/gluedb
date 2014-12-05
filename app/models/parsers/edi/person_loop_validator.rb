@@ -11,11 +11,12 @@ module Parsers
           true
         end
         if policy
-           enrollee = policy.enrollee_for_member_id(person_loop.member_id)
-           if enrollee.blank?
-             listener.no_such_member(person_loop.member_id)
+          enrollee = policy.enrollee_for_member_id(person_loop.member_id)
+          if enrollee.blank?
+            listener.no_such_member(person_loop.member_id)
           end
         end
       end
+    end
   end
 end

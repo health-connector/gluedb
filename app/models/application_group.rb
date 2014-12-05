@@ -23,17 +23,11 @@ class ApplicationGroup
   embeds_many :applicants, cascade_callbacks: true
   accepts_nested_attributes_for :applicants
 
-  embeds_many :irs_groups, cascade_callbacks: true #TODO to be removed
+  embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
   embeds_many :households, cascade_callbacks: true
   accepts_nested_attributes_for :households
-
-  embeds_many :coverage_households, cascade_callbacks: true #TODO to be removed
-  accepts_nested_attributes_for :coverage_households
-
-  embeds_many :tax_households, cascade_callbacks: true #TODO to be removed
-  accepts_nested_attributes_for :tax_households
 
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true

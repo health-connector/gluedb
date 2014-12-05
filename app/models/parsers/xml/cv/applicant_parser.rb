@@ -11,6 +11,7 @@ module Parsers::Xml::Cv
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, xpath:'cv:person_relationships'
     has_one :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics'
+    has_many :alias_ids, String, xpath: 'cv:id/cv:alias_ids/cv:alias_id'
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     element :tax_household_id, String, tag: 'tax_household_id'
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
@@ -19,7 +20,10 @@ module Parsers::Xml::Cv
     element :is_active, String, tag: 'is_active'
 
     def to_individual_request(member_id_generator, p_tracker)
-      person.individual_request(member_id_generator, p_tracker).merge(person_demographics.individual_request).merge({
+      alias_ids.each do |a_id|
+        p_tracker.register_alias(a_id,id)
+      end
+      person.individual_request(member_id_generator).merge(person_demographics.individual_request).merge({
         :emails => email_requests,
         :addresses => address_requests,
         :phones => phone_requests

@@ -44,7 +44,7 @@ module Parsers::Xml::Cv
       self.id.blank? ? "" : self.id 
     end
 
-    def individual_request(member_id_generator, p_tracker)
+    def individual_request(member_id_generator)
       {
         :name_first => name_first,
         :name_last => name_last,

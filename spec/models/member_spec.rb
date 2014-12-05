@@ -113,7 +113,7 @@ describe Member do
     let(:id_to_lookup) { '666' }
     let(:different_id) { '777' }
     let(:enrollee) { Enrollee.new(relationship_status_code: 'self', employment_status_code: 'active', benefit_status_code: 'active') }
-    let(:policy) { Policy.new(eg_id: '1') }
+    let(:policy) { Policy.new(eg_id: '1', plan_id: '1') }
 
     describe '#policies' do
       it 'finds policies who has an enrollee with a matching hbx_member_id' do
@@ -124,7 +124,7 @@ describe Member do
         policy.save!
 
         unrelated_enrollee = Enrollee.new(m_id: different_id, relationship_status_code: 'spouse', employment_status_code: 'active', benefit_status_code: 'active')
-        other_policy = Policy.new(eg_id: '1')
+        other_policy = Policy.new(eg_id: '1', plan_id: '1')
         other_policy.enrollees << unrelated_enrollee
         other_policy.save!
 
@@ -141,7 +141,7 @@ describe Member do
         policy.save!
 
         unrelated_enrollee = Enrollee.new(m_id: different_id, relationship_status_code: 'spouse', employment_status_code: 'active', benefit_status_code: 'active')
-        other_policy = Policy.new(eg_id: '1')
+        other_policy = Policy.new(eg_id: '1', plan_id: '1')
         other_policy.enrollees << unrelated_enrollee
         other_policy.save!
 

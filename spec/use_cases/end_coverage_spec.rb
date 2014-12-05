@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 shared_examples "coverage ended with correct responsible amount" do
   describe "when a shop enrollment" do
@@ -58,7 +58,7 @@ describe EndCoverage do
   let(:current_user) { 'joe@example.com' }
 
   let(:policy_repo) { double(find: policy) }
-  let(:policy) { Policy.create!(eg_id: '1', enrollees: enrollees, pre_amt_tot: premium_total) }
+  let(:policy) { Policy.create!(eg_id: '1', enrollees: enrollees, pre_amt_tot: premium_total, plan_id: "1") }
   let(:premium_total) { 300.00 }
   let(:enrollees) { [ subscriber, member ]}
   let(:subscriber) { Enrollee.new(rel_code: 'self', coverage_start: coverage_start, pre_amt: 100.00, ben_stat: 'active', emp_stat: 'active',  m_id: '1') }

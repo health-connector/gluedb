@@ -30,7 +30,6 @@ module Parsers::Xml::Cv
           zip: location_postal_code,
       }
 
-      puts response
       response
     end
   end

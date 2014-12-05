@@ -1,6 +1,9 @@
 class ImportApplicationGroups
 
   class PersonImportListener
+
+    attr_reader :errors
+
     def initialize(person_id, person_tracker)
       @person_id = person_id
       @errors = {}
@@ -42,6 +45,9 @@ class ImportApplicationGroups
   end
 
   class PersonMapper
+
+    attr_reader :people_map
+
     def initialize
       @people_map = {}
     end
@@ -84,6 +90,8 @@ class ImportApplicationGroups
           listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
           uc.validate(ig_request, listener)
       end
+
+      puts "all_valid #{all_valid}"
       next unless all_valid
       ig_requests.each do |ig_request|
           listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
@@ -94,15 +102,25 @@ class ImportApplicationGroups
       ag.applicants.each do |applicant|
         applicant.to_relationships.each do |relationship_hash|
 
-          subject_person = p_tracker[relationship_hash[:subject_person_id]].first
+          p_tracker.people_map.each do |k,v|
+           # puts "#{k} = #{v}"
+          end
+
+          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"
+
+          subject_person = p_tracker[subject_person_id_uri].first
 
           person_relationship = PersonRelationship.new
-          person_relationship.relative = p_tracker[relationship_hash[:object_person_id]].first
-          person_relationship.kind = relationship_hash.relationship
+          #person_relationship.relative = p_tracker["urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"].first
+          person_relationship.relative = p_tracker[subject_person_id_uri].first
+          puts relationship_hash.inspect
+          person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
         end
       end
+
+      puts ag.inspect
 
     end
 

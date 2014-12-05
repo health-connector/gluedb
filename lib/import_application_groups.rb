@@ -75,9 +75,12 @@ class ImportApplicationGroups
     p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
     puts "PARSING START"
+
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
     puts "PARSING DONE"
     ags.each do |ag|
+
+      application_group_builder = ApplicationGroupBuilder.new
       ig_requests = ag.individual_requests(member_id_generator)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
@@ -104,9 +107,11 @@ class ImportApplicationGroups
 
           subject_person.merge_relationship(person_relationship)
         end
+
+        application_group_builder.add_applicant(applicant)
       end
 
-      puts ag.inspect
+      puts application_group_builder.application_group.inspect
 
     end
 

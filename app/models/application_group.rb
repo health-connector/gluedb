@@ -35,7 +35,8 @@ class ApplicationGroup
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
   validates :renewal_consent_through_year,
-              numericality: { only_integer: true, inclusion: 2014..2025 }
+              numericality: { only_integer: true, inclusion: 2014..2025 },
+              :allow_nil => true
 
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
 

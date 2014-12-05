@@ -1,4 +1,4 @@
-path = "ApplicationGroupsSample20141125_0149PM.xml"
+path = "/Users/CitadelFirm/Downloads/projects/hbx/ApplicantionsGroups_1.xml"
 
 iag = ImportApplicationGroups.new(path)
 

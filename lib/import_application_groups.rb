@@ -44,14 +44,21 @@ class ImportApplicationGroups
   class PersonMapper
     def initialize
       @people_map = {}
+      @alias_map = {}
+    end
+
+    def register_alias(alias_uri, p_uri)
+      @alias_map[alias_uri] = p_uri
     end
 
     def register_person(p_uri, person, member)
+      register_alias(p_uri, p_uri)
       @people_map[p_uri] = [person, member]
     end
 
     def [](uri)
-      @people_map[uri]
+      p_uri = @alias_map[uri]
+      @people_map[p_uri]
     end
   end
 
@@ -82,6 +89,7 @@ class ImportApplicationGroups
 
       application_group_builder = ApplicationGroupBuilder.new
       ig_requests = ag.individual_requests(member_id_generator)
+      ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
           listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)

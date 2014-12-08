@@ -32,7 +32,7 @@ class Api::V2::RenewalPoliciesController < ApplicationController
       renewal = p.clone_for_renewal(start_date)
 
       if p.subscriber.canceled? || p.subscriber.terminated?
-        renewal.errors.add(:renewal_policy, 'must be active')
+        renewal.errors.add(:Policy, 'to be renewed must be active')
       else
         calc.apply_calculations(renewal)
       end
@@ -60,7 +60,7 @@ class Api::V2::RenewalPoliciesController < ApplicationController
     @renewal = @policy.clone_for_renewal(start_date)
 
     if @renewal.subscriber.nil?
-      @renewal.errors.add(:renewal_policy, 'must be active')
+      @renewal.errors.add(:Policy, 'to be renewed must be active')
       render :status => 422, :xml => @renewal.errors
     else
       calc.apply_calculations(@renewal)

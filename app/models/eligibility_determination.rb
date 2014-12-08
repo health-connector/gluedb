@@ -47,6 +47,7 @@ class EligibilityDetermination
   end
 
   def csr_percent=(value)
+    value ||= 0 #to handle value = nil
     raise "value out of range" if (value < 0 || value > 1)
     self.csr_percent_as_integer = Rational(value) * Rational(100)
   end

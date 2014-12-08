@@ -31,8 +31,6 @@ class FinancialStatement
   embeds_many :alternate_benefits
   accepts_nested_attributes_for :alternate_benefits
 
-  validates_presence_of :tax_household_member_id
-
   validates :tax_filing_status,
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true

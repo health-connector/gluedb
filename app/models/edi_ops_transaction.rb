@@ -23,6 +23,9 @@ class EdiOpsTransaction
 
   index({aasm_state:  1})
 
+  scope :by_active_ownership, ->(email){ where(assigned_to: email, aasm_state: :assigned) }
+  scope :by_oldest, order_by(submitted_timestamp: 1)
+
   aasm do
     state :open, initial: true
     state :assigned

@@ -58,10 +58,12 @@ module Parsers::Xml::Cv
 
     def to_hash
      {
+         id:id,
          is_primary_applicant: is_primary_applicant,
          is_coverage_applicant: is_coverage_applicant,
          is_head_of_household:is_head_of_household,
-         person_demographics: person_demographics.to_hash
+         person_demographics: person_demographics.to_hash,
+         financial_statements: financial_statements.map(&:to_hash)
      }
     end
   end

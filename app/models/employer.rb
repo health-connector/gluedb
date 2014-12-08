@@ -149,9 +149,9 @@ class Employer
   end
 
   def self.find_for_fein(e_fein)
-    Rails.cache.fetch("Employer/find/fein.#{e_fein}") do
+#    Rails.cache.fetch("Employer/find/fein.#{e_fein}") do
       Employer.where(:fein => e_fein).first
-    end
+#    end
   end
 
   def self.find_for_carrier_and_group_id(carrier_id, group_id)

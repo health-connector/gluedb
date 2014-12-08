@@ -21,14 +21,16 @@ module Parsers::Xml::Cv
     element :location, String, tag: "location"
 
     def request_hash
-      {
-          type: type,
-          address1: address_line_1,
-          address2: address_line_2,
+      response = {
+          address_type: type.split("#").last,
+          address_1: address_line_1,
+          address_2: address_line_2,
           city: location_city_name,
           state: location_state_code,
           zip: location_postal_code,
       }
+
+      response
     end
   end
 end

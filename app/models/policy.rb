@@ -2,7 +2,7 @@ class Policy
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
   include AASM
 
   extend Mongorder
@@ -27,6 +27,8 @@ class Policy
   field :carrier_to_bill, type: Boolean, default: false
   field :aasm_state, type: String
   field :updated_by, type: String
+  field :is_active, type: Boolean, default: true
+
 
   validates_presence_of :eg_id
 #  validates_presence_of :plan_id
@@ -36,6 +38,9 @@ class Policy
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
+
+  embeds_many :comments
+  accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
   belongs_to :hbx_enrollment_policy, class_name: "ApplicationGroup", inverse_of: :hbx_enrollment_policies, index: true
   belongs_to :carrier, counter_cache: true, index: true
@@ -149,7 +154,7 @@ class Policy
   end
 
   def is_shop?
-    !employer.nil?
+    !employer_id.blank?
   end
 
   def subscriber
@@ -377,7 +382,7 @@ class Policy
   def self.find_terminated_in_range(start_d, end_d, other_params = {})
     Policy.where(
       PolicyStatus::Terminated.during(
-        start_d, 
+        start_d,
         end_d
         ).query
     )
@@ -520,7 +525,7 @@ class Policy
   def clone_for_renewal(start_date)
     pol = Policy.new({
       :broker => self.broker,
-      :employer => self.employer,
+      :employer_id => self.employer_id,
       :carrier_to_bill => self.carrier_to_bill,
       :preceding_enrollment_group_id => self.eg_id,
       :carrier_id => self.carrier_id,
@@ -532,11 +537,12 @@ class Policy
     pol.enrollees = cloneable_enrollees.map do |en|
       en.clone_for_renewal(start_date)
     end
-    pol.plan = self.plan.renewal_plan
+    current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
+    pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
     pol
   end
 
-protected
+  protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end

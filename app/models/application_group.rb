@@ -2,7 +2,7 @@ class ApplicationGroup
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
   include AASM
 
   auto_increment :hbx_assigned_id, seed: 9999
@@ -29,18 +29,14 @@ class ApplicationGroup
   embeds_many :households, cascade_callbacks: true
   accepts_nested_attributes_for :households
 
-  embeds_many :coverage_households, cascade_callbacks: true
-  accepts_nested_attributes_for :coverage_households
-
-  embeds_many :tax_households, cascade_callbacks: true
-  accepts_nested_attributes_for :tax_households
+  embeds_many :financial_statements
 
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  validates :renewal_consent_through_year, 
-              presence: true,
-              numericality: { only_integer: true, inclusion: 2014..2025 }
+  validates :renewal_consent_through_year,
+              numericality: { only_integer: true, inclusion: 2014..2025 },
+              :allow_nil => true
 
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
 

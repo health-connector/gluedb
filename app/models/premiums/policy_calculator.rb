@@ -1,6 +1,7 @@
 module Premiums
   class PolicyCalculator
-    def initialize
+    def initialize(member_cache = nil)
+      @member_cache = member_cache
     end
 
     def apply_calculations(policy)
@@ -16,24 +17,36 @@ module Premiums
         plan_year = determine_shop_plan_year(policy)
         rate_begin_date = plan_year.start_date
         policy.enrollees.each do |en|
-          en.calculate_premium_using(plan, rate_begin_date)
+          en.pre_amt = calculate_cached_premium(plan, en, rate_begin_date, en.coverage_start)
         end
       else
         policy.enrollees.each do |en|
-          en.calculate_premium_using(plan, en.coverage_start)
+          en.pre_amt = calculate_cached_premium(plan, en, en.coverage_start, en.coverage_start)
         end
       end
     end
 
+    def calculate_cached_premium(plan, enrollee, rate_start_date, coverage_start)
+      member = get_member(enrollee)
+      sprintf("%.2f", plan.rate(rate_start_date, coverage_start, member.dob).amount)
+    end
+
+    def get_member(enrollee)
+      return enrollee.member unless @member_cache
+      @member_cache.lookup(enrollee.m_id)
+    end
+
     def apply_group_discount(policy)
       children_under_21 = policy.enrollees.select do |en|
-        ager = Ager.new(en.member.dob)
+        member = get_member(en)
+        ager = Ager.new(member.dob)
         age = ager.age_as_of(en.coverage_start)
         (age < 21) && (en.rel_code == "child")
       end
       return(nil) unless children_under_21.length > 3
       orderly_children = (children_under_21.sort_by do |en|
-        ager = Ager.new(en.member.dob)
+        member = get_member(en)
+        ager = Ager.new(member.dob)
         ager.age_as_of(en.coverage_start)
       end).reverse
       orderly_children.drop(3).each do |en|
@@ -60,13 +73,14 @@ module Premiums
       end
     end
 
+    def get_employer(policy)
+      Caches::MongoidCache.lookup(Employer, policy.employer_id) { policy.employer }
+    end
+
     def determine_shop_plan_year(policy)
       coverage_start_date = policy.subscriber.coverage_start
-      employer = policy.employer
-      employer.plan_years.detect do |py|
-        (py.start_date <= coverage_start_date) &&
-          (py.end_date >= coverage_start_date)
-      end
+      employer = get_employer(policy)
+      employer.plan_year_of(coverage_start_date)
     end
   end
 end

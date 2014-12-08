@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -20,7 +20,8 @@ class Person
   field :department, type: String, default: ""
   field :is_active, type: Boolean, default: true
 
-  field :application_group, type: Moped::BSON::ObjectId
+  # We've moved to a many-to-many
+  # field :application_group, type: Moped::BSON::ObjectId
 
   # TODO: reference authority member by Mongo ID
   # field :application_group, type: Moped::BSON::ObjectId
@@ -103,7 +104,8 @@ class Person
     # - the delta ("delta")
     # We have everything we need to construct whatever messages care about that data.
     # E.g. (again, ignore the naming as it is terrible)
-    Protocols::Notifier.update_notification(old_record, props, delta)
+    #Protocols::Notifier.update_notification(old_record, props, delta)
+    Protocols::Notifier.update_notification(old_record, delta) #The above statement was giving error with 3 params
 
     # Then we proceed normally
     self.update_attributes(props)
@@ -385,6 +387,17 @@ class Person
     Person.find_for_members([member_id]).first
   end
 
+  def merge_relationship(new_rel)
+    old_relationships = self.person_relationships.select do |rel|
+      rel.relative_id == new_rel.relative_id
+    end
+    old_relationships.each do |old_rel|
+      self.person_relationships.delete(old_rel)
+    end
+    self.person_relationships << new_rel
+    self.touch
+  end
+
   private
 
   def initialize_authority_member
@@ -395,14 +408,5 @@ class Person
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
 
-  def merge_relationship(new_rel)
-    old_relationships = self.person_relationships.select do |rel|
-      rel.relative_id == new_rel.relative_id
-    end
-    old.relationships.each do |old_rel|
-      self.relationships.delete(old_rel)
-    end
-    self.relationships.add(new_rel)
-    self.touch
-  end
+
 end

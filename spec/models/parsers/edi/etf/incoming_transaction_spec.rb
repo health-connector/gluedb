@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 describe Parsers::Edi::IncomingTransaction do
   let(:enrollee) { Enrollee.new(m_id: '1',
                                 relationship_status_code: 'self',
@@ -7,7 +7,7 @@ describe Parsers::Edi::IncomingTransaction do
                                 coverage_start: coverage_start,
                                 coverage_end: coverage_end ) }
   let(:policy) do
-    policy = Policy.new(eg_id: '1')
+    policy = Policy.new(eg_id: '1', plan_id: '1')
     policy.enrollees << enrollee
     policy.save!
     policy

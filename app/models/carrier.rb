@@ -2,7 +2,7 @@ class Carrier
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
 
 
   field :name, type: String
@@ -12,6 +12,7 @@ class Carrier
   field :ind_dtl, as: :individual_market_dental, type: Boolean, default: false
   field :shp_hlt, as: :shop_market_health, type: Boolean, default: false
   field :shp_dtl, as: :shop_market_dental, type: Boolean, default: false
+  field :is_active, type: Boolean, default: true
 
   has_many :plans
   has_many :policies

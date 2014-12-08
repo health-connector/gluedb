@@ -1,43 +1,36 @@
-= render 'shared/v2/identity', id: api_v1_employer_url(employer.id)
+= render 'shared/v2/identity', id: api_v2_employer_url(employer.id), obj: employer
 %n1:name= employer.name
-- if false
-  %n1:dba
+- if employer.dba.present?
+  %n1:dba= employer.dba
 %n1:fein= employer.fein
 - if employer.sic_code.present?
   %n1:sic_code= employer.sic_code
-- if employer.broker.present?
-  %n1:broker= render 'shared/v2/broker_link_type', broker: employer.broker
-%n1:fte_count= employer.fte_count
-%n1:pte_count= employer.pte_count
-%n1:open_enrollment_start= employer.open_enrollment_start.try(:strftime,"%Y%m%d")
-%n1:open_enrollment_end= employer.open_enrollment_end.try(:strftime,"%Y%m%d")
-%n1:plan_year_start= employer.plan_year_start.try(:strftime,"%Y%m%d")
-- if employer.plan_year_end.present?
-  %n1:plan_year_end= employer.plan_year_end.try(:strftime,"%Y%m%d")
-%n1:plans
-  - carrier_cache = build_carrier_cache
-  - employer.elected_plans.each do |elected_plan|
-    - plan = elected_plan.plan
-    %n1:plan
-      = render 'shared/v2/identity', id: elected_plan.id
-      %n1:qhp_id= elected_plan.qhp_id
-      %n1:name= elected_plan.plan_name
-      %n1:is_dental_only_flag= plan.coverage_type == 'dental'
-      %n1:carrier= render 'shared/v2/carrier_link_type', carrier: carrier_cache[elected_plan.carrier_id]
-      %n1:coverage_type= "urn:openhbx:terms:v1:benefit_coverage##{plan.coverage_type}"
-      %n1:metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level.downcase}"
-      - if plan.market_type.present?
-        %n1:market= "urn:openhbx:terms:v1:hbx_market##{plan.market_type}"
-      %n1:original_effective_date= elected_plan.original_effective_date.try(:strftime,"%Y%m%d")
-      - if elected_plan.carrier_employer_group_id.present?
-        %n1:group_id= elected_plan.carrier_employer_group_id
-      - if elected_plan.carrier_policy_number.present?
-        %n1:policy_number= elected_plan.carrier_policy_number
-%n1:contacts
-  - 1.times do
-    %n1:contact
-      = render 'shared/v2/person', person: employer
-- if employer.notes.present?
-  %n1:notes= employer.notes
-- if employer.notes.present?
-  %n1:notes= employer.notes
+- unless employer.plan_years.empty?
+  %n1:plan_years
+    - employer.plan_years.each do |py|
+      %n1:plan_year
+        %n1:plan_year_start= py.start_date
+        - if py.end_date.present?
+          %n1:plan_year_end= py.end_date
+        - if py.broker.present?
+          %n1:broker= render 'shared/v2/broker_link_type', broker: py.broker
+        %n1:fte_count= employer.fte_count
+        %n1:pte_count= employer.pte_count
+        %n1:open_enrollment_start= employer.open_enrollment_start.try(:strftime,"%Y%m%d")
+        %n1:open_enrollment_end= employer.open_enrollment_end.try(:strftime,"%Y%m%d")
+        %n1:plans
+          - carrier_cache = build_carrier_cache
+          - py.elected_plans.each do |ep|
+            %n1:plan
+              = render 'shared/v2/identity', id: ep.id, obj: ep
+              %n1:name= ep.plan_name
+              %n1:is_dental_only_flag= ep.coverage_type == 'dental'
+              %n1:carrier= render 'shared/v2/carrier_link_type', carrier: carrier_cache[ep.carrier_id]
+              %n1:original_effective_date= ep.original_effective_date.try(:strftime,"%Y%m%d")
+              - if ep.carrier_employer_group_id.present?
+                %n1:group_id= ep.carrier_employer_group_id
+              - if ep.carrier_policy_number.present?
+                %n1:policy_number= ep.carrier_policy_number
+              %n1:coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{ep.coverage_type}"
+              %n1:metal_level= "urn:openhbx:terms:v1:plan_metal_level##{ep.metal_level.downcase}"
+              = ep.inspect

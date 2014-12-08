@@ -1,4 +1,3 @@
-= render 'shared/v2/identity', id: api_v2_policy_url(policy.id), obj: policy
 - broker = policy.broker
 - if broker.present?
   = render 'shared/v2/broker_link_type', broker: policy.broker
@@ -43,4 +42,3 @@
 %n1:active_flag= policy.is_active
 - unless policy.comments.empty?
   = render 'shared/v2/comments', object: policy
-= render 'shared/v2/timestamp', record: policy

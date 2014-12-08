@@ -14,6 +14,7 @@ class TaxHousehold
   embeds_many :tax_household_members
   accepts_nested_attributes_for :tax_household_members
 
+  include HasApplicants
 
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i
@@ -38,8 +39,16 @@ class TaxHousehold
     members.size 
   end
 
+  def application_group
+    return nil unless household
+    household.application_group   
+  end
+
   def is_eligibility_determined?
     self.is_eligibility_determined
   end
 
+  def applicant_ids
+    tax_household_members.map(&:applicant_id)
+  end
 end

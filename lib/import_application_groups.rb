@@ -1,6 +1,9 @@
 class ImportApplicationGroups
 
   class PersonImportListener
+
+    attr_reader :errors
+
     def initialize(person_id, person_tracker)
       @person_id = person_id
       @errors = {}
@@ -42,16 +45,27 @@ class ImportApplicationGroups
   end
 
   class PersonMapper
+
+    attr_reader :people_map
+    attr_reader :alias_map
+
     def initialize
       @people_map = {}
+      @alias_map = {}
+    end
+
+    def register_alias(alias_uri, p_uri)
+      @alias_map[alias_uri] = p_uri
     end
 
     def register_person(p_uri, person, member)
+      register_alias(p_uri, p_uri)
       @people_map[p_uri] = [person, member]
     end
 
     def [](uri)
-      @people_map[uri]
+      p_uri = @alias_map[uri]
+      @people_map[p_uri]
     end
   end
 
@@ -75,10 +89,13 @@ class ImportApplicationGroups
     p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
     puts "PARSING START"
+
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
     puts "PARSING DONE"
     ags.each do |ag|
-      ig_requests = ag.individual_requests(member_id_generator)
+
+      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash)
+      ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
           listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
@@ -92,18 +109,35 @@ class ImportApplicationGroups
 
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
+
         applicant.to_relationships.each do |relationship_hash|
 
-          subject_person = p_tracker[relationship_hash[:subject_person_id]].first
+          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
+          object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
+          subject_person = p_tracker[subject_person_id_uri].first
 
           person_relationship = PersonRelationship.new
-          person_relationship.relative = p_tracker[relationship_hash[:object_person_id]].first
-          person_relationship.kind = relationship_hash.relationship
+          person_relationship.relative = p_tracker[object_person_id_uri].first
+          person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
+
+          new_applicant = Applicant.new(applicant.to_hash)
+          new_applicant.person = subject_person
+          new_applicant.person_id = subject_person.id
+          application_group_builder.add_applicant(new_applicant)
+        end
+
+        #application_group_builder.add_irsgroups(ag.irs_groups)
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
+        application_group_builder.application_group.save!
+
+        application_group_builder.application_group.households.each do |household|
+          household.tax_households.each do |tax_household|
+            puts tax_household.inspect
+          end
         end
       end
-
     end
 
 

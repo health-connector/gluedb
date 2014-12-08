@@ -36,5 +36,4 @@ class EdiOpsTransaction
       transitions from: :assigned, to: :resolved
     end
   end
-   
 end

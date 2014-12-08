@@ -4,25 +4,10 @@
   <%= render 'shared/breadcrumb', crumbs: ['EdiIssues'] %>
 </div>
 
-
-<div class="btn-toolbar">
-  <div class="btn-btn-group">
-    <%= link_to("All", { action: "index" }, class: "active btn btn-primary") %>
-    <%= link_to("open", { action: "index", aasm_state: "open" }, class: "active btn btn-primary") %>
-    <%= link_to("Close", { action: "index", aasm_state: "close" }, class: "btn btn-primary") %>
-    <%= link_to("Assigned", { action: "index", aasm_state: "Assigned" }, class: "btn btn-primary") %>
-  </div>
-</div>
-
-
 <table class="table table-condensed">
   <thead>
     <tr>
-      <% h = {:sort => "enrollment_id", :direction => sort_direction} 
-      if request[:q] 
-          h[:q] = request[:q] 
-      end %>
-      <th><%= link_to "Enrollment Group Id", h %></th>
+      <th>Enrollment Group Id</th>
       <th>Resource</th>
       <th>Event name</th>
       <th>Submitted timestamp</th>

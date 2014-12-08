@@ -4,23 +4,20 @@
   <%= render 'shared/breadcrumb', crumbs: [@edi_issue.enrollment_group_uri] %>
 </div>
 
-
 <div class="row">
   <div class="col-md-5">
-    <dl class="dl-horizontal"> 
+    <dl class="dl-horizontal">
     <dt><%= model_class.human_attribute_name(:assigned_to) %>:</dt>
     <dd><%= @edi_issue.assigned_to %></dd>
     <dt><%= model_class.human_attribute_name(:resolved_by) %>:</dt>
-    <dd><%= @edi_issue.resolved_by %></dd>   
+    <dd><%= @edi_issue.resolved_by %></dd>
     <dt><%= model_class.human_attribute_name(:aasm_state) %>:</dt>
     <dd><%= @edi_issue.aasm_state %></dd>
     <dt><%= link_to "Edit", edit_edi_issue_path(@edi_issue), class: 'btn btn-primary'  %></dt>
     </dl>
+  </div>
+</div>
 
-  </div>  
-</div>   
-
- <p>
  <div class="col-md-8">
    <div class="panel panel-default">
       <div class="panel-heading">
@@ -35,19 +32,17 @@
     </div>
    </div>
   </p>
-  
+
  <div class="col-md-10">
     <%= render 'comments/comment_panel', commentable: @edi_issue %>
-  </div> 
-  
+  </div>
+
 
 <div class="col-md-12">
-  
+
   <div class="well well-sm default">
     <div class="form-actions">
      <%= link_to t('.back', :default => t("helpers.links.back")), edi_issues_path, :class => 'btn btn-primary'  %>
     </div>
   </div>
 </div>
-
-   

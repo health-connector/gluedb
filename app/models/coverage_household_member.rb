@@ -7,18 +7,11 @@ class CoverageHouseholdMember
   field :applicant_id, type: Moped::BSON::ObjectId
   field :is_subscriber, type: Boolean, default: false
 
+  include BelongsToApplicant
 
-  def parent
-    self.coverage_household.application_group
-  end
-
-  def applicant
-    parent.applicant.find(self.applicant_id) unless self.applicant_id.blank?
-  end
-
-  def applicant=(applicant_instance)
-    return unless applicant_instance.is_a? Applicant
-    self.applicant_instance_id = applicant._id
+  def application_group
+    return nil unless coverage_household
+    coverage_household.application_group
   end
 
 end

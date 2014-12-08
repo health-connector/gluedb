@@ -22,7 +22,7 @@ class FinancialStatement
 
   index({submitted_date:  1})
 
-  embedded_in :application_group
+  embedded_in :tax_household_member
 
   embeds_many :incomes
   accepts_nested_attributes_for :incomes
@@ -39,13 +39,14 @@ class FinancialStatement
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
 
-  def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+  def application_group
+    return nil unless tax_household_member
+    tax_household_member.application_group
   end
 
   def applicant
-    parent.applicants.find(self.applicant_id) unless self.applicant_id.blank?
+    return nil unless tax_household
+    tax_household_member.applicant
   end
 
   def eligibility_determination=(ed_instance)

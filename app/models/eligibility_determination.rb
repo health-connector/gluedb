@@ -22,27 +22,11 @@ class EligibilityDetermination
               allow_nil: true, 
               numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-  def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
-  end
+  include HasApplicants
 
-  def tax_household=(tax_household_instance)
-    return unless tax_household_instance.is_a? TaxHousehold
-    self.tax_household_id = tax_household_instance._id
-  end
-
-  def tax_household
-    parent.tax_household.find(self.tax_household_id)
-  end
-
-  def primary_applicant=(person_instance)
-    return unless person_instance.is_a? Person
-    self.primary_applicant_id = person_instance._id
-  end
-
-  def primary_applicant
-    Person.find(self.primary_applicant_id) unless self.primary_applicant_id.blank?
+  def application_group
+    return nil unless tax_household
+    tax_household.application_group
   end
 
   def benchmark_plan=(benchmark_plan_instance)

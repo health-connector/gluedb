@@ -10,8 +10,6 @@ class FinancialStatement
   field :is_tax_filing_together, type: Boolean
 
   field :eligibility_determination_id, type: Moped::BSON::ObjectId
-  field :tax_household_member_id, type: Moped::BSON::ObjectId
-
 
   # Has access to employer-sponsored coverage that meets ACA minimum standard value and 
   #   employee responsible premium amount is <= 9.5% of Household income
@@ -45,7 +43,7 @@ class FinancialStatement
   end
 
   def applicant
-    return nil unless tax_household
+    return nil unless tax_household_member
     tax_household_member.applicant
   end
 
@@ -55,7 +53,8 @@ class FinancialStatement
   end
 
   def eligibility_determination
-    parent.eligibility_determination.find(self.eligibility_determination_id) unless self.eligibility_determination_id.blank?
+    return nil unless tax_household_member
+    tax_household_member.eligibility_determinations.detect { |elig_d| elig_d._id == self.eligibility_determination_id }
   end
 
   # Evaluate if receiving Alternative Benefits this year

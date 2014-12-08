@@ -14,7 +14,7 @@ class TaxHousehold
   embeds_many :tax_household_members
   accepts_nested_attributes_for :tax_household_members
 
-  embeds_one :eligibility_determination
+  embeds_many :eligibility_determinations
 
   include HasApplicants
 

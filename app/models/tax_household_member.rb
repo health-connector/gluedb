@@ -13,9 +13,9 @@ class TaxHouseholdMember
 
   include BelongsToApplicant
 
-  def eligibility_determination
+  def eligibility_determinations
     return nil unless tax_household
-    tax_household.eligibility_determination
+    tax_household.eligibility_determinations
   end
 
   def application_group

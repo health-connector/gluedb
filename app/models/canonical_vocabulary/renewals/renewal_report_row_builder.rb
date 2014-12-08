@@ -87,7 +87,7 @@ module CanonicalVocabulary
       end
 
       def append_yearwise_income_of(member)
-        @data_set << member.yearwise_incomes("2014")
+        @data_set << member.income_by_year("2014")
       end
 
       def append_blank

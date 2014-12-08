@@ -30,7 +30,12 @@ class Api::V2::RenewalPoliciesController < ApplicationController
       end
 
       renewal = p.clone_for_renewal(start_date)
-      calc.apply_calculations(renewal)
+
+      if p.subscriber.canceled? || p.subscriber.terminated?
+        renewal.errors.add(:renewal_policy, 'must be active')
+      else
+        calc.apply_calculations(renewal)
+      end
 
       @renewals[p] = renewal
     end
@@ -53,10 +58,16 @@ class Api::V2::RenewalPoliciesController < ApplicationController
     end
 
     @renewal = @policy.clone_for_renewal(start_date)
-    calc.apply_calculations(@renewal)
 
-    Caches::MongoidCache.with_cache_for(Carrier) do
-      render 'show'
+    if @renewal.subscriber.nil?
+      @renewal.errors.add(:renewal_policy, 'must be active')
+      render :status => 422, :xml => @renewal.errors
+    else
+      calc.apply_calculations(@renewal)
+
+      Caches::MongoidCache.with_cache_for(Carrier) do
+        render 'show'
+      end
     end
   end
 end

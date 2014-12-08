@@ -12,7 +12,7 @@ module AssistanceStrategies
       catch(:assistance_calculated) do
         possible_assistance = calculate_benchmark_for(people) - calculate_fpl_responsible_amount(people, income)
         assistance = [0.00, possible_assistance].max
-        [:assistance, sprintf("%.2f", assistance).to_f]
+        sprintf("%.2f", assistance).to_f
       end
     end
 
@@ -31,7 +31,7 @@ module AssistanceStrategies
     def calculate_fpl_responsible_amount(people, income)
       fpl_percent = income/fpl_income_for(people)
       found_percentage = fpl_percentages.detect { |fplp| fplp.include?(fpl_percent) }
-      throw(:assistance_calculated, [:assisted, 0.00]) unless found_percentage
+      throw(:assistance_calculated, 0.00) unless found_percentage
       result = income * found_percentage.percentage(fpl_percent) * 0.083333
       sprintf("%.2f", result).to_f
     end

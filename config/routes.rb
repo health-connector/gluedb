@@ -51,6 +51,7 @@ Gluedb::Application.routes.draw do
   end
 
   resources :application_groups do
+    resources :applicants
     member do
       get :applicant_links
     end

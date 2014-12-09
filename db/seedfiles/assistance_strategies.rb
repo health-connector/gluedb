@@ -13,56 +13,38 @@ assistance_strat = AssistanceStrategies::SetAgnosticBenchmarkPlan.new(
     {
       :min => 0.00,
       :max => 1.33,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0201,
-      :coefficient => 0.00,
-      :divisor => 0.5
+      :max_contribution => 0.0201
     },
     {
       :min => 1.33,
       :max => 1.50,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0302,
-      :coefficient => 1.00,
-      :divisor => 0.17
+      :max_contribution => 0.0402
     },
     {
       :min => 1.50,
       :max => 2.00,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0402,
-      :coefficient => 2.32,
-      :divisor => 0.50
+      :max_contribution => 0.0634
     },
     {
       :min => 2.00,
       :max => 2.50,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0634,
-      :coefficient => 1.76,
-      :divisor => 0.50
+      :max_contribution => 0.0810
     },
     {
       :min => 2.50,
       :max => 3.00,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0810,
-      :coefficient => 1.46,
-      :divisor => 0.50
+      :min_contribution => 0.0956
     },
     {
       :min => 3.00,
       :max => 4.00,
-      :min_inclusive => true,
-      :max_inclusive => false,
       :min_contribution => 0.0956,
-      :coefficient => 0.00,
-      :divisor => 0.50
+      :max_contribution => 0.0956
     }
   ],
   :fpl_amounts => {

@@ -4,17 +4,14 @@ module Parsers::Xml::Cv
     include HappyMapper
 
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"
-    tag 'incomes'
+    tag 'income'
     namespace 'cv'
 
-    xpath_income_prefix = " income"
-    xpath_total_income_by_year_prefix = "total_income_by_year"
-
-    element :calendar_year, String, tag:"#{xpath_total_income_by_year_prefix}/cv:calender_year"
-    element :total_amount, String, tag:"#{xpath_total_income_by_year_prefix}/cv:total_amount"
-    element :amount, String, xpath:"#{xpath_income_prefix}/cv:amount"
-    element :type, String, tag:"#{xpath_income_prefix}/cv:type"
-    element :frequency, String, tag:"#{xpath_income_prefix}/cv:frequency"
+    element :calendar_year, String, tag:"calender_year"
+    element :total_amount, String, tag:"total_amount"
+    element :amount, String, tag:"amount"
+    element :type, String, tag:"type"
+    element :frequency, String, tag:"frequency"
 
     def to_hash
       {

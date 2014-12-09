@@ -20,7 +20,7 @@ module Parsers::Xml::Cv
 
     has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
 
-    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, tag: 'eligibility_determinations'
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, xpath: 'cv:eligibility_determinations'
 
     has_many :hbx_enrollments, Parsers::Xml::Cv::HbxEnrollmentParser, tag: 'hbx_enrollments'
 

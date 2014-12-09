@@ -48,10 +48,12 @@ class ImportApplicationGroups
 
     attr_reader :people_map
     attr_reader :alias_map
+    attr_reader :applicant_map
 
     def initialize
       @people_map = {}
       @alias_map = {}
+      @applicant_map = {}
     end
 
     def register_alias(alias_uri, p_uri)
@@ -66,6 +68,15 @@ class ImportApplicationGroups
     def [](uri)
       p_uri = @alias_map[uri]
       @people_map[p_uri]
+    end
+
+    def register_applicant(person, applicant)
+      @applicant_map[person.id] = applicant
+    end
+
+    def get_applicant(uri)
+      person = self[uri].first
+      @applicant_map[person.id]
     end
   end
 
@@ -94,7 +105,7 @@ class ImportApplicationGroups
     puts "PARSING DONE"
     ags.each do |ag|
 
-      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash)
+      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
@@ -122,20 +133,37 @@ class ImportApplicationGroups
 
           subject_person.merge_relationship(person_relationship)
 
-          new_applicant = Applicant.new(applicant.to_hash)
-          new_applicant.person = subject_person
-          new_applicant.person_id = subject_person.id
-          application_group_builder.add_applicant(new_applicant)
+          #new_applicant = Applicant.new(applicant.to_hash)
+          #new_applicant.person = subject_person
+          #new_applicant.person_id = subject_person.id
+          #application_group_builder.add_applicant(new_applicant)
         end
 
-        #application_group_builder.add_irsgroups(ag.irs_groups)
-        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
-        application_group_builder.add_financial_statements(ag.to_hash[:applicants])
-        application_group_builder.application_group.save!
-
-        puts "We saved #{application_group_builder.application_group.id} \n\n #{application_group_builder.application_group.inspect}"
+        #new_applicant = Applicant.new(applicant.to_hash(p_tracker))
+        new_applicant = application_group_builder.add_applicant(applicant.to_hash(p_tracker))
+        p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
 
       end
+
+      #application_group_builder.add_irsgroups(ag.irs_groups)
+      application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+      application_group_builder.application_group.save!
+
+      applicants_params = ag.applicants.map do |applicant|
+        applicant.to_hash(p_tracker)
+      end
+      application_group_builder.add_financial_statements(applicants_params)
+      application_group_builder.application_group.save!
+
+      puts "We saved #{application_group_builder.application_group.id}"
+      puts "\n\n #{application_group_builder.application_group.inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:incomes).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:deductions).inspect}"
+
+
     end
 
 

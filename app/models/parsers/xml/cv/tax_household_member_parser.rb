@@ -16,7 +16,7 @@ module Parsers::Xml::Cv
     def to_hash
       {
           id: id,
-          person: person.to_hash
+          # //person: person.to_hash
       }
     end
 

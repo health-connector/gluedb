@@ -51,6 +51,12 @@ describe Parsers::Xml::Cv::ApplicationGroup do
   let(:location_postal_code) {"13171"}
   let(:type) {"urn:openhbx:terms:v1:address_type#home"}
 
+  let(:household_state) {"urn:openhbx:terms:v1:household_state#cs7"}
+  let(:maximum_aptc) {"0"}
+  let(:csr_percent) {"0.0"}
+  let(:determination_date) {"20131204"}
+
+
   it 'should return e_case_id' do
     expect(subject.e_case_id).to eql(e_case_id)
   end
@@ -127,5 +133,14 @@ describe Parsers::Xml::Cv::ApplicationGroup do
     expect(subject.submitted_date).to eq(submitted_date)
   end
 
+  it "should return the eligibilty determination" do
+    expect(subject.eligibility_determinations.first.determination_date).to eq(:determination_date)
+
+    puts subject.eligibility_determinations.first.csr_percent
+    expect(subject.eligibility_determinations.first.maximum_aptc).to eq(:maximum_aptc)
+    expect(subject.eligibility_determinations.first.csr_percent).to eq(:csr_percent)
+    expect(subject.eligibility_determinations.first.household_state).to eq(:household_state)
+    expect(subject.eligibility_determinations.first.submitted_date).to eq(:submitted_date)
+  end
 
 end

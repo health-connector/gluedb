@@ -13,6 +13,7 @@ module Policies
       plan_year = request[:plan_year]
       broker_npn = request[:broker_npn]
       enrollees = request[:enrollees]
+      employer_fein = request[:employer_fein]
       existing_policy = @policy_factory.find_for_group_and_hios(eg_id, hios_id)
       if !existing_policy.blank?
         listener.policy_already_exists({
@@ -20,6 +21,13 @@ module Policies
           :hios_id => hios_id
         })
         fail = true
+      end
+      if !employer_fein.blank?
+        employer = Employer.find_for_fein(employer_fein)
+        if employer.blank?
+          listener.employer_not_found(:fein => employer_fein)
+          fail = true
+        end
       end
       if !broker_npn.blank?
         broker = Broker.find_by_npn(broker_npn)
@@ -50,17 +58,23 @@ module Policies
       hios_id = request[:hios_id]
       plan_year = request[:plan_year]
       broker_npn = request[:broker_npn]
+      employer_fein = request[:employer_fein]
 
       plan = Plan.find_by_hios_id_and_year(hios_id, plan_year)
       broker = nil
+      employer = nil
       if !broker_npn.blank?
         broker = Broker.find_by_npn(broker_npn)
+      end
+      if !employer_fein.blank?
+        employer = Employer.find_for_fein(employer_fein)
       end
 
       policy = @policy_factory.create!(request.merge({
         :plan => plan,
         :carrier => plan.carrier,
-        :broker => broker
+        :broker => broker,
+        :employer => employer
       }))
       listener.policy_created(policy.id)
       cancel_others(policy, listener)

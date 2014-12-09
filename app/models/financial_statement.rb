@@ -10,8 +10,6 @@ class FinancialStatement
   field :is_tax_filing_together, type: Boolean
 
   field :eligibility_determination_id, type: Moped::BSON::ObjectId
-  field :tax_household_member_id, type: Moped::BSON::ObjectId
-
 
   # Has access to employer-sponsored coverage that meets ACA minimum standard value and 
   #   employee responsible premium amount is <= 9.5% of Household income
@@ -22,7 +20,7 @@ class FinancialStatement
 
   index({submitted_date:  1})
 
-  embedded_in :application_group
+  embedded_in :tax_household_member
 
   embeds_many :incomes
   accepts_nested_attributes_for :incomes
@@ -33,19 +31,18 @@ class FinancialStatement
   embeds_many :alternate_benefits
   accepts_nested_attributes_for :alternate_benefits
 
-  validates_presence_of :tax_household_member_id
-
   validates :tax_filing_status,
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
 
-  def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+  def application_group
+    return nil unless tax_household_member
+    tax_household_member.application_group
   end
 
   def applicant
-    parent.applicants.find(self.applicant_id) unless self.applicant_id.blank?
+    return nil unless tax_household_member
+    tax_household_member.applicant
   end
 
   def eligibility_determination=(ed_instance)
@@ -54,7 +51,8 @@ class FinancialStatement
   end
 
   def eligibility_determination
-    parent.eligibility_determination.find(self.eligibility_determination_id) unless self.eligibility_determination_id.blank?
+    return nil unless tax_household_member
+    tax_household_member.eligibility_determinations.detect { |elig_d| elig_d._id == self.eligibility_determination_id }
   end
 
   # Evaluate if receiving Alternative Benefits this year

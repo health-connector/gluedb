@@ -14,6 +14,8 @@ class TaxHousehold
   embeds_many :tax_household_members
   accepts_nested_attributes_for :tax_household_members
 
+  embeds_many :eligibility_determinations
+
   include HasApplicants
 
   def allocated_aptc_in_dollars=(dollars)

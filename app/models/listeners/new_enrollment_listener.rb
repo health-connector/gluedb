@@ -69,6 +69,10 @@ module Listeners
       add_policy_error(:plan, "not found for HIOS #{details[:hios_id]} and year #{details[:plan_year]}")
     end
 
+    def employer_not_found(details)
+      add_policy_error(:employer, "not found for fein #{details[:fein]}")
+    end
+
     def invalid_policy(details)
       details.each_pair do |k, v|
         add_policy_error(k, v)

@@ -129,14 +129,12 @@ class ImportApplicationGroups
         end
 
         #application_group_builder.add_irsgroups(ag.irs_groups)
-        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+        application_group_builder.add_financial_statements(ag.to_hash[:applicants])
         application_group_builder.application_group.save!
 
-        application_group_builder.application_group.households.each do |household|
-          household.tax_households.each do |tax_household|
-            puts tax_household.inspect
-          end
-        end
+        puts "We saved #{application_group_builder.application_group.id} \n\n #{application_group_builder.application_group.inspect}"
+
       end
     end
 

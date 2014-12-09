@@ -41,7 +41,19 @@ module Parsers::Xml::Cv
     def to_hash
       response = {
           e_case_id:e_case_id,
-          submitted_date:submitted_date
+          submitted_date:submitted_date,
+          irs_groups: irs_groups.map do |irs_group|
+            irs_group.to_hash
+          end,
+          tax_households: tax_households.map do |tax_household|
+            tax_household.to_hash
+          end,
+          applicants: applicants.map do |applicant|
+            applicant.to_hash
+          end,
+          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
+            eligibility_determination.to_hash
+          end
       }
     end
   end

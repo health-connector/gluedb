@@ -16,7 +16,7 @@ module Parsers
 
         person_loop_validator = PersonLoopValidator.new
         etf.people.each do |person_loop|
-          person_loop_validator.validate(person_loop, incoming_transaction)
+          person_loop_validator.validate(person_loop, incoming_transaction, policy)
         end
 
         policy_loop_validator = PolicyLoopValidator.new
@@ -37,6 +37,7 @@ module Parsers
       def import
         return unless valid?
         @etf.people.each do |person_loop|
+          begin 
           enrollee = @policy.enrollee_for_member_id(person_loop.member_id)
 
           policy_loop = person_loop.policy_loops.first
@@ -56,6 +57,11 @@ module Parsers
               end
             end
 
+          end
+          rescue Exception
+            puts @policy.eg_id
+            puts person_loop.member_id
+            raise $!
           end
         end
         @policy.save
@@ -93,6 +99,10 @@ module Parsers
         if(!policy_loop.canceled?)
           @errors << "Missing Carrier Member ID."
         end
+      end
+
+      def no_such_member(id)
+        @errors << "Member not found in policy: #{id}"
       end
 
       def found_carrier_policy_id(id)

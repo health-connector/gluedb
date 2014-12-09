@@ -75,7 +75,7 @@ class Plan
 
   def self.default_search_order
     [
-      ["name", 1],
+      ["name", 1]
     ]
   end
 

@@ -18,7 +18,7 @@ module Parsers::Xml::Cv
           start_date: start_date,
           end_date: end_date,
           submitted_date: submitted_date,
-          type: type
+          kind: type.split('#').last.gsub('-','_')
       }
     end
 

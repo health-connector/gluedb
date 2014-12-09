@@ -50,6 +50,9 @@ module Parsers::Xml::Cv
           end,
           applicants: applicants.map do |applicant|
             applicant.to_hash
+          end,
+          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
+            eligibility_determination.to_hash
           end
       }
     end

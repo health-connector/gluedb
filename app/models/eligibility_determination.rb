@@ -18,9 +18,6 @@ class EligibilityDetermination
   field :determination_date, type: DateTime
 
   validates_presence_of :determination_date, :max_aptc_in_cents, :csr_percent_as_integer
-  validates :csr_percent_as_integer,
-              allow_nil: true, 
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   include HasApplicants
 

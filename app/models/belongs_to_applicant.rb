@@ -6,6 +6,6 @@ module BelongsToApplicant
 
   def applicant=(applicant_instance)
     return unless applicant_instance.is_a? Applicant
-    self.applicant_id = applicant._id
+    self.applicant_id = applicant_instance._id
   end
 end

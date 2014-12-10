@@ -14,7 +14,7 @@ class ApplicationGroup
 
   field :aasm_state, type: String
   field :is_active, type: Boolean, default: true   # ApplicationGroup active on the Exchange?
-  field :submitted_date, type: DateTime            # Date application was created on authority system
+  field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
 
   has_and_belongs_to_many :qualifying_life_events
@@ -72,6 +72,14 @@ class ApplicationGroup
 
   def consent_applicant
     applicants.detect { |a| a.is_consent_applicant? }
+  end
+
+  def find_applicant_by_person(person)
+    applicants.detect { |a| a.person == person }
+  end
+
+  def person_is_applicant?(person)
+    return true unless find_applicant_by_person(person).blank?
   end
 
   aasm do

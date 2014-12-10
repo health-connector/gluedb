@@ -3,6 +3,8 @@ class HbxEnrollment
   include Mongoid::Timestamps
   include AASM   
 
+  # Persists result of a completed plan shopping process
+
   KINDS = %W[unassisted_qhp insurance_assisted_qhp employer_sponsored streamlined_medicaid emergency_medicaid hcr_chip]
 
   embedded_in :household
@@ -12,6 +14,7 @@ class HbxEnrollment
   field :applied_aptc_in_cents, type: Integer, default: 0
   field :elected_aptc_in_cents, type: Integer, default: 0
   field :is_active, type: Boolean, default: true 
+  field :submitted_at, type: DateTime
   field :aasm_state, type: String
 
   field :policy_id, type: Integer
@@ -29,7 +32,11 @@ class HbxEnrollment
     					allow_nil:   false,
     					inclusion: {in: KINDS, message: "%{value} is not a valid enrollment type"}
 
-  validates :allocated_aptc_in_cents,
+  validates :applied_aptc_in_cents,
+              allow_nil: true, 
+              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :elected_aptc_in_cents,
               allow_nil: true, 
               numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 

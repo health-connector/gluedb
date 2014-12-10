@@ -3,6 +3,7 @@ class EdiOpsTransaction
   include Mongoid::Timestamps
   include AASM
 
+  extend Mongorder
 
   field :qualifying_reason_uri, type: String
   field :enrollment_group_uri, type: String
@@ -35,5 +36,20 @@ class EdiOpsTransaction
     event :resolve do
       transitions from: :assigned, to: :resolved
     end
+  end
+
+  def self.default_search_order
+    []
+  end
+
+  def self.search_hash(s_rex)
+    search_rex = Regexp.compile(Regexp.escape(s_rex), true)
+    {
+      "$or" => ([
+        {"enrollment_group_uri" => search_rex},
+        {"aasm_state" => search_rex},
+        {"assigned_to" => search_rex}
+      ])
+    }
   end
 end

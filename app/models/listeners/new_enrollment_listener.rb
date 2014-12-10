@@ -83,6 +83,23 @@ module Listeners
       add_policy_error(:enrollees, "is empty")
     end
 
+    # Premium errors
+    def invalid_premium_total(details)
+      add_policy_error(:premium_total, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_employer_contribution(details)
+      add_policy_error(:employer_contribution, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_responsible_total(details)
+      add_policy_error(:responsible_total, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_member_premium(details)
+      add_policy_error(:member_premium, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
     # Person errors
     def invalid_person(details)
       details.each_pair do |k, v|

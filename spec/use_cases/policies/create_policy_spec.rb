@@ -10,7 +10,8 @@ describe Policies::CreatePolicy do
   let(:carrier) { double }
   let(:plan) { double(:carrier => carrier) }
   let(:subscriber) { double(:person => person, :coverage_start => coverage_start) }
-  let(:enrollees) { [subscriber] }
+  let(:enrollees) { [subscriber_hash] }
+  let(:subscriber_hash) { { }}
   let(:policy_factory) { double(:new => new_policy) }
   let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors) }
   let(:valid_policy) { true }
@@ -101,7 +102,8 @@ describe Policies::CreatePolicy do
       request.merge({
         :plan => plan,
         :carrier => carrier,
-        :broker => nil
+        :broker => nil,
+        :employer => nil
       })
     }
 

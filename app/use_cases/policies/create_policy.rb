@@ -12,7 +12,7 @@ module Policies
       hios_id = request[:hios_id]
       plan_year = request[:plan_year]
       broker_npn = request[:broker_npn]
-      enrollees = request[:enrollees]
+      enrollees = request[:enrollees].dup.map { |val| val.reject { |k,v| k == :member } }
       employer_fein = request[:employer_fein]
       existing_policy = @policy_factory.find_for_group_and_hios(eg_id, hios_id)
       if !existing_policy.blank?

@@ -1,5 +1,7 @@
 class ImportApplicationGroups
 
+  @@logger = Logger.new("#{Rails.root}/log/soap.log")
+
   class PersonImportListener
 
     attr_reader :errors
@@ -153,16 +155,22 @@ class ImportApplicationGroups
         applicant.to_hash(p_tracker)
       end
       application_group_builder.add_financial_statements(applicants_params)
-      application_group_builder.application_group.save!
+      begin
+        application_group_builder.application_group.save!
+      rescue Exception=>e
+        puts e.message
+        puts e.backtrace.inspect
+      end
 
       puts "We saved #{application_group_builder.application_group.id}"
+=begin
       puts "\n\n #{application_group_builder.application_group.inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:incomes).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:deductions).inspect}"
-
+=end
 
     end
 

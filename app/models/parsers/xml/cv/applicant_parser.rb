@@ -70,5 +70,15 @@ module Parsers::Xml::Cv
 
      response
     end
+
+    def income_by_year(year)
+      total_income = 0.0
+      financial_statements.select do |financial_statement|
+        incomes = financial_statement.to_hash[:incomes]
+        incomes = incomes.select{|income| income[:total_income_by_year] == calender_year }
+        incomes.each {|x| total_income += x[:income].to_f }
+      end
+      sprintf("%.2f", total_income)
+    end
   end
 end

@@ -8,10 +8,7 @@ class CommentsController < ActionController::Base
     @comment.priority = params[:comment][:priority]
     @comment.user = current_user.email
     @comment.save
-    respond_to do |format|
-       format.js
-    end  
-    ##redirect_to @commentable
+    redirect_to @commentable
   end
 
   def destroy

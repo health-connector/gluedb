@@ -7,6 +7,7 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :id, String, tag: 'id/cv:id'
+    element :policy_id, String, tag: 'policy_id/cv:id'
 
   end
 end

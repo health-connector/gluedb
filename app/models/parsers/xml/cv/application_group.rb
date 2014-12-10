@@ -31,11 +31,15 @@ module Parsers::Xml::Cv
     end
 
     def primary_applicant
-      applicants.detect{|applicant| applicant.id == primary_applicant_id }
+      if applicants.size == 1
+        applicants.first
+      else
+        applicants.detect{|applicant| applicant.id == primary_applicant_id }
+      end
     end
 
     def policies_enrolled
-      ['772']
+      hbx_enrollments.map{|enrollment| enrollment.policy_id }
     end
 
     def to_hash

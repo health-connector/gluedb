@@ -129,4 +129,12 @@ module ApplicationHelper
   def dd_value(val)
     val.blank? ? "&nbsp;" : val
   end
+
+  def sortable(column, title = nil)
+    fui = params[:direction] == "desc" ? "down" : "up"
+    title ||= column.titleize
+    css_class = (column == sort_column) ? "fui-triangle-#{fui}-small" : nil
+    direction = (column == params[:sort] && params[:direction] == "asc") ? "desc" : "asc"
+    ((link_to title, params.merge(:sort => column, :direction => direction, :page => nil) ) + content_tag(:sort, raw("&nbsp;"), class: css_class))
+  end
 end

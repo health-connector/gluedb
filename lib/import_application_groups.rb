@@ -1,5 +1,7 @@
 class ImportApplicationGroups
 
+  @@logger = Logger.new("#{Rails.root}/log/soap.log")
+
   class PersonImportListener
 
     attr_reader :errors
@@ -57,10 +59,25 @@ class ImportApplicationGroups
     end
 
     def register_alias(alias_uri, p_uri)
+      @alias_map.each_pair do |k,v|
+        if (p_uri == k) && (p_uri != v)
+          @alias_map[alias_uri] = v
+          return
+        end 
+      end
       @alias_map[alias_uri] = p_uri
     end
 
     def register_person(p_uri, person, member)
+      existing_record = nil
+      existing_key = nil
+      @people_map.each_pair do |k,v|
+        existing_person = v.first
+        if person.id == existing_person.id
+          register_alias(p_uri, k)
+          return
+        end
+      end
       register_alias(p_uri, p_uri)
       @people_map[p_uri] = [person, member]
     end
@@ -153,16 +170,22 @@ class ImportApplicationGroups
         applicant.to_hash(p_tracker)
       end
       application_group_builder.add_financial_statements(applicants_params)
-      application_group_builder.application_group.save!
+      begin
+        application_group_builder.application_group.save!
+      rescue Exception=>e
+        puts e.message
+        puts e.backtrace.inspect
+      end
 
       puts "We saved #{application_group_builder.application_group.id}"
+=begin
       puts "\n\n #{application_group_builder.application_group.inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:incomes).inspect}"
       puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:deductions).inspect}"
-
+=end
 
     end
 

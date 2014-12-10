@@ -59,10 +59,25 @@ class ImportApplicationGroups
     end
 
     def register_alias(alias_uri, p_uri)
+      @alias_map.each_pair do |k,v|
+        if (p_uri == k) && (p_uri != v)
+          @alias_map[alias_uri] = v
+          return
+        end 
+      end
       @alias_map[alias_uri] = p_uri
     end
 
     def register_person(p_uri, person, member)
+      existing_record = nil
+      existing_key = nil
+      @people_map.each_pair do |k,v|
+        existing_person = v.first
+        if person.id == existing_person.id
+          register_alias(p_uri, k)
+          return
+        end
+      end
       register_alias(p_uri, p_uri)
       @people_map[p_uri] = [person, member]
     end

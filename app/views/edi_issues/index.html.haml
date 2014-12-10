@@ -2,30 +2,11 @@
 - t '.title', :default => model_class.model_name.human.pluralize.titleize
 .page-header
   = render 'shared/breadcrumb', crumbs: ['EdiIssues']
-.row
-  .col-md-8
-  .col-md-4
-    = render 'search', url: edi_issues_path, q: @q, placeholder: 'EG Id, Status, Assigned'
-.col-md-12
-  %table.table.table-condensed
-    %thead
-      %tr
-        %th Enrollment Group Id
-        %th Resource
-        %th Event Name
-        %th= sortable "submitted_timestamp", "Submitted Timestamp"
-        %th= sortable "aasm_state", "Status"
-        %th= sortable "assigned_to", "Assigned To"
-    %tbody
-      - @edi_issues.each do |ed|
-        %tr
-          %td= link_to ed.enrollment_group_uri, edi_issue_path(ed)
-          %td= ed.event_key
-          %td= ed.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
-          %td= ed.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
-          %td= ed.aasm_state
-          %td= ed.assigned_to.present? ? ed.assigned_to : "Unassigned"
-
+  .row
+    .col-md-8
+    .col-md-4
+      = render 'search', url: edi_issues_path, q: @q, placeholder: 'EG Id, Status, Assigned'
+#issues_table= render 'issues_table'
 .row
   .col-md-8
     = paginate @edi_issues, theme: "twitter-bootstrap", pagination_class: "pagination-plain"

@@ -8,7 +8,7 @@ class Applicant
   field :is_primary_applicant, type: Boolean, default: false
 
   # Person is applying for coverage
-  field :is_coverage_applicant, type: Boolean, default: false
+  field :is_coverage_applicant, type: Boolean, default: true
 
   # Person who authorizes auto-renewal eligibility check
   field :is_consent_applicant, type: Boolean, default: false
@@ -25,6 +25,8 @@ class Applicant
   index({person_id: 1})
   index({broker_id:  1})
   index({is_primary_applicant: 1})
+
+  validates_presence_of :person_id, :is_primary_applicant
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 

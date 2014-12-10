@@ -3,6 +3,8 @@ class CoverageHousehold
   include Mongoid::Timestamps
 
   embedded_in :household
+  
+  field :submitted_at, type: DateTime
 
   embeds_many :coverage_household_members
   accepts_nested_attributes_for :coverage_household_members

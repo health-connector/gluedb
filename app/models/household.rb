@@ -11,7 +11,7 @@ class Household
 
   field :is_active, type: Boolean, default: true
 
-  field :submitted_date, type: DateTime
+  field :submitted_at, type: DateTime
   field :effective_start_date, type: Date
   field :effective_end_date, type: Date
 

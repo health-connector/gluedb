@@ -1,6 +1,6 @@
 class ImportApplicationGroups
 
-  @@logger = Logger.new("#{Rails.root}/log/soap.log")
+  @@logger = Logger.new("#{Rails.root}/log/import_application_groups.log")
 
   class PersonImportListener
 
@@ -59,11 +59,11 @@ class ImportApplicationGroups
     end
 
     def register_alias(alias_uri, p_uri)
-      @alias_map.each_pair do |k,v|
+      @alias_map.each_pair do |k, v|
         if (p_uri == k) && (p_uri != v)
           @alias_map[alias_uri] = v
           return
-        end 
+        end
       end
       @alias_map[alias_uri] = p_uri
     end
@@ -71,7 +71,7 @@ class ImportApplicationGroups
     def register_person(p_uri, person, member)
       existing_record = nil
       existing_key = nil
-      @people_map.each_pair do |k,v|
+      @people_map.each_pair do |k, v|
         existing_person = v.first
         if person.id == existing_person.id
           register_alias(p_uri, k)
@@ -120,19 +120,20 @@ class ImportApplicationGroups
 
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
     puts "PARSING DONE"
+    puts "Total number of application groups :#{ags.size}"
     ags.each do |ag|
 
       application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          uc.validate(ig_request, listener)
+        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+        uc.validate(ig_request, listener)
       end
       next unless all_valid
       ig_requests.each do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          uc.commit(ig_request, listener)
+        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+        uc.commit(ig_request, listener)
       end
 
       #applying person objects in person relationships for each applicant.
@@ -162,19 +163,20 @@ class ImportApplicationGroups
 
       end
 
-      #application_group_builder.add_irsgroups(ag.irs_groups)
-      application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
-      application_group_builder.application_group.save!
-
-      applicants_params = ag.applicants.map do |applicant|
-        applicant.to_hash(p_tracker)
-      end
-      application_group_builder.add_financial_statements(applicants_params)
       begin
+        #application_group_builder.add_irsgroups(ag.irs_groups)
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+
+        applicants_params = ag.applicants.map do |applicant|
+          applicant.to_hash(p_tracker)
+        end
+        application_group_builder.add_financial_statements(applicants_params)
+
         application_group_builder.application_group.save!
-      rescue Exception=>e
-        puts e.message
-        puts e.backtrace.inspect
+      rescue Exception => e
+        @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s}\n"+
+                          "message:#{e.message}\n" +
+                          "backtrace:#{e.backtrace.inspect}\n"
       end
 
       puts "We saved #{application_group_builder.application_group.id}"

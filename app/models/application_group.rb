@@ -45,6 +45,13 @@ class ApplicationGroup
   index({aasm_state:  1})
   index({submitted_date:  1})
 
+  validate :no_duplicate_applicants
+
+  def no_duplicate_applicants
+    applicants.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
+      errors.add(:base, "Duplicate applicants for person: #{k}")
+    end
+  end
 
   def active_applicants
     applicants.find_all { |a| a.is_active? }

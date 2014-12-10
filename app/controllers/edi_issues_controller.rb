@@ -2,7 +2,7 @@ class EdiIssuesController < ApplicationController
   helper_method :sort_column, :sort_direction
 
   def index
-    @edi_issues = EdiOpsTransaction.order_by(sort_column.to_sym.send(sort_direction))
+    @edi_issues = EdiOpsTransaction.order_by(sort_column.to_sym.send(sort_direction)).page(params[:page]).per(20)
   end
 
   def show

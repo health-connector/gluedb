@@ -20,4 +20,12 @@
           %td= ed.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
           %td= ed.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
           %td= ed.aasm_state
-          %th= ed.assigned_to.present? ? ed.assigned_to : "Unassigned"
+          %td= ed.assigned_to.present? ? ed.assigned_to : "Unassigned"
+
+.row
+  .col-md-8
+    = paginate @edi_issues, theme: "twitter-bootstrap", pagination_class: "pagination-plain"
+  .col-md-4
+    %p
+      = "#{number_with_delimiter(@edi_issues.count)} / #{number_with_delimiter(EdiOpsTransaction.count)} "
+      %small (transactions selected / total)

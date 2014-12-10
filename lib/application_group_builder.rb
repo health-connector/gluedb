@@ -29,27 +29,19 @@ class ApplicationGroupBuilder
       tax_household = @household.tax_households.build(tax_household_params)
 
       tax_household_params[:tax_household_members].map do |tax_household_member_params|
-        #tax_household_member = TaxHouseholdMember.new(tax_household_member_params)
         tax_household_member = tax_household.tax_household_members.build(tax_household_member_params)
-        #tax_household_member.applicant_id = @person_mapper.get_applicant(tax_household_member_params[:id]).id
-        puts "MY SEARRCH KEY #{tax_household_member_params[:id]}"
         person_uri =  @person_mapper.alias_map[tax_household_member_params[:id]]
         person_obj = @person_mapper.people_map[person_uri].first
         tax_household_member.applicant_id = @person_mapper.applicant_map[person_obj.id].id
         tax_household_member.applicant = @person_mapper.applicant_map[person_obj.id]
-        #puts tax_household_member.application_group.inspect
-        # tax_household.tax_household_members.build(tax_household_member)
       end
-
-      #puts @household.tax_households.flat_map(&:tax_household_members).flat_map(&:applicant).inspect
 
     end
 
 
     eligibility_determinations_params.each do |eligibility_determination_params|
       #TODO assuming only 1tax_household. needs to be corrected later
-      eligibility_determination = EligibilityDetermination.new(eligibility_determination_params)
-      @household.tax_households.first.eligibility_determinations << eligibility_determination
+      @household.tax_households.first.eligibility_determinations.build(eligibility_determination_params)
     end
 
   end
@@ -71,22 +63,6 @@ class ApplicationGroupBuilder
         end
       end
     end
-
-=begin
-    applicants_params.map do |applicant_params|
-      applicant_params[:financial_statements].each do |financial_statement_params|
-        #financial_statement = FinancialStatement.new(financial_statement_params)
-        financial_statement = @household.FinancialStatement.new(financial_statement_params)
-        financial_statement.incomes << financial_statement_params[:incomes].map do |income_params|
-          income = Income.new(income_params)
-        end
-        financial_statement.deductions << financial_statement_params[:deductions].map do |deduction_params|
-          Deduction.new(deduction_params)
-        end
-        add_financial_statements_to_tax_household(financial_statement, applicant_params[:id])
-      end
-    end
-=end
   end
 
   def find_tax_household_member(applicant)

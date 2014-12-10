@@ -1,8 +1,8 @@
 class EdiIssuesController < ApplicationController
-  before_filter :select_issue, only: [:edit, :update]
+  helper_method :sort_column, :sort_direction
 
   def index
-    @edi_issues = EdiOpsTransaction.all.by_oldest
+    @edi_issues = EdiOpsTransaction.order_by(sort_column.to_sym.send(sort_direction))
   end
 
   def show
@@ -14,7 +14,11 @@ class EdiIssuesController < ApplicationController
   end
 
   private
-    def set_tasks
-      @edi_issue = EdiOpsTransaction.find(params[:id])
+    def sort_direction
+      %w[asc desc].include?(params[:direction]) ?  params[:direction] : "desc"
     end
+
+    def sort_column
+      EdiOpsTransaction.fields.include?(params[:sort]) ? params[:sort] : "submitted_timestamp"
+  end
 end

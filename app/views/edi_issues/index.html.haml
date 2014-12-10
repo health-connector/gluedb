@@ -8,10 +8,10 @@
       %tr
         %th Enrollment Group Id
         %th Resource
-        %th Event name
-        %th Submitted timestamp
-        %th Status
-        %th Assigned To
+        %th Event Name
+        %th= sortable "submitted_timestamp", "Submitted Timestamp"
+        %th= sortable "aasm_state", "Status"
+        %th= sortable "assigned_to", "Assigned To"
     %tbody
       - @edi_issues.each do |ed|
         %tr

@@ -1,8 +1,9 @@
 module Policies
   class CreatePolicy
 
-    def initialize(policy_factory = Policy)
+    def initialize(policy_factory = Policy, premium_validator = Premiums::PolicyRequestValidator.new)
       @policy_factory = policy_factory
+      @premium_validator = premium_validator
     end
 
     # TODO: Introduce premium validations and employers!
@@ -50,7 +51,8 @@ module Policies
         listener.no_enrollees
         fail = true
       end
-      !fail
+      return false if fail
+      @premium_validator.validate(request, listener)
     end
 
     # TODO: Cancel the policies we should be cancelling

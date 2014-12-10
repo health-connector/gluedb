@@ -23,8 +23,9 @@ describe Policies::CreatePolicy do
   let(:coverage_type) { "health" }
 
   let(:existing_policies) { [] }
+  let(:premium_validator) { double(:validate => true) }
 
-  subject { Policies::CreatePolicy.new(policy_factory) }
+  subject { Policies::CreatePolicy.new(policy_factory, premium_validator) }
 
   before :each do
     allow(policy_factory).to receive(:find_for_group_and_hios).with(

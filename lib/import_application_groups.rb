@@ -121,6 +121,7 @@ class ImportApplicationGroups
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
     puts "PARSING DONE"
     puts "Total number of application groups :#{ags.size}"
+    fail_counter = 0
     ags.each do |ag|
 
       application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
@@ -150,14 +151,8 @@ class ImportApplicationGroups
           person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
-
-          #new_applicant = Applicant.new(applicant.to_hash)
-          #new_applicant.person = subject_person
-          #new_applicant.person_id = subject_person.id
-          #application_group_builder.add_applicant(new_applicant)
         end
 
-        #new_applicant = Applicant.new(applicant.to_hash(p_tracker))
         new_applicant = application_group_builder.add_applicant(applicant.to_hash(p_tracker))
         p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
 
@@ -173,24 +168,24 @@ class ImportApplicationGroups
         application_group_builder.add_financial_statements(applicants_params)
 
         application_group_builder.application_group.save!
+
       rescue Exception => e
+        fail_counter += 1
+        puts "FAILED #{application_group_builder.application_group.id}"
+
+        @@logger.info "Applicants #{application_group_builder.application_group.applicants.size}}\n"
+
+        application_group_builder.application_group.applicants.each do |applicant|
+          @@logger.info "#{applicant.inspect}"
+        end
+
         @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s}\n"+
                           "message:#{e.message}\n" +
                           "backtrace:#{e.backtrace.inspect}\n"
       end
-
-      puts "We saved #{application_group_builder.application_group.id}"
-=begin
-      puts "\n\n #{application_group_builder.application_group.inspect}"
-      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).inspect}"
-      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).inspect}"
-      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).inspect}"
-      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:incomes).inspect}"
-      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:deductions).inspect}"
-=end
-
     end
 
+    puts "Total fails: #{fail_counter}"
 
   end
 end

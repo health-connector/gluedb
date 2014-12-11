@@ -7,6 +7,10 @@ class HbxEnrollmentMember
   field :applicant_id, type: Moped::BSON::ObjectId
   field :premium_amount_in_dollars, type: Integer
   field :is_subscriber, type: Boolean, default: false
+  field :eligibility_date, type: Date
+  field :start_date, type: Date
+  field :end_date, type: Date
+
 
   include BelongsToApplicant
 

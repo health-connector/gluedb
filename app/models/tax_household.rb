@@ -1,6 +1,10 @@
 class TaxHousehold
   include Mongoid::Document
   include Mongoid::Timestamps
+  include HasApplicants
+
+  # A set of applicants, grouped according to IRS and ACA rules, who are considered a single unit
+  # when determining eligibility for Insurance Assistance and Medicaid
 
   embedded_in :household
 
@@ -9,14 +13,17 @@ class TaxHousehold
   field :allocated_aptc_in_cents, type: Integer, default: 0
   field :is_eligibility_determined, type: Boolean, default: false
 
-  index({_id: 1})
+  field :effective_start_date, type: Date
+  field :effective_end_date, type: Date
+  field :submitted_at, type: DateTime
+
+  index({hbx_assigned_id: 1})
 
   embeds_many :tax_household_members
   accepts_nested_attributes_for :tax_household_members
 
   embeds_many :eligibility_determinations
 
-  include HasApplicants
 
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i

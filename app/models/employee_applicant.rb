@@ -6,7 +6,7 @@ class EmployeeApplicant
 
   embedded_in :applicant
 
-  field :employer_id,  type: Moped::BSON::ObjectId
+  field :employer_id, type: Moped::BSON::ObjectId
 
   field :status, type: String
   field :eligibility_date, type: Date
@@ -14,6 +14,8 @@ class EmployeeApplicant
   field :end_date, type: Date
 
   index({employer_id: 1})
+
+  validates_presence_of :employer_id, :start_date
 
   def employer=(employer_instance)
     return unless employer_instance.is_a? Employer

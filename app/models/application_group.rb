@@ -5,6 +5,8 @@ class ApplicationGroup
   # include Mongoid::Paranoia
   include AASM
 
+  KINDS = %W[unassisted_qhp insurance_assisted_qhp employer_sponsored streamlined_medicaid emergency_medicaid hcr_chip]
+
   auto_increment :hbx_assigned_id, seed: 9999
 
   field :e_case_id, type: String  # Eligibility system foreign key
@@ -53,6 +55,11 @@ class ApplicationGroup
     end
   end
 
+  def latest_household
+    return households.first if households.size = 1
+    households.sort_by(&:submitted_at).last.submitted_at
+  end
+
   def active_applicants
     applicants.find_all { |a| a.is_active? }
   end
@@ -82,7 +89,7 @@ class ApplicationGroup
   end
 
   def find_applicant_by_person(person)
-    applicants.detect { |a| a.person == person }
+    applicants.detect { |a| a.person_id == person._id }
   end
 
   def person_is_applicant?(person)

@@ -1,6 +1,9 @@
 class Income
+
   include Mongoid::Document
   include Mongoid::Timestamps
+
+  after_initialize :set_amount_in_cents
 
   KINDS = %W(
   	alimony_and_maintenance
@@ -41,7 +44,7 @@ class Income
   embedded_in :assistance_eligibility, :inverse_of => :incomes
 
   validates :amount_in_cents, presence: true,
-  														numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  														numericality: { only_integer: true, greater_than_or_equal_to: 0, message: "%{value} is #######" }
   validates :kind, presence: true,
   												inclusion: { in: KINDS, message: "%{value} is not a valid income type" }
   validates :frequency, 	presence: true,
@@ -77,6 +80,10 @@ class Income
       is_projected: income_data[:is_projected],
       submission_date: income_data[:submission_date])
 
+  end
+
+  def set_amount_in_cents
+    self.amount_in_cents = (self.amount.to_f * 100).to_i if self.amount
   end
 
 end

@@ -32,5 +32,10 @@ module Parsers::Xml::Cv
 
       response
     end
+
+    def to_hash
+      response = {}
+      response.merge(request_hash)
+    end
   end
 end

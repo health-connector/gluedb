@@ -6,22 +6,21 @@ class FinancialStatement
 
   TAX_FILING_STATUS_TYPES = %W(tax_filer tax_dependent non_filer)
 
-  embedded_in :application_group
-
   field :tax_filing_status, type: String
   field :is_tax_filing_together, type: Boolean
 
   field :eligibility_determination_id, type: Moped::BSON::ObjectId
-  field :applicant_link_id, type: Moped::BSON::ObjectId
-
 
   # Has access to employer-sponsored coverage that meets ACA minimum standard value and 
   #   employee responsible premium amount is <= 9.5% of Household income
   field :is_enrolled_for_es_coverage, type: Boolean, default: false
   field :is_without_assistance, type: Boolean, default: true
   field :submitted_date, type: DateTime
+  field :is_active, type: Boolean, default: true
 
   index({submitted_date:  1})
+
+  embedded_in :tax_household_member
 
   embeds_many :incomes
   accepts_nested_attributes_for :incomes
@@ -36,18 +35,14 @@ class FinancialStatement
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
 
-  def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+  def application_group
+    return nil unless tax_household_member
+    tax_household_member.application_group
   end
 
-  def applicant_link=(al_instance)
-    return unless al_instance.is_a? Applicantlink
-    self.applicant_link_id = al_instance._id
-  end
-
-  def applicant_link
-    parent.applicant_links.find(self.applicant_link_id) unless self.applicant_link_id.blank?
+  def applicant
+    return nil unless tax_household_member
+    tax_household_member.applicant
   end
 
   def eligibility_determination=(ed_instance)
@@ -56,7 +51,8 @@ class FinancialStatement
   end
 
   def eligibility_determination
-    parent.eligibility_determination.find(self.eligibility_determination_id) unless self.eligibility_determination_id.blank?
+    return nil unless tax_household_member
+    tax_household_member.eligibility_determinations.detect { |elig_d| elig_d._id == self.eligibility_determination_id }
   end
 
   # Evaluate if receiving Alternative Benefits this year
@@ -148,6 +144,22 @@ class FinancialStatement
       total_incomes[y] = (income_this_year - deductions_this_year) * 0.01
     end
     total_incomes
+  end
+
+  def is_tax_filing_together?
+    self.is_tax_filing_together
+  end
+
+  def is_enrolled_for_es_coverage?
+    self.is_enrolled_for_es_coverage
+  end
+
+  def is_without_assistance?
+    self.is_without_assistance
+  end
+
+  def is_active?
+    self.is_active
   end
 
 end

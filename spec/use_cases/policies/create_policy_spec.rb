@@ -10,7 +10,8 @@ describe Policies::CreatePolicy do
   let(:carrier) { double }
   let(:plan) { double(:carrier => carrier) }
   let(:subscriber) { double(:person => person, :coverage_start => coverage_start) }
-  let(:enrollees) { [subscriber] }
+  let(:enrollees) { [subscriber_hash] }
+  let(:subscriber_hash) { { }}
   let(:policy_factory) { double(:new => new_policy) }
   let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors) }
   let(:valid_policy) { true }
@@ -22,8 +23,9 @@ describe Policies::CreatePolicy do
   let(:coverage_type) { "health" }
 
   let(:existing_policies) { [] }
+  let(:premium_validator) { double(:validate => true) }
 
-  subject { Policies::CreatePolicy.new(policy_factory) }
+  subject { Policies::CreatePolicy.new(policy_factory, premium_validator) }
 
   before :each do
     allow(policy_factory).to receive(:find_for_group_and_hios).with(
@@ -101,7 +103,8 @@ describe Policies::CreatePolicy do
       request.merge({
         :plan => plan,
         :carrier => carrier,
-        :broker => nil
+        :broker => nil,
+        :employer => nil
       })
     }
 

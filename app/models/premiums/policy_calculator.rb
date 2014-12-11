@@ -28,7 +28,7 @@ module Premiums
 
     def calculate_cached_premium(plan, enrollee, rate_start_date, coverage_start)
       member = get_member(enrollee)
-      sprintf("%.2f", plan.rate(rate_start_date, coverage_start, member.dob).amount)
+      sprintf("%.2f", plan.rate(rate_start_date, coverage_start, member.dob).amount).to_f
     end
 
     def get_member(enrollee)
@@ -67,9 +67,9 @@ module Premiums
         plan_year = determine_shop_plan_year(policy)
         contribution_strategy = plan_year.contribution_strategy
         policy.tot_emp_res_amt = contribution_strategy.contribution_for(policy)
-        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.tot_emp_res_amt)
+        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.tot_emp_res_amt).to_f
       else
-        policy.tot_res_amt = policy.pre_amt_tot
+        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.applied_aptc).to_f
       end
     end
 

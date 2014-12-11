@@ -4,6 +4,8 @@ class QualifyingLifeEvent
   include AASM
 
   KINDS = [
+    "initial_enrollment",
+    "renewal",
     "open_enrollment",
     "lost_access_to_mec",
     "adoption",
@@ -32,9 +34,10 @@ class QualifyingLifeEvent
     "exceptional_circumstances"
   ]
 
-  embedded_in :application_group
+  MARKETS = ["unassisted_qhp", "insurance_assisted_qhp", "employer_sponsored"]
 
 	field :kind, type: String  # Qualifying Life Event
+  field :market, type: String
 	field :event_date, type: Date
 	field :sep_start_date, type: Date
 	field :sep_end_date, type: Date
@@ -44,10 +47,12 @@ class QualifyingLifeEvent
   field :submitted_date, type: DateTime
 
   index({kind:  1})
+  index({market:  1})
   index({sep_start_date:  1})
   index({sep_end_date:  1})
 
-  embedded_in :application_group
+  has_and_belongs_to_many :application_groups
+  accepts_nested_attributes_for :application_groups
 
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
@@ -57,17 +62,19 @@ class QualifyingLifeEvent
 	validate :end_date_follows_start_date
 
   validates :kind, 
-  					presence: true,
-  					allow_blank: false,
-  					allow_nil:   false,
-  					inclusion: {in: KINDS}
+            presence: true,
+            allow_blank: false,
+            allow_nil:   false,
+            inclusion: {in: KINDS}
+
+  validates :market, 
+            presence: true,
+            allow_blank: false,
+            allow_nil:   false,
+            inclusion: {in: MARKETS}
 
   # before_create :activate_household_sep
   # before_save :activate_household_sep
-
-  def parent
-    self.application_group
-  end
 
 	def calculate_end_date(period_in_days)
 		self.end_date = start_date + period_in_days unless start_date.blank?

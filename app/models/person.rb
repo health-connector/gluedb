@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-#  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -20,6 +20,11 @@ class Person
   field :department, type: String, default: ""
   field :is_active, type: Boolean, default: true
 
+  # We've moved to a many-to-many
+  # field :application_group, type: Moped::BSON::ObjectId
+
+  # TODO: reference authority member by Mongo ID
+  # field :application_group, type: Moped::BSON::ObjectId
   field :authority_member_id, type: String, default: nil
   index({"authority_member_id" => 1})
 
@@ -42,8 +47,6 @@ class Person
   index({"emails.email_address" => 1})
 
   #TODO - create authority member index (use Mongo indexing method that expects many empty values)
-
-  belongs_to :application_group, class_name: "ApplicationGroup", inverse_of: nil, index: true
 
   # has_and_belongs_to_many :employers, class_name: "Employer", inverse_of: :employees
   belongs_to :employer, class_name: "Employer", inverse_of: :employees, index: true
@@ -85,6 +88,10 @@ class Person
   scope :all_with_multiple_members, exists({ :'members.1' => true })
   scope :by_name, order_by(name_last: 1, name_first: 1)
 
+  def application_groups
+    ApplicationGroup.where(:applicants.person_id => self.id).to_a
+  end
+
   def update_attributes_with_delta(props = {})
     old_record = self.find(self.id)
     self.assign_attributes(props)
@@ -97,7 +104,8 @@ class Person
     # - the delta ("delta")
     # We have everything we need to construct whatever messages care about that data.
     # E.g. (again, ignore the naming as it is terrible)
-    Protocols::Notifier.update_notification(old_record, props, delta)
+    #Protocols::Notifier.update_notification(old_record, props, delta)
+    Protocols::Notifier.update_notification(old_record, delta) #The above statement was giving error with 3 params
 
     # Then we proceed normally
     self.update_attributes(props)

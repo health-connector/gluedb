@@ -2,88 +2,59 @@ class ApplicationGroup
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
   include AASM
 
   auto_increment :hbx_assigned_id, seed: 9999
+
   field :e_case_id, type: String  # Eligibility system foreign key
   field :e_status_code, type: String
-  field :is_active, type: Boolean, default: true   # ApplicationGroup active on the Exchange?
-
-  field :renewal_consent_through_year, type: Integer  # Authorize auto-renewal elibility check through this year (CCYY format)
-  field :submitted_date, type: DateTime               # Date application was created on authority system
-
-  # Person responsible for this application group
-  field :primary_applicant_id, type: Moped::BSON::ObjectId
-
-  # Person who authorizes auto-renewal eligibility check
-  field :consent_applicant_id, type: Moped::BSON::ObjectId
-
   field :application_type, type: String
+  field :renewal_consent_through_year, type: Integer  # Authorize auto-renewal elibility check through this year (CCYY format)
+
   field :aasm_state, type: String
+  field :is_active, type: Boolean, default: true   # ApplicationGroup active on the Exchange?
+  field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
 
-  # All current and former members of this group
-  has_many :applicants, class_name: "Person", inverse_of: nil
-  accepts_nested_attributes_for :applicants
+  has_and_belongs_to_many :qualifying_life_events
 
-  has_many :hbx_enrollment_policies, class_name: "Policy", inverse_of: :hbx_enrollment_policy
-  accepts_nested_attributes_for :hbx_enrollment_policies
- 
-  embeds_many :applicant_links, cascade_callbacks: true
-  accepts_nested_attributes_for :applicant_links
+  # All current and former members of this group
+  embeds_many :applicants, cascade_callbacks: true
+  accepts_nested_attributes_for :applicants
 
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
-  embeds_many :tax_households, cascade_callbacks: true
-  accepts_nested_attributes_for :tax_households
-
-  embeds_many :hbx_enrollments, cascade_callbacks: true
-  accepts_nested_attributes_for :hbx_enrollments
-
-  embeds_many :hbx_enrollment_exemptions, cascade_callbacks: true
-  accepts_nested_attributes_for :hbx_enrollment_exemptions
-
-  embeds_many :financial_statements
-  accepts_nested_attributes_for :financial_statements
-
-  embeds_many :eligibility_determinations, cascade_callbacks: true
-  accepts_nested_attributes_for :eligibility_determinations
-
-  embeds_many :qualifying_life_events, cascade_callbacks: true
-  accepts_nested_attributes_for :qualifying_life_events, reject_if: proc { |attribs| attribs['sep_start_date'].blank? }, allow_destroy: true
+  embeds_many :households, cascade_callbacks: true
+  accepts_nested_attributes_for :households
 
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  validates :renewal_consent_through_year, 
-              presence: true,
-              numericality: { only_integer: true, inclusion: 2014..2025 }
+  validates :renewal_consent_through_year,
+              numericality: { only_integer: true, inclusion: 2014..2025 },
+              :allow_nil => true
 
-
-  scope :all_with_multiple_applicants, exists({ :'applicant_links.1' => true })
+  scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
 
 #  validates_inclusion_of :max_renewal_year, :in => 2013..2025, message: "must fall between 2013 and 2030"
 
   index({e_case_id:  1})
   index({is_active:  1})
   index({aasm_state:  1})
-  index({primary_applicant_id:  1})
-  index({consent_applicant_id:  1})
-  index({"irs_group.hbx_id" =>  1})
-  index({"hbx_enrollment._id" =>  1})
-  index({"hbx_enrollment.broker_id" =>  1})
-  index({"hbx_enrollment.employer_id" =>  1})
-  index({"hbx_enrollment.policy_id" =>  1})
   index({submitted_date:  1})
-  index({"applicant_links.applicant_id" => 1})
 
+  validate :no_duplicate_applicants
+
+  def no_duplicate_applicants
+    applicants.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
+      errors.add(:base, "Duplicate applicants for person: #{k}")
+    end
+  end
 
   def active_applicants
-    self.applicants
-    # Use following after data is populated
-    # applicant_links.inject([]) { |al, a| p << a.person if a.person.is_active? } || []
+    applicants.find_all { |a| a.is_active? }
   end
 
   def employers
@@ -102,24 +73,21 @@ class ApplicationGroup
     hbx_enrollments.inject([]) { |b, e| b << e.broker if e.is_active? && !e.broker.blank? } || []
   end
 
-  def primary_applicant=(person_instance)
-    return unless person_instance.is_a? Person
-    self.primary_applicant_id = person_instance._id
-  end
-
   def primary_applicant
-    Person.find(self.primary_applicant_id) unless self.primary_applicant_id.blank?
-  end
-
-  def consent_applicant=(person_instance)
-    return unless person_instance.is_a? Person
-    self.consent_applicant_id = person_instance._id
+    applicants.detect { |a| a.is_primary_applicant? }
   end
 
   def consent_applicant
-    Person.find(self.consent_applicant_id) unless self.consent_applicant_id.blank?
+    applicants.detect { |a| a.is_consent_applicant? }
   end
 
+  def find_applicant_by_person(person)
+    applicants.detect { |a| a.person == person }
+  end
+
+  def person_is_applicant?(person)
+    return true unless find_applicant_by_person(person).blank?
+  end
 
   aasm do
     state :enrollment_closed, initial: true
@@ -187,6 +155,12 @@ class ApplicationGroup
 
   def is_active?
     self.is_active
+  end
+
+private
+
+  def validate_one_and_only_one_primary_applicant
+    # applicants.detect { |a| a.is_primary_applicant? }
   end
 
 end

@@ -20,13 +20,13 @@ module Parsers::Xml::Cv
 
     has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
 
-    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, tag: 'eligibility_determinations'
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, xpath: 'cv:eligibility_determinations'
 
     has_many :hbx_enrollments, Parsers::Xml::Cv::HbxEnrollmentParser, tag: 'hbx_enrollments'
 
-    def individual_requests(member_id_generator)
+    def individual_requests(member_id_generator, p_tracker)
       applicants.map do |applicant|
-        applicant.to_individual_request(member_id_generator)
+        applicant.to_individual_request(member_id_generator, p_tracker)
       end
     end
 
@@ -42,14 +42,23 @@ module Parsers::Xml::Cv
       hbx_enrollments.map{|enrollment| enrollment.policy_id }
     end
 
-    def yearly_income(calender_year)
-      total_income = 0.0
-      tax_households.each do |tax_household|
-        yearly_incomes = tax_household.to_hash[:total_incomes_by_year]
-        income_record = yearly_incomes.detect{|income| income[:calendar_year] == calendar_year}
-        total_income += income_record[:total_amount].to_f if income_record
-      end
-      sprintf("%.2f", total_income)
+    def to_hash
+      response = {
+          e_case_id:e_case_id,
+          submitted_date:submitted_date,
+          irs_groups: irs_groups.map do |irs_group|
+            irs_group.to_hash
+          end,
+          tax_households: tax_households.map do |tax_household|
+            tax_household.to_hash
+          end,
+          applicants: applicants.map do |applicant|
+            applicant.to_hash
+          end,
+          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
+            eligibility_determination.to_hash
+          end
+      }
     end
   end
 end

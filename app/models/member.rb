@@ -32,8 +32,8 @@ class Member
   # we'll store them at the policy level to avoid any issues
   #  field :carrier_id, type: String
 
-  field :dob, type: DateTime
-  field :death_date, type: DateTime
+  field :dob, type: Date
+  field :death_date, type: Date
   field :ssn, type: String
   field :gender, type: String
   field :ethnicity, type: String, default: ""

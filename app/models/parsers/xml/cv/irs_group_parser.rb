@@ -14,10 +14,10 @@ module Parsers::Xml::Cv
     def to_hash
       {
           id: id,
-          hbx_enrollment_ids: tax_households_ids.map do |hbx_enrollment_id|
+          hbx_enrollment_ids: hbx_enrollment_ids.map do |hbx_enrollment_id|
             hbx_enrollment_id
           end,
-          hbx_enrollment_exemption_ids: tax_households_ids.map do |hbx_enrollment_exemption_id|
+          hbx_enrollment_exemption_ids: hbx_enrollment_exemption_ids.map do |hbx_enrollment_exemption_id|
             hbx_enrollment_exemption_id
           end
       }

@@ -12,13 +12,17 @@ module Parsers::Xml::Cv
     element :end_date, String, tag:"end_date"
     element :submitted_date, String, tag:"submitted_date"
 
+    def sanitize_type
+      kind = type.split('#').last
+      kind = kind.gsub('-','_') if kind
+    end
 
     def to_hash
       {
           start_date: start_date,
           end_date: end_date,
           submitted_date: submitted_date,
-          type: type
+          kind: sanitize_type
       }
     end
 

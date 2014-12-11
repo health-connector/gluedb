@@ -72,5 +72,13 @@ module Parsers::Xml::Cv
       emails.map(&:request_hash)
     end
 
+    def to_hash
+      {
+          id: id,
+          name_first: name_first,
+          name_last: name_last
+      }
+    end
+
   end
 end

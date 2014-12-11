@@ -25,5 +25,14 @@ module Parsers::Xml::Cv
           :gender => sex.split("#").last
       }
     end
+
+    def to_hash
+      response = {
+          is_state_resident:is_state_resident,
+          citizen_status:citizen_status,
+          marital_status:marital_status
+      }
+      response.merge(individual_request)
+    end
   end
 end

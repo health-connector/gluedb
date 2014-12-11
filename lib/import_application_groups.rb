@@ -1,5 +1,7 @@
 class ImportApplicationGroups
 
+  @@logger = Logger.new("#{Rails.root}/log/import_application_groups.log")
+
   class PersonImportListener
 
     attr_reader :errors
@@ -47,17 +49,51 @@ class ImportApplicationGroups
   class PersonMapper
 
     attr_reader :people_map
+    attr_reader :alias_map
+    attr_reader :applicant_map
 
     def initialize
       @people_map = {}
+      @alias_map = {}
+      @applicant_map = {}
+    end
+
+    def register_alias(alias_uri, p_uri)
+      @alias_map.each_pair do |k, v|
+        if (p_uri == k) && (p_uri != v)
+          @alias_map[alias_uri] = v
+          return
+        end
+      end
+      @alias_map[alias_uri] = p_uri
     end
 
     def register_person(p_uri, person, member)
+      existing_record = nil
+      existing_key = nil
+      @people_map.each_pair do |k, v|
+        existing_person = v.first
+        if person.id == existing_person.id
+          register_alias(p_uri, k)
+          return
+        end
+      end
+      register_alias(p_uri, p_uri)
       @people_map[p_uri] = [person, member]
     end
 
     def [](uri)
-      @people_map[uri]
+      p_uri = @alias_map[uri]
+      @people_map[p_uri]
+    end
+
+    def register_applicant(person, applicant)
+      @applicant_map[person.id] = applicant
+    end
+
+    def get_applicant(uri)
+      person = self[uri].first
+      @applicant_map[person.id]
     end
   end
 
@@ -81,46 +117,77 @@ class ImportApplicationGroups
     p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
     puts "PARSING START"
+
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
     puts "PARSING DONE"
+    puts "Total number of application groups :#{ags.size}"
     ags.each do |ag|
-      ig_requests = ag.individual_requests(member_id_generator)
+
+      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
+      ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          uc.validate(ig_request, listener)
+        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+        uc.validate(ig_request, listener)
       end
-
-      puts "all_valid #{all_valid}"
       next unless all_valid
       ig_requests.each do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          uc.commit(ig_request, listener)
+        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+        uc.commit(ig_request, listener)
       end
 
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
+
         applicant.to_relationships.each do |relationship_hash|
 
-          p_tracker.people_map.each do |k,v|
-           # puts "#{k} = #{v}"
-          end
-
-          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"
-
+          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
+          object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
           subject_person = p_tracker[subject_person_id_uri].first
 
           person_relationship = PersonRelationship.new
-          #person_relationship.relative = p_tracker["urn:openhbx:hbx:dc0:resources:v1:curam:person##{relationship_hash[:subject_person_id]}"].first
-          person_relationship.relative = p_tracker[subject_person_id_uri].first
-          puts relationship_hash.inspect
+          person_relationship.relative = p_tracker[object_person_id_uri].first
           person_relationship.kind = relationship_hash[:relationship]
 
           subject_person.merge_relationship(person_relationship)
+
+          #new_applicant = Applicant.new(applicant.to_hash)
+          #new_applicant.person = subject_person
+          #new_applicant.person_id = subject_person.id
+          #application_group_builder.add_applicant(new_applicant)
         end
+
+        #new_applicant = Applicant.new(applicant.to_hash(p_tracker))
+        new_applicant = application_group_builder.add_applicant(applicant.to_hash(p_tracker))
+        p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
+
       end
 
-      puts ag.inspect
+      begin
+        #application_group_builder.add_irsgroups(ag.irs_groups)
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+
+        applicants_params = ag.applicants.map do |applicant|
+          applicant.to_hash(p_tracker)
+        end
+        application_group_builder.add_financial_statements(applicants_params)
+
+        application_group_builder.application_group.save!
+      rescue Exception => e
+        @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s}\n"+
+                          "message:#{e.message}\n" +
+                          "backtrace:#{e.backtrace.inspect}\n"
+      end
+
+      puts "We saved #{application_group_builder.application_group.id}"
+=begin
+      puts "\n\n #{application_group_builder.application_group.inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:incomes).inspect}"
+      puts "\n\n #{application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).flat_map(&:deductions).inspect}"
+=end
 
     end
 

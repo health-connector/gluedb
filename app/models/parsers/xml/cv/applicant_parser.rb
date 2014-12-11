@@ -11,6 +11,7 @@ module Parsers::Xml::Cv
     has_one :person, Parsers::Xml::Cv::PersonParser, tag:'person'
     has_many :person_relationships, Parsers::Xml::Cv::PersonRelationshipParser, xpath:'cv:person_relationships'
     has_one :person_demographics, Parsers::Xml::Cv::PersonDemographicsParser, tag:'person_demographics'
+    has_many :alias_ids, String, xpath: 'cv:id/cv:alias_ids/cv:alias_id/cv:id'
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     element :tax_household_id, String, tag: 'tax_household_id'
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
@@ -18,7 +19,10 @@ module Parsers::Xml::Cv
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
 
-    def to_individual_request(member_id_generator)
+    def to_individual_request(member_id_generator, p_tracker)
+      alias_ids.each do |a_id|
+        p_tracker.register_alias(a_id,id)
+      end
       person.individual_request(member_id_generator).merge(person_demographics.individual_request).merge({
         :emails => email_requests,
         :addresses => address_requests,
@@ -50,6 +54,21 @@ module Parsers::Xml::Cv
       person_relationships.map do |person_relationships|
         person_relationships.to_relationship
       end
+    end
+
+    def to_hash(p_tracker=nil)
+     response = {
+         applicant_id: id,
+         is_primary_applicant: is_primary_applicant,
+         is_coverage_applicant: is_coverage_applicant,
+         is_head_of_household:is_head_of_household,
+         person_demographics: person_demographics.to_hash,
+         financial_statements: financial_statements.map(&:to_hash)
+     }
+
+     response[:person] = p_tracker[id].first if p_tracker
+
+     response
     end
 
     def income_by_year(year)

@@ -66,7 +66,7 @@ module Premiums
       if policy.is_shop?
         plan_year = determine_shop_plan_year(policy)
         contribution_strategy = plan_year.contribution_strategy
-        policy.tot_emp_res_amt = contribution_strategy.contribution_for(policy)
+        policy.tot_emp_res_amt = sprintf("%.2f", contribution_strategy.contribution_for(policy)).to_f
         policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.tot_emp_res_amt).to_f
       else
         policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.applied_aptc).to_f

@@ -45,8 +45,8 @@ class Member
   field :citizen_status, type: String, default: 'us_citizen'
   field :is_state_resident, type: Boolean, default: true
   field :is_incarcerated, type: Boolean, default: false
-  field :is_applicant, type: Boolean, default: true
   field :is_disabled, type: Boolean, default: false
+  field :is_pregnant, type: Boolean, default: false
 
   field :hlh, as: :tobacco_use_code, type: String, default: "unknown"
   field :lui, as: :language_code, type: String
@@ -61,6 +61,8 @@ class Member
   validates :citizen_status,
     inclusion: { in: CITIZEN_STATUS_TYPES, message: "%{value} is not a valid citizen status" },
     allow_blank: true
+
+  validate :no_pregnant_males
 
   index({"person_relationships.subject_person" => 1})
   index({"person_relationships.object_person" => 1})
@@ -135,9 +137,29 @@ class Member
     !is_incarcerated
   end
 
+  def is_state_resident?
+    self.is_state_resident
+  end
+
+  def is_incarcerated?
+    self.is_incarcerated
+  end
+
+  def is_disabled?
+    self.is_disabled
+  end
+
+  def is_pregnant?
+    self.is_pregnant
+  end
+
 protected
   def generate_hbx_member_id
     self.hbx_member_id = self.hbx_member_id || self._id.to_s
+  end
+
+  def no_pregnant_males
+    errors.add(:base, "is_pregnant == true invalid for male gender") if gender == "male"
   end
 
   def dob_string

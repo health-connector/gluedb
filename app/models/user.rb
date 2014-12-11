@@ -63,6 +63,10 @@ class User
     super && approved?
   end
 
+  def self.read_write_usernames
+    where(role: "edi_ops").map(&:email)
+  end
+
   def inactive_message
     if !approved?
       :not_approved

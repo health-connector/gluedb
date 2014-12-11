@@ -9,18 +9,18 @@ module EmployerContributions
     validates_presence_of :dependent_max_percent
 
     def contribution_for(enrollment)
-      enrollment.enrollee.inject(0.00) do |total, en|
+      enrollment.enrollees.inject(0.00) do |total, en|
         total += employer_contribution_for(en)
       end
     end
 
     def employer_contribution_for(enrollee)
-      [reference_contribution_for(enrollee), enrollee.pre_amt].min
+      sprintf("%.2f", [reference_contribution_for(enrollee), enrollee.pre_amt].min).to_f
     end
 
     def reference_contribution_for(enrollee)
       reference_percent = enrollee.subscriber? ? employee_max_percent : dependent_max_percent
-      enrollee.reference_premium_for(reference_plan, plan_year.start_date) * reference_percent * 0.01
+      enrollee.reference_premium_for(reference_plan, plan_year.start_date) * reference_percent
     end
   end
 end

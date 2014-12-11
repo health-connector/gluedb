@@ -22,7 +22,7 @@ module Premiums
        end
 
        def reference_premium_for(plan, rate_date)
-         plan.rate(rate_date, coverage_start, member.dob)
+         plan.rate(rate_date, coverage_start, member.dob).amount
        end
 
        def subscriber?

@@ -44,7 +44,7 @@ module Parsers::Xml::Cv
 
     def to_hash
       response = {
-          e_case_id:e_case_id,
+          e_case_id:e_case_id.split("#").last,
           submitted_date:submitted_date,
           irs_groups: irs_groups.map do |irs_group|
             irs_group.to_hash

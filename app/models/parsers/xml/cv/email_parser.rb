@@ -12,9 +12,13 @@ module Parsers::Xml::Cv
 
     def request_hash
       {
-          type:type.split("#").last,
+          email_type:type.split("#").last,
           email_address:email_address
       }
+    end
+
+    def to_hash
+          request_hash
     end
   end
 end

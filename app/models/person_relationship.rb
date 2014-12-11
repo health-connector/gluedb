@@ -107,7 +107,7 @@ class PersonRelationship
   end
 
   def invert_relationship
-    self.kind = INVERSE_MAP[self.kind]
+    self.kind = INVERSE_MAP[self.kind.parameterize.underscore]
     self
   end
 

@@ -3,7 +3,7 @@ class ApplicationGroupBuilder
   attr_reader :application_group
 
   def initialize(param, person_mapper)
-    param = param.slice('e_case_id', 'submitted_date')
+    param = param.slice(:e_case_id, :submitted_date)
     @person_mapper = person_mapper
     @application_group = ApplicationGroup.new(param)
     @household = self.application_group.households.build
@@ -14,6 +14,7 @@ class ApplicationGroupBuilder
   end
 
 
+  #TODO - method not implemented properly using .build(params)
   def add_irsgroups(irs_groups_params)
     irs_groups = irs_groups_params.map do |irs_group_params|
       IrsGroup.new(irs_group_params)
@@ -32,8 +33,10 @@ class ApplicationGroupBuilder
         tax_household_member = tax_household.tax_household_members.build(tax_household_member_params)
         person_uri =  @person_mapper.alias_map[tax_household_member_params[:id]]
         person_obj = @person_mapper.people_map[person_uri].first
-        tax_household_member.applicant_id = @person_mapper.applicant_map[person_obj.id].id
-        tax_household_member.applicant = @person_mapper.applicant_map[person_obj.id]
+        new_applicant = get_applicant(person_obj)
+        tax_household_member.applicant_id = new_applicant.id
+        tax_household_member.applicant = new_applicant
+
       end
 
     end
@@ -44,6 +47,14 @@ class ApplicationGroupBuilder
       @household.tax_households.first.eligibility_determinations.build(eligibility_determination_params)
     end
 
+  end
+
+  def get_applicant(person_obj)
+
+    new_applicant = self.application_group.applicants.find do |applicant|
+      applicant.id == @person_mapper.applicant_map[person_obj.id].id
+    end
+    new_applicant = @person_mapper.applicant_map[person_obj.id] unless new_applicant
   end
 
   def add_financial_statements(applicants_params)
@@ -74,18 +85,6 @@ class ApplicationGroupBuilder
     end
 
     tax_household_member
-  end
-
-  def add_financial_statements_to_tax_household(financial_statement, applicant_id)
-      tax_household_members = self.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
-
-      tax_household_member = tax_household_members.find do |tax_household_member|
-        puts applicant_id
-        puts tax_household_member.inspect
-        tax_household_member.applicant_id = applicant_id
-      end
-
-      tax_household_member.financial_statements << financial_statement if tax_household_member
   end
 
 end

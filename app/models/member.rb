@@ -159,7 +159,9 @@ protected
   end
 
   def no_pregnant_males
-    errors.add(:base, "is_pregnant == true invalid for male gender") if gender == "male"
+    if gender == "male" && is_pregnant?
+      errors.add(:base, "is_pregnant == true invalid for male gender")
+    end
   end
 
   def dob_string

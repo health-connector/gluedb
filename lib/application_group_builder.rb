@@ -5,12 +5,18 @@ class ApplicationGroupBuilder
   def initialize(param, person_mapper)
     param = param.slice(:e_case_id, :submitted_date)
     @person_mapper = person_mapper
-    @application_group = ApplicationGroup.new(param)
+    #@application_group = ApplicationGroup.where(e_case_id:param[:e_case_id]).first
+    @application_group ||= ApplicationGroup.new(param)
     @household = self.application_group.households.build
   end
 
   def add_applicant(applicant_params)
-    applicant = @application_group.applicants.build(applicant_params)
+    applicant = @application_group.applicants.build(applicant_params.slice(:applicant_id,
+                                                                           :is_primary_applicant,
+                                                                           :is_coverage_applicant,
+                                                                           :is_head_of_household,
+                                                                           :person_demographics,
+                                                                           :person))
   end
 
 
@@ -27,7 +33,9 @@ class ApplicationGroupBuilder
   def add_tax_households(tax_households_params, eligibility_determinations_params)
 
     tax_households_params.map do |tax_household_params|
-      tax_household = @household.tax_households.build(tax_household_params)
+
+      tax_household = @household.tax_households.build(tax_household_params.slice(:id, :primary_applicant_id,
+                                                                                 :total_count, :total_incomes_by_year))
 
       tax_household_params[:tax_household_members].map do |tax_household_member_params|
         tax_household_member = tax_household.tax_household_members.build(tax_household_member_params)
@@ -58,11 +66,10 @@ class ApplicationGroupBuilder
   end
 
   def add_financial_statements(applicants_params)
-
     applicants_params.map do |applicant_params|
       applicant_params[:financial_statements].each do |financial_statement_params|
         tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
-        financial_statement = tax_household_member.financial_statements.build(financial_statement_params)
+        financial_statement = tax_household_member.financial_statements.build(financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status ))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)
         end

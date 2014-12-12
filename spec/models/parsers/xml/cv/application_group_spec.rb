@@ -134,13 +134,10 @@ describe Parsers::Xml::Cv::ApplicationGroup do
   end
 
   it "should return the eligibilty determination" do
-    expect(subject.eligibility_determinations.first.determination_date).to eq(:determination_date)
-
-    puts subject.eligibility_determinations.first.csr_percent
-    expect(subject.eligibility_determinations.first.maximum_aptc).to eq(:maximum_aptc)
-    expect(subject.eligibility_determinations.first.csr_percent).to eq(:csr_percent)
-    expect(subject.eligibility_determinations.first.household_state).to eq(:household_state)
-    expect(subject.eligibility_determinations.first.submitted_date).to eq(:submitted_date)
+    expect(subject.eligibility_determinations.first.determination_date).to eq(determination_date)
+    expect(subject.eligibility_determinations.first.maximum_aptc).to eq(maximum_aptc)
+    expect(subject.eligibility_determinations.first.csr_percent).to eq(csr_percent)
+    expect(subject.eligibility_determinations.first.household_state).to eq(household_state)
   end
 
 end

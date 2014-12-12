@@ -90,7 +90,7 @@ class PersonRelationship
             allow_nil:   false,
             inclusion: {in: KINDS, message: "%{value} is not a valid person relationship"}
 
-  index({related_person_id:  1})
+  index({relative_id:  1})
 
   def parent
     raise "undefined parent class: Person" unless person? 

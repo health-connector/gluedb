@@ -3,8 +3,6 @@ class Income
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  after_initialize :set_amount_in_cents
-
   KINDS = %W(
   	alimony_and_maintenance
 		american_indian_and_alaskan_native
@@ -80,10 +78,6 @@ class Income
       is_projected: income_data[:is_projected],
       submission_date: income_data[:submission_date])
 
-  end
-
-  def set_amount_in_cents
-    self.amount_in_cents = (self.amount.to_f * 100).to_i if self.amount
   end
 
 end

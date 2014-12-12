@@ -51,7 +51,8 @@ class ApplicationGroup
 
   def no_duplicate_applicants
     applicants.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
-      errors.add(:base, "Duplicate applicants for person: #{k}")
+      errors.add(:base, "Duplicate applicants for person: #{k}\n" +
+                         "Applicants: #{v.inspect}")
     end
   end
 

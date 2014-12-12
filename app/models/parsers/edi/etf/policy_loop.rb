@@ -56,9 +56,10 @@ module Parsers
         end
 
         def eg_id
-          (@loop["REFs"].detect do |r|
+          eg_loop = (@loop["REFs"].detect do |r|
             r[1] == "1L"
-          end)[2]
+          end)
+          eg_loop.blank? ? nil : eg_loop[2]
         end
 
         def hios_id

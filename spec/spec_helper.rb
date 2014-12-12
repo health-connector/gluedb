@@ -13,7 +13,7 @@ SimpleCov.profiles.define 'glue_profiles' do
 end
 
 SimpleCov.start 'glue_profiles' do 
-  minimum_coverage 90
+#  minimum_coverage 90
   maximum_coverage_drop 5
 end
 

@@ -58,3 +58,5 @@ gem 'oj'
 gem 'roo'
 gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
+gem 'prawn'
+gem 'simplecov', :require => false, :group => :test

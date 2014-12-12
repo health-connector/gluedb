@@ -6,7 +6,7 @@ congress_feins = %w{
 emp_ids = Employer.where(:fein => { "$in" => congress_feins }).map(&:id)
 
 policies = Policy.no_timeout.where(
-  PolicyStatus.active_as_of(Date.new(2015, 1, 1),
+  PolicyStatus::Active.as_of(Date.new(2015, 1, 1),
     {
     :employer_id => { "$in" => emp_ids }
   }

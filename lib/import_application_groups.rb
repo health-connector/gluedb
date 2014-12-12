@@ -131,10 +131,12 @@ class ImportApplicationGroups
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
         uc.validate(ig_request, listener)
       end
+
       next unless all_valid
+
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-        uc.commit(ig_request, listener)
+        value = uc.commit(ig_request, listener)
       end
 
       #applying person objects in person relationships for each applicant.
@@ -165,9 +167,11 @@ class ImportApplicationGroups
         applicants_params = ag.applicants.map do |applicant|
           applicant.to_hash(p_tracker)
         end
+
         application_group_builder.add_financial_statements(applicants_params)
 
         application_group_builder.application_group.save!
+        puts "Saved #{application_group_builder.application_group.id}"
 
       rescue Exception => e
         fail_counter += 1

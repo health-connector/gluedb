@@ -12,7 +12,7 @@ namespace :edi do
         :format => "%t %a %e |%B| %P%%"
       )
       CSV.foreach(f, :headers => true) do |data|
-        yield data
+        yield data, pb
         pb.progress += data.to_s.length
       end
       pb.finish
@@ -49,8 +49,10 @@ namespace :edi do
       bgn_blacklist = import_bgn_blacklist
       f = File.join(Rails.root, "db", "data", "all_json.csv")
       ic = Parsers::Edi::ImportCache.new
+      Caches::HiosCache.allocate
+      Caches::MongoidCache.allocate(Plan)
 #     RubyProf.start
-      with_progress_bar(f, "ie 834s") do |row|
+      with_progress_bar(f, "ie 834s") do |row, pb|
         record = row.to_hash
         f_name = record['PROTOCOLMESSAGEID']
         trans_kind = record['TRANSTYPE']
@@ -62,10 +64,10 @@ namespace :edi do
           p = Parsers::Edi::TransmissionResponse.new(f_name, record['WIREPAYLOADUNPACKED'])
           p.persist!
         when "820"
-          p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'], ic)
+          p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'], ic, pb)
           p.persist!
         else
-          p = Parsers::Edi::TransmissionFile.new(f_name, trans_kind, record['WIREPAYLOADUNPACKED'], bgn_blacklist, ic)
+          p = Parsers::Edi::TransmissionFile.new(f_name, trans_kind, record['WIREPAYLOADUNPACKED'], bgn_blacklist, ic, pb)
           p.persist!
         end
       end
@@ -74,6 +76,8 @@ namespace :edi do
 #      r_file = File.open('profile.html', 'w')
 #      printer.print(r_file)
 #      r_file.close
+      Caches::HiosCache.release
+      Caches::MongoidCache.release(Plan)
     end
   end
 end

@@ -2,8 +2,10 @@ module Parsers
   module Edi
     class RemittanceTransmission
       attr_reader :result
-      def initialize(path, r_data, i_cache)
+      def initialize(path, r_data, i_cache, pb)
+        @progress_bar = pb
         @result = Oj.load(r_data)
+        @progress_bar.refresh
         @file_name = File.basename(path)
         @import_cache = i_cache
       end
@@ -15,6 +17,7 @@ module Parsers
         @result["L820s"].each do |l820|
           transaction = persist_edi_transaction(l820, edi_transmission, carrier)
           persist_premium_payments(l820, carrier, transaction)
+          @progress_bar.refresh
         end
       end
 

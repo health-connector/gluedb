@@ -4,9 +4,11 @@ module Parsers
       attr_reader :result
       attr_accessor :transmission_kind
       
-      def initialize(path, t_kind, r_data, blist = [], i_cache)
+      def initialize(path, t_kind, r_data, blist = [], i_cache, pb)
         @raw = r_data
+        @progress_bar = pb
         @result = Oj.load(r_data)
+        @progress_bar.refresh
         @file_name = File.basename(path)
         @transmission_kind = t_kind
         @inbound = (t_kind == "effectuation")
@@ -32,6 +34,7 @@ module Parsers
         bgn = l834["BGN"]
         fs = FileString.new(bgn[2] + "_" + @file_name, l834["RAW_CONTENT"])
         etf = Etf::EtfLoop.new(l834)
+        @progress_bar.refresh
         Protocols::X12::TransactionSetEnrollment.create!(
           :st01 => st[1],
           :st02 => st[2],

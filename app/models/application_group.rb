@@ -38,8 +38,6 @@ class ApplicationGroup
               numericality: { only_integer: true, inclusion: 2014..2025 },
               :allow_nil => true
 
-  scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
-
 #  validates_inclusion_of :max_renewal_year, :in => 2013..2025, message: "must fall between 2013 and 2030"
 
   index({e_case_id:  1})
@@ -48,6 +46,9 @@ class ApplicationGroup
   index({submitted_date:  1})
 
   validate :no_duplicate_applicants
+
+  scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
+  scope :all_with_household, exists({ :'households.0' => true })
 
   def no_duplicate_applicants
     applicants.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|

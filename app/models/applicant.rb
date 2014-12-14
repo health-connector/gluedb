@@ -13,11 +13,16 @@ class Applicant
   # Person who authorizes auto-renewal eligibility check
   field :is_consent_applicant, type: Boolean, default: false
 
+  field :is_active, type: Boolean, default: true
+
   field :person_id, type: Moped::BSON::ObjectId
   field :broker_id, type: Moped::BSON::ObjectId
 
   embeds_many :hbx_enrollment_exemptions
+  accepts_nested_attributes_for :hbx_enrollment_exemptions
+
   embeds_many :employee_applicants
+  accepts_nested_attributes_for :employee_applicants
 
   embeds_many :comments, cascade_callbacks: true
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true

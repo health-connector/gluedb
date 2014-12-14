@@ -21,6 +21,7 @@ module Parsers::Xml::Cv
       {
           total_amount: total_amount,
           amount: amount,
+          amount_in_cents: (amount.to_f * 100).to_i,
           kind: type.split('#').last.gsub('-','_'),
           frequency: frequency.split('#').last.gsub('-','_'),
           start_date: start_date,

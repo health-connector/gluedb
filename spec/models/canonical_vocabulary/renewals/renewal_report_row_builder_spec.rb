@@ -4,7 +4,7 @@ require 'rails_helper'
 module CanonicalVocabulary::Renewals
   describe RenewalReportRowBuilder do
     subject { RenewalReportRowBuilder.new(app_group, primary) }
-    let(:app_group) { double(e_case_id: '1234', yearwise_incomes: "250000", irs_consent: nil, size: 2, applicants: applicants) }
+    let(:app_group) { double(e_case_id: 'uri#1234', yearwise_incomes: "250000", irs_consent: nil, size: 2, applicants: applicants) }
     let(:applicants) { [primary, member]}
     let(:primary) { double(person: person)}
     let(:member) { double(person: person, person_demographics: person_demographics, age: 30, tax_status: 'Single', mec: nil)}
@@ -13,7 +13,7 @@ module CanonicalVocabulary::Renewals
     let(:current) { {plan: double} }
     let(:notice_date) { double }
     let(:addresses) { [ address ] }
-    let(:address) { {address_1: 'Wilson Building', address_2: 'K Street', apt: 'Suite 100', city: 'Washington DC', state: state, postal_code: '20002'} }
+    let(:address) { double(address_line_1: 'Wilson Building', address_line_2: 'K Street', apt: 'Suite 100', location_city_name: 'Washington DC', location_state_code: state, location_postal_code: '20002') }
     let(:state) { 'DC'}
     let(:response_date) { double }
     let(:aptc) { nil }
@@ -23,7 +23,7 @@ module CanonicalVocabulary::Renewals
     it 'can append integrated case numbers' do
       subject.append_integrated_case_number
 
-      expect(subject.data_set).to include app_group.e_case_id
+      expect(subject.data_set).to include app_group.e_case_id.split('#')[1]
     end
 
     it 'can append name of a member' do
@@ -40,7 +40,7 @@ module CanonicalVocabulary::Renewals
 
     it 'can append household address' do 
       subject.append_household_address
-      expect(subject.data_set).to eq [addresses[0][:address_1], addresses[0][:address_2], addresses[0][:apt], addresses[0][:city], addresses[0][:state], addresses[0][:postal_code]]
+      expect(subject.data_set).to eq [addresses[0].address_line_1, addresses[0].address_line_2, nil, addresses[0].location_city_name, addresses[0].location_state_code, addresses[0].location_postal_code]
     end
 
     it 'can append aptc' do
@@ -93,7 +93,7 @@ module CanonicalVocabulary::Renewals
       end
 
       context 'when member is not a D.C resident' do
-        let(:address) { {address_1: '3000 Park Drive', apt: 'Suite 10', city: 'Alexandria', state: 'VA', postal_code: '22302'} }
+        let(:address) { double(address_line_1: '3000 Park Drive', apt: 'Suite 10', location_city_name: 'Alexandria', location_state_code: 'VA', location_postal_code: '22302') }
         it 'appends non dc resident status' do
          subject.append_residency_of(member)
          expect(subject.data_set).to include 'Not a D.C. Resident'
@@ -112,7 +112,8 @@ module CanonicalVocabulary::Renewals
         end
 
         context 'primary member is not a D.C resident' do
-          let(:address) { {address_1: '3000 Park Drive', apt: 'Suite 10', city: 'Alexandria', state: 'VA', postal_code: '22302'} }
+          let(:address) { double(address_line_1: '3000 Park Drive', apt: 'Suite 10', location_city_name: 'Alexandria', location_state_code: 'VA', location_postal_code: '22302') }
+
           it 'appends non dc resident status' do
             subject.append_residency_of(member)
             expect(subject.data_set).to include 'Not a D.C. Resident'          

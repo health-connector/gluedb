@@ -37,6 +37,7 @@ group :test do
   gem 'database_cleaner', '1.3.0'
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
+  gem 'simplecov', :require => false, :group => :test
 end
 
 group :production do
@@ -58,3 +59,4 @@ gem 'oj'
 gem 'roo'
 gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
+gem 'prawn'

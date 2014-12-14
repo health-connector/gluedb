@@ -25,7 +25,7 @@ module Parsers::Xml::Cv
           alternative_benefits: alternative_benefits.map do |alternative_benefit|
             alternative_benefit.to_hash
           end,
-          deductions: alternative_benefits.map do |deduction|
+          deductions: deductions.map do |deduction|
             deduction.to_hash
           end
       }

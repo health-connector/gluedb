@@ -264,7 +264,7 @@ class Policy
   end
 
   def self.find_for_group_and_hios(eg_id, h_id)
-      plans = Plan.where(hios_plan_id: h_id)
+      plans = Caches::HiosCache.lookup(h_id) { Plan.where(hios_plan_id: h_id) }
       plan_ids = plans.map(&:_id)
 
       policies = Policy.where(
@@ -299,7 +299,7 @@ class Policy
   end
 
   def self.find_or_update_policy(m_enrollment)
-    plan = Plan.find(m_enrollment.plan_id)
+    plan = Caches::MongoidCache.lookup(Plan, m_enrollment.plan_id) { Plan.find(m_enrollment.plan_id) }
     found_enrollment = self.find_by_subkeys(
       m_enrollment.enrollment_group_id,
       m_enrollment.carrier_id,

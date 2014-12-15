@@ -3,10 +3,11 @@ class ApplicationGroupBuilder
   attr_reader :application_group
 
   def initialize(param, person_mapper)
-    param = param.slice(:e_case_id, :submitted_date)
+    param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
     #@application_group = ApplicationGroup.where(e_case_id:param[:e_case_id]).first
     @application_group ||= ApplicationGroup.new(param)
+    @application_group.updated_by = "curam_system_service"
     @household = self.application_group.households.build
   end
 

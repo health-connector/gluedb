@@ -11,12 +11,12 @@
           %th= sortable "assigned_to", "Assigned To"
           %th= sortable "resolved_by", "Resolved By"
       %tbody
-        - @edi_issues.each do |ed|
+        - @edi_ops_transactions.each do |ed|
           %tr
-            %td= link_to ed.enrollment_group_uri, edit_edi_issue_path(ed)
+            %td= link_to ed.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,""), edit_edi_ops_transaction_path(ed)
             %td= ed.event_key
             %td= ed.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
             %td= ed.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
-            %td= ed.aasm_state
+            %td= transaction_status_to_label(ed)
             %td= ed.assigned_to.present? ? ed.assigned_to : "Unassigned"
-            %td= ed.assigned_to.present? ? ed.assigned_to : "Unresolved"
+            %td= ed.resolved_by.present? ? ed.resolved_by : "Unresolved"

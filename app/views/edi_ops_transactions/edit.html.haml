@@ -7,10 +7,22 @@
     = form_for @edi_ops_transaction, url: edi_ops_transactions_path , layout: :default do |f|
       .panel
         .row
-          .col-md-6
-            %h4
+          .col-md-10
+            %h5
               Status:
               = transaction_status_to_label(@edi_ops_transaction)
+            %dl.dl-horizontal
+              %dt Qualifying Reason
+              %dd= @edi_ops_transaction.qualifying_reason_uri.gsub(/^urn:dc0:terms:v1:qualifying_life_event#/,"")
+              %dt Resource
+              %dd= @edi_ops_transaction.event_key
+              %dt Event Name
+              %dd= @edi_ops_transaction.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
+              %dt Submitted
+              %dd= @edi_ops_transaction.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
+              - if @edi_ops_transaction.return_status.present?
+                %dt Return Status
+                %dd= @edi_ops_transaction.return_status
             = f.select :assigned_to, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }
 
             = f.select :resolved_by, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }

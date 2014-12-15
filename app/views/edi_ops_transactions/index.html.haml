@@ -5,12 +5,12 @@
   .row
     .col-md-8
     .col-md-4
-      = render 'search', url: edi_issues_path, q: @q, placeholder: 'EG Id, Status, Assigned'
+      = render 'search', url: edi_ops_transactions_path, q: @q, placeholder: 'EG Id, Status, Assigned'
 #issues_table= render 'issues_table'
 .row
   .col-md-8
-    = paginate @edi_issues, theme: "twitter-bootstrap", pagination_class: "pagination-plain"
+    = paginate @edi_ops_transactions, theme: "twitter-bootstrap", pagination_class: "pagination-plain"
   .col-md-4
     %p
-      = "#{number_with_delimiter(@edi_issues.count)} / #{number_with_delimiter(EdiOpsTransaction.count)} "
+      = "#{number_with_delimiter(@edi_ops_transactions.count)} / #{number_with_delimiter(EdiOpsTransaction.count)} "
       %small (transactions selected / total)

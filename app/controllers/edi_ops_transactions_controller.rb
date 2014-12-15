@@ -20,7 +20,6 @@ class EdiOpsTransactionsController < ApplicationController
     else
       render "edit"
     end
-
   end
 
   private

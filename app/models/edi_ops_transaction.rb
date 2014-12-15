@@ -63,7 +63,6 @@ class EdiOpsTransaction
     else
       self.reopen
     end
-
   end
 
   def self.default_search_order

@@ -20,6 +20,53 @@ class ApplicationGroupBuilder
                                                                            :person))
   end
 
+  def add_coverage_household(household=@application_group.households.first)
+
+    coverage_household = household.coverage_households.build({submitted_at: Time.now})
+
+    @application_group.applicants.each do |applicant|
+      coverage_household.coverage_household_members << applicant if applicant.is_coverage_applicant
+    end
+
+  end
+
+  def add_hbx_enrollment(household=@application_group.households.first)
+
+
+    puts "#{@application_group.id} #{@application_group.primary_applicant.person.id} #{@application_group.primary_applicant.person.policies.size}"
+    @application_group.primary_applicant.person.policies.each do |policy|
+
+      hbx_enrollement = household.hbx_enrollments.build
+      hbx_enrollement.policy = policy
+      hbx_enrollement.enrollment_group_id = policy.eg_id
+      hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
+      hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
+      hbx_enrollement.submitted_at = Time.now
+
+      hbx_enrollement.kind = "employer_sponsored" unless policy.employer_id.blank?
+      hbx_enrollement.kind = "unassisted_qhp" if (hbx_enrollement.applied_aptc_in_cents == 0 && policy.employer.blank?)
+      hbx_enrollement.kind = "insurance_assisted_qhp" if (hbx_enrollement.applied_aptc_in_cents > 0 && policy.employer.blank?)
+
+      policy.enrollees.each do |enrollee|
+        begin
+          person = Person.find_for_member_id(enrollee.m_id)
+
+          @application_group.applicants << Applicant.new(person: person) unless @application_group.person_is_applicant?(person)
+          application_group = @application_group.find_applicant_by_person(person)
+
+          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: application_group,
+                                                         premium_amount_in_dollars: enrollee.pre_amt})
+          hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
+
+        rescue FloatDomainError
+          puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
+          next
+        end
+      end
+
+    end
+
+  end
 
   #TODO - method not implemented properly using .build(params)
   def add_irsgroups(irs_groups_params)
@@ -40,7 +87,7 @@ class ApplicationGroupBuilder
 
       tax_household_params[:tax_household_members].map do |tax_household_member_params|
         tax_household_member = tax_household.tax_household_members.build(tax_household_member_params)
-        person_uri =  @person_mapper.alias_map[tax_household_member_params[:id]]
+        person_uri = @person_mapper.alias_map[tax_household_member_params[:id]]
         person_obj = @person_mapper.people_map[person_uri].first
         new_applicant = get_applicant(person_obj)
         tax_household_member.applicant_id = new_applicant.id
@@ -70,7 +117,7 @@ class ApplicationGroupBuilder
     applicants_params.map do |applicant_params|
       applicant_params[:financial_statements].each do |financial_statement_params|
         tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
-        financial_statement = tax_household_member.financial_statements.build(financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status ))
+        financial_statement = tax_household_member.financial_statements.build(financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)
         end

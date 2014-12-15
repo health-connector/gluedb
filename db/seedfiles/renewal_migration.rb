@@ -67,7 +67,7 @@ end
 
 def build_enrollments(app_group)
   enrollments = []
-  enrollment_list = app_group.primary_applicant.person.policies.collect do |policy|
+  enrollment_list = app_group.primary_applicant.person.policies.collect { |policy|
     he = HbxEnrollment.new()
 
     # he.plan = Plan.find(policy.plan_id)
@@ -87,7 +87,7 @@ def build_enrollments(app_group)
     he.kind = "insurance_assisted_qhp" if (he.applied_aptc_in_cents > 0 && policy.employer.blank?)
 
     policy.enrollees.each do |enrollee|
-     begin
+      begin
         person = Person.find_for_member_id(enrollee.m_id)
         # puts "Person: #{person.inspect}"
         app_group.applicants << Applicant.new(person: person) unless app_group.person_is_applicant?(person)
@@ -95,9 +95,9 @@ def build_enrollments(app_group)
         # puts "Applicant: #{appl}"
 
         em = HbxEnrollmentMember.new(
-          applicant: appl,
-          premium_amount_in_dollars: enrollee.pre_amt
-          )
+            applicant: appl,
+            premium_amount_in_dollars: enrollee.pre_amt
+        )
 
         em.is_subscriber = true if (enrollee.rel_code == "self")
         he.hbx_enrollment_members << em
@@ -109,7 +109,7 @@ def build_enrollments(app_group)
     end
 
     enrollments << he
-  end
+  }
   enrollments
 end
 
@@ -133,7 +133,7 @@ application_group.each do |ag|
   hh.hbx_enrollments = build_enrollments(ag)
 
   ag.applicants.each do |applicant|
-    ch.coverage_household_members << applicant 
+    ch.coverage_household_members << applicant if applicant.is_coverage_applicant
   end
 
   ag.renewal_consent_through_year = 2014

@@ -99,14 +99,6 @@ class Employer
     write_attribute(:fein, val.to_s.gsub(/[^0-9]/i, ''))
   end
 
-  def plan_year_of(coverage_start_date)
-     # The #to_a is a caching thing.
-     plan_years.to_a.detect do |py|
-       (py.start_date <= coverage_start_date) &&
-         (py.end_date >= coverage_start_date)
-     end
-   end
-
   def invalidate_find_caches
     Rails.cache.delete("Employer/find/fein.#{fein}")
 #    elected_plans.each do |ep|

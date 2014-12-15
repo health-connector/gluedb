@@ -150,7 +150,7 @@ class Policy
   end
 
   def market
-    employer.nil? ? 'individual' : 'shop'
+    is_shop? ? 'shop' : 'individual'
   end
 
   def is_shop?

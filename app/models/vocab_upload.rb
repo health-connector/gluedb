@@ -32,7 +32,6 @@ class VocabUpload
 
       change_request = Parsers::Xml::Enrollment::ChangeRequestFactory.create_from_xml(doc)
       plan = Plan.find_by_hios_id_and_year(change_request.hios_plan_id, change_request.plan_year)
-
       validations = [
         Validators::PremiumValidator.new(change_request, plan, listener),
         Validators::PremiumTotalValidatorFactory.create_for(change_request, listener),

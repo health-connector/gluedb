@@ -27,7 +27,7 @@ module Listeners
       request = NewEnrollmentRequest.from_xml(payload)
       NewEnrollment.new.execute(request, uc_listener)
       # Don't enable this until we are done!
-      channel.acknowledge(delivery_info.delivery_tag, false) 
+      channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
     def handle_success(details, policy_ids, canceled_policies)

@@ -38,6 +38,8 @@ class ApplicationGroup
               numericality: { only_integer: true, inclusion: 2014..2025 },
               :allow_nil => true
 
+  validates :e_case_id, uniqueness: true
+
 #  validates_inclusion_of :max_renewal_year, :in => 2013..2025, message: "must fall between 2013 and 2030"
 
   index({e_case_id:  1})

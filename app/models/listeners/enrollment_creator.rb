@@ -11,12 +11,15 @@ module Listeners
       end
     end
 
+    
+
     def on_message(delivery_info, properties, payload)
       event_key = delivery_info.routing_key
       qr_uri = properties.headers["qualifying_reason_uri"]
       reply_to = properties.reply_to
       body = payload
 
+=begin
       uc_listener = Listeners::NewEnrollmentListener.new(
         {
           :qualifying_reason => qr_uri,
@@ -26,7 +29,11 @@ module Listeners
 
       request = NewEnrollmentRequest.from_xml(payload)
       NewEnrollment.new.execute(request, uc_listener)
-      # Don't enable this until we are done!
+=end
+      error_props = error_properties(reply_to, delivery_info, properties)
+      error_props[:headers][:return_status] = "503"
+      error_props[:headers][:error_message] = "Service temporarily disabled due to Curam data issues." 
+      channel.default_exchange.publish(payload, error_props)
       channel.acknowledge(delivery_info.delivery_tag, false) 
     end
 

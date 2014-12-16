@@ -12,6 +12,8 @@
               Status:
               = transaction_status_to_label(@edi_ops_transaction)
             %dl.dl-horizontal
+              %dt Enrollment Group ID
+              %dd= @edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")
               %dt Qualifying Reason
               %dd= @edi_ops_transaction.qualifying_reason_uri.gsub(/^urn:dc0:terms:v1:qualifying_life_event#/,"")
               %dt Resource

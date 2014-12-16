@@ -26,8 +26,9 @@ module Parsers::Xml::Cv
             alternative_benefit.to_hash
           end,
           deductions: deductions.map do |deduction|
-            deduction.to_hash
-          end
+            deduction.to_hash if deduction.to_hash.has_key?(:kind)
+          end - [nil] #if :kind is absent, reject the deduction. nil =  cases where :kind = nil
+
       }
     end
   end

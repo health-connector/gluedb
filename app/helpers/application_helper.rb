@@ -18,6 +18,16 @@ module ApplicationHelper
     test ? content_tag(:span, "Authority Member", class: "label label-success") : content_tag(:span, "Non-Authority Member", class: "label label-warning")
   end
 
+  def transaction_status_to_label(ed)
+    if ed.open?
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-warning")
+    elsif ed.assigned?
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-info")
+    else
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-success")
+    end
+  end
+
   # Formats a full name into upper/lower case with last name wrapped in HTML <strong> tag
   def name_to_listing(person)
     given_name = [person.name_first, person.name_middle].reject(&:nil? || empty?).join(' ')
@@ -134,7 +144,7 @@ module ApplicationHelper
     fui = params[:direction] == "desc" ? "down" : "up"
     title ||= column.titleize
     css_class = (column == sort_column) ? "fui-triangle-#{fui}-small" : nil
-    direction = (column == params[:sort] && params[:direction] == "asc") ? "desc" : "asc"
+    direction = (column == params[:sort] && params[:direction] == "desc") ? "asc" : "desc"
     ((link_to title, params.merge(:sort => column, :direction => direction, :page => nil) ) + content_tag(:sort, raw("&nbsp;"), class: css_class))
   end
 end

@@ -1,6 +1,7 @@
 
-application_group_list = ApplicationGroup.limit(100)
-# application_group_list = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
+application_group = ApplicationGroup.limit(10)
+application_group = ApplicationGroup.first.to_a
+# application_group = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
 
 # Move person_relationships from ApplicationGroup to Person model
 def migrate_relationships(app_group)
@@ -18,7 +19,7 @@ def migrate_relationships(app_group)
     subject.updated_by = "renewal_migration_service"
     subject.save!
 
-    unless relationship == "self" || relationship.blank?
+    unless relationship == "self"
       # Create the other person's self-relective relationship 
       relative.person_relationships << PersonRelationship.new(
           relative: relative,
@@ -30,7 +31,6 @@ def migrate_relationships(app_group)
           relative: subject,
           kind: relationship
         )
-
       # Flip the relationship
       relative.person_relationships << pr.invert_relationship
 
@@ -41,7 +41,7 @@ def migrate_relationships(app_group)
 end
 
 def build_applicant_list(app_group)
-  app_group.applicants = []
+  applicants = []
 
   # Distinct applicants may be found in both person_relationships and enrollments
   app_group.person_relationships.each do |rel|
@@ -49,39 +49,30 @@ def build_applicant_list(app_group)
     p1 = Person.find(rel["object_person"])
     relationship = rel["relationship_kind"]
 
-    appl = nil
     if relationship == "self"
-      unless app_group.person_is_applicant?(p0)
-        appl = Applicant.new(person: p0, is_primary_applicant: true, is_consent_applicant: true)
-      end
+      appl = Applicant.new(person: p0, is_primary_applicant: true, is_consent_applicant: true)
+      primary_appl = appl
     else
-      appl = Applicant.new(person: p1) unless app_group.person_is_applicant?(p1)
+      appl = Applicant.new(person: p1)
     end
-    app_group.applicants << appl unless appl.blank?
+    applicants << appl
   end
 
-  app_group
+  # Find enrollees from all polocies associated with Primary Applicant
+  # primary_appl.person.policies.collect do |policy|
+  # end
+
+  applicants
 end
 
 def build_enrollments(app_group)
   enrollments = []
-
-  primary_appl = app_group.primary_applicant
-  if primary_appl.blank?
-    puts "ApplicationGroup missing primary applicant: #{app_group.inspect}"
-    return
-  end
-
-  primary_appl.person.policies.collect do |policy|
-
-    if policy.blank?
-      puts "No Policies found for primary applicant: #{primary_appl.inspect}"
-      next
-    end
-
+  enrollment_list = app_group.primary_applicant.person.policies.collect { |policy|
     he = HbxEnrollment.new()
 
     # he.plan = Plan.find(policy.plan_id)
+    # he.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
+    # he.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
     # he.primary_applicant = alpha_person
     # he.allocated_aptc_in_dollars = policy.allocated_aptc
 
@@ -89,28 +80,27 @@ def build_enrollments(app_group)
     he.enrollment_group_id = policy.eg_id
     he.elected_aptc_in_dollars = policy.elected_aptc
     he.applied_aptc_in_dollars = policy.applied_aptc
-    he.submitted_at = policy.enrollees.first.coverage_start
+    he.submitted_date = Time.now
 
-    if policy.is_shop?
-      he.kind = "employer_sponsored"
-    else
-      he.applied_aptc_in_cents > 0 ? he.kind = "insurance_assisted_qhp" : he.kind = "unassisted_qhp"
-    end
+    he.kind = "employer_sponsored" unless policy.employer_id.blank?
+    he.kind = "unassisted_qhp" if (he.applied_aptc_in_cents == 0 && policy.employer.blank?)
+    he.kind = "insurance_assisted_qhp" if (he.applied_aptc_in_cents > 0 && policy.employer.blank?)
 
     policy.enrollees.each do |enrollee|
       begin
         person = Person.find_for_member_id(enrollee.m_id)
+        # puts "Person: #{person.inspect}"
         app_group.applicants << Applicant.new(person: person) unless app_group.person_is_applicant?(person)
         appl = app_group.find_applicant_by_person(person)
+        # puts "Applicant: #{appl}"
 
-        em = he.hbx_enrollment_members.build(
+        em = HbxEnrollmentMember.new(
             applicant: appl,
-            premium_amount_in_dollars: enrollee.pre_amt,
-            start_date: Date.today,
-            eligibility_date: Date.today
-          )
+            premium_amount_in_dollars: enrollee.pre_amt
+        )
 
         em.is_subscriber = true if (enrollee.rel_code == "self")
+        he.hbx_enrollment_members << em
 
       rescue FloatDomainError
         puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
@@ -118,48 +108,38 @@ def build_enrollments(app_group)
       end
     end
 
-    # Assign broker if known
-    primary_appl.broker = Broker.find(policy.broker_id) unless policy.broker_id.blank?
-
-    unless policy.employer_id.blank?
-      employer = Employer.find(policy.employer_id)
-      puts "Employer: #{employer.inspect}"
-      puts "PrimaryApplicant: #{primary_appl.inspect}"
-      # ea = primary_appl.employee_applicants.build(employer: employer, start_date: )
-      # puts "EmployeeApplicant: #{ea.inspect}"
-    end
-
     enrollments << he
-  end
+  }
   enrollments
 end
 
-application_group_list.each do |ag|
+application_group.each do |ag|
 
+  hh = Household.new(
+      application_group: ag,
+      submitted_at: Time.now
+    )
+  ch = CoverageHousehold.new(
+      household: hh,
+      submitted_at: Time.now
+    )
 
   # Move the ApplicationGroup relationships to repsective Person models
   migrate_relationships(ag)
 
-  build_applicant_list(ag)
+  ag.applicants = build_applicant_list(ag)
 
   # Build hbx_enrollments
-  hh = ag.households.build(submitted_at: Time.now)
-  ch = hh.coverage_households.build(submitted_at: Time.now)
-  
   hh.hbx_enrollments = build_enrollments(ag)
 
   ag.applicants.each do |applicant|
-    ch.coverage_household_members << applicant 
+    ch.coverage_household_members << applicant if applicant.is_coverage_applicant
   end
 
-  ag.application_type = hh.hbx_enrollments.first.kind
   ag.renewal_consent_through_year = 2014
   ag.submitted_at = Time.now
   ag.updated_by = "renewal_migration_service"
 
-  puts ag.errors.full_messages
-  puts ag.valid?
-  puts "Applicants: #{ag.applicants.inspect}" unless ag.valid? 
   ag.save!
   # Build tax_households
 

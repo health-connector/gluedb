@@ -1,0 +1,52 @@
+- model_class = EdiOpsTransaction
+- t '.title', :default => model_class.model_name.human.titleize
+.page-header
+  = render 'shared/breadcrumb', crumbs: [@edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")]
+.row
+  .col-md-4
+    = form_for @edi_ops_transaction, url: edi_ops_transactions_path , layout: :default do |f|
+      .panel
+        .row
+          .col-md-10
+            %h5
+              Status:
+              = transaction_status_to_label(@edi_ops_transaction)
+            %dl.dl-horizontal
+              %dt Qualifying Reason
+              %dd= @edi_ops_transaction.qualifying_reason_uri.gsub(/^urn:dc0:terms:v1:qualifying_life_event#/,"")
+              %dt Resource
+              %dd= @edi_ops_transaction.event_key
+              %dt Event Name
+              %dd= @edi_ops_transaction.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
+              %dt Submitted
+              %dd= @edi_ops_transaction.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
+              - if @edi_ops_transaction.return_status.present?
+                %dt Return Status
+                %dd= @edi_ops_transaction.return_status
+            = f.select :assigned_to, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }
+
+            = f.select :resolved_by, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }
+          .col-md-12
+            .well.well-sm.default
+              .form-actions
+                = f.button "Save Changes" , :class => 'btn btn-primary'
+                = link_to t('.back', :default => t("helpers.links.back")), edi_ops_transactions_path, :class => 'btn btn-primary'
+  .col-md-8
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title
+          %span.fui-document  
+          Headers
+      .panel-body
+        %pre
+          %code.json= @edi_ops_transaction.json_body({headers: true})
+    .panel.panel-default
+      .panel-heading
+        %h3.panel-title
+          %span.fui-document  
+          Body
+      .panel-body
+        %pre
+          %code.json= @edi_ops_transaction.json_body
+.page-header
+= render 'comments/comment_panel', commentable: @edi_ops_transaction

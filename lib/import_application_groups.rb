@@ -123,13 +123,14 @@ class ImportApplicationGroups
     puts "Total number of application groups :#{ags.size}"
     fail_counter = 0
     ags.each do |ag|
+      puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
 
       application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-        uc.validate(ig_request, listener)
+        value = uc.validate(ig_request, listener)
       end
 
       next unless all_valid
@@ -169,6 +170,8 @@ class ImportApplicationGroups
         end
 
         application_group_builder.add_financial_statements(applicants_params)
+        application_group_builder.add_hbx_enrollment
+        application_group_builder.add_coverage_household
 
         application_group_builder.application_group.save!
         puts "Saved #{application_group_builder.application_group.id}"

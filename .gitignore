@@ -18,6 +18,7 @@
 
 # Ignore vim swapfiles
 *.swp
+coverage/
 dump/
 db/data
 db/seedfiles/**/*.xml

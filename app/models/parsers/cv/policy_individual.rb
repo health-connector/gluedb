@@ -72,8 +72,6 @@ module Parsers
           :ssn => ssn,
           :hbx_member_id => hbx_member_id,
           :gender => gender,
-          :emails => ["a"],
-          :phones => ["a"],
           :addresses => addresses.map(&:to_hash),
           :emails => emails.map(&:to_hash),
           :phones => phones.map(&:to_hash)

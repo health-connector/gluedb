@@ -90,9 +90,11 @@ class EdiOpsTransaction
     search_rex = Regexp.compile(Regexp.escape(s_rex), true)
     {
       "$or" => ([
+        {"event_key" => search_rex},
         {"enrollment_group_uri" => search_rex},
         {"aasm_state" => search_rex},
-        {"assigned_to" => search_rex}
+        {"assigned_to" => search_rex},
+        {"resolved_by" => search_rex}
       ])
     }
   end

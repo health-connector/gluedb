@@ -1,10 +1,10 @@
 - model_class = EdiOpsTransaction
 - t '.title', :default => model_class.model_name.human.titleize
 .page-header
-  = render 'shared/breadcrumb', crumbs: [@edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")]
+  = render 'shared/breadcrumb', crumbs: [link_to('Edi Ops Transactions', edi_ops_transactions_path), link_to('Edi Ops Transaction', edit_edi_ops_transaction_path(@edi_ops_transaction)), link_to("Enrollment Group ID : #{@edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")}", edit_edi_ops_transaction_path)]
 .row
   .col-md-4
-    = form_for @edi_ops_transaction, url: edi_ops_transactions_path , layout: :default do |f|
+    = form_for @edi_ops_transaction, layout: :default do |f|
       .panel
         .row
           .col-md-10

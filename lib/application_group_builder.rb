@@ -32,8 +32,6 @@ class ApplicationGroupBuilder
 
   def add_hbx_enrollment(household=@application_group.households.first)
 
-
-    puts "#{@application_group.id} #{@application_group.primary_applicant.person.id} #{@application_group.primary_applicant.person.policies.size}"
     @application_group.primary_applicant.person.policies.each do |policy|
 
       hbx_enrollement = household.hbx_enrollments.build

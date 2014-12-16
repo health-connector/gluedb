@@ -5,7 +5,7 @@ class Member
 
   include MergingModel
 
-  GENDER_TYPES = %W(male female unknown)
+  GENDER_TYPES = %W(male female)
 
   CITIZEN_STATUS_TYPES = %W[
       us_citizen

@@ -18,15 +18,18 @@ module Parsers::Xml::Cv
     element :submitted_date, String, tag:"submitted_date"
 
     def to_hash
-      {
+      response = {
           total_amount: total_amount,
           amount: amount,
           amount_in_cents: (amount.to_f * 100).to_i,
-          kind: type.split('#').last.gsub('-','_'),
           frequency: frequency.split('#').last.gsub('-','_'),
           start_date: start_date,
           submitted_date: submitted_date
       }
+
+      response[:kind] = type.split('#').last.gsub('-','_') unless type.blank? # don't add :kind if its not blank
+
+      response
     end
 
   end

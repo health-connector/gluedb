@@ -1,16 +1,30 @@
 - model_class = EdiOpsTransaction
 - t '.title', :default => model_class.model_name.human.titleize
 .page-header
-  = render 'shared/breadcrumb', crumbs: [@edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")]
+  = render 'shared/breadcrumb', crumbs: [link_to('Edi Ops Transactions', edi_ops_transactions_path), link_to('Edi Ops Transaction', edit_edi_ops_transaction_path(@edi_ops_transaction)), link_to("Enrollment Group ID : #{@edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")}", edit_edi_ops_transaction_path)]
 .row
   .col-md-4
-    = form_for @edi_ops_transaction, url: edi_ops_transactions_path , layout: :default do |f|
+    = form_for @edi_ops_transaction, layout: :default do |f|
       .panel
         .row
-          .col-md-6
-            %h4
+          .col-md-10
+            %h5
               Status:
               = transaction_status_to_label(@edi_ops_transaction)
+            %dl.dl-horizontal
+              %dt Enrollment Group ID
+              %dd= @edi_ops_transaction.enrollment_group_uri.gsub(/^dc0:enrollment_group_id:/,"")
+              %dt Qualifying Reason
+              %dd= @edi_ops_transaction.qualifying_reason_uri.gsub(/^urn:dc0:terms:v1:qualifying_life_event#/,"")
+              %dt Resource
+              %dd= @edi_ops_transaction.event_key
+              %dt Event Name
+              %dd= @edi_ops_transaction.event_name.gsub(/^urn:openhbx:events:v1:individual#/,"")
+              %dt Submitted
+              %dd= @edi_ops_transaction.submitted_timestamp.strftime('%m-%d-%Y %l:%M %p')
+              - if @edi_ops_transaction.return_status.present?
+                %dt Return Status
+                %dd= @edi_ops_transaction.return_status
             = f.select :assigned_to, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }
 
             = f.select :resolved_by, User.read_write_usernames, {include_blank: "None"}, { class: "select select-primary", data: { toggle: "select"} }

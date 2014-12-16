@@ -11,6 +11,8 @@ module Listeners
       end
     end
 
+    
+
     def on_message(delivery_info, properties, payload)
       event_key = delivery_info.routing_key
       qr_uri = properties.headers["qualifying_reason_uri"]

@@ -21,12 +21,15 @@ class ApplicationGroupBuilder
 
   def add_applicant(applicant_params)
 
+    puts "add_applicant"
+    puts @application_group.applicants.map(&:person_id)
+    puts applicant_params[:person].id
 
-    if @application_group.applicants.map(&:applicant_id).include? applicant_params[:applicant_id]
-      applicant = @application_group.applicants.where(applicant_id:applicant_params[:applicant_id]).first
+    if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
+      applicant = @application_group.applicants.where(person_id:applicant_params[:person].id).first
     else
 
-      applicant = @application_group.applicants.build(applicant_params.slice(:applicant_id,
+      applicant = @application_group.applicants.build(applicant_params.slice(
                                                                            :is_primary_applicant,
                                                                            :is_coverage_applicant,
                                                                            :is_head_of_household,
@@ -53,7 +56,7 @@ class ApplicationGroupBuilder
     else
       puts "else?"
       #TODO to use .is_active household instead of .last
-      @household = self.application_group.households.last #if update and applicants haven't changed then use the latest household in use
+      @household = self.application_group.latest_coverage_household #if update and applicants haven't changed then use the latest household in use
     end
 
     puts "households #{self.application_group.households.inspect}"
@@ -63,7 +66,7 @@ class ApplicationGroupBuilder
   end
 
   def have_applicants_changed?
-    if @application_group.applicants.map(&:applicant_id).sort == @applicants_params.map do |applicants_param| applicants_param[:applicant_id] end.sort
+    if @application_group.applicants.map(&:id).sort == @applicants_params.map do |applicants_param| applicants_param[:applicant_id] end.sort
       return false
     else
       return true
@@ -72,8 +75,7 @@ class ApplicationGroupBuilder
 
   def add_coverage_household
 
-    household = @household
-    coverage_household = household.coverage_households.build({submitted_at: Time.now})
+    coverage_household = @household.coverage_households.build({submitted_at: Time.now})
 
     @application_group.applicants.each do |applicant|
       coverage_household.coverage_household_members << applicant if applicant.is_coverage_applicant

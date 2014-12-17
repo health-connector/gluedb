@@ -21,7 +21,7 @@ module Parsers::Xml::Cv
       {
           start_date: start_date,
           end_date: end_date,
-          submitted_date: submitted_date,
+          submission_date: submitted_date,
           kind: sanitize_type
       }
     end

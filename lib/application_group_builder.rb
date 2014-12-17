@@ -101,9 +101,9 @@ class ApplicationGroupBuilder
           person = Person.find_for_member_id(enrollee.m_id)
 
           @application_group.applicants << Applicant.new(person: person) unless @application_group.person_is_applicant?(person)
-          application_group = @application_group.find_applicant_by_person(person)
+          applicant = @application_group.find_applicant_by_person(person)
 
-          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: application_group,
+          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: applicant,
                                                          premium_amount_in_dollars: enrollee.pre_amt})
           hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
@@ -174,7 +174,7 @@ class ApplicationGroupBuilder
           financial_statement.deductions.build(deduction_params)
         end
         financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
-          financial_statement.alternative_benefits.build(alternative_benefit_params)
+          financial_statement.alternate_benefits.build(alternative_benefit_params)
         end
       end
     end

@@ -36,6 +36,11 @@ module Policies
       policy = @policy_factory.new(request.merge({:plan => plan, :carrier => plan.carrier}))
       if !policy.valid?
         listener.invalid_policy(policy.errors.to_hash)
+        policy.enrollees.each do |en|
+          if !en.valid?
+            listener.invalid_enrollee(en.errors.to_hash)
+          end
+        end
         fail = true
       end
       if enrollees.blank?

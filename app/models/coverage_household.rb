@@ -7,8 +7,6 @@ class CoverageHousehold
 
   embedded_in :household
   
-  field :effective_start_date, type: Date
-  field :effective_end_date, type: Date
   field :submitted_at, type: DateTime
 
   embeds_many :coverage_household_members

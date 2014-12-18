@@ -20,11 +20,11 @@ module Parsers
       end
 
       def tot_res_amt
-        @tot_res_amount ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:total_responsible_amount",namespaces)).content.split("#").last.value || "0.0"
+        @tot_res_amount ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:total_responsible_amount",namespaces)).content.split("#").last.value || 0.00
       end
 
       def pre_amt_tot
-        @pre_amt_tot ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:premium_total_amount",namespaces)).content.split("#").last.value || "0.0"
+        @pre_amt_tot ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:premium_total_amount",namespaces)).content.split("#").last.value || 0.00
       end
 
       def tot_emp_res_amt
@@ -36,7 +36,7 @@ module Parsers
       end
 
       def applied_aptc
-        @applied_aptc ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:individual_market/cv:applied_aptc_amount",namespaces)).content.split("#").last.value || "0.0"
+        @applied_aptc ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:individual_market/cv:applied_aptc_amount",namespaces)).content.split("#").last.value || 0.00
       end
 
       def carrier_to_bill

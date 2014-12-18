@@ -18,6 +18,7 @@ module Parsers::Xml::Cv
     element :is_head_of_household, String, tag: 'is_head_of_household'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
+    has_many :employee_applicants, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
 
     def to_individual_request(member_id_generator, p_tracker)
       alias_ids.each do |a_id|
@@ -63,7 +64,8 @@ module Parsers::Xml::Cv
          is_coverage_applicant: is_coverage_applicant,
          is_head_of_household:is_head_of_household,
          person_demographics: person_demographics.to_hash,
-         financial_statements: financial_statements.map(&:to_hash)
+         financial_statements: financial_statements.map(&:to_hash),
+         employee_applicants: employee_applicants.map(&:to_hash)
      }
 
      response[:person] = p_tracker[id].first if p_tracker

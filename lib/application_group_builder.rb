@@ -3,26 +3,79 @@ class ApplicationGroupBuilder
   attr_reader :application_group
 
   def initialize(param, person_mapper)
+    @is_update = true # we assume that this is a update existing application group workflow
+    @applicants_params = param[:applicants]
     param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
-    #@application_group = ApplicationGroup.where(e_case_id:param[:e_case_id]).first
-    @application_group ||= ApplicationGroup.new(param)
+    @application_group = ApplicationGroup.where(e_case_id:param[:e_case_id]).first
+
+    if @application_group.nil?
+      @application_group = ApplicationGroup.new(param) #we create a new application group from the xml
+      @is_update = false # means this is a create
+    end
+
     @application_group.updated_by = "curam_system_service"
-    @household = self.application_group.households.build
+
+    get_household
   end
 
   def add_applicant(applicant_params)
-    applicant = @application_group.applicants.build(applicant_params.slice(:applicant_id,
+
+    puts "add_applicant"
+    puts @application_group.applicants.map(&:person_id)
+    puts applicant_params[:person].id
+
+    if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
+      applicant = @application_group.applicants.where(person_id:applicant_params[:person].id).first
+    else
+
+      applicant = @application_group.applicants.build(applicant_params.slice(
                                                                            :is_primary_applicant,
                                                                            :is_coverage_applicant,
                                                                            :is_head_of_household,
                                                                            :person_demographics,
                                                                            :person))
+
+    end
+
+    applicant
   end
 
-  def add_coverage_household(household=@application_group.households.first)
+  def get_household
 
-    coverage_household = household.coverage_households.build({submitted_at: Time.now})
+    return @household if @household
+
+    puts "households #{self.application_group.households.inspect}"
+
+    if !@is_update
+      puts "Updating"
+      @household = self.application_group.households.build #if new application group then create new household
+    elsif have_applicants_changed?
+      puts "have_applicants_changed?"
+      @household = self.application_group.households.build #if applicants have changed then create new household
+    else
+      puts "else?"
+      #TODO to use .is_active household instead of .last
+      @household = self.application_group.latest_coverage_household #if update and applicants haven't changed then use the latest household in use
+    end
+
+    puts "households #{self.application_group.households.inspect}"
+
+    return @household
+
+  end
+
+  def have_applicants_changed?
+    if @application_group.applicants.map(&:id).sort == @applicants_params.map do |applicants_param| applicants_param[:applicant_id] end.sort
+      return false
+    else
+      return true
+    end
+  end
+
+  def add_coverage_household
+
+    coverage_household = @household.coverage_households.build({submitted_at: Time.now})
 
     @application_group.applicants.each do |applicant|
       coverage_household.coverage_household_members << applicant if applicant.is_coverage_applicant
@@ -30,11 +83,11 @@ class ApplicationGroupBuilder
 
   end
 
-  def add_hbx_enrollment(household=@application_group.households.first)
+  def add_hbx_enrollment
 
     @application_group.primary_applicant.person.policies.each do |policy|
 
-      hbx_enrollement = household.hbx_enrollments.build
+      hbx_enrollement = @household.hbx_enrollments.build
       hbx_enrollement.policy = policy
       hbx_enrollement.enrollment_group_id = policy.eg_id
       hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
@@ -50,9 +103,9 @@ class ApplicationGroupBuilder
           person = Person.find_for_member_id(enrollee.m_id)
 
           @application_group.applicants << Applicant.new(person: person) unless @application_group.person_is_applicant?(person)
-          application_group = @application_group.find_applicant_by_person(person)
+          applicant = @application_group.find_applicant_by_person(person)
 
-          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: application_group,
+          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: applicant,
                                                          premium_amount_in_dollars: enrollee.pre_amt})
           hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
@@ -123,7 +176,7 @@ class ApplicationGroupBuilder
           financial_statement.deductions.build(deduction_params)
         end
         financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
-          financial_statement.alternative_benefits.build(alternative_benefit_params)
+          financial_statement.alternate_benefits.build(alternative_benefit_params)
         end
       end
     end

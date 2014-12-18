@@ -11,12 +11,42 @@ Gluedb::Application.routes.draw do
 
   post "policy_forms", :to => 'policies#create'
 
+  resources :users
+
+  # concern :commentable do
+  #   resources :comments #, only: [:new, :create]
+  # end
+
   namespace :admin do
     namespace :settings do
       resources :hbx_policies
     end
     resources :users
   end
+
+  resources :application_groups do
+    get 'page/:page', :action => :index, :on => :collection
+
+    # resources :primary_applicant, only: [:new, :create, :update]
+    resources :applicants
+
+    member do
+      get :link_employee
+      get :challenge_identity
+    end
+
+    resources :households
+  end
+
+  resources :coverage_households
+
+  resources :tax_households do
+    resources :eligibility_determinations
+    resources :tax_household_members
+  end
+
+  resources :hbx_enrollments
+  resources :irs_groups
 
   resources :enrollment_addresses
 
@@ -52,21 +82,6 @@ Gluedb::Application.routes.draw do
       get :canonical_vocabulary
     end
   end
-
-  resources :application_groups do
-    resources :applicants
-    member do
-      get :applicant_links
-    end
-    resources :enrollments
-    resources :enrollment_exemptions
-    resources :eligibility_determinations
-    resources :financial_statements
-    resources :tax_households
-    get 'page/:page', :action => :index, :on => :collection
-  end
-
-  resources :users
 
   resources :policies, only: [:new, :show, :create, :edit, :update] do
     member do

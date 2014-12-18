@@ -101,7 +101,7 @@ class FinancialStatement
       end
     end
 
-    income_deduction_per_year
+    income_deduction_per_year.merge(income_deduction_per_year) { |k, v| Integer(v) rescue v }
   end
 
   # Compute the actual days a person worked during one year

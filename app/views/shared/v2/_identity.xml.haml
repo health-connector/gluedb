@@ -4,4 +4,4 @@
   %n1:alias_ids
   - person.members.each do |member|
     %n1:alias_id
-      = render 'shared/identity', id: api_v1_people_url(hbx_id:member.hbx_member_id)
+      = render 'shared/identity', id: api_v2_people_url(hbx_id:member.hbx_member_id), obj: member

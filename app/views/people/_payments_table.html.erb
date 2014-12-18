@@ -14,7 +14,7 @@
     <% premium_payments.each do |p| %>
     <tr>
       <td><span class="fui-credit-card">&nbsp;</span> <%= p.paid_at %></td>
-      <td><%= p.carrier.name %></td>
+      <td><%= (Caches::MongoidCache.lookup(Carrier, p.carrier_id) {p.carrier}).name %></td>
       <td><%= number_to_currency(p.payment_amount_in_dollars) %></td>
       <td><%= p.start_date %></td>
       <td><%= p.end_date %></td>

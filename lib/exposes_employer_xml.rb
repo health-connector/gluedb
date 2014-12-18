@@ -9,84 +9,85 @@ class ExposesEmployerXml
   end
 
   def name
-    @parser.at_css('name').text
+    @parser.at_xpath('//ns1:name').text
   end
 
   def fein
-    @parser.at_css('fein').text
+    @parser.at_xpath('//ns1:fein').text
   end
 
   def employer_exchange_id
-    @parser.at_css('employer_exchange_id').text
+    @parser.at_xpath('//ns1:employer_exchange_id').text
   end
 
   def sic_code
-    node = @parser.at_css('sic_code')
+    node = @parser.at_xpath('//ns1:sic_code')
     (node.nil?)? '' : node.text
   end
 
   def fte_count
-    @parser.at_css('fte_count').text
+    @parser.at_xpath('//ns1:fte_count').text
   end
 
   def pte_count
-    @parser.at_css('pte_count').text
+    @parser.at_xpath('//ns1:pte_count').text
   end
 
   def broker_npn_id
-    node = @parser.at_css('broker npn_id')
+    node = @parser.at_xpath('//ns1:broker/ns1:npn_id')
     (node.nil?)? '' : node.text
   end
 
   def open_enrollment_start
-    @parser.at_css('open_enrollment_start').text
+    @parser.at_xpath('//ns1:open_enrollment_start').text
   end
 
   def open_enrollment_end
-    @parser.at_css('open_enrollment_end').text
+    @parser.at_xpath('//ns1:open_enrollment_end').text
   end
 
   def plan_year_start
-    @parser.at_css('plan_year_start').text
+    @parser.at_xpath('//ns1:plan_year_start').text
   end
 
   def plan_year_end
-    node = @parser.at_css('plan_year_end')
+    node = @parser.at_xpath('//ns1:plan_year_end')
     (node.nil?)? '' : node.text
   end
 
   def plans
     result = []
-    @parser.css('plans plan').each do |plan_xml|
+    @parser.xpath('ns1:plans/ns1:plan').each do |plan_xml|
       result << ExposesPlanXml.new(plan_xml)
     end
     result
   end
 
   def exchange_id
-    @parser.at_css('exchange_id').text
+    @parser.at_xpath('//ns1:exchange_id').text
   end
 
   def exchange_status
-    @parser.at_css('exchange_status').text
+    @parser.at_xpath('//ns1:exchange_status').text
   end
 
   def exchange_version
-    @parser.at_css('exchange_version').text
+    @parser.at_xpath('//ns1:exchange_version').text
   end
 
   def notes
-    node = @parser.at_css('notes')
+    node = @parser.at_xpath('//ns1:notes')
     (node.nil?) ? '' : node.text
   end
 
   def contact
-    namespace = determine_vcard_namespace
-    node = @parser.at_css('ns2|vcard', ns2: namespace )
+    # namespace = determine_vcard_namespace
+    # node = @parser.at_css('ns2|vcard', ns2: namespace )
+    node = nil
     if(node.nil?)
       NullExposesContactXml.new
     else
-      ExposesContactXml.new(node, namespace)
+      # ExposesContactXml.new(node, namespace)
     end
   end
 

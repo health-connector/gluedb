@@ -5,22 +5,29 @@ describe NewEnrollment do
   let(:listener) { double }
   let(:update_person_use_case) { double(:validate => true) }
   let(:create_policy_use_case) { double(:validate => true) }
+  let(:renewal_determination) { double(:validate => true) }
   let(:individuals) { [person1] }
   let(:person1) { double }
-  let(:policy1) { double }
+  let(:policy1) { { :enrollees => [] } }
   let(:policies) { [policy1] }
+  let(:person_mapper_listener) { NewEnrollment::PersonMappingListener.new(listener) }
   before(:each) {
+      allow(renewal_determination).to receive(:validate).with(request, listener).and_return(true)
       allow(update_person_use_case).to receive(:validate).with(person1, listener).and_return(true)
       allow(create_policy_use_case).to receive(:validate).with(policy1, listener).and_return(true)
+      allow(listener).to receive(:set_current_person).with(0)
+      allow(listener).to receive(:set_current_policy).with(0)
+
+      allow(NewEnrollment::PersonMappingListener).to receive(:new).with(listener).and_return(person_mapper_listener)
   }
 
   subject {
-    NewEnrollment.new(update_person_use_case, create_policy_use_case)
+    NewEnrollment.new(update_person_use_case, create_policy_use_case, renewal_determination)
   }
 
   it "should notify the listener of success" do
-      expect(update_person_use_case).to receive(:commit).with(person1)
-      expect(create_policy_use_case).to receive(:commit).with(policy1)
+      expect(update_person_use_case).to receive(:commit).with(person1, person_mapper_listener)
+      expect(create_policy_use_case).to receive(:commit).with(policy1, person_mapper_listener)
       expect(listener).to receive(:success)
       subject.execute(request, listener)
   end
@@ -41,7 +48,7 @@ describe NewEnrollment do
     let(:individuals) { [] }
     
     it "should notify the listener" do
-      expect(listener).to receive(:no_enrollees)
+      expect(listener).to receive(:no_individuals)
       expect(listener).to receive(:fail)
       subject.execute(request, listener)
     end
@@ -53,6 +60,7 @@ describe NewEnrollment do
 
     before(:each) {
       allow(update_person_use_case).to receive(:validate).with(person2, listener).and_return(false)
+      allow(listener).to receive(:set_current_person).with(1)
     }
 
     it "should notify the listener of failure" do
@@ -68,6 +76,7 @@ describe NewEnrollment do
 
     before(:each) {
       allow(create_policy_use_case).to receive(:validate).with(policy2, listener).and_return(false)
+      allow(listener).to receive(:set_current_policy).with(1)
     }
 
     it "should notify the listener of failure" do

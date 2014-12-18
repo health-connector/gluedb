@@ -1,7 +1,7 @@
 class Plan
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -30,6 +30,7 @@ class Plan
 #  validates_inclusion_of :market_type, in: ["individual", "shop"]
 
 	belongs_to :carrier, index: true
+  belongs_to :renewal_plan, :class_name => "Plan"
   has_many :policies, :inverse_of => :plan
   has_and_belongs_to_many :employers
   embeds_many :premium_tables

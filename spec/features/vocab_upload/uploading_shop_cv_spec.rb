@@ -17,9 +17,8 @@ feature 'uploading show CV' do
     plan = Plan.new(coverage_type: 'health', hios_plan_id: '11111111111111-11', year: 2014)
     plan.premium_tables << premium
     plan.save!
-
-    Employer.create!(fein: 111111111, plan_year_start: Date.new(2014,05,01))
-
+    employer = Employer.create!(fein: 111111111)
+    plan_year = PlanYear.create!(start_date: Date.new(2014,05,01), end_date: Date.new(2015, 4, 30), employer: employer)
   end
 
   scenario 'no file is selected' do

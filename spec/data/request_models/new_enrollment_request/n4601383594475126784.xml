@@ -1,0 +1,69 @@
+<enrollment xmlns='http://openhbx.org/api/terms/1.0'>
+	<policy>
+		<id>
+			<id>-4601383594475126784</id>
+		</id>
+		<enrollees>
+			<enrollee>
+				<member>
+					<id>
+						<id>122070</id>
+					</id>
+					<person>
+						<id>
+							<id>339349</id>
+						</id>
+						<person_name>
+							<person_surname>Tharper</person_surname>
+							<person_given_name>Daniel</person_given_name>
+							<person_full_name>Daniel  Tharper</person_full_name>
+						</person_name>
+						<addresses>
+							<address>
+								<type>urn:openhbx:terms:v1:address_type#home</type>
+								<address_line_1>2255 Wisconsin Ave NW</address_line_1>
+								<location_city_name>Washington</location_city_name>
+								<location_state_code>dc</location_state_code>
+								<postal_code>20015</postal_code>
+							</address>
+						</addresses>
+					</person>
+					<person_relationships></person_relationships>
+					<person_demographics>
+						<ssn>633702503</ssn>
+						<sex>urn:openhbx:terms:v1:gender#male</sex>
+						<birth_date>19640613</birth_date>
+					</person_demographics>
+				</member>
+				<is_subscriber>true</is_subscriber>
+				<benefit_status>urn:openhbx:terms:v1:benefit_status#active</benefit_status>
+				<benefit>
+					<premium_amount>244.17</premium_amount>
+					<begin_date>20141201</begin_date>
+					<end_date>20141231</end_date>
+				</benefit>
+			</enrollee>
+		</enrollees>
+		<enrollment>
+			<plan>
+				<id>
+					<id>urn:openhbx:terms:v1:hios_id#86052DC0410002-01</id>
+				</id>
+				<coverage_type>urn:openhbx:terms:v1:benefit_coverage#medical</coverage_type>
+				<carrier>
+					<id>2ad981f8-993e-4276-8c1b-dc0ea189b53d</id>
+					<name>CareFirst BlueCross BlueShield</name>
+					<display_name>CareFirst BlueCross BlueShield</display_name>
+				</carrier>
+				<plan_year>2014</plan_year>
+				<name>BlueChoice HSA Bronze $6,000</name>
+				<individual_market>
+					<is_carrier_to_bill>true</is_carrier_to_bill>
+					<applied_aptc_amount>0.0</applied_aptc_amount>
+				</individual_market>
+				<premium_total_amount>244.17</premium_total_amount>
+				<total_responsible_amount>244.17</total_responsible_amount>
+			</plan>
+		</enrollment>
+	</policy>
+</enrollment>

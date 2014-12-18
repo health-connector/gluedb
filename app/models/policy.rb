@@ -2,7 +2,7 @@ class Policy
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
   include AASM
 
   extend Mongorder
@@ -29,6 +29,9 @@ class Policy
   field :updated_by, type: String
 
   validates_presence_of :eg_id
+#  validates_presence_of :plan_id
+  validates_presence_of :pre_amt_tot
+  validates_presence_of :tot_res_amt
 
   index({:eg_id => 1})
   index({:aasm_state => 1})
@@ -252,7 +255,7 @@ class Policy
   end
 
   def self.find_for_group_and_hios(eg_id, h_id)
-      plans = Plan.where(hios_plan_id: h_id)
+      plans = Caches::HiosCache.lookup(h_id) { Plan.where(hios_plan_id: h_id) }
       plan_ids = plans.map(&:_id)
 
       policies = Policy.where(
@@ -287,7 +290,7 @@ class Policy
   end
 
   def self.find_or_update_policy(m_enrollment)
-    plan = Plan.find(m_enrollment.plan_id)
+    plan = Caches::MongoidCache.lookup(Plan, m_enrollment.plan_id) { Plan.find(m_enrollment.plan_id) }
     found_enrollment = self.find_by_subkeys(
       m_enrollment.enrollment_group_id,
       m_enrollment.carrier_id,
@@ -466,6 +469,13 @@ class Policy
     subscriber.coverage_start > now
   end
 
+  def active_as_of?(date)
+    return false if subscriber.nil?
+    return false if (subscriber.coverage_start == subscriber.coverage_end)
+    return false if (!subscriber.coverage_end.nil? && subscriber.coverage_end < date)
+    subscriber.coverage_start <= date
+  end
+
   def future_active_for?(member_id)
     en = enrollees.detect { |enr| enr.m_id == member_id }
     now = Date.today
@@ -488,6 +498,18 @@ class Policy
 
   def transaction_list
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
+  end
+
+  def cancel_via_hbx!
+    self.aasm_state = "hbx_canceled"
+    self.enrollees.each do |en|
+      en.coverage_end = en.coverage_start
+      en.coverage_status = 'inactive'
+      en.touch
+      self.touch
+      en.save!
+    end
+    self.save!
   end
 
 protected

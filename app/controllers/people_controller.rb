@@ -23,6 +23,7 @@ class PeopleController < ApplicationController
   end
 
   def show
+    Caches::MongoidCache.allocate(Carrier)
 		@person = Person.find(params[:id])
 
 	  respond_to do |format|
@@ -80,10 +81,10 @@ class PeopleController < ApplicationController
     end
     @person.assign_attributes(params[:person], without_protection: true)
 
-    request = UpdatePersonRequest.from_form(params[:id], params[:person], current_user.email)
+    request = UpdatePersonAddressRequest.from_form(params[:id], params[:person], current_user.email)
     listener = UpdatePersonErrorCatcher.new(@person)
     address_changer = ChangeMemberAddress.new(nil)
-    update_person = UpdatePerson.new(Person, address_changer, ChangeAddressRequest)
+    update_person = UpdatePersonAddress.new(Person, address_changer, ChangeAddressRequest)
     if(!update_person.validate(request, listener))
       render "edit" and return
     end
@@ -94,10 +95,10 @@ class PeopleController < ApplicationController
 
   def persist_and_transmit
     @person = Person.find(params[:id])
-    request = UpdatePersonRequest.from_form(params[:id], JSON.parse(params[:person]), current_user.email)
+    request = UpdatePersonAddressRequest.from_form(params[:id], JSON.parse(params[:person]), current_user.email)
 
     address_changer = ChangeMemberAddress.new(transmitter)
-    update_person = UpdatePerson.new(Person, address_changer, ChangeAddressRequest)
+    update_person = UpdatePersonAddress.new(Person, address_changer, ChangeAddressRequest)
     update_person.commit(request)
     redirect_to @person, notice: 'Person was successfully updated.'
   end

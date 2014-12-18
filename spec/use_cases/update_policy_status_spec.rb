@@ -44,6 +44,7 @@ describe UpdatePolicyStatus do
 
   let(:failure_details) {
     {
+      attestation_date: request_attestation_date,
       submitted_by: submitted_by,
       batch_id: batch_id,
       file_name: file_name,
@@ -56,7 +57,7 @@ describe UpdatePolicyStatus do
   let(:latest_transaction_date) { nil }
 
   let(:success_details) { failure_details }
-  let(:request_attestation_date) { Date.today.to_s }
+  let(:request_attestation_date) { Date.today.strftime("%m/%d/%Y") }
   let(:requested_status) { 'carrier_terminated' }
   let(:requested_begin_date) { Date.today.prev_month }
   let(:requested_end_date) { Date.today }
@@ -90,7 +91,7 @@ describe UpdatePolicyStatus do
   end
 
   context 'policy has enrollment transaction after attestation date' do
-    let(:request_attestation_date) { Date.today.prev_month.to_s }
+    let(:request_attestation_date) { Date.today.prev_month.strftime("%m/%d/%Y") }
     let(:latest_transaction_date) { Date.today }
 
     it 'should fail to update' do

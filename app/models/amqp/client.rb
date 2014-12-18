@@ -1,5 +1,4 @@
-require 'timeout'
-require 'thread'
+require 'json'
 
 module Amqp
   class Client
@@ -42,7 +41,7 @@ module Amqp
         },
         :original_payload => payload
       }
-      @channel.default_exchange.publish(error_message.to_json, error_properties(@processing_failed_queue, delivery_info, properties))
+      @channel.default_exchange.publish(JSON.dump(error_message), error_properties(@processing_failed_queue, delivery_info, properties))
       channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
@@ -72,6 +71,7 @@ module Amqp
     def subscribe(opts = {})
       @running = false
       trap('TERM') { try_to_stop }
+      trap('INT') { exit -1 }
       @queue.subscribe(opts) do |delivery_info, properties, payload|
         start_running
         begin
@@ -91,7 +91,7 @@ module Amqp
               $stderr.puts payload
               publish_processing_failed(delivery_info, properties, payload, e)
             else
-              new_properties = redelivery_properties(existing_retry_count, properties)
+              new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
               queue.publish(payload, new_properties)
               channel.acknowledge(delivery_info.delivery_tag, false)
             end
@@ -122,19 +122,9 @@ module Amqp
       new_properties
     end
 
-    def request(properties, payload)
-      temp_queue = channel.queue("", :exclusive => true)
-      channel.publish(payload, properties.merge({ :reply_to => temp_queue.name }))
-      delivery_info, properties, payload = [nil, nil, nil]
-      Timeout::timeout(15) do
-        temp_queue.subscribe({:manual_ack => true, :block => true}) do |di, prop, pay|
-          delivery_info, properties, payload = [di, prop, pay]
-          channel.acknowledge(di.delivery_tag, false)
-          throw :terminate, "success"
-        end
-      end
-      temp_queue.delete
-      [delivery_info, properties, payload]
+    def request(properties, payload, timeout = 15)
+      req_chan = channel.connection.create_channel
+      ::Amqp::Requestor.new(req_chan).request(properties, payload, timeout)
     end
   end
 end

@@ -1,61 +1,50 @@
-= render 'shared/v2/identity', id: api_v1_people_url(hbx_id: person.authority_member_id), obj: person
+= render 'shared/v2/identity', id: api_v2_people_url(hbx_id: person.authority_member_id), obj: person
 - if person.application_group_id.present?
-  %n1:application_group_id= render 'shared/v2/identity', id: api_v1_application_group_url(person.application_group_id), obj: nil
+  %n1:application_group_id= api_v2_application_group_url(person.application_group_id)
 - if false #TODO
   %n1:tax_household_id
 %n1:person
   = render 'shared/v2/person', person: person
-
-
-
-
-
+- unless person.person_relationships.empty?
+  = render 'shared/v2/relationships', person: person
 - authority_member = person.authority_member
-%n1:is_authoritative= person.is_authoritative?
-- unless person.members.empty?
-  %n1:aliases
-    - person.members.each do |member|
-      %n1:alias
-        = render 'shared/v2/identity', id: api_v1_people_url(hbx_id:member.hbx_member_id), obj: person
-        %n1:is_authoritative= member.authority?
-
-= render 'shared/v2/relationships', person: person
-= render 'shared/v2/person_demographics', member: person.authority_member
-= render 'shared/v2/roles', person: person
-- unless person.responsible_parties.empty?
-  %n1:responsible_party_roles
-    - person.responsible_parties.each do |responsible_party|
-      %n1:responsible_party
-        %n1:entity_identifier= responsible_party.entity_identifier
-        %n1:organization_id= responsible_party.organization_name
-        - policies = responsible_party.policies
-        - if policies.present?
-          %n1:policies
-            - policies.each do |policy|
-              %n1:policy= render 'shared/v2/policy_link_type', policy: policy, member: member
+= render 'shared/v2/person_demographics', member: authority_member
+- if false #TODO
+  %n1:is_primary_applicant
+- if false #TODO
+  %n1:is_coverage_applicant
+- if person.employer.present?
+  %n1:employer= render 'shared/v2/employer_link_type', employer: person.employer
+- if false #TODO
+  %n1:is_head_of_household
+- if false #TODO
+  %n1:is_without_assistance
+- if false #TODO
+  %n1:is_enrolled_in_employer_sponsored_coverage
+- if false #TODO
+  %n1:is_insurance_assistance_eligible
+- if false #TODO
+  %n1:is_medicaid_chip_eligible
 - if authority_member.hlh.present?
   %n1:person_health
-    %n1:tobacco_user= authority_member.hlh
-%n1:application_group_id= api_v1_application_group_url(person.application_groups.first.id)
-- if authority_member.is_applicant.present?
-  %n1:is_coverage_applicant= authority_member.is_applicant
-- if authority_member.is_incarcerated.present?
-  %n1:incarcerated_flag= authority_member.is_incarcerated
+    %n1:is_tobacco_user= authority_member.hlh
+    - if false #TODO
+      %n1:is_disabled
+- unless person.responsible_parties.empty? && true #MAJOR TODO
+  %n1:responsible_parties
+    - person.responsible_parties.each do |rp|
+      %n1:responsible_party
+        = render 'shared/v2/person', person: rp
 - unless person.assistance_eligibilities.empty?
-  %n1:assistance_eligibilities
+  %n1:financial_reports
     - person.assistance_eligibilities.each do |assistance_eligibility|
-      %n1:assistance_eligibility
-        %n1:is_primary_applicant= assistance_eligibility.is_primary_applicant
+      %n1:financial_report
         %n1:tax_filing_status= "urn:openhbx:terms:v1:tax_filer##{assistance_eligibility.tax_filing_status}"
         %n1:is_tax_filing_together= assistance_eligibility.is_tax_filing_together
-        %n1:is_enrolled_for_es_coverage= assistance_eligibility.is_enrolled_for_es_coverage
-        %n1:is_without_assistance= assistance_eligibility.is_without_assistance
-        %n1:is_ia_eligible= assistance_eligibility.is_ia_eligible
-        %n1:is_medicaid_chip_eligible= assistance_eligibility.is_medicaid_chip_eligible
         - unless assistance_eligibility.incomes.empty?
           %n1:incomes
             - assistance_eligibility.compute_yearwise(assistance_eligibility.incomes).each do |k, v|
-              %n1:total_income
+              %n1:total_income_by_year
                 %n1:calendar_year= k
                 %n1:total_income= v
             - assistance_eligibility.incomes.each do |income|
@@ -70,7 +59,7 @@
         - unless assistance_eligibility.deductions.empty?
           %n1:deductions
             - assistance_eligibility.compute_yearwise(assistance_eligibility.deductions).each do |k, v|
-              %n1:total_income
+              %n1:total_income_by_year
                 %n1:calendar_year= k
                 %n1:total_income= v
             - assistance_eligibility.deductions.each do |deduction|
@@ -82,16 +71,17 @@
                 - if deduction.end_date.present?
                   %n1:end_date= deduction.end_date.try(:strftime,"%Y%m%d")
                 %n1:submitted_date= deduction.submission_date.try(:strftime,"%Y%m%d")
-        - unless assistance_eligibility.alternate_benefits.empty?
-          %n1:alternate_benefits
-            - assistance_eligibility.alternate_benefits.each do |alternate_benefit|
-              %n1:alternate_benefit
-                %n1:type= alternate_benefit.kind
-                %n1:start_date= alternate_benefit.start_date
-                %n1:end_date= alternate_benefit.end_date
-                %n1:submitted_date= alternate_benefit.submission_date
-        %n1:submission_date=assistance_eligibility.submission_date
-%n1:is_active= person.is_active
+        %n1:alternate_benefits
+          - assistance_eligibility.alternate_benefits.each do |alternate_benefit|
+            %n1:alternate_benefit
+              %n1:type= alternate_benefit.kind
+              %n1:start_date= alternate_benefit.start_date
+              %n1:end_date= alternate_benefit.end_date
+              %n1:submitted_date= alternate_benefit.submission_date
+        = render 'shared/v2/timestamp', record: assistance_eligibility
+- if person.is_active.present?
+  %n1:is_active= person.is_active
 - unless person.comments.empty?
   = render 'shared/v2/comments', object: person
-= render 'shared/v2/timestamp', record: person
+- if person.version.present?
+  = render 'shared/v2/timestamp', record: person

@@ -1,8 +1,8 @@
 require 'spec_helper'
 module TestBarrier
 
-  describe UpdatePerson do
-    subject(:update_person) { UpdatePerson.new(person_repo, address_changer, change_address_request_factory) }
+  describe UpdatePersonAddress do
+    subject(:update_person) { UpdatePersonAddress.new(person_repo, address_changer, change_address_request_factory) }
     let(:listener) { double(has_errors?: false, success: false, :set_current_address => nil) }
     let(:person_repo) { double(find_by_id: person) }
     let(:change_address_request_factory) { double(from_person_update_request: change_address_request) }

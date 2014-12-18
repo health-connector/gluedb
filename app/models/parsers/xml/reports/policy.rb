@@ -2,12 +2,41 @@ module Parsers::Xml::Reports
   class Policy
 
     include NodeUtils
-    attr_reader :root, :root_elements, :enrollees, :responsible_party, :enrollment, :comments
+    attr_reader :root, :root_elements, :enrollees, :enrollment, :responsible_party, :comments, :broker
     
     def initialize(parser = nil)
       @root = parser
-      # @individuals = []
-      # covered_individuals
+      build_namespaces
+      parse_policy_xml
+    end
+
+    def parse_policy_xml
+      @root_elements = @root.elements.inject({}) do |data, node|
+        data[node.name.to_sym] = parse_uri(node.text().strip()) if node.elements.count.zero?
+        data
+      end
+
+      @enrollees = @root.xpath('n1:enrollees/n1:enrollee', @namespaces).inject([]) do |data, node|
+        data << Enrollee.new(node, @namespaces)
+      end
+
+      broker = @root.at_xpath('n1:broker', @namespaces)
+      if broker
+        @broker =  {
+          id: @root.at_xpath('n1:broker/n1:id/n1:id').text.strip,
+          name: @root.at_xpath('n1:broker/n1:name').text.strip,
+          is_active: @root.at_xpath('n1:broker/n1:is_active').text.strip
+        }
+      end
+
+      @responsible_party = extract_elements(@root.at_xpath('n1:responsible_party', @namespaces))
+
+      @enrollment = @root.at_xpath('n1:enrollment', @namespaces).elements.inject({}) do |data, node|
+        data[node.name.to_sym] = ((node.name == 'plan') ? PolicyPlan.new(node, @namespaces) : node.text.strip)
+        data
+      end
+
+      @comments = extract_elements(@root.at_xpath('n1:comments', @namespaces))
     end
 
     # def covered_individuals
@@ -19,39 +48,6 @@ module Parsers::Xml::Reports
     #     @individuals << individual
     #   end
     # end
-
-    def parse_full_xml
-      root_level_elements
-      [ :enrollees, :responsible_party, :enrollment_details, :financial_reports, :health ].each do |attr|
-        self.send("policy_#{attr.to_s}")
-      end
-    end
-
-    def policy_enrollees
-      node = @root.at_xpath('n1:enrollees')
-      @enrollees = node.elements.inject([]) do |data, node|
-        data << policy_enrollee(node)
-      end
-    end
-
-    def policy_enrollee(node)
-      @root.elements.inject({}) do |data, node|
-        data[node.name.to_sym] = (node.name == 'member') ? Individual.new(node) : node.text().strip()
-        data
-      end
-    end
-
-    def policy_responsible_party
-      @responsible_party = extract_elements(@root.at_xpath('n1:responsible_party'))
-    end
-
-    def policy_enrollment_details
-      @enrollment = extract_elements(@root.at_xpath('n1:enrollment'))
-    end
-
-    def policy_comments
-      @comments = extract_elements(@root.at_xpath('n1:comments'))
-    end
 
     # def id
     #   @root.at_xpath("n1:id").text

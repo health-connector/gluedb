@@ -5,6 +5,7 @@
   %n1:birth_date= member.dob.try(:strftime,"%Y%m%d")
   - if member.death_date.present?
     %n1:death_date= member.death_date
+  %n1:is_incarcerated= member.is_incarcerated
   - if member.lui.present?
     %n1:language_code= member.lui
   - if member.ethnicity.present?

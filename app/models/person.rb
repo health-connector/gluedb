@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::Paranoia
+#  include Mongoid::Paranoia
 
   extend Mongorder
 

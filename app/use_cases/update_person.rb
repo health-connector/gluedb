@@ -1,49 +1,30 @@
 class UpdatePerson
-  def initialize(person_repo, address_changer, change_address_request_factory)
-    @person_repo = person_repo
-    @address_changer = address_changer
-    @change_address_request_factory = change_address_request_factory
+
+  def initialize
+    @create_person_factory = CreatePerson.new
   end
 
   def validate(request, listener)
     fail = false
-    person = @person_repo.find_by_id(request[:person_id])
-
-    if(missing_home_address?(request))
-      listener.home_address_not_present
-      fail = true
-    end
-
-    type_count_map = {}
-    request[:addresses].each do |address|
-      type_count_map[address[:address_type]] ||= 0
-      type_count_map[address[:address_type]] += 1
-    end
-
-    type_count_map.each_pair do |type, count|
-      max = 1
-      if(count > max)
-        listener.too_many_addresses_of_type({address_type: type, max: max})
-        fail = true
+    begin
+      person, member = person_and_member_match(request)
+      if person
+        person.assign_attributes(request[:person])
+        if !person.valid?
+          listener.invalid_person(person.errors.to_hash)
+          fail = true
+        end
+        member ||= person.members.new
+        member.attributes = request[:demographics]
+        if !member.valid?
+          listener.invalid_member(member.errors.to_hash)
+          fail = true
+        end
+      else
+        fail = !@create_person_factory.validate(request, listener)
       end
-    end
-
-    addresses_valid = true
-    request[:addresses].each_with_index do |address, idx|
-      listener.set_current_address(idx)
-      change_address_request = @change_address_request_factory.from_person_update_request(address, {
-              :person_id => request[:person_id], 
-              :current_user => request[:current_user] 
-      })
-      addresses_valid = addresses_valid && @address_changer.validate(change_address_request, listener)
-    end
-
-    if listener.has_errors?
-      fail = true
-    end
-
-    unless addresses_valid
-      fail = true
+    rescue PersonMatchStrategies::AmbigiousMatchError => error
+      listener.person_match_error(error.message)
     end
 
     !fail
@@ -55,38 +36,70 @@ class UpdatePerson
       listener.success
     else
       listener.fail
+      endx
     end
+  end
+
+  def person_and_member_match(request)
+    options = {
+      member_id: request[:hbx_member_id],
+      name_first: request[:person][:name_first],
+      name_last: request[:person][:name_last],
+      ssn: request[:demographics][:ssn],
+      dob: request[:demographics][:dob]
+    }
+
+    PersonMatchStrategies::Finder.find_person_and_member(options)
   end
 
   def commit(request)
-    person = @person_repo.find_by_id(request[:person_id])
-
-    address_deleter = DeleteAddress.new(NullPolicyMaintenance.new, @person_repo)
-
-    Address::TYPES.each do |t|
-      request_address = request[:addresses].detect { |a| a[:address_type] == t }
-      if (request_address.nil?)
-        address_deleter.commit({
-          :person_id => request[:person_id], 
-          :type => t,  
-          :current_user => request[:current_user] 
-          }
-        )
-      else
-        change_address_request = @change_address_request_factory.from_person_update_request(request_address, {
-              :person_id => request[:person_id],
-              :current_user => request[:current_user] 
-          })
-        @address_changer.commit(change_address_request)
+    person, member = person_and_member_match(request)
+    if person
+      member_attributes = request[:demographics]
+      if member.nil?
+        member_attributes.merge({:hbx_member_id => request[:hbx_member_id]})
       end
+      member ||= person.members.new
+      member.assign_attributes(member_attributes)
+      member.save!
+
+      person_attributes = request[:person].inject({}) do |person, (k, v)|
+        person[k] = v if v.is_a?(String)
+        person
+      end
+      person.attributes = person_attributes
+      person.save!
+
+      request[:person][:addresses].each do |address|
+        if current_address = person.phones.detect{|x| x.address_type == phone[:address_type]}
+          current_address.update_attributes(address)
+        else
+          new_address = person.addresses.new(address)
+          new_address.save!
+        end
+      end
+
+      request[:person][:phones].each do |phone|
+        if current_phone = person.phones.detect{|x| x.phone_type == phone[:phone_type]}
+          current_phone.update_attributes(phone)
+        else
+          new_phone = person.phones.new(phone)
+          new_phone.save!
+        end
+      end
+
+      request[:person][:emails].each do |email|
+        if current_email = person.emails.detect{|x| x.email_type == email[:email_type]}
+          current_email.update_attributes(email)
+        else
+          new_email = person.emails.new(email)
+          new_email.save!
+        end
+      end
+
+      listener.register_person(request[:member], person, member)
+    else
+      @create_person_factory.commit(request)
     end
-    person.updated_by = request[:current_user]
-    person.save!
-  end
-
-  protected
-
-  def missing_home_address?(request)
-    request[:addresses].detect { |a| a[:address_type] == 'home' }.nil?
   end
 end

@@ -1,7 +1,6 @@
 module Queries
   class PersonMatch
     def self.find(options)
-      # return nil if(options[:member_id].nil? && options[:name_last].nil?)
       found_person = nil
 
       if (!options[:member_id].blank?)

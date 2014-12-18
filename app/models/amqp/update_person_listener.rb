@@ -15,13 +15,13 @@ module Amqp
       )
 
       # Turn individual response payload into a PersonUpdateRequest
-      request = UpdatePersonRequest.from_cv(individual_xml)
+      request = UpdatePersonAddressRequest.from_cv(individual_xml)
 
       # Execute the UpdatePerson use case with that request
       person = Person.find(request[:person_id])
       listener = UpdatePersonErrorCatcher.new(person)
       address_changer = ChangeMemberAddress.new(TransmitPolicyMaintenance.new)
-      update_person = UpdatePerson.new(Person, address_changer, ChangeAddressRequest)
+      update_person = UpdatePersonAddress.new(Person, address_changer, ChangeAddressRequest)
       update_person.execute(request, listener)
     end
 

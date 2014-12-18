@@ -1,47 +1,31 @@
 class UpdatePersonRequest
-  def self.from_form(person_id, form, current_user)
-    request = {
-      person_id: person_id,
-      current_user: current_user,
-      addresses: []
+  def self.from_xml(payload = nil)
+    individual = Parsers::Xml::Reports::Individual.new(payload)
+    @glue_mapping = Parsers::Xml::Reports::GlueMappings.new
+
+    {
+      hbx_member_id: individual.hbx_ids[:id],
+      person: serialize_person(individual),
+      demographics: map_with_glue(individual.demographics, @glue_mapping.demographics)
     }
-
-    form_addresses = form['addresses_attributes']
-    form_addresses.each_value do |form_addr|
-      request[:addresses] << {
-        address_type: form_addr['address_type'],
-        address_1: form_addr['address_1'],
-        address_2: form_addr['address_2'],
-        city: form_addr['city'],
-        state: form_addr['state'],
-        zip: form_addr['zip']
-      }
-    end
-
-    # remove blank addresses, because rails assign_attributes removes them as well.
-    to_remove = []
-    request[:addresses].each do |a|
-      if(a.values.all? {|x| x == ""})
-        to_remove << a
-      end
-    end
-    to_remove.each { |a| request[:addresses].delete(a) }
-    
-    request
   end
 
+  private
 
-  def self.from_cv(payload)
-    parser = Nokogiri::XML(payload)
-    individual = Parsers::Xml::Reports::individual.new(parser.root)
+  def self.serialize_person(individual)
+    person = individual.person
+    person[:id] = individual.person[:id]
+    person[:phones] = person[:phones].map{|e| map_with_glue(e, @glue_mapping.phone)} if person[:phones]
+    person[:addresses] = person[:addresses].map{|e| map_with_glue(e, @glue_mapping.address)} if person[:addresses]
+    person[:emails] = person[:emails].map{|e| map_with_glue(e, @glue_mapping.email)} if person[:emails]
+    person
+  end
 
-    request = {
-      person_id: individual.id,
-      current_user: 'trey.evans@dc.gov',
-      addresses: []
-    }
-
-    request[:addresses] = individual.addressses
-    request
+  def self.map_with_glue(properties, mapping)
+    properties.inject({}) do |data, (k, v)|
+      key = mapping.has_key?(k) ? mapping[k] : k
+      data[key] = v
+      data
+    end
   end
 end

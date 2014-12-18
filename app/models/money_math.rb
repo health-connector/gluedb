@@ -1,5 +1,5 @@
 module MoneyMath
   def as_dollars(val)
-    BigDecimal.new(sprintf("%.2f", val))
+    BigDecimal.new(val).round(2)
   end
 end

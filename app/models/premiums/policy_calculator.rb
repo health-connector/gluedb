@@ -69,7 +69,7 @@ module Premiums
         policy.tot_emp_res_amt = sprintf("%.2f", contribution_strategy.contribution_for(policy)).to_f
         policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.tot_emp_res_amt).to_f
       else
-        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.applied_aptc).to_f
+        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.applied_aptc.to_f).to_f
       end
     end
 

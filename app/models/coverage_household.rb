@@ -12,10 +12,9 @@ class CoverageHousehold
   embeds_many :coverage_household_members
   accepts_nested_attributes_for :coverage_household_members
 
+  validate :presence_of_coverage_household_members
 
-  validates :presence_of_coverage_household_members
-
-  def coverage_household_members
+  def presence_of_coverage_household_members
     if self.coverage_household_members.size == 0
       self.errors.add(:base, "Should have atleast one coverage_household_member")
     end

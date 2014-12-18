@@ -16,11 +16,11 @@ module EmployerContributions
     end
 
     def max_amount_for(enrollment)
-      applicable_group_for(enrollment).contribution_amount
+      applicable_group_for(enrollment).contribution_amount.to_f
     end
 
     def contribution_for(enrollment)
-      percent_contribution = enrollment.pre_amt_tot * 0.01 * contribution_percent
+      percent_contribution = enrollment.pre_amt_tot * 0.01000 * contribution_percent.to_f
       (sprintf("%.2f", [percent_contribution, max_amount_for(enrollment)].min)).to_f
     end
   end

@@ -68,4 +68,10 @@ class TaxHousehold
       false
     end
   end
+
+  def primary_applicant
+    self.tax_household_members.find do |tax_household_member|
+      tax_household_member.is_subscriber = true
+    end
+  end
 end

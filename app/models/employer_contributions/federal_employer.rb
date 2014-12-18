@@ -20,7 +20,7 @@ module EmployerContributions
     end
 
     def contribution_for(enrollment)
-      percent_contribution = enrollment.pre_amt_tot * 0.01000 * contribution_percent.to_f
+      percent_contribution = enrollment.pre_amt_tot * BigDecimal.new("0.01")  * contribution_percent
       (sprintf("%.2f", [percent_contribution, max_amount_for(enrollment)].min)).to_f
     end
   end

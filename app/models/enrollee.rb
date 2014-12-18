@@ -87,6 +87,7 @@ class Enrollee
       end
     else
     end
+    self.save!
   end
 
   def active?

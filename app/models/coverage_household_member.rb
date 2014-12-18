@@ -14,4 +14,8 @@ class CoverageHouseholdMember
     coverage_household.application_group
   end
 
+  def is_subscriber?
+    self.is_subscriber
+  end
+
 end

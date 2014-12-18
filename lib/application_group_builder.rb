@@ -17,6 +17,7 @@ class ApplicationGroupBuilder
     @application_group.updated_by = "curam_system_service"
 
     get_household
+    add_irsgroup # we need a atleast 1 irsgroup hence adding a blank one
   end
 
   def add_applicant(applicant_params)
@@ -124,6 +125,10 @@ class ApplicationGroupBuilder
 
     end
 
+  end
+
+  def add_irsgroup
+    @application_group.irs_groups.build()
   end
 
   #TODO - method not implemented properly using .build(params)

@@ -1,5 +1,7 @@
 module Premiums
   class PolicyCalculator
+    include MoneyMath
+
     def initialize(member_cache = nil)
       @member_cache = member_cache
     end
@@ -82,8 +84,5 @@ module Premiums
       employer.plan_year_of(coverage_start_date)
     end
 
-    def as_dollars(val)
-      BigDecimal.new(sprintf("%.2f", val))
-    end
   end
 end

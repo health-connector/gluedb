@@ -1,4 +1,4 @@
-class Policies
+class PolicyQueries
   def self.without_aptc
     {
       "$or" => [

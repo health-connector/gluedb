@@ -1,5 +1,5 @@
 class Policies
-  def without_aptc
+  def self.without_aptc
     {
       "$or" => [
         {"applied_aptc" => {

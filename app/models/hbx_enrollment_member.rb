@@ -14,6 +14,9 @@ class HbxEnrollmentMember
 
   include BelongsToApplicant
 
+  validates :start_date, presence: true
+  validates :end_date, presence: true
+
   validates_presence_of :applicant_id
 
   def application_group

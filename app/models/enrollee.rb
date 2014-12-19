@@ -91,6 +91,7 @@ class Enrollee
       end
     else
     end
+    self.save!
   end
 
   def clone_for_renewal(start_date)

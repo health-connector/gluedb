@@ -1,5 +1,6 @@
 module Generators::Reports  
   class PdfReport < Prawn::Document
+    include Prawn::Measurements
 
     def initialize(options={ })
       super(options.merge(:margin => [50, 70]))

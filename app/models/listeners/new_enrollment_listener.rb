@@ -100,6 +100,12 @@ module Listeners
       add_policy_error(:member_premium, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
     end
 
+    def invalid_enrollee(details)
+      details.each_pair do |k, v|
+        add_policy_error("enrollees_#{k}", v)
+      end
+    end
+
     # Person errors
     def invalid_person(details)
       details.each_pair do |k, v|

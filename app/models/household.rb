@@ -28,6 +28,19 @@ class Household
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
+  #TODO uncomment
+  #validates :start_date, presence: true
+
+  #TODO uncomment
+  #validate :end_date_gt_start_date
+
+  def end_date_gt_start_date
+    if end_date
+      if end_date < start_date
+        self.errors.add(:base, "The end date should be earlier or equal to start date")
+      end
+    end
+  end
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 

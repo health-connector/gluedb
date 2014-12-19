@@ -53,21 +53,21 @@ module CanonicalVocabulary::Renewals
       expect(subject.data_set).to include response_date
     end
 
-    # context 'when there is a current policy' do
-    #   let(:current) { {plan: double} }
-    #   it 'can append policy' do
-    #     subject.append_policy(policy)
-    #     expect(subject.data_set).to eq [policy.current[:plan], policy.future_plan_name, policy.quoted_premium]
-    #   end
-    # end
+    context 'when there is a current policy' do
+      let(:current) { double(plan_name: 'current plan name', future_plan_name: 'future plan name', quoted_premium: '$100') }
+      it 'can append policy' do
+        subject.append_policy(policy)
+        expect(subject.data_set).to eq [policy.current.plan_name, policy.current.future_plan_name, policy.current.quoted_premium]
+      end
+    end
 
-    # context 'when there is no current policy' do
-    #   let(:current) { nil }
-    #   it 'appends policy with nil current plan' do
-    #     subject.append_policy(policy)
-    #     expect(subject.data_set).to eq [policy.current, policy.future_plan_name, policy.quoted_premium]
-    #   end
-    # end
+    context 'when there is no current policy' do
+      let(:current) { nil }
+      it 'appends policy with nil current plan' do
+        subject.append_policy(policy)
+        expect(subject.data_set).to eq [nil, nil, nil]
+      end
+    end
 
     it 'can append post aptc premium' do
       subject.append_post_aptc_premium

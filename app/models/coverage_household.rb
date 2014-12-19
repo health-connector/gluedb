@@ -6,14 +6,19 @@ class CoverageHousehold
   # The pool of all applicants eligible for enrollment during a certain time period
 
   embedded_in :household
-  
-  field :effective_start_date, type: Date
-  field :effective_end_date, type: Date
+
   field :submitted_at, type: DateTime
 
   embeds_many :coverage_household_members
   accepts_nested_attributes_for :coverage_household_members
 
+  validate :presence_of_coverage_household_members
+
+  def presence_of_coverage_household_members
+    if self.coverage_household_members.size == 0
+      self.errors.add(:base, "Should have atleast one coverage_household_member")
+    end
+  end
 
   def application_group
     return nil unless household
@@ -23,5 +28,6 @@ class CoverageHousehold
   def applicant_ids
     coverage_household_members.map(&:applicant_id)
   end
+
 
 end

@@ -54,7 +54,6 @@ class ApplicationGroupBuilder
     applicant_params = applicant_params.slice(
         :is_primary_applicant,
         :is_coverage_applicant,
-        :is_head_of_household,
         :person)
     applicant_params.delete_if do |k, v|
       v.nil?

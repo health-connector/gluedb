@@ -1,5 +1,6 @@
 module Generators::Reports  
   class Renewals < PdfReport
+    include ActionView::Helpers::NumberHelper
 
     def initialize(notice,type='uqhp')
       @assisted = (type == 'qhp') ? true : false
@@ -73,7 +74,7 @@ module Generators::Reports
       end
 
       bounding_box([350, 145], :width => 200) do
-        text "$#{@notice.health_premium}"
+        text number_to_currency(@notice.health_premium)
       end
 
       bounding_box([65, 120], :width => 350) do
@@ -81,7 +82,7 @@ module Generators::Reports
       end
 
       bounding_box([350, 90], :width => 200) do
-        text "$#{@notice.dental_premium}"
+        text number_to_currency(@notice.dental_premium)
       end
     end
 

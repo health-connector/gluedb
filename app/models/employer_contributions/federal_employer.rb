@@ -6,6 +6,8 @@ module EmployerContributions
 
     validates_presence_of :contribution_percent
 
+    include MoneyMath
+
     def applicable_group_for(enrollment)
       people_count = enrollment.enrollees.length
       max_group = federal_contribution_groups.max_by(&:enrollee_count)
@@ -16,12 +18,12 @@ module EmployerContributions
     end
 
     def max_amount_for(enrollment)
-      applicable_group_for(enrollment).contribution_amount
+      applicable_group_for(enrollment).contribution_amount.to_f
     end
 
     def contribution_for(enrollment)
-      percent_contribution = enrollment.pre_amt_tot * 0.01 * contribution_percent
-      (sprintf("%.2f", [percent_contribution, max_amount_for(enrollment)].min)).to_f
+      percent_contribution = as_dollars(enrollment.pre_amt_tot) * BigDecimal.new("0.01")  * as_dollars(contribution_percent)
+      as_dollars([percent_contribution, max_amount_for(enrollment)].min)
     end
   end
 end

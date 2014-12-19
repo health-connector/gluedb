@@ -1,5 +1,7 @@
 module Premiums
   class PolicyCalculator
+    include MoneyMath
+
     def initialize(member_cache = nil)
       @member_cache = member_cache
     end
@@ -28,7 +30,7 @@ module Premiums
 
     def calculate_cached_premium(plan, enrollee, rate_start_date, coverage_start)
       member = get_member(enrollee)
-      sprintf("%.2f", plan.rate(rate_start_date, coverage_start, member.dob).amount).to_f
+      as_dollars(plan.rate(rate_start_date, coverage_start, member.dob).amount)
     end
 
     def get_member(enrollee)
@@ -56,20 +58,19 @@ module Premiums
 
     def apply_totals(policy)
       premium = policy.enrollees.inject(BigDecimal.new("0.00")) do |acc, en|
-        prem = acc.to_f + en.pre_amt.to_f
-        BigDecimal.new(sprintf("%.2f", prem))
+        as_dollars(acc) + as_dollars(en.pre_amt)
       end
-      policy.pre_amt_tot = BigDecimal.new(sprintf("%.2f", premium))
+      policy.pre_amt_tot = as_dollars(premium)
     end
 
     def apply_credits(policy)
       if policy.is_shop?
         plan_year = determine_shop_plan_year(policy)
         contribution_strategy = plan_year.contribution_strategy
-        policy.tot_emp_res_amt = sprintf("%.2f", contribution_strategy.contribution_for(policy)).to_f
-        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.tot_emp_res_amt).to_f
+        policy.tot_emp_res_amt = as_dollars(contribution_strategy.contribution_for(policy))
+        policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.tot_emp_res_amt)
       else
-        policy.tot_res_amt = sprintf("%.2f", policy.pre_amt_tot - policy.applied_aptc).to_f
+        policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.applied_aptc)
       end
     end
 
@@ -82,5 +83,6 @@ module Premiums
       employer = get_employer(policy)
       employer.plan_year_of(coverage_start_date)
     end
+
   end
 end

@@ -19,7 +19,7 @@ module PolicyStatus
             :enrollees => {"$elemMatch" => {
               :rel_code => "self",
               :coverage_start => {"$lte" => target_date},
-              :coverage_end => {"$gt" => target_date}
+              :coverage_end => {"$gte" => target_date}
             }}},
             { :aasm_state => { "$ne" => "canceled"},
               :eg_id => { "$not" => /DC0.{32}/ },

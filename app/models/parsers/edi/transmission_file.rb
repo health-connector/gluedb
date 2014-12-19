@@ -179,7 +179,7 @@ module Parsers
           enrollee = build_enrollee(person_loop, policy_loop)
           policy.merge_enrollee(enrollee, policy_loop.action)
         end
-        policy.unsafe_save!
+        policy.save!
 
         policy
       end

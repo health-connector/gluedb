@@ -9,6 +9,7 @@ gem "nokogiri", "~> 1.6.1"
 gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
+gem 'virtus'
 
 group :development do
   gem 'capistrano', '2.15.4'

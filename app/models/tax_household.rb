@@ -56,10 +56,6 @@ class TaxHousehold
     self.is_eligibility_determined
   end
 
-  def applicant_ids
-    tax_household_members.map(&:applicant_id)
-  end
-
   def is_eligibility_determined?
     if self.elegibility_determinizations.size > 0
       true

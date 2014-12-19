@@ -21,10 +21,7 @@ module Parsers::Xml::Cv
           household_state: household_state,
           maximum_aptc: maximum_aptc,
           csr_percent_as_integer: csr_percent,
-          determination_date: determination_date,
-          persons: applicants.map do |applicant|
-            applicant.person.to_hash
-          end
+          determination_date: determination_date
       }
     end
 

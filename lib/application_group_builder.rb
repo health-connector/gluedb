@@ -17,28 +17,32 @@ class ApplicationGroupBuilder
     @application_group.updated_by = "curam_system_service"
 
     get_household
+    add_irsgroup # we need a atleast 1 irsgroup hence adding a blank one
   end
 
   def add_applicant(applicant_params)
-
-    puts "add_applicant"
-    puts @application_group.applicants.map(&:person_id)
-    puts applicant_params[:person].id
 
     if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
       applicant = @application_group.applicants.where(person_id:applicant_params[:person].id).first
     else
 
-      applicant = @application_group.applicants.build(applicant_params.slice(
-                                                                           :is_primary_applicant,
-                                                                           :is_coverage_applicant,
-                                                                           :is_head_of_household,
-                                                                           :person_demographics,
-                                                                           :person))
+      applicant = @application_group.applicants.build(filter_applicant_params(applicant_params))
 
     end
 
     applicant
+  end
+
+  def filter_applicant_params(applicant_params)
+    applicant_params = applicant_params.slice(
+        :is_primary_applicant,
+        :is_coverage_applicant,
+        :is_head_of_household,
+        :person_demographics,
+        :person)
+    applicant_params.delete_if do |k, v|
+      v.nil?
+    end
   end
 
   def get_household
@@ -89,6 +93,10 @@ class ApplicationGroupBuilder
 
       hbx_enrollement = @household.hbx_enrollments.build
       hbx_enrollement.policy = policy
+      hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
+      hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
+      #hbx_enrollement.primary_applicant = alpha_person
+      #hbx_enrollement.allocated_aptc_in_dollars = policy.allocated_aptc
       hbx_enrollement.enrollment_group_id = policy.eg_id
       hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
       hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
@@ -119,6 +127,10 @@ class ApplicationGroupBuilder
 
   end
 
+  def add_irsgroup
+    @application_group.irs_groups.build()
+  end
+
   #TODO - method not implemented properly using .build(params)
   def add_irsgroups(irs_groups_params)
     irs_groups = irs_groups_params.map do |irs_group_params|
@@ -133,11 +145,13 @@ class ApplicationGroupBuilder
 
     tax_households_params.map do |tax_household_params|
 
-      tax_household = @household.tax_households.build(tax_household_params.slice(:id, :primary_applicant_id,
-                                                                                 :total_count, :total_incomes_by_year))
+      #tax_household = @household.tax_households.build(tax_household_params.slice(:id, :primary_applicant_id,
+                                                                                # :total_count, :total_incomes_by_year))
+
+      tax_household = @household.tax_households.build(filter_tax_household_params(tax_household_params))
 
       tax_household_params[:tax_household_members].map do |tax_household_member_params|
-        tax_household_member = tax_household.tax_household_members.build(tax_household_member_params)
+        tax_household_member = tax_household.tax_household_members.build(filter_tax_household_member_params(tax_household_member_params))
         person_uri = @person_mapper.alias_map[tax_household_member_params[:id]]
         person_obj = @person_mapper.people_map[person_uri].first
         new_applicant = get_applicant(person_obj)
@@ -156,6 +170,19 @@ class ApplicationGroupBuilder
 
   end
 
+  def filter_tax_household_member_params(tax_household_member_params)
+    tax_household_member_params.delete_if do |k, v|
+      v.nil?
+    end
+  end
+
+  def filter_tax_household_params(tax_household_params)
+    tax_household_params = tax_household_params.slice(:id, :primary_applicant_id, :total_count, :total_incomes_by_year)
+    tax_household_params.delete_if do |k, v|
+      v.nil?
+    end
+  end
+
   def get_applicant(person_obj)
 
     new_applicant = self.application_group.applicants.find do |applicant|
@@ -168,7 +195,7 @@ class ApplicationGroupBuilder
     applicants_params.map do |applicant_params|
       applicant_params[:financial_statements].each do |financial_statement_params|
         tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
-        financial_statement = tax_household_member.financial_statements.build(financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status))
+        financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)
         end
@@ -179,6 +206,12 @@ class ApplicationGroupBuilder
           financial_statement.alternate_benefits.build(alternative_benefit_params)
         end
       end
+    end
+  end
+
+  def filter_financial_statement_params(financial_statement_params)
+    financial_statement_params.delete_if do |k, v|
+      v.nil?
     end
   end
 

@@ -24,20 +24,6 @@ class TaxHousehold
 
   embeds_many :eligibility_determinations
 
-  #TODO uncomment
-  #validates :start_date, presence: true
-  
-  #TODO uncomment
-  #validate :end_date_gt_start_date
-
-  def end_date_gt_start_date
-    if end_date
-      if end_date < start_date
-        self.errors.add(:base, "The end date should be earlier or equal to start date")
-      end
-    end
-  end
-
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i
   end

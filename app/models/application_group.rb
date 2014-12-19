@@ -49,6 +49,8 @@ class ApplicationGroup
 
   validate :no_duplicate_applicants
 
+  validate :integrity_of_applicant_objects
+
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
 
@@ -172,6 +174,24 @@ private
 
   def validate_one_and_only_one_primary_applicant
     # applicants.detect { |a| a.is_primary_applicant? }
+  end
+
+  def integrity_of_applicant_objects
+
+    applicants_in_application_group = self.applicants - [nil]
+
+    puts applicants_in_application_group.map(&:id).inspect
+
+    tax_household_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:tax_households).flat_map(&:tax_household_members).map(&:applicant_id))
+
+    coverage_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:coverage_households).flat_map(&:coverage_household_members).map(&:applicant_id))
+
+    tax_household_applicants_valid && coverage_applicants_valid
+  end
+
+  def are_arrays_of_applicants_same?(base_set, test_set)
+
+    base_set.uniq.sort == test_set.uniq.sort
   end
 
 end

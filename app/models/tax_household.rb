@@ -24,6 +24,7 @@ class TaxHousehold
 
   embeds_many :eligibility_determinations
 
+
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i
   end
@@ -50,10 +51,6 @@ class TaxHousehold
   def application_group
     return nil unless household
     household.application_group   
-  end
-
-  def is_eligibility_determined?
-    self.is_eligibility_determined
   end
 
   def is_eligibility_determined?

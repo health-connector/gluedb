@@ -6,6 +6,8 @@ class PlanYearDateFixer
 
   # will set end_date to 31st Dec of year. Year is taken from start_date.
   def fix_end_date
+    @plan_year if @plan_year.start_date.nil?
+
     if @plan_year.end_date.nil?
       year = @plan_year.start_date.year
       @plan_year.end_date = Date.new(year, 12, 31)

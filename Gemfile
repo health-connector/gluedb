@@ -61,3 +61,4 @@ gem 'roo'
 gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn'
+gem 'render_anywhere', :require => false

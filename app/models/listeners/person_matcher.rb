@@ -69,3 +69,4 @@ module Listeners
       self.new(chan, q).subscribe(:block => true, :manual_ack => true)
     end
   end
+end

@@ -10,7 +10,7 @@ class CreateOrUpdatePerson
     member = nil
     begin
       person, member = @person_finder.find_person_and_member(request)
-    rescue PersonMatchStrategies::AmbiguiousMatchError => e
+    rescue PersonMatchStrategies::AmbiguousMatchError => e
       listener.person_match_error(e.message)
       return false
     end

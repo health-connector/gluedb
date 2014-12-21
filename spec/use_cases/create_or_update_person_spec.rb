@@ -12,9 +12,9 @@ describe CreateOrUpdatePerson do
   let(:other_props) {
     {
       :addresses => addresses,
-      :emails => emails, 
+      :emails => emails,
       :phones => phones
-    } 
+    }
   }
 
   let(:addresses) { [] }
@@ -57,7 +57,7 @@ describe CreateOrUpdatePerson do
     describe "and the person is valid" do
       let(:new_member) { double }
 
-      before(:each) do 
+      before(:each) do
         allow(new_person).to receive(:valid?).and_return(true)
         allow(member_factory).to receive(:new).with(request).and_return(new_member)
       end
@@ -90,7 +90,7 @@ describe CreateOrUpdatePerson do
         let(:person_match_error_message) { "Some matching failure." }
 
         it "should notify the listener" do
-          allow(person_finder).to receive(:find_person_and_member).with(request).and_raise(PersonMatchStrategies::AmbiguiousMatchError.new(person_match_error_message))
+          allow(person_finder).to receive(:find_person_and_member).with(request).and_raise(PersonMatchStrategies::AmbiguousMatchError.new(person_match_error_message))
           expect(listener).to receive(:person_match_error).with(person_match_error_message)
           expect(subject.validate(request, listener)).to be_falsey
         end
@@ -157,5 +157,5 @@ describe CreateOrUpdatePerson do
         subject.commit(request, listener)
       end
     end
-  end 
+  end
 end

@@ -1,10 +1,11 @@
 = render 'shared/v2/identity', id: api_v1_application_group_url(group.id), obj: group
+- if group.application_type.present?
+  %n1:application_type="urn:openhbx:terms:v1:hbx_service##{group.application_type}"
 %n1:applicants
   - group.person_ids.each do |p_id|
     %n1:applicant= render 'shared/v2/individual_type', person: (Caches::CustomCache.lookup(Person, "ag_lookup", p_id) { Person.find(p_id) })
-- if group.primary_applicant_id.present?
-  %n1:primary_applicant_id
-    %n1:id= api_v1_application_group_url(group.primary_applicant_id)
+%n1:primary_applicant_id
+  %n1:id= api_v1_application_group_url(group.primary_applicant_id)
 - if group.e_case_id.present?
   %n1:e_case_id= group.e_case_id
 - if group.consent_applicant_id.present?

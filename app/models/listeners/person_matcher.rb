@@ -36,9 +36,10 @@ module Listeners
         else
           channel.default_exchange.publish(render('shared/v2/person_match',person: person, member: member),response_properties(reply_to, "200"))
         end
-      rescue PersonMatchStrategies::AmbiguousMatchError => e
+      rescue PersonMatchStrategies::AmbiguiousMatchError => e
         channel.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "409",e.message))
       end
+      channel.ack(delivery_info.delivery_tag, false)
     end
 
     def response_properties(reply_to, status)

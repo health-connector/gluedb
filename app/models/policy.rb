@@ -1,7 +1,7 @@
 class Policy
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Versioning
+#  include Mongoid::Versioning
 #  include Mongoid::Paranoia
   include AASM
 
@@ -275,7 +275,7 @@ class Policy
           }
         })
       if(policies.count > 1)
-        raise "More than one policy that match subkeys: eg_id=#{eg_id}, carrier_id=#{c_id}, plan_ids=#{plan_ids}"
+        raise "More than one policy that match subkeys: eg_id=#{eg_id}, plan_ids=#{plan_ids}"
       end
       policies.first
   end
@@ -317,7 +317,8 @@ class Policy
       found_enrollment.save!
       return found_enrollment
     end
-    m_enrollment.unsafe_save!
+    m_enrollment.save!
+#    m_enrollment.unsafe_save!
     m_enrollment
   end
 

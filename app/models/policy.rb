@@ -266,7 +266,7 @@ class Policy
           }
         })
       if(policies.count > 1)
-        raise "More than one policy that match subkeys: eg_id=#{eg_id}, carrier_id=#{c_id}, plan_ids=#{plan_ids}"
+        raise "More than one policy that match subkeys: eg_id=#{eg_id}, plan_ids=#{plan_ids}"
       end
       policies.first
   end

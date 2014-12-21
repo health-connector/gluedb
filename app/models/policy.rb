@@ -308,7 +308,8 @@ class Policy
       found_enrollment.save!
       return found_enrollment
     end
-    m_enrollment.unsafe_save!
+    m_enrollment.save!
+#    m_enrollment.unsafe_save!
     m_enrollment
   end
 

@@ -1,24 +1,25 @@
-%n1:person
-  %n1:id
-    %n1:id= person.authority_member.id
-  %n1:is_authoratative= person.is_authoritative?
-  %n1:alias_ids
-  - person.members.each do |member|
-    %n1:alias_id
-      %n1:id= member.hbx_member_id
-  %n1:person_name
-    = render 'shared/v2/name', object: person
-  - unless person.addresses.empty?
-    %n1:addresses
-      - person.addresses.each do |address|
-        = render 'shared/v2/address', address: address
-  - unless person.emails.empty?
-    %n1:emails
-      - person.emails.each do |email|
-        = render 'shared/v2/email', email: email
-  - unless person.phones.empty?
-    %n1:phones
-      - person.phones.each do |phone|
-        = render 'shared/v2/phone', phone: phone
-    = render 'shared/v2/timestamp', record: person
-  = render 'shared/v2/person_demographics', member: member
+%n1:individual{"xmlns:n1" => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://openhbx.org/api/terms/1.0 individual.xsd"}
+  %n1:person
+    %n1:id
+      %n1:id= person.authority_member.id
+    %n1:is_authoratative= person.is_authoritative?
+    %n1:alias_ids
+    - person.members.each do |member|
+      %n1:alias_id
+        %n1:id= member.hbx_member_id
+    %n1:person_name
+      = render 'shared/v2/name', object: person
+    - unless person.addresses.empty?
+      %n1:addresses
+        - person.addresses.each do |address|
+          = render 'shared/v2/address', address: address
+    - unless person.emails.empty?
+      %n1:emails
+        - person.emails.each do |email|
+          = render 'shared/v2/email', email: email
+    - unless person.phones.empty?
+      %n1:phones
+        - person.phones.each do |phone|
+          = render 'shared/v2/phone', phone: phone
+      = render 'shared/v2/timestamp', record: person
+    = render 'shared/v2/person_demographics', member: member

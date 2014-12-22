@@ -1,6 +1,6 @@
 %n1:person
   %n1:id
-    %n1:id= person.id
+    %n1:id= person.authority_member.id
   %n1:is_authoratative= person.is_authoritative?
   %n1:alias_ids
   - person.members.each do |member|

@@ -38,7 +38,9 @@ pols.each do |pol|
         sub_person = p_repo[pol.subscriber.m_id]
         begin
             if (!excluded_people.include?([sub_person, ct]))
-              gap_policies << pol.id
+              if (pol.subscriber.coverage_start > Date.new(2014,11,30))
+                gap_policies << pol.id
+              end
             end
         rescue
           raise([sub_person.id, pol.id].inspect)
@@ -47,4 +49,17 @@ pols.each do |pol|
   end
 end
 
-puts gap_policies.length
+CSV.open("dec_policies.csv", "w") do |csv|
+  csv << ["Enrollment Group", "HBX", "SSN", "DOB", "First", "Middle", "Last"]
+  gap_policies.each do |gp|
+    pol = Policy.find(gp)
+    subscriber = pol.subscriber
+    s_person = subscriber.person
+    auth_member = subscriber.person.authority_member
+    csv << [
+     pol.eg_id,
+     auth_member.hbx_member_id, auth_member.ssn, auth_member.dob,
+     s_person.name_first, s_person.name_middle, s_person.name_last
+    ]
+  end
+end

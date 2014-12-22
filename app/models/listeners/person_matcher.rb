@@ -30,7 +30,7 @@ module Listeners
         if person.blank? || member.blank?
           channel.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "404","not found"))
         else
-          channel.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: p, member: m}),response_properties(reply_to, "200"))
+          channel.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: person, member: member}),response_properties(reply_to, "200"))
         end
       rescue PersonMatchStrategies::AmbiguousMatchError => e
         channel.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "409",e.message))

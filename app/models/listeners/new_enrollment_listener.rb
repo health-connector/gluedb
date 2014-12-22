@@ -54,6 +54,10 @@ module Listeners
       add_error(:enrollment, "requires a carrier switch")
     end
 
+    def enrollees_changed_for_renewal(details)
+      add_error(:enrollment, "the number of enrollees has changed: was #{details[:old_policy]} is now #{details[:new_policy]}")
+    end
+
     # Policy Errors
     def policy_already_exists(details)
       eg_id = details[:enrollment_group_id]

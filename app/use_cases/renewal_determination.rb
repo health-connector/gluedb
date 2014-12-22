@@ -42,14 +42,32 @@ class RenewalDetermination
         listener.plan_not_found(:hios_id => hios_id, :plan_year => plan_year)
         return false
       end
+      # TODO: Check if content of enrollees differs
+      renewal_threshold = coverage_start - 1.day
       date_market_different_carrier = policies.select do |pol|
         (pol.plan.coverage_type == plan.coverage_type) &&
-          pol.active_as_of?(coverage_start - 1.day) &&
+          pol.active_as_of?(renewal_threshold) &&
           (pol.plan.carrier_id != plan.carrier_id)
       end
       if date_market_different_carrier.any?
         listener.carrier_switch_renewal
         return false
+      end
+      date_market_renewal = policies.select do |pol|
+        (pol.plan.coverage_type == plan.coverage_type) &&
+          pol.active_as_of?(renewal_threshold)
+      end
+      date_market_renewal.each do |r_pol|
+        candidate_enrollees = r_pol.enrollees.select do |en|
+          r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
+            (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
+        end
+        if (candidate_enrollees.length != policy.enrollees.length)
+          listener.enrollees_changed_for_renewal({
+            :old_policy => candidate_enrollees.length
+            :new_policy => policy.enrollees.length
+          })
+        end
       end
     end
     true

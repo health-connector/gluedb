@@ -62,10 +62,10 @@ class RenewalDetermination
           r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
             (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
         end
-        if (candidate_enrollees.length != policy.enrollees.length)
+        if (candidate_enrollees.length != policy[:enrollees].length)
           listener.enrollees_changed_for_renewal({
             :old_policy => candidate_enrollees.length,
-            :new_policy => policy.enrollees.length
+            :new_policy => policy[:enrollees].length
           })
         end
       end

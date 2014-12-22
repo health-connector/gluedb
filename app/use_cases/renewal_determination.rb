@@ -64,7 +64,7 @@ class RenewalDetermination
         end
         if (candidate_enrollees.length != policy.enrollees.length)
           listener.enrollees_changed_for_renewal({
-            :old_policy => candidate_enrollees.length
+            :old_policy => candidate_enrollees.length,
             :new_policy => policy.enrollees.length
           })
         end

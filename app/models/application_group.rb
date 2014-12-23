@@ -51,6 +51,8 @@ class ApplicationGroup
 
   validate :integrity_of_applicant_objects
 
+  validate :max_one_primary_applicant
+
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
 
@@ -194,6 +196,16 @@ private
   def are_arrays_of_applicants_same?(base_set, test_set)
 
     base_set.uniq.sort == test_set.uniq.sort
+  end
+
+  def max_one_primary_applicant
+    primary_applicants = self.applicants.select do |applicant|
+      applicant.is_primary_applicant == true
+    end
+
+    if primary_applicants.size > 1
+      self.errors.add(:base, "Multiple primary applicants")
+    end
   end
 
 end

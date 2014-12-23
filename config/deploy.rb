@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "git@github.com:dchbx/gluedb.git"
-set :branch,      "release-1.1"
+set :branch,      "release-2.0"
 set :rails_env,       "production"
 set :deploy_to,       "/var/www/deployments/gluedb"
 set :deploy_via, :copy

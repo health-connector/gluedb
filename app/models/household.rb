@@ -5,6 +5,9 @@ class Household
 
   embedded_in :application_group
 
+  before_save :set_effective_end_date
+  before_save :reset_is_active_for_previous
+
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   # embedded belongs_to :irs_group association
@@ -76,6 +79,16 @@ class Household
       acc + he.applicant_ids
     end
     (th_applicant_ids + ch_applicant_ids + hbxe_applicant_ids).distinct
+  end
+
+  def set_effective_end_date
+    latest_household = self.application_group.latest_household
+    latest_household.effective_end_date = latest_household.effective_start_date - 1.day
+  end
+
+  def reset_is_active_for_previous
+    latest_household = self.application_group.latest_household
+    latest_household.is_active = false
   end
 
 end

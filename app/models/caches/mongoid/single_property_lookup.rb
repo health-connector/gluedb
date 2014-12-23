@@ -11,6 +11,10 @@ module Caches
         end
       end
 
+      def [](val)
+        lookup(val)
+      end
+
       def lookup(m_id)
         @records[m_id]
       end

@@ -31,7 +31,9 @@ class Applicant
   index({broker_id:  1})
   index({is_primary_applicant: 1})
 
-  validates_presence_of :person_id, :is_primary_applicant
+  validates_presence_of :person_id, :is_primary_applicant, :is_coverage_applicant
+
+  validates :is_coverage_applicant, presence: true
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 

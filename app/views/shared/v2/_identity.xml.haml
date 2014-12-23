@@ -1,8 +1,8 @@
 %n1:id
   %n1:id= id
-- if obj.class == "Person"
-  %n1:is_authoratative= obj.is_authoratative?
+- if obj.class == Person
+  %n1:is_authoritative= obj.is_authoritative?
   %n1:alias_ids
-  - person.members.each do |member|
-    %n1:alias_id
-      = render 'shared/v2/identity', id: api_v2_people_url(hbx_id:member.hbx_member_id), obj: member
+    - obj.members.each do |member|
+      %n1:alias_id
+        = render 'shared/v2/identity', id: api_v2_people_url( hbx_id: member.hbx_member_id), obj: member

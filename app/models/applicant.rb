@@ -33,8 +33,6 @@ class Applicant
 
   validates_presence_of :person_id, :is_primary_applicant, :is_coverage_applicant
 
-  validates :is_coverage_applicant, presence: true
-
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
     self.application_group

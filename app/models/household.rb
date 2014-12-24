@@ -81,9 +81,11 @@ class Household
     (th_applicant_ids + ch_applicant_ids + hbxe_applicant_ids).distinct
   end
 
+  # This will set the effective_end_date of previously active household to 1 day
+  # before start of the current household's effective_start_date
   def set_effective_end_date
     latest_household = self.application_group.latest_household
-    latest_household.effective_end_date = latest_household.effective_start_date - 1.day
+    latest_household.effective_end_date = self.effective_start_date - 1.day
   end
 
   def reset_is_active_for_previous

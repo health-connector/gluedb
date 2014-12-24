@@ -25,6 +25,8 @@ class ApplicationGroupBuilder
 
   def add_applicant(applicant_params)
 
+    puts applicant_params[:is_primary_applicant]
+
     if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
       puts "Added already existing applicant"
       applicant = @application_group.applicants.where(person_id:applicant_params[:person].id).first
@@ -38,6 +40,13 @@ class ApplicationGroupBuilder
     end
 
     applicant
+  end
+
+  def reset_exisiting_primary_applicant
+    @application_group.applicants.each do |applicant|
+        applicant.is_primary_applicant = false
+        applicant.save
+    end
   end
 
   def set_person_demographics(member, person_demographics_params)
@@ -86,8 +95,8 @@ class ApplicationGroupBuilder
     current_list = @application_group.applicants.map do |applicant| applicant.person_id end.sort
     new_list = @applicants_params.map do |applicants_param| applicants_param[:person].id end.sort
 
-    puts current_list.inspect
-    puts new_list.inspect
+    #puts current_list.inspect
+    #puts new_list.inspect
 
     if current_list == new_list
       return false

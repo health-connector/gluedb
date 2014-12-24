@@ -1,6 +1,6 @@
 = render 'shared/v2/identity', id: api_v2_people_url(hbx_id: person.authority_member_id), obj: person
-- if person.application_group_id.present?
-  %n1:application_group_id= api_v2_application_group_url(person.application_group_id)
+/ - if person.application_group_id.present?
+/   %n1:application_group_id= api_v2_application_group_url(person.application_group_id)
 - if false #TODO ? Commented out in applicant link model?
   %n1:tax_household_id
 %n1:person

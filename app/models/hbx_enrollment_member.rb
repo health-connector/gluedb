@@ -14,11 +14,13 @@ class HbxEnrollmentMember
 
   include BelongsToApplicant
 
-  validates :start_date, presence: true
+  #TODO uncomment
+  #validates :start_date, presence: true
 
   validates_presence_of :applicant_id
 
-  validate :end_date_gt_start_date
+  #TODO uncomment
+  #validate :end_date_gt_start_date
 
   def end_date_gt_start_date
     if end_date

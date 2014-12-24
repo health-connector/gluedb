@@ -13,6 +13,8 @@ class TaxHouseholdMember
 
   include BelongsToApplicant
 
+  validate :strictly_boolean
+
   def eligibility_determinations
     return nil unless tax_household
     tax_household.eligibility_determinations
@@ -33,5 +35,19 @@ class TaxHouseholdMember
 
   def is_subscriber?
     self.is_subscriber
+  end
+
+  def strictly_boolean
+    unless is_ia_eligible.is_a? Boolean
+      self.errors.add(:base, "is_ia_eligible should be a boolean")
+    end
+
+    unless is_medicaid_chip_eligible.is_a? Boolean
+      self.errors.add(:base, "is_medicaid_chip_eligible should be a boolean")
+    end
+
+    unless is_subscriber.is_a? Boolean
+      self.errors.add(:base, "is_subscriber should be a boolean")
+    end
   end
 end

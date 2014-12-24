@@ -5,6 +5,9 @@ class Household
 
   embedded_in :application_group
 
+  before_save :set_effective_end_date
+  before_save :reset_is_active_for_previous
+
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   # embedded belongs_to :irs_group association
@@ -28,6 +31,19 @@ class Household
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
+  #TODO uncomment
+  #validates :effective_start_date, presence: true
+
+  #TODO uncomment
+  #validate :effective_end_date_gt_effective_start_date
+
+  def effective_end_date_gt_effective_start_date
+    if effective_end_date
+      if effective_end_date < effective_start_date
+        self.errors.add(:base, "The effective end date should be earlier or equal to effective start date")
+      end
+    end
+  end
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
@@ -63,6 +79,18 @@ class Household
       acc + he.applicant_ids
     end
     (th_applicant_ids + ch_applicant_ids + hbxe_applicant_ids).distinct
+  end
+
+  # This will set the effective_end_date of previously active household to 1 day
+  # before start of the current household's effective_start_date
+  def set_effective_end_date
+    latest_household = self.application_group.latest_household
+    latest_household.effective_end_date = self.effective_start_date - 1.day
+  end
+
+  def reset_is_active_for_previous
+    latest_household = self.application_group.latest_household
+    latest_household.is_active = false
   end
 
 end

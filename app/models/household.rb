@@ -32,15 +32,15 @@ class Household
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
   #TODO uncomment
-  #validates :start_date, presence: true
+  #validates :effective_start_date, presence: true
 
   #TODO uncomment
-  #validate :end_date_gt_start_date
+  #validate :effective_end_date_gt_effective_start_date
 
-  def end_date_gt_start_date
-    if end_date
-      if end_date < start_date
-        self.errors.add(:base, "The end date should be earlier or equal to start date")
+  def effective_end_date_gt_effective_start_date
+    if effective_end_date
+      if effective_end_date < effective_start_date
+        self.errors.add(:base, "The effective end date should be earlier or equal to effective start date")
       end
     end
   end

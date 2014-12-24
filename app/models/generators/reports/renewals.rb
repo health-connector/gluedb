@@ -17,10 +17,12 @@ module Generators::Reports
     end
 
     def fill_envelope
-      x_pos = mm2pt(21.83) - @margin[0]
-      y_pos = 841.89 - @margin[1] - mm2pt(61.52)
 
-      bounding_box([x_pos, 600], :width => 300) do
+      # x_pos = mm2pt(21.83) - @margin[0]
+      x_pos = mm2pt(21.83) - @margin[0]
+      y_pos = 790.86 - mm2pt(57.15) - 65
+
+      bounding_box([x_pos, y_pos], :width => 300) do
         fill_primary_address
       end
     end
@@ -39,7 +41,7 @@ module Generators::Reports
       end
 
       bounding_box([345, 538], :width => 200) do
-        text '1704151'
+        text @notice.primary_identifier
       end
 
       bounding_box([2, 490], :width => 300) do
@@ -69,12 +71,12 @@ module Generators::Reports
     end
 
     def fill_uqhp_policy
-      bounding_box([65, 176], :width => 200) do
+      bounding_box([65, 176], :width => 350) do
         text fill_health_plan_name
       end
 
       bounding_box([350, 145], :width => 200) do
-        text number_to_currency(@notice.health_premium)
+        text number_to_currency(@notice.health_premium.to_f)
       end
 
       bounding_box([65, 120], :width => 350) do
@@ -82,7 +84,7 @@ module Generators::Reports
       end
 
       bounding_box([350, 90], :width => 200) do
-        text number_to_currency(@notice.dental_premium)
+        text number_to_currency(@notice.dental_premium.to_f)
       end
     end
 
@@ -95,16 +97,16 @@ module Generators::Reports
     end
 
     def fill_qhp_policy
-      bounding_box([65, 176], :width => 200) do
+      bounding_box([65, 176], :width => 350) do
         text fill_health_plan_name
       end
 
       bounding_box([245, 148], :width => 100) do
-        text "1,195.02", :align => :right
+        text number_to_currency(@notice.health_premium.to_f).gsub(/\$/, ''), :align => :right
         move_down(2)
-        text "395.00", :align => :right
+        text number_to_currency(@notice.health_aptc.to_f).gsub(/\$/, ''), :align => :right
         move_down(15)
-        text "<b>800.00</b>", :align => :right, :inline_format => true
+        text "<b>#{number_to_currency(@notice.health_responsible_amt.to_f).gsub(/\$/, '')}</b>", :align => :right, :inline_format => true
       end
 
       go_to_page(3)
@@ -114,11 +116,11 @@ module Generators::Reports
       end
 
       bounding_box([245, 639], :width => 100) do
-        text "0", :align => :right
+        text number_to_currency(@notice.dental_premium.to_f).gsub(/\$/, ''), :align => :right
         move_down(2)
-        text "0", :align => :right
+        text number_to_currency(@notice.dental_aptc.to_f).gsub(/\$/, ''), :align => :right
         move_down(15)
-        text "<b>0</b>", :align => :right, :inline_format => true
+        text "<b>#{number_to_currency(@notice.dental_responsible_amt.to_f).gsub(/\$/, '')}</b>", :align => :right, :inline_format => true
       end
     end
 

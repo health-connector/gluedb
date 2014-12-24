@@ -19,11 +19,10 @@ class RenewalsGenerator
     counter = 0
 
     while true
-      folder_number = set.to_s
-      folder_number = prepend_zeros(folder_number, 6)
-      # (3 - set.to_s.size).times{ folder_number = folder_number.prepend('0')}
-      Dir.mkdir "#{Rails.root.to_s}/#{@type}_pdf_reports/DCHBX_#{Date.today.strftime('%d_%m_%Y')}_#{folder_number}"
-      @folder_name = "DCHBX_23_12_2014_#{folder_number}"
+
+      folder_number = prepend_zeros(set.to_s, 6)
+      @folder_name = "DCHBX_#{Date.today.strftime('%d_%m_%Y')}_#{folder_number}"
+      Dir.mkdir "#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}"
 
       member_ids[lower_bound..upper_bound].each do |m_id|
         counter += 1
@@ -44,7 +43,7 @@ class RenewalsGenerator
           end
         end
       end
-
+      
       lower_bound = upper_bound + 1
       upper_bound += batch_size
       set += 1
@@ -144,8 +143,12 @@ class RenewalsGenerator
   end
 
   def write_report(notice)
+    puts notice.inspect
     pdf = Generators::Reports::Renewals.new(notice, @type)
-    pdf.render_file("#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}/#{generate_file_name}.pdf")
+    file_name = generate_file_name
+    pdf_file_name = "#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}/#{file_name}.pdf"
+    puts pdf_file_name.inspect
+    pdf.render_file(pdf_file_name)
   end
 
   def generate_file_name
@@ -154,14 +157,17 @@ class RenewalsGenerator
     # (6 - @count.to_s.size).times{ sequential_number = sequential_number.prepend('0')}
     sequential_number = prepend_zeros(sequential_number, 6)
     if @type == 'qhp'
-      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR11"
+      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR7"
     else
-      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR12"
+      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR8"
     end
   end
 
   def prepend_zeros(number, n)
-    (n - number.size).times{ number = number.prepend('0')}
+    number = number.to_s
+    (n - number.to_s.size).times do
+      number = number.prepend('0')
+    end
     return number
   end
 end

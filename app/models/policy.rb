@@ -1,7 +1,7 @@
 class Policy
   include Mongoid::Document
   include Mongoid::Timestamps
-#  include Mongoid::Versioning
+  include Mongoid::Versioning
 #  include Mongoid::Paranoia
   include AASM
 

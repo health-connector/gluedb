@@ -100,8 +100,8 @@ class Household
   end
 
   def set_submitted_at
-    submitted_at = tax_households.sort_by(&:updated_at).last.updated_at
-    submitted_at |= parent.updated_at
+    self.submitted_at = tax_households.sort_by(&:updated_at).last.updated_at
+    self.submitted_at = parent.updated_at unless self.submitted_at
     true
   end
 

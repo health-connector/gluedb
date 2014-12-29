@@ -68,6 +68,7 @@ class RenewalDetermination
           pol.active_as_of?(renewal_threshold)
       end
       date_market_renewal.each do |r_pol|
+        begin
         candidate_enrollees = r_pol.enrollees.select do |en|
           r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
             (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
@@ -77,6 +78,10 @@ class RenewalDetermination
             :old_policy => candidate_enrollees.length,
             :new_policy => policy[:enrollees].length
           })
+        end
+        rescue
+          puts policy.inspect
+          raise policy.inspect
         end
       end
     end

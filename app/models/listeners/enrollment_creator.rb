@@ -16,6 +16,7 @@ module Listeners
       qr_uri = properties.headers["qualifying_reason_uri"]
       reply_to = properties.reply_to
       body = payload
+      puts payload
 
       uc_listener = Listeners::NewEnrollmentListener.new(
         {

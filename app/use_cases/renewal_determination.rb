@@ -6,6 +6,7 @@ class RenewalDetermination
   end
 
   def validate(request, listener)
+    puts request.inspect
     pols = request[:policies]
     people = request[:individuals]
     s_enrollee = pols.first[:enrollees].detect do |enrollee|

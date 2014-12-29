@@ -7,6 +7,7 @@ class Household
 
   before_save :set_effective_end_date
   before_save :reset_is_active_for_previous
+  before_save :set_submitted_at
 
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
@@ -84,13 +85,24 @@ class Household
   # This will set the effective_end_date of previously active household to 1 day
   # before start of the current household's effective_start_date
   def set_effective_end_date
+    return true unless self.effective_start_date
     latest_household = self.application_group.latest_household
     latest_household.effective_end_date = self.effective_start_date - 1.day
+    true
   end
 
   def reset_is_active_for_previous
     latest_household = self.application_group.latest_household
+    active_value = self.is_active
     latest_household.is_active = false
+    self.is_active = active_value
+    true
+  end
+
+  def set_submitted_at
+    submitted_at = tax_households.sort_by(&:updated_at).last.updated_at
+    submitted_at |= parent.updated_at
+    true
   end
 
 end

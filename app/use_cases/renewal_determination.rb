@@ -48,6 +48,7 @@ class RenewalDetermination
       date_market_different_carrier = policies.select do |pol|
         (pol.plan.coverage_type == plan.coverage_type) &&
           pol.active_as_of?(renewal_threshold) &&
+          (pol.subscriber.coverage_end != renewal_threshold) &&
           (pol.plan.carrier_id != plan.carrier_id)
       end
       if date_market_different_carrier.any?

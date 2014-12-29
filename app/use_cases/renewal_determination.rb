@@ -80,6 +80,7 @@ class RenewalDetermination
           })
         end
         rescue
+          puts request.inspect
           puts policy.inspect
           raise policy.inspect
         end

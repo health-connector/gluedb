@@ -6,7 +6,6 @@ class RenewalDetermination
   end
 
   def validate(request, listener)
-    puts request.inspect
     pols = request[:policies]
     people = request[:individuals]
     s_enrollee = pols.first[:enrollees].detect do |enrollee|
@@ -38,7 +37,7 @@ class RenewalDetermination
     pols.each do |policy|
       hios_id = policy[:hios_id]
       plan_year = policy[:plan_year]
-      eg_id = policy = [:enrollment_group_id]
+      eg_id = policy[:enrollment_group_id]
       plan = @plan_finder.find_by_hios_id_and_year(hios_id, plan_year)
       if plan.blank?
         listener.plan_not_found(:hios_id => hios_id, :plan_year => plan_year)
@@ -69,7 +68,6 @@ class RenewalDetermination
           pol.active_as_of?(renewal_threshold)
       end
       date_market_renewal.each do |r_pol|
-        begin
         candidate_enrollees = r_pol.enrollees.select do |en|
           r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
             (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
@@ -79,11 +77,6 @@ class RenewalDetermination
             :old_policy => candidate_enrollees.length,
             :new_policy => policy[:enrollees].length
           })
-        end
-        rescue
-          puts request.inspect
-          puts policy.inspect
-          raise policy.inspect
         end
       end
     end

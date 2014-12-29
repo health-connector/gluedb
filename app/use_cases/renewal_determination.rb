@@ -37,6 +37,7 @@ class RenewalDetermination
     pols.each do |policy|
       hios_id = policy[:hios_id]
       plan_year = policy[:plan_year]
+      eg_id = policy = [:enrollment_group_id]
       plan = @plan_finder.find_by_hios_id_and_year(hios_id, plan_year)
       if plan.blank?
         listener.plan_not_found(:hios_id => hios_id, :plan_year => plan_year)
@@ -50,7 +51,15 @@ class RenewalDetermination
           (pol.plan.carrier_id != plan.carrier_id)
       end
       if date_market_different_carrier.any?
-        listener.carrier_switch_renewal
+        date_market_different_carrier.each do |op|
+        listener.carrier_switch_renewal(
+          :new_enrollment_group_id => eg_id,
+          :old_policy => {
+            :enrollment_group_id => op.eg_id,
+            :policy_id => op.id
+          }
+        )
+        end
         return false
       end
       date_market_renewal = policies.select do |pol|

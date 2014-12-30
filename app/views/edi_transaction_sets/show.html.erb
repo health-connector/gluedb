@@ -38,7 +38,7 @@
       <dt><%= "Ack/Nak at" %>:</dt>
       <dd><%= @edi_transaction_set.ack_nak_processed_at.strftime("%m-%d-%Y %H:%M:%S%z") if @edi_transaction_set.ack_nak_processed_at.present? %></dd>
       <dt>File name:</dt>
-      <dd><%= @edi_transaction_set.body.split('_', 2).last%></dt>
+      <dd><%= @edi_transaction_set.body %></dt>
     </dl>
   </div>
 

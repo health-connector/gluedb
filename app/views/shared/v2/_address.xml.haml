@@ -7,8 +7,7 @@
     %n1:address_line_3= address.address_3
   %n1:location_city_name= address.city
   %n1:location_state= address.state
-  - if address.location_state_code.present?
-    %n1:location_state_code= address.location_state_code
+  %n1:location_state_code= address.state
   %n1:location_postal_code= address.zip
   - if address.zip_extension
     %n1:location_postal_extension_code= address.zip_extension

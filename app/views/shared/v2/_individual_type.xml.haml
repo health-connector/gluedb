@@ -1,8 +1,4 @@
 = render 'shared/v2/identity', id: api_v2_people_url(hbx_id: person.authority_member_id), obj: person
-- if person.application_group_id.present?
-  %n1:application_group_id= api_v2_application_group_url(person.application_group_id)
-- if false #TODO ? Commented out in applicant link model?
-  %n1:tax_household_id
 %n1:person
   = render 'shared/v2/person', person: person
 - unless person.person_relationships.empty?
@@ -29,51 +25,6 @@
 - if authority_member.hlh.present?
   %n1:person_health
     %n1:tobacco_user= authority_member.hlh
-- unless person.application_group.financial_statements.empty?
-  %n1:financial_statements
-    - person.application_group.financial_statements.each do |financial_statement|
-      %n1:financial_statement
-        %n1:tax_filing_status= "urn:openhbx:terms:v1:tax_filer##{financial_statement.tax_filing_status}"
-        %n1:is_tax_filing_together= financial_statement.is_tax_filing_together
-        - unless financial_statement.incomes.empty?
-          %n1:incomes
-            - financial_statement.compute_yearwise(financial_statement.incomes).each do |k, v|
-              %n1:total_income_by_year
-                %n1:calendar_year= k
-                %n1:total_amount= v
-            - financial_statement.incomes.each do |income|
-              %n1:income
-                %n1:amount= income.amount_in_dollars
-                %n1:type= "urn:openhbx:terms:v1:income##{income.income_type}"
-                %n1:frequency= "urn:openhbx:terms:v1:income_frequency##{income.frequency}"
-                %n1:start_date= income.start_date.try(:strftime,"%Y%m%d")
-                - if income.end_date.present?
-                  %n1:end_date= income.end_date.try(:strftime,"%Y%m%d")
-                %n1:submitted_date= income.submission_date.try(:strftime,"%Y%m%d")
-        - unless financial_statement.deductions.empty?
-          %n1:deductions
-            - financial_statement.compute_yearwise(financial_statement.deductions).each do |k, v|
-              %n1:total_deductions_by_year
-                %n1:calendar_year= k
-                %n1:total_amount= v
-            - financial_statement.deductions.each do |deduction|
-              %n1:deduction
-                %n1:amount= deduction.amount_in_dollars
-                %n1:type= "urn:openhbx:terms:v1:deduction##{deduction.deduction_type}"
-                %n1:frequency= "urn:openhbx:terms:v1:deduction_frequency##{deduction.frequency}"
-                %n1:start_date= deduction.start_date.try(:strftime,"%Y%m%d")
-                - if deduction.end_date.present?
-                  %n1:end_date= deduction.end_date.try(:strftime,"%Y%m%d")
-                %n1:submitted_date= deduction.submission_date.try(:strftime,"%Y%m%d")
-        - unless financial_statement.alternate_benefits.empty?
-          %n1:alternate_benefits
-            - financial_statement.alternate_benefits.each do |alternate_benefit|
-              %n1:alternate_benefit
-                %n1:type= alternate_benefit.kind
-                %n1:start_date= alternate_benefit.start_date
-                %n1:end_date= alternate_benefit.end_date
-                %n1:submitted_date= alternate_benefit.submission_date
-        %n1:submission_date=financial_statement.submission_date
 %n1:is_active= person.is_active
 - unless person.comments.empty?
   = render 'shared/v2/comments', object: person

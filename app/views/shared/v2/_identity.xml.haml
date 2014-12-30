@@ -5,4 +5,4 @@
     %n1:alias_ids
       - obj.members.each do |member|
         %n1:alias_id
-          = render 'shared/v2/identity', id: api_v2_people_url( hbx_id: member.hbx_member_id), obj: member
+          %n1:id= member.hbx_member_id

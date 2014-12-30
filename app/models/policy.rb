@@ -145,6 +145,12 @@ class Policy
 
   end
 
+  def self.default_search_order
+    [
+      ["members.coverage_start", 1]
+    ]
+  end
+
   def canceled?
     subscriber.canceled?
   end
@@ -223,20 +229,19 @@ class Policy
     CanonicalVocabulary::EnrollmentSerializer.new(self, member_ids).serialize
   end
 
-  def self.default_search_orders
-    [[:eg_id, 1]]
-  end
-
   def self.find_all_policies_for_member_id(m_id)
     self.where(
       "enrollees.m_id" => m_id
     ).order_by([:eg_id])
   end
 
-  def self.search_hash(s_rex)
+  def self.search_hash(s_str)
+    clean_str = s_str.strip
+    s_rex = Regexp.new(Regexp.escape(clean_str), true)
     {
       "$or" => [
-        {"eg_id" => s_rex}
+        {"eg_id" => s_rex},
+        {"id" => s_rex}
       ]
     }
   end

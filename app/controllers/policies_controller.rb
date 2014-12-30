@@ -53,4 +53,21 @@ class PoliciesController < ApplicationController
 
   end
 
+  def index
+    @q = params[:q]
+    @qf = params[:qf]
+    @qd = params[:qd]
+
+    if params[:q].present?
+      @policies = Policy.search(@q, @qf, @qd).page(params[:page]).per(15)
+    else
+      @policies = Policy.page(params[:page]).per(15)
+    end
+
+    respond_to do |format|
+	    format.html # index.html.erb
+	    format.json { render json: @policies }
+	  end
+  end
+
 end

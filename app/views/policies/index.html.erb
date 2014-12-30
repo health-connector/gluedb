@@ -1,21 +1,22 @@
-<h1>Listing policies</h1>
+<%- model_class = Policy -%>
+<%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
+<div class="page-header">
+  <%= render 'shared/breadcrumb', crumbs: ['Policies'] %>
 
-<table>
-  <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+  <div class="row">
+    <div class="col-md-offset-8 col-md-4">
+      <%= render 'shared/search', url: policies_path, q: @q, placeholder: "EG ID, Member ID, Policy ID" %>
+    </div>
+  </div>
+</div>
 
-<% @policies.each do |policy| %>
-  <tr>
-    <td><%= link_to 'Show', policy %></td>
-    <td><%= link_to 'Edit', edit_policy_path(policy) %></td>
-    <td><%= link_to 'Destroy', policy, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
-</table>
+<%= render "policy_list", policies: @policies %>
 
-<br />
-
-<%= link_to 'New Policy', new_policy_path %>
+<div class="row">
+  <div class="col-md-8">
+    <%= paginate @policies, theme: "twitter-bootstrap", pagination_class: "pagination-plain" %>
+  </div>
+  <div class="rol-md-4">
+    <p><%= "#{number_with_delimiter(@policies.count)} / #{number_with_delimiter(Policy.count)} " %><small>(policies selected / total)</small></p>
+  </div>
+</div>

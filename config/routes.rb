@@ -12,7 +12,6 @@ Gluedb::Application.routes.draw do
   post "policy_forms", :to => 'policies#create'
 
   resources :users
-  resources :policies, :only => "index"
 
   # concern :commentable do
   #   resources :comments #, only: [:new, :create]

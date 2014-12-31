@@ -41,5 +41,6 @@ Bluepill.application("gluedb_listeners", :log_file => HBXBUS_LOG) do |app|
   app.gid = "nginx"
 
 #  define_multi_worker(app, "edi_ops_listener", "script/amqp/edi_ops_listener.rb", BUS_DIRECTORY, 1)
-  define_multi_worker(app, "enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY, 1)
+  define_multi_worker(app, "enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY, 2)
+  define_multi_worker(app, "person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY, 2)
 end

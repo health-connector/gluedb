@@ -57,7 +57,8 @@ module Policies
         fail = true
       end
       return false if fail
-      @premium_validator.validate(request, listener)
+      !fail
+#      @premium_validator.validate(request, listener)
     end
 
     # TODO: Cancel the policies we should be cancelling
@@ -83,6 +84,9 @@ module Policies
         :broker => broker,
         :employer => employer
       }))
+      p_calc = Premiums::PolicyCalculator.new
+      p_calc.apply_calculations(policy)
+      policy.save! 
       listener.policy_created(policy.id)
       cancel_others(policy, listener)
     end

@@ -83,7 +83,7 @@ Gluedb::Application.routes.draw do
     end
   end
 
-  resources :policies, only: [:new, :show, :create, :edit, :update] do
+  resources :policies, only: [:new, :show, :create, :edit, :update, :index] do
     member do
       get :cancelterminate
       post :transmit

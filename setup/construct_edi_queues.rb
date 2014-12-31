@@ -43,6 +43,8 @@ class EdiQueueSetup
     
     emake_q = queue(Listeners::EnrollmentCreator.queue_name)
     emake_q.bind(req_exchange, :routing_key => "enrollment.create")
+    pmatch_q = queue(Listeners::PersonMatcher.queue_name)
+    pmatch_q.bind(req_exchange, :routing_key => "person.match")
 
     map_recording_queue(ev_exchange, "individual.initial_enrollment", "enrollment.individual.initial_enrollment")
     map_recording_queue(ev_exchange, "shop.initial_enrollment", "enrollment.shop.initial_enrollment")

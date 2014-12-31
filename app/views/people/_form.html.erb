@@ -83,6 +83,6 @@
 
 <%= panel title: 'Relationship Type' do %>
   <div class='panel-body'>
-    <%= f.select :relationship,  PersonRelationship::ALL_RELATIONSHIPS_LIST, {include_blank: "Type"}, { class: "select select-primary", data: { toggle: "select"}, disabled: true } %>
+    <%= f.select :relationship,  PersonRelationship::RELATIONSHIPS_LIST, {include_blank: "Type"}, { class: "select select-primary", data: { toggle: "select"}, disabled: true } %>
   </div>
 <% end %>

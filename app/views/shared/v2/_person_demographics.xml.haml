@@ -1,7 +1,7 @@
 %n1:person_demographics
   - if member.ssn.present?
     %n1:ssn= member.ssn
-  %n1:sex= member.gender
+  %n1:sex= "urn:openhbx:terms:v1:gender##{member.gender}"
   %n1:birth_date= member.dob.try(:strftime,"%Y%m%d")
   - if member.death_date.present?
     %n1:death_date= member.death_date
@@ -17,7 +17,7 @@
   - if member.marital_status.present?
     %n1:marital_status= member.marital_status
   - if member.citizen_status.present?
-    %n1:citizenship_status= member.citizen_status
+    %n1:citizen_status= "urn:openhbx:terms:v1:citizen_status##{member.citizen_status}"
   - if member.is_state_resident.present?
     %n1:is_state_resident= member.is_state_resident
-= render 'shared/timestamp', record: member
+  = render 'shared/timestamp', record: member

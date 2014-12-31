@@ -10,9 +10,9 @@
       %n1:benefit_status= "urn:openhbx:terms:v1:benefit_status##{e.ben_stat}"
       %n1:benefit
         %n1:premium_amount= e.pre_amt
-        %n1:begin_date= e.coverage_start
+        %n1:begin_date= e.coverage_start.strftime("%Y%m%d")
         - if e.coverage_end.present?
-          %n1:end_date= e.coverage_end
+          %n1:end_date= e.coverage_end.strftime("%Y%m%d")
         - if e.cp_id.present?
           %n1:carrier_assigned_policy_id= e.cp_id
         - if e.c_id.present?
@@ -31,16 +31,16 @@
       %n1:total_employer_responsible_amount= policy.tot_emp_res_amt
   - elsif policy.market == 'individual'
     %n1:individual_market
-      %n1:carrier_to_bill_flag= policy.carrier_to_bill
+      %n1:is_carrier_to_bill= policy.carrier_to_bill
       %n1:allocated_aptc_amount= policy.allocated_aptc
       %n1:elected_aptc_percent= policy.elected_aptc
       %n1:applied_aptc_amount= policy.applied_aptc
-      %n1:other_payment_amount= #TODO
-  %n1:premium_amount_total= policy.pre_amt_tot
+      %n1:other_payment_amount= 0.0
+  %n1:premium_total_amount= policy.pre_amt_tot
   %n1:total_responsible_amount= policy.tot_res_amt
 %n1:policy_state= "urn:openhbx:terms:v1:policy_state##{policy.aasm_state}"
-%n1:request_submitted_timestamp
-%n1:active_flag= policy.is_active
+%n1:request_submitted_timestamp= policy.updated_at.to_datetime
+%n1:is_active= policy.is_active
 - unless policy.comments.empty?
   = render 'shared/v2/comments', object: policy
 = render 'shared/v2/timestamp', record: policy

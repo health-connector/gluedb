@@ -24,7 +24,7 @@
   %n1:is_medicaid_chip_eligible
 - if authority_member.hlh.present?
   %n1:person_health
-    %n1:tobacco_user= authority_member.hlh
+    %n1:is_tobacco_user= authority_member.hlh
 %n1:is_active= person.is_active
 - unless person.comments.empty?
   = render 'shared/v2/comments', object: person

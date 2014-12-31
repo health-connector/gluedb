@@ -15,7 +15,6 @@ module Parsers::Xml::Cv
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     element :tax_household_id, String, tag: 'tax_household_id'
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
-    element :is_head_of_household, String, tag: 'is_head_of_household'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
     has_many :employee_applicants, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
@@ -62,7 +61,6 @@ module Parsers::Xml::Cv
          applicant_id: id,
          is_primary_applicant: is_primary_applicant,
          is_coverage_applicant: is_coverage_applicant,
-         is_head_of_household:is_head_of_household,
          person_demographics: person_demographics.to_hash,
          financial_statements: financial_statements.map(&:to_hash),
          employee_applicants: employee_applicants.map(&:to_hash)

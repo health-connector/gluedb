@@ -42,7 +42,7 @@ module Parsers::Xml::Cv
       hbx_enrollments.map{|enrollment| enrollment.policy_id }
     end
 
-    def to_hash
+    def to_hash(p_tracker=nil)
       response = {
           e_case_id:e_case_id.split("#").last,
           submitted_at:submitted_date,
@@ -53,7 +53,7 @@ module Parsers::Xml::Cv
             tax_household.to_hash
           end,
           applicants: applicants.map do |applicant|
-            applicant.to_hash
+            applicant.to_hash(p_tracker)
           end,
           eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
             eligibility_determination.to_hash

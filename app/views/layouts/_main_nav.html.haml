@@ -17,31 +17,31 @@
           != active_menu_item("Brokers", brokers_path, :brokers)
           != active_menu_item("Carriers", carriers_path, :carriers)
         %li.dropdown
-        - if can? :read, current_user
-          %a.dropdown-toggle{"data-toggle" => "dropdown", :href => "#"}
-            Tools
-            %span.caret
-          %ul.dropdown-menu{:role => "menu"}
-            != active_menu_item("Premium Calculator", tools_premium_calc_path)
-            != active_menu_item("Vocab Upload", new_vocab_upload_path) if can? :edit, @user
-            != active_menu_item("Member Address Change", new_member_address_change_path) if can? :edit, @user
-            != active_menu_item("Effective Date Change", new_effective_date_change_path) if can? :edit, @user
-            != active_menu_item("Bulk Silent Policy Cancels", new_mass_silent_cancel_path) if can? :edit, @user
-            != active_menu_item("Bulk Terminates", new_bulk_terminate_path) if can? :edit, @user
-        - if current_user
-          %li.dropdown
-            %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#"}
-              %span.visible-sm.visible-xs
-                Settings
-                %span.fui-gear
-                %b.caret
-              %span.visible-md.visible-lg
-                %span.fui-gear
-                #{current_user.email}
-                %b.caret
-              %span.dropdown-arrow
-            %ul.dropdown-menu
-              %li
-                = link_to "Sign out", destroy_user_session_path, :method => "delete"
-              %li
-                = link_to "Change Password", edit_user_registration_path
+          - if can? :read, current_user
+            %a.dropdown-toggle{"data-toggle" => "dropdown", :href => "#"}
+              Tools
+              %span.caret
+            %ul.dropdown-menu{:role => "menu"}
+              != active_menu_item("Premium Calculator", tools_premium_calc_path)
+              != active_menu_item("Vocab Upload", new_vocab_upload_path) if can? :edit, @user
+              != active_menu_item("Member Address Change", new_member_address_change_path) if can? :edit, @user
+              != active_menu_item("Effective Date Change", new_effective_date_change_path) if can? :edit, @user
+              != active_menu_item("Bulk Silent Policy Cancels", new_mass_silent_cancel_path) if can? :edit, @user
+              != active_menu_item("Bulk Terminates", new_bulk_terminate_path) if can? :edit, @user
+          - if current_user
+            %li.dropdown
+              %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#"}
+                %span.visible-sm.visible-xs
+                  Settings
+                  %span.fui-gear
+                  %b.caret
+                %span.visible-md.visible-lg
+                  %span.fui-gear
+                  #{current_user.email}
+                  %b.caret
+                %span.dropdown-arrow
+              %ul.dropdown-menu
+                %li
+                  = link_to "Sign out", destroy_user_session_path, :method => "delete"
+                %li
+                  = link_to "Change Password", edit_user_registration_path

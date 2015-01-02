@@ -16,12 +16,15 @@ module Parsers::Xml::Cv
     def to_hash
       result = {
           id:id,
+          hbx_member_id:id,
           application_group_id:application_group_id,
           tax_household_id:tax_household_id,
           person:person.to_hash,
       }
 
       result[:benefit] = benefit.to_hash if benefit
+
+      result
     end
   end
 end

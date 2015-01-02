@@ -8,7 +8,7 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :total_employer_responsible_amount, String, tag: "total_employer_responsible_amount"
-    has_one :employer_link, Parsers::Xml::Cv::EmployerLinkParser, xpath: "cv:employer_link"
+    has_one :employer_link, Parsers::Xml::Cv::EmployerLinkParser, tag: "employer_link"
 
     def to_hash
       {

@@ -8,8 +8,8 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :id, String, tag: "id/cv:id"
-    has_one :enrollment, Parsers::Xml::Cv::EnrollmentParser, tag:'enrollment'
     has_many :enrollees, Parsers::Xml::Cv::EnrolleeParser, xpath: 'cv:enrollees'
+    has_one :enrollment, Parsers::Xml::Cv::EnrollmentParser, tag: 'enrollment'
 
 
     def to_hash

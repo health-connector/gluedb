@@ -155,6 +155,8 @@ Gluedb::Application.routes.draw do
       resources :irs_reports, :only => [:index]
       resources :plans, :only => [:show]
       resources :renewal_policies, :only => [:show, :index]
+      #resources :premium_calculator
+      post 'calculate_premium', to: 'premium_calculator#calculate'
     end
   end
 

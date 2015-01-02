@@ -13,10 +13,10 @@
 		</div>  <!-- outer panel-heading -->
 
 		<div class="panel-body">
-			<% policies = Policy.find_all_policies_for_member_id(member.hbx_member_id) %>
 			<ul class="list-group">
+				<% policies = Policy.find_all_policies_for_member_id(member.hbx_member_id) %>
 				<% policies.each do |policy| %>
-					<li class="list-group-item"><%= render 'policy_detail', p: policy %></li>
+					<li class="list-group-item"><%= render 'policy_detail', p: policy if can? :read, current_user && policy_market(policy) == "Individual" %></li>
 				<% end %>
 			</ul>
 		</div>

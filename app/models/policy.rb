@@ -79,6 +79,12 @@ class Policy
   scope :unassisted, where(:applied_aptc.in => ["0", "0.0", "0.00"])
   scope :insurance_assisted, where(:applied_aptc.nin => ["0", "0.0", "0.00"])
 
+  # scopes of renewal reports
+  scope :active_renewal_policies, where({:employer_id => nil, :enrollees => {"$elemMatch" => { :rel_code => "self", :coverage_start => {"$gt" => Date.new(2014,12,31)}, :coverage_end.in => [nil]}}})
+  scope :by_member_id, ->(member_id) { where("enrollees.m_id" => {"$in" => [ member_id ]}, "enrollees.rel_code" => "self") }
+  scope :with_aptc, where(PolicyQueries.with_aptc)
+  scope :without_aptc, where(PolicyQueries.without_aptc)
+
   aasm do
     state :submitted, initial: true
     state :effectuated
@@ -142,7 +148,6 @@ class Policy
       transitions from: :carrier_terminated, to: :effectuated
       transitions from: :carrier_canceled, to: :effectuated
     end
-
   end
 
   def canceled?

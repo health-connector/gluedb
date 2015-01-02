@@ -21,7 +21,7 @@ module PersonMatchStrategies
 
     def select_authority_member(person, options)
       if !person.authority_member.present?
-        raise AmbiguiousMatchError.new("No authority member for ssn #{options[:ssn]}, person #{person.id}")
+        raise AmbiguousMatchError.new("No authority member for ssn #{options[:ssn]}, person #{person.id}")
       end
       return [person, person.authority_member]
     end
@@ -40,19 +40,19 @@ module PersonMatchStrategies
       if !val.blank?
         filtered = plist.select { |per| per.send(sym.to_sym).downcase == val.downcase }
         if filtered.empty?
-          raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
+          raise AmbiguousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
         elsif filtered.length == 1
           throw(:person_found, filtered)
         else
           if error_on_many
-            raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
+            raise AmbiguousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
           else
             filtered
           end
         end
       end
       if plist.many? && error_on_many
-        raise AmbiguiousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
+        raise AmbiguousMatchError.new("Multiple people with same ssn: #{props[:ssn]}")
       end
       plist
     end

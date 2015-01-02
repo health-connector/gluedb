@@ -64,8 +64,9 @@ class ApplicationGroup
   end
 
   def latest_household
-    return households.first if households.size = 1
-    households.sort_by(&:submitted_at).last.submitted_at
+    return households.first if households.size == 1
+    persisted_household = households.select(&:persisted?) - [nil] #remove any nils
+    persisted_household.sort_by(&:submitted_at).last
   end
 
   def active_applicants
@@ -194,7 +195,6 @@ private
   end
 
   def are_arrays_of_applicants_same?(base_set, test_set)
-
     base_set.uniq.sort == test_set.uniq.sort
   end
 
@@ -205,7 +205,16 @@ private
 
     if primary_applicants.size > 1
       self.errors.add(:base, "Multiple primary applicants")
+      return false
+    else
+      return true
     end
+  end
+
+  #TODO need a way to fetch the employer via policy
+  def set_employee_applicant
+    #self.primary_applicant.employee_applicant.employee = primary_applicant.policy.employer if primary_applicant && primary_applicant.primary_applicant.policy && primary_applicant.policy.employer
+    return true
   end
 
 end

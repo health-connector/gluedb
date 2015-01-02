@@ -1,4 +1,7 @@
 class EmployersController < ApplicationController
+
+  load_and_authorize_resource
+
   def index
     @q = params[:q]
     @qf = params[:qf]
@@ -25,7 +28,7 @@ class EmployersController < ApplicationController
     @premium_payments = @employer.payment_transactions.group_by{ |p| p["_id"]["paid_at"]}.sort
 
     @plan_years = @employer.plan_years
-    
+
     if params[:q_person].present?
       @employees = @employer.employees.search(@q_person, @qf_person, @qd_person).page(params[:employee_page]).per(12)
     else

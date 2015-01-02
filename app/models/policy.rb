@@ -150,6 +150,12 @@ class Policy
     end
   end
 
+  def self.default_search_order
+    [
+      ["members.coverage_start", 1]
+    ]
+  end
+
   def canceled?
     subscriber.canceled?
   end
@@ -228,20 +234,19 @@ class Policy
     CanonicalVocabulary::EnrollmentSerializer.new(self, member_ids).serialize
   end
 
-  def self.default_search_orders
-    [[:eg_id, 1]]
-  end
-
   def self.find_all_policies_for_member_id(m_id)
     self.where(
       "enrollees.m_id" => m_id
     ).order_by([:eg_id])
   end
 
-  def self.search_hash(s_rex)
+  def self.search_hash(s_str)
+    clean_str = s_str.strip
+    s_rex = Regexp.new(Regexp.escape(clean_str), true)
     {
       "$or" => [
-        {"eg_id" => s_rex}
+        {"eg_id" => s_rex},
+        {"id" => s_rex}
       ]
     }
   end
@@ -280,7 +285,7 @@ class Policy
           }
         })
       if(policies.count > 1)
-        raise "More than one policy that match subkeys: eg_id=#{eg_id}, carrier_id=#{c_id}, plan_ids=#{plan_ids}"
+        raise "More than one policy that match subkeys: eg_id=#{eg_id}, plan_ids=#{plan_ids}"
       end
       policies.first
   end
@@ -322,7 +327,8 @@ class Policy
       found_enrollment.save!
       return found_enrollment
     end
-    m_enrollment.unsafe_save!
+    m_enrollment.save!
+#    m_enrollment.unsafe_save!
     m_enrollment
   end
 
@@ -462,16 +468,21 @@ class Policy
     true
   end
 
-  def currently_active_for?(member_id)
-    return false unless currently_active?
+  def active_on_date_for?(date, member_id)
+    return false unless active_as_of?(date)
     en = enrollees.detect { |enr| enr.m_id == member_id }
     return false if en.nil?
-    now = Date.today
-    return false if en.coverage_start > now
+    return false if en.coverage_start > date
     return false if (en.coverage_start == en.coverage_end)
-    return false if (!en.coverage_end.nil? && en.coverage_end < now)
+    return false if (!en.coverage_end.nil? && en.coverage_end < date)
     true
   end
+
+  def currently_active_for?(member_id)
+    now = Date.today
+    active_on_date_for?(now, member_id)
+  end
+
   def future_active?
     now = Date.today
     return false if subscriber.nil?

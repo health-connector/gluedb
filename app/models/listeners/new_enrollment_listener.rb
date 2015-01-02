@@ -50,8 +50,12 @@ module Listeners
       add_error(:enrollment, "has no subscriber")
     end
 
-    def carrier_switch_renewal
-      add_error(:enrollment, "requires a carrier switch")
+    def carrier_switch_renewal(details)
+      add_error(:enrollment, "requires a carrier switch: new enrollment_group_ids: #{details[:new_enrollment_group_id]}, old policy: enrollment_group_id: #{details[:old_policy][:enrollment_group_id]}, policy_id: #{details[:old_policy][:policy_id]}")
+    end
+
+    def enrollees_changed_for_renewal(details)
+      add_error(:enrollment, "the number of enrollees has changed: was #{details[:old_policy]} is now #{details[:new_policy]}")
     end
 
     # Policy Errors

@@ -17,11 +17,9 @@
 
 <div class="row">
   <div class="col-md-2">
-    <% if can? :read, current_user %>
-      <div class="well sidebar-nav">
-        <%= controls_for_people(@person) %>
-      </div>
-    <% end %>
+    <div class="well sidebar-nav">
+      <%= controls_for_people(@person) %>
+    </div>
   </div>
 
   <div class="col-md-10">

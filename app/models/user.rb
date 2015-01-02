@@ -33,9 +33,9 @@ class User
 
   field :authentication_token
 
-  field :role, :type => String, :default => "user"
+  field :role, :type => String, :default => "service"
 
-  ROLES = %w[user edi_ops admin]
+  ROLES = %w[user edi_ops admin serivce]
 
   ## Confirmable
   # field :confirmation_token,   :type => String

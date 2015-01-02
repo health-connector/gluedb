@@ -1,6 +1,9 @@
 class DashboardsController < ApplicationController
 
+  before_filter :check_access
+
   def index
+
   	@total_employers = Employer.count
   	@total_enrollments = Policy.count
   	@total_edi_transactions = Protocols::X12::TransactionSetEnrollment.count
@@ -36,5 +39,11 @@ class DashboardsController < ApplicationController
     @response_metric = ResponseMetric.all
     @ambiguous_people_metric = AmbiguousPeopleMetric.all
     render :index
+  end
+
+  private
+
+  def check_access
+    redirect_to people_path and return if current_user.role == "service"
   end
 end

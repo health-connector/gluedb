@@ -1,4 +1,7 @@
 class BrokersController < ApplicationController
+
+  load_and_authorize_resource
+
   def index
     @q = params[:q]
 

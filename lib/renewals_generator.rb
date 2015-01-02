@@ -1,5 +1,4 @@
 class RenewalsGenerator
-  # include Virtus.model
 
   def initialize(type = 'uqhp')
     @count = 0
@@ -9,6 +8,10 @@ class RenewalsGenerator
 
   def run
     policies = Policy.active_renewal_policies
+
+    uqhp_policies = policies.without_aptc
+    qhp_policies = policies.with_aptc
+
     policies = (@type == 'qhp' ? policies.with_aptc : policies.without_aptc)
     member_ids = policies.map{|x| x.subscriber.m_id}.uniq
 
@@ -16,34 +19,51 @@ class RenewalsGenerator
     lower_bound = 0
     batch_size  = 200
     upper_bound = 199
-    counter = 0
 
     while true
-
       folder_number = prepend_zeros(set.to_s, 6)
       @folder_name = "DCHBX_#{Date.today.strftime('%d_%m_%Y')}_#{folder_number}"
       Dir.mkdir "#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}"
 
       member_ids[lower_bound..upper_bound].each do |m_id|
-        counter += 1
-        policies = policies.by_member_id(m_id)
-        puts "processing----#{counter}"
-        policy_hash = policies.inject({}) do |data, policy|
-          data["#{policy.subscriber.m_id}-#{policy.plan_id}"] = policy
+        member_policies = policies.by_member_id(m_id)
+        if @type == 'qhp'
+          member_policies += uqhp_policies.by_member_id(m_id).select{|x| x.plan.coverage_type == 'dental'}
+        else
+          matched = qhp_policies.by_member_id(m_id)
+          if matched.count > 0
+            matched += member_policies.select{|x| x.plan.coverage_type == 'dental'} 
+            policy_hash = matched.inject({}) do |data, policy|
+              data["#{policy.subscriber.m_id}-#{policy.plan.hios_plan_id}"] = policy
+              data
+            end
+            non_duplicate_policies = policy_hash.values
+            dentals = group_policies_for_noticies(non_duplicate_policies).inject([]) do |data, policies|
+              data << (policies[0].nil? ? nil : policies[1])
+            end   
+            if dentals && dentals.compact.size > 0
+              member_policies = member_policies.uniq - dentals.compact.uniq
+            end
+          end
+        end
+
+        policy_hash = member_policies.inject({}) do |data, policy|
+          data["#{policy.subscriber.m_id}-#{policy.plan.hios_plan_id}"] = policy
           data
         end
 
         non_duplicate_policies = policy_hash.values
         group_policies_for_noticies(non_duplicate_policies).each do |policies|
           begin
+            next if (@type == 'qhp') && policies[0].nil?
             notice = build_input_object(policies)
             write_report(notice)
           rescue Exception => e
-            @logger.info "#{policies.inspect}----#{e.inspect}"
+            @logger.info "#{policies.inspect}-----#{e.inspect}"
           end
         end
       end
-      
+
       lower_bound = upper_bound + 1
       upper_bound += batch_size
       set += 1
@@ -53,10 +73,7 @@ class RenewalsGenerator
 
   def build_input_object(policies)
     health, dental = policies
-
     notice = PdfTemplates::NoticeInput.new
-    address = PdfTemplates::NoticeAddress.new
-
     base_policy = health || dental
 
     if base_policy.subscriber.nil?
@@ -73,45 +90,44 @@ class RenewalsGenerator
       raise 'subscriber address empty'
     end
 
+    append_address(primary, notice)
+    notice.covered_individuals = members
+    notice = append_health_policy(health, notice) if health
+    notice = append_dental_policy(dental, notice) if dental
+
+    return notice
+  end
+
+  def append_address(primary, notice)
     primary_address = primary.addresses[0]
+    address = PdfTemplates::NoticeAddress.new
     address.street_1 = primary_address.address_1
     address.street_2 = primary_address.address_2
     address.city = primary_address.city
     address.state = primary_address.state
     address.zip = primary_address.zip
-
     notice.primary_address = address
-    notice.covered_individuals = members
-
-    if health
-     notice = insert_health_policy(health, notice)
-    end
-
-    if dental
-      notice = insert_dental_policy(dental, notice)
-    end
-    # puts notice.inspect
-    return notice
+    notice
   end
 
-  def insert_health_policy(health, notice)
+  def append_health_policy(health, notice)
     notice.health_plan_name = health.plan.name
     notice.health_premium = health.pre_amt_tot
     if @type == 'qhp'
       notice.health_aptc = health.applied_aptc
       notice.health_responsible_amt = health.tot_res_amt
     end
-    return notice    
+    notice    
   end
 
-  def insert_dental_policy(dental, notice)
+  def append_dental_policy(dental, notice)
     notice.dental_plan_name = dental.plan.name
     notice.dental_premium = dental.pre_amt_tot
     if @type == 'qhp'
       notice.dental_aptc = dental.applied_aptc
       notice.dental_responsible_amt = dental.tot_res_amt
     end
-    return notice
+    notice
   end
 
   private
@@ -143,18 +159,15 @@ class RenewalsGenerator
   end
 
   def write_report(notice)
-    puts notice.inspect
     pdf = Generators::Reports::Renewals.new(notice, @type)
     file_name = generate_file_name
     pdf_file_name = "#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}/#{file_name}.pdf"
-    puts pdf_file_name.inspect
     pdf.render_file(pdf_file_name)
   end
 
   def generate_file_name
     @count += 1
     sequential_number = @count.to_s
-    # (6 - @count.to_s.size).times{ sequential_number = sequential_number.prepend('0')}
     sequential_number = prepend_zeros(sequential_number, 6)
     if @type == 'qhp'
       "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR7"

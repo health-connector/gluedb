@@ -1,5 +1,5 @@
 module Generators::Reports  
-  class Renewals < PdfReport
+  class RenewalPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
     def initialize(notice,type='uqhp')

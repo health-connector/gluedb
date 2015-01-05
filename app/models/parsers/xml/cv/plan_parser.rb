@@ -13,6 +13,7 @@ module Parsers::Xml::Cv
     element :is_dental_only, String, tag: "is_dental_only"
 
     def to_hash
+
       {
           id:id,
           coverage_type:coverage_type,

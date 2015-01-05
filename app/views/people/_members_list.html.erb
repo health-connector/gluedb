@@ -2,7 +2,7 @@
   <tr>
     <td class="text-right"><%= mbr.hbx_member_id %></td>
     <td class="text-right"><%= mbr.policies.size %></td>
-    <td><%= number_to_ssn(mbr.ssn) %></td>
+    <td><%= display_ssn_by_user(mbr) %></td>
     <td><%= format_date(mbr.dob) %></td>
     <td><%= mbr.gender.capitalize %></td>
     <td><%= member_authority_to_label(mbr.authority?) %></td>

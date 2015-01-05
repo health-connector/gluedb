@@ -10,12 +10,12 @@ class ApplicationGroupBuilder
     @applicants_params = param[:applicants]
     param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
-    @application_group = ApplicationGroup.where(e_case_id:param[:e_case_id]).first
+    @application_group = ApplicationGroup.where(e_case_id: param[:e_case_id]).first
 
     if @application_group.nil?
       @application_group = ApplicationGroup.new(param) #we create a new application group from the xml
       @is_update = false # means this is a create
-      add_irsgroup # we need a atleast 1 irsgroup hence adding a blank one
+      add_irsgroup({}) # we need a atleast 1 irsgroup hence adding a blank one
     end
 
     @application_group.updated_by = "curam_system_service"
@@ -25,18 +25,25 @@ class ApplicationGroupBuilder
 
   def add_applicant(applicant_params)
 
-    puts applicant_params[:is_primary_applicant]
+    puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]}"
 
     if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
       puts "Added already existing applicant"
-      applicant = @application_group.applicants.where(person_id:applicant_params[:person].id).first
+      applicant = @application_group.applicants.where(person_id: applicant_params[:person].id).first
     else
       puts "Added a new applicant"
+      if applicant_params[:is_primary_applicant] == "true"
+        reset_exisiting_primary_applicant
+      end
+
       applicant = @application_group.applicants.build(filter_applicant_params(applicant_params))
-      member = applicant.person.members.select do |m| m.authority? end.first
+      member = applicant.person.members.select do |m|
+        m.authority?
+      end.first
       set_person_demographics(member, applicant_params[:person_demographics])
       @save_list << member
       @save_list << applicant
+      puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.applicants #{applicant.inspect}"
     end
 
     applicant
@@ -44,8 +51,7 @@ class ApplicationGroupBuilder
 
   def reset_exisiting_primary_applicant
     @application_group.applicants.each do |applicant|
-        applicant.is_primary_applicant = false
-        applicant.save
+      applicant.is_primary_applicant = false
     end
   end
 
@@ -87,13 +93,19 @@ class ApplicationGroupBuilder
       @household = self.application_group.households.last #if update and applicants haven't changed then use the latest household in use
     end
 
+    puts "return @household"
+
     return @household
 
   end
 
   def have_applicants_changed?
-    current_list = @application_group.applicants.map do |applicant| applicant.person_id end.sort
-    new_list = @applicants_params.map do |applicants_param| applicants_param[:person].id end.sort
+    current_list = @application_group.applicants.map do |applicant|
+      applicant.person_id
+    end.sort
+    new_list = @applicants_params.map do |applicants_param|
+      applicants_param[:person].id
+    end.sort
 
     #puts current_list.inspect
     #puts new_list.inspect
@@ -120,10 +132,13 @@ class ApplicationGroupBuilder
 
   def add_hbx_enrollment
 
+    puts @application_group.primary_applicant
+
     @application_group.primary_applicant.person.policies.each do |policy|
 
       hbx_enrollement = @household.hbx_enrollments.build
       hbx_enrollement.policy = policy
+      @application_group.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
       #hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
       #hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
       #hbx_enrollement.primary_applicant = alpha_person
@@ -145,7 +160,7 @@ class ApplicationGroupBuilder
           applicant = @application_group.find_applicant_by_person(person)
 
           hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: applicant,
-                                                         premium_amount_in_cents: enrollee.pre_amt})
+                                                                                 premium_amount_in_cents: enrollee.pre_amt})
           hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
         rescue FloatDomainError
@@ -158,26 +173,20 @@ class ApplicationGroupBuilder
 
   end
 
-  def add_irsgroup
+  def add_irsgroup(irs_group_params)
     @application_group.irs_groups.build()
   end
 
   #TODO - method not implemented properly using .build(params)
   def add_irsgroups(irs_groups_params)
-    irs_groups = irs_groups_params.map do |irs_group_params|
-      IrsGroup.new(irs_group_params)
+    irs_groups_params.map do |irs_group_params|
+      add_irsgroup(irs_group_params)
     end
-
-    @application_group.irs_groups = irs_groups
-
   end
 
   def add_tax_households(tax_households_params, eligibility_determinations_params)
 
     tax_households_params.map do |tax_household_params|
-
-      #tax_household = @household.tax_households.build(tax_household_params.slice(:id, :primary_applicant_id,
-                                                                                # :total_count, :total_incomes_by_year))
 
       tax_household = @household.tax_households.build(filter_tax_household_params(tax_household_params))
 
@@ -186,19 +195,22 @@ class ApplicationGroupBuilder
         person_uri = @person_mapper.alias_map[tax_household_member_params[:id]]
         person_obj = @person_mapper.people_map[person_uri].first
         new_applicant = get_applicant(person_obj)
+        new_applicant = verify_person_id(new_applicant)
         tax_household_member.applicant_id = new_applicant.id
         tax_household_member.applicant = new_applicant
-
       end
-
     end
-
 
     eligibility_determinations_params.each do |eligibility_determination_params|
       #TODO assuming only 1tax_household. needs to be corrected later
       @household.tax_households.first.eligibility_determinations.build(eligibility_determination_params)
     end
+  end
 
+  def verify_person_id(applicant)
+    if applicant.include? "concern_role"
+
+    end
   end
 
   def filter_tax_household_member_params(tax_household_member_params)
@@ -215,7 +227,6 @@ class ApplicationGroupBuilder
   end
 
   def get_applicant(person_obj)
-
     new_applicant = self.application_group.applicants.find do |applicant|
       applicant.id == @person_mapper.applicant_map[person_obj.id].id
     end
@@ -241,6 +252,9 @@ class ApplicationGroupBuilder
   end
 
   def filter_financial_statement_params(financial_statement_params)
+
+    financial_statement_params = financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status)
+
     financial_statement_params.delete_if do |k, v|
       v.nil?
     end
@@ -250,7 +264,6 @@ class ApplicationGroupBuilder
     tax_household_members = self.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
 
     tax_household_member = tax_household_members.find do |tax_household_member|
-
       tax_household_member.applicant_id == applicant.id
     end
 

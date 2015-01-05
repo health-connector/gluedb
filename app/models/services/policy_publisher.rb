@@ -54,7 +54,8 @@ module Services
       has_renewal_match = sub_person.policies.any? do |pol|
         (pol.plan.coverage_type == policy.plan.coverage_type) &&
           pol.active_as_of?(coverage_start - 1.day) &&
-          (pol.id != policy.id)
+          (pol.id != policy.id) &&
+          (pol.carrier_id == policy.carrier_id)
       end
       has_renewal_match ? "renewal" : "initial_enrollment"
     end

@@ -49,8 +49,12 @@ module Parsers
         end
       end
 
+      def employer_id
+        @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id",namespaces)).content.split("/").last.value
+      end
+
       def broker_npn
-        @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).content.split("#").last.value
+        @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).first.content.split("#").last.value
       end
 
       def to_hash
@@ -65,7 +69,8 @@ module Parsers
           :broker_npn => broker_npn,
           :employer_fein => employer_fein,
           :tot_emp_res_amt => tot_emp_res_amt,
-          :enrollees => enrollees.map(&:to_hash)
+          :enrollees => enrollees.map(&:to_hash),
+          :employer_id => employer_id
         }
       end
     end

@@ -1,5 +1,5 @@
 = render 'shared/v2/identity', id: api_v2_plan_url(plan.id), obj: plan\
-%n1:coverage_type= "urn:openhbx:terms:v1:benefit_coverage##{plan.coverage_type}"
+%n1:coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
 %n1:carrier= render 'shared/v2/carrier_link_type', carrier: (Caches::MongoidCache.lookup(Carrier, plan.carrier_id) { plan.carrier })
 %n1:plan_year= plan.year
 %n1:name= plan.name

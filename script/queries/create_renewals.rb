@@ -3,8 +3,8 @@ feins = []
 emp_ids = Employer.where(:fein => { "$in" => feins } ).map(&:id)
 
 
-pols_mems = Policy.where(PolicyStatus::Active.as_of(Date.parse('12/31/2014'), { "employer_id" => { "$in" => emp_ids }}).query)
-pols = Policy.where(PolicyStatus::Active.as_of(Date.parse('12/31/2014'), { "employer_id" => { "$in" => emp_ids }}).query).no_timeout
+pols_mems = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }})
+pols = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }}).no_timeout
 
 m_ids = []
   
@@ -30,7 +30,7 @@ pols.each do |pol|
       puts "No authority member for: #{pol.subscriber.m_id}"
     else
       if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
-        r_pol = pol.clone_for_renewal(Date.new(2015,1,1))
+        r_pol = pol.clone_for_renewal(Date.new(2015,2,1))
         calc.apply_calculations(r_pol)
         p_id = p_id + 1
         out_file = File.open("renewals/#{p_id}.xml", 'w')

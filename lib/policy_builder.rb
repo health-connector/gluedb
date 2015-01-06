@@ -22,14 +22,14 @@ class PolicyBuilder
 
   def add_enrollment(enrollment_params)
     #puts "enrollment_params #{enrollment_params.inspect}"
-    #@policy.enrollment.build(enrollment_params)
+    @policy.enrollment.build(enrollment_params)
   end
 
   def set_policy_params(params)
     params[:plan_id] = params[:enrollment][:plan][:id]
   end
 
-  def set_enrollee_params(params)
-    params[:relationship_status_code] = params[:enrollment][:plan][:id]
+  def set_enrollee_params(enrollee_params)
+    enrollee_params[:relationship_status_code] = enrollee_params[:person_relationships][:plan]
   end
 end

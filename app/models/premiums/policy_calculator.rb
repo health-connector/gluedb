@@ -67,7 +67,11 @@ module Premiums
       if policy.is_shop?
         plan_year = determine_shop_plan_year(policy)
         contribution_strategy = plan_year.contribution_strategy
-        policy.tot_emp_res_amt = as_dollars(contribution_strategy.contribution_for(policy))
+
+        if contribution_strategy
+          policy.tot_emp_res_amt = as_dollars(contribution_strategy.contribution_for(policy))
+        end
+
         policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.tot_emp_res_amt)
       else
         policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.applied_aptc)
@@ -81,8 +85,8 @@ module Premiums
     def determine_shop_plan_year(policy)
       coverage_start_date = policy.subscriber.coverage_start
       employer = get_employer(policy)
-      employer.plan_year_of(coverage_start_date)
+      puts employer.inspect
+      plan_year = employer.plan_year_of(coverage_start_date)
     end
-
   end
 end

@@ -1,9 +1,9 @@
 module Generators::Reports  
-  class RenewalNoticeInput
+  class RenewalNoticeInputBuilder
 
-    def create(policies)
+    def process(policies)
       health, dental = policies
-      notice = PdfTemplates::NoticeInput.new
+      notice = PdfTemplates::RenewalNoticeInput.new
       base_policy = health || dental
 
       if base_policy.subscriber.nil?

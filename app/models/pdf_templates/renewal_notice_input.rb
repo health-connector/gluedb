@@ -1,5 +1,5 @@
 module PdfTemplates
-  class NoticeInput
+  class RenewalNoticeInput
     include Virtus.model
 
     attribute :primary_name, String

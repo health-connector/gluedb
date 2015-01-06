@@ -11,16 +11,23 @@ module Parsers::Xml::Cv
     element :name, String, tag: "name"
     element :plan_year, String, tag: "plan_year"
     element :is_dental_only, String, tag: "is_dental_only"
+    element :carrier, CarrierParser, tag: 'carrier'
 
     def to_hash
 
-      {
-          id:id,
-          coverage_type:coverage_type,
-          name:name,
-          plan_year:plan_year,
-          is_dental_only:is_dental_only
+      response = {
+
+          coverage_type: coverage_type,
+          name: name,
+          plan_year: plan_year,
+          is_dental_only: is_dental_only,
+          carrier: carrier.to_hash
       }
+
+      response[:id] = id.split('#').last
+      response[:id] = response[:id].split('/').last
+
+      response
     end
   end
 end

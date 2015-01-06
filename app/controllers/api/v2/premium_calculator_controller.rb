@@ -1,5 +1,9 @@
-class Api::V2::PremiumCalculatorController < ApplicationController
+require File.join(Rails.root, "app", "models", "premiums", "enrollment_cv_proxy.rb")
 
+class Api::V2::PremiumCalculatorController < ApplicationController
+  skip_before_filter :authenticate_user_from_token!
+  skip_before_filter :authenticate_me!
+  protect_from_forgery :except => [:create]
 
 
   def calculate
@@ -7,19 +11,23 @@ class Api::V2::PremiumCalculatorController < ApplicationController
 
     enrollment_xml = request.body.read
 
-    policy_parser = Parsers::Xml::Cv::PolicyParser.parse(enrollment_xml)
+    enrollment_cv_proxy = EnrollmentCvProxy.new(enrollment_xml)
 
-    @policy = PolicyBuilder.new(policy_parser.first.to_hash).policy
-
-    @old_policy = @policy.clone
+    policy = enrollment_cv_proxy.policy
 
     premium_calculator = Premiums::PolicyCalculator.new
 
-    premium_calculator.apply_calculations(@policy)
+    premium_calculator.apply_calculations(policy)
 
-    logger.info "#{@old_policy.inspect}"
-    logger.info "#{@policy.inspect}"
-    render xml: @policy, layout: false
+    enrollment_cv_proxy.policy_emp_res_amt = policy.tot_emp_res_amt
+    enrollment_cv_proxy.policy_tot_res_amt = policy.tot_res_amt
+    enrollment_cv_proxy.policy_pre_amt_tot = policy.pre_amt_tot
+
+    policy.enrollees.each do |enrollee|
+      enrollment_cv_proxy.enrollee_pre_amt=(enrollee)
+    end
+
+    render :text => enrollment_cv_proxy.to_xml
   end
 
 end

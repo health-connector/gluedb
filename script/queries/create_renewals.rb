@@ -1,7 +1,9 @@
-feins = []
+require File.join(Rails.root, "script/queries/policy_id_generator")
+
+feins = %w(
+)
 
 emp_ids = Employer.where(:fein => { "$in" => feins } ).map(&:id)
-
 
 pols_mems = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }})
 pols = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }}).no_timeout
@@ -20,7 +22,7 @@ Caches::MongoidCache.allocate(Employer)
 Caches::MongoidCache.allocate(Plan)
 Caches::MongoidCache.allocate(Carrier)
 
-p_id = 50000
+polgen = PolicyIdGenerator.new(10)
 
 pols.each do |pol|
   if pol.subscriber.coverage_end.blank?
@@ -32,7 +34,7 @@ pols.each do |pol|
       if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
         r_pol = pol.clone_for_renewal(Date.new(2015,2,1))
         calc.apply_calculations(r_pol)
-        p_id = p_id + 1
+        p_id = polgen.get_id
         out_file = File.open("renewals/#{p_id}.xml", 'w')
         member_ids = r_pol.enrollees.map(&:m_id)
         r_pol.eg_id = p_id.to_s
@@ -47,4 +49,3 @@ end
 Caches::MongoidCache.release(Plan)
 Caches::MongoidCache.release(Carrier)
 Caches::MongoidCache.release(Employer)
-

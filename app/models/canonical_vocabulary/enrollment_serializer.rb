@@ -170,7 +170,7 @@ module CanonicalVocabulary
           xml['pln'].carrier_id_ref(carrier._id)
           xml['pln'].hios_plan_id(plan.hios_plan_id)
           xml['pln'].plan_name(plan.name)
-          xml['pln'].coverage_type(@policy.coverage_type.capitalize)
+          xml['pln'].coverage_type(plan.coverage_type.capitalize)
         end
         xml['ins'].plan_id(plan._id)
         xml['ins'].premium_amount_total(@policy.pre_amt_tot)

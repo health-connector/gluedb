@@ -364,7 +364,7 @@ class Policy
 
   def self.find_active_and_unterminated_for_members_in_range(m_ids, start_d, end_d, other_params = {})
     Policy.where(
-      PolicyStatus::Active.as_of(end_d,
+      PolicyStatus::Active.as_of(end_d).query).where(
       {"enrollees" => {
         "$elemMatch" => {
           "m_id" => { "$in" => m_ids },
@@ -375,14 +375,13 @@ class Policy
             {:coverage_end => nil}
           ]
         }
-      } }).query
-    )
+      } })
+    
   end
 
   def self.find_active_and_unterminated_in_range(start_d, end_d, other_params = {})
     Policy.where(
-      PolicyStatus::Active.as_of(end_d, other_params).query
-    )
+      PolicyStatus::Active.as_of(end_d).query).where( other_params)
   end
 
   def self.find_terminated_in_range(start_d, end_d, other_params = {})

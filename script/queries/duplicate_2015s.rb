@@ -36,13 +36,15 @@ dupes = p_count.select do |k,v|
   selected = false
   if (v[:health] > 1)
     if v[:healths].length == 1
-      duplicate_healths << [k, v[:healths], v[:health_policies]]
+      h_pols = v[:health_policies].sort[0..-2]
+      duplicate_healths << [h_pols]
       selected = true
     end
   end
   if (v[:dental] > 1)
     if v[:dentals].length == 1
-      duplicate_dentals << [k, v[:dentals], v[:dental_policies]]
+      d_policies = v[:dental_policies].sort[0..-2]
+      duplicate_dentals << [d_policies]
       selected = true
     end
   end
@@ -52,7 +54,15 @@ end
 puts duplicate_dentals.length
 puts duplicate_healths.length
 
-puts duplicate_dentals.inspect
+dentals_to_cancel = duplicate_dentals.flatten
+Policy.where(:id => {"$in" => dentals_to_cancel}).each do |pol|
+  pol.cancel_via_hbx!
+end
+
+healths_to_cancel = duplicate_healths.flatten
+Policy.where(:id => {"$in" => healths_to_cancel}).each do |pol|
+  pol.cancel_via_hbx!
+end
 
 puts dupes.keys.length
 =begin

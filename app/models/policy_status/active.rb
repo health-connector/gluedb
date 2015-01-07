@@ -46,5 +46,9 @@ module PolicyStatus
     def self.today(options = {})
       self.new(Date.today, options) 
     end
+
+    def self.between(s_date, e_date)
+      ::PolicyStatus::ActiveRange.new(s_date, e_date)
+    end
   end
 end

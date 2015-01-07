@@ -1,9 +1,17 @@
-<% if type == :notice %>
+<% if type == :success %>
   <%= alert_box context: :success, dismissible: true do %>
     <%= message %>
   <% end %>
-<% else %>
+<% elsif type == :error %>
   <%= alert_box context: :danger, dismissible: true do %>
+    <%= message %>
+  <% end %>
+<% elsif type == :warning %>
+    <%= alert_box context: :warning, dismissible: true do %>
+      <%= message %>
+    <% end %>
+<% else %>
+  <%= alert_box context: :info, dismissible: true do %>
     <%= message %>
   <% end %>
 <% end %>

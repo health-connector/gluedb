@@ -3,6 +3,7 @@ class PolicyIdGenerator
 
   def initialize(size = 1)
     @b_size = size
+    @buffer = []
   end
 
   def new_batch_of(count = 1)
@@ -14,7 +15,7 @@ class PolicyIdGenerator
     @buffer.shift
   end
 
-  def empty_buffer
+  def empty_buffer?
     @buffer.empty?
   end
 

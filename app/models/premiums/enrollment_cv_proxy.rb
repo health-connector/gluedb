@@ -46,10 +46,14 @@ class EnrollmentCvProxy
     @xml_doc.xpath('//ns1:enrollment/ns1:policy/ns1:enrollment/ns1:shop_market/ns1:total_employer_responsible_amount', NAMESPACES).first.content = value
   end
 
-  def enrollee_pre_amt=(enrollee)
-    enrollees_node = @xml_doc.xpath('//ns1:enrollment/ns1:policy/ns1:enrollees', NAMESPACES).first
+  def enrollees_pre_amt=(enrollees)
+    enrollees_node = @xml_doc.xpath('//ns1:enrollment/ns1:policy/ns1:enrollees', NAMESPACES)
 
-    @xml_doc.xpath('//ns1:enrollment/ns1:policy/ns1:enrollees/ns1:enrollee/ns1:benefit/ns1:premium_amount', NAMESPACES).first.content = enrollee.premium_amount
+    enrollees_and_nodes = enrollees_node.zip enrollees
+
+    enrollees_and_nodes.each do |enrollee_node, enrollee|
+      @xml_doc.xpath('//ns1:enrollee/ns1:benefit/ns1:premium_amount', NAMESPACES).first.content = enrollee.premium_amount
+    end
   end
 
   def to_xml

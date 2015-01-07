@@ -23,11 +23,12 @@ class Api::V2::PremiumCalculatorController < ApplicationController
     enrollment_cv_proxy.policy_tot_res_amt = policy.tot_res_amt
     enrollment_cv_proxy.policy_pre_amt_tot = policy.pre_amt_tot
 
-    policy.enrollees.each do |enrollee|
-      enrollment_cv_proxy.enrollee_pre_amt=(enrollee)
-    end
+    enrollment_cv_proxy.enrollees_pre_amt=(policy.enrollees)
 
-    render :text => enrollment_cv_proxy.to_xml
+    #policy.enrollees.each do |enrollee|
+    #end
+
+    render :xml => enrollment_cv_proxy.to_xml
   end
 
 end

@@ -36,13 +36,13 @@ dupes = p_count.select do |k,v|
   selected = false
   if (v[:health] > 1)
     if v[:healths].length == 1
-      duplicate_healths << [k, v]
+      duplicate_healths << [k, v[:healths], v[:health_policies]]
       selected = true
     end
   end
   if (v[:dental] > 1)
     if v[:dentals].length == 1
-      duplicate_dentals << [k, v]
+      duplicate_dentals << [k, v[:dentals], v[:dental_policies]]
       selected = true
     end
   end

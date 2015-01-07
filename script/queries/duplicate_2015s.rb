@@ -22,10 +22,11 @@ next_year_pols.each do |pol|
   ct = ct_cache.lookup(pol.plan_id)
   p_id = p_repo[pol.subscriber.m_id]
   if !p_count.has_key?(p_id)
-    p_count[p_id] = {:health => 0, :dental => 0 , :healths => [], :dentals =>[]} 
+    p_count[p_id] = {:health => 0, :dental => 0 , :healths => [], :dentals =>[], :health_policies => [], :dental_policies => []} 
   end
   p_count[p_id][ct.to_sym] = p_count[p_id][ct.to_sym] + 1
   p_count[p_id][(ct + "s").to_sym] = p_count[p_id][(ct + "s").to_sym].push(pol.plan_id).uniq
+  p_count[p_id][(ct + "_policies").to_sym] = p_count[p_id][(ct + "_policies").to_sym] + [pol.id]
 end
 
 duplicate_dentals = []
@@ -34,13 +35,13 @@ duplicate_healths = []
 dupes = p_count.select do |k,v|
   selected = false
   if (v[:health] > 1)
-    if v[:health] > v[:healths].length
+    if v[:healths].length == 1
       duplicate_healths << [k, v]
       selected = true
     end
   end
   if (v[:dental] > 1)
-    if v[:dental] > v[:dentals].length
+    if v[:dentals].length == 1
       duplicate_dentals << [k, v]
       selected = true
     end
@@ -48,8 +49,10 @@ dupes = p_count.select do |k,v|
   selected
 end
 
-puts duplicate_dentals.keys.inspect
-puts duplicate_healths.keys.inspect
+puts duplicate_dentals.length
+puts duplicate_healths.length
+
+puts duplicate_dentals.inspect
 
 puts dupes.keys.length
 =begin

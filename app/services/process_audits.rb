@@ -23,7 +23,7 @@ class ProcessAudits
     audit_ids.uniq!
     member_ids.uniq!
 
-    audits = Policy.where("id" => {"$in" => audit_ids})
+    audits = Policy.where("id" => {"$in" => audit_ids}).no_timeout
     m_cache = Caches::MemberCache.new(member_ids)
     Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 

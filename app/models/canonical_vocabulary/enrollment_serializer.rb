@@ -117,7 +117,7 @@ module CanonicalVocabulary
       xml['ins'].gender_code(member.gender)
       xml['ins'].tobacco_use("Unknown")
       xml['ins'].coverage do |xml|
-        xml['ins'].plan_id_ref(policy.plan._id)
+        xml['ins'].plan_id_ref(policy.plan_id)
         xml['ins'].premium_amount(en.pre_amt)
         if en.coverage_start.nil?
           raise @policy.inspect

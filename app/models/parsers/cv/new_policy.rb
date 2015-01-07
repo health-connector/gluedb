@@ -16,7 +16,7 @@ module Parsers
       end
 
       def plan_year
-        @plan_year ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:plan_year",namespaces)).content.split("#").last.value
+        @plan_year ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:plan_year",namespaces)).content.value
       end
 
       def tot_res_amt

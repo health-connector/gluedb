@@ -13,11 +13,11 @@ describe Policies::CreatePolicy do
   let(:enrollees) { [subscriber_hash] }
   let(:subscriber_hash) { { }}
   let(:policy_factory) { double(:new => new_policy) }
-  let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors) }
+  let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors, :enrollees => []) }
   let(:valid_policy) { true }
   let(:policy_errors) { { "an error" => "a reason" } }
   let(:policy_id) { double }
-  let(:policy) { double(:id => policy_id, :subscriber => subscriber, :coverage_type => coverage_type) }
+  let(:policy) { double(:id => policy_id, :subscriber => subscriber, :coverage_type => coverage_type, :plan => plan, :enrollees => []) }
   let(:person) { double(:policies => existing_policies) }
   let(:coverage_start) { nil }
   let(:coverage_type) { "health" }
@@ -107,6 +107,15 @@ describe Policies::CreatePolicy do
         :employer => nil
       })
     }
+    
+    before(:each) do
+      allow(policy).to receive(:is_shop?).and_return(false)
+      allow(policy).to receive(:pre_amt_tot=)
+      allow(policy).to receive(:tot_res_amt=)
+      allow(policy).to receive(:save!)
+      allow(policy).to receive(:pre_amt_tot).and_return(0.00)
+      allow(policy).to receive(:applied_aptc).and_return(0.00)
+    end
 
     it "should create the policy" do
       expect(policy_factory).to receive(:create!).with(create_params).and_return(policy)

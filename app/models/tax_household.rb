@@ -63,7 +63,7 @@ class TaxHousehold
 
   #primary applicant is the tax household member who is the subscriber
   def primary_applicant
-    self.tax_household_members.find do |tax_household_member|
+    tax_household_members.detect do |tax_household_member|
       tax_household_member.is_subscriber == true
     end
   end

@@ -14,9 +14,7 @@ describe PolicyBuilder do
   end
 
   it "should construct a valid object" do
-    puts @policy.class
     @policy.valid?
-    puts @policy.errors.full_messages.inspect
 
     expect(@policy.valid?).to eq(true)
   end

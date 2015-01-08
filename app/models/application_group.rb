@@ -159,7 +159,7 @@ class ApplicationGroup
 
   def people_relationship_map
     map = Hash.new
-    people.each do |person|      
+    people.each do |person|
       map[person] = person_relationships.detect { |r| r.object_person == person.id }.relationship_kind
     end
     map
@@ -180,7 +180,7 @@ private
 
     applicants_in_application_group = self.applicants - [nil]
 
-    puts applicants_in_application_group.map(&:id).inspect
+    # puts applicants_in_application_group.map(&:id).inspect
 
     tax_household_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:tax_households).flat_map(&:tax_household_members).map(&:applicant_id))
 

@@ -85,7 +85,7 @@ module Premiums
     def determine_shop_plan_year(policy)
       coverage_start_date = policy.subscriber.coverage_start
       employer = get_employer(policy)
-      puts employer.inspect
+      # puts employer.inspect
       plan_year = employer.plan_year_of(coverage_start_date)
     end
   end

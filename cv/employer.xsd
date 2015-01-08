@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2014 rel. 2 (x64) (http://www.altova.com) by Dan Thomas (private) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://openhbx.org/api/terms/1.0" targetNamespace="http://openhbx.org/api/terms/1.0" elementFormDefault="qualified">
+	<xs:include schemaLocation="common.xsd"/>
+  <xs:include schemaLocation="plan.xsd"/>
+	<xs:element name="employer" type="EmployerType">
+		<xs:annotation>
+			<xs:documentation>SHOP employer instance</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="employer_event" type="EmployerEventType">
+		<xs:annotation>
+			<xs:documentation>SHOP employer event instance</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="employer_request" type="EmployerRequestType"/>
+	<xs:element name="employer_response" type="EmployerResponseType"/>
+	<xs:element name="employer_uri" type="IdentifierSimpleType" substitutionGroup="resource_instance_uri">
+		<xs:annotation>
+			<xs:documentation>Dereferenceable identifier for employer instance, e.g. http://dchealthlink.com/api/services/employer/_id</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="EmployerEventType">
+		<xs:annotation>
+			<xs:documentation>Message structure for SHOP employer event</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="header">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceHeaderType">
+							<xs:sequence>
+								<xs:element name="hbx_id" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>CMS-assigned Health Benefit Exchange identifier, e.g. DC0</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="submitted_timestamp" type="xs:dateTime">
+									<xs:annotation>
+										<xs:documentation>UTC date and time when event occured</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="authorization" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>Authentication/authorization credentials</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="message_id" type="xs:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Value that uniqely identifies message</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="originating_service" type="xs:anyURI">
+									<xs:annotation>
+										<xs:documentation>The urn of the requesting service</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="correlation_id" type="xs:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Attribute to associate the current message with previous message ID or application-specifc ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="event">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceEventType">
+							<xs:sequence>
+								<xs:element name="event_name" type="EmployerEventNameType"/>
+								<xs:element ref="employer_uri"/>
+								<xs:element name="body" minOccurs="0">
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:restriction base="ServiceBodyType">
+												<xs:sequence>
+													<xs:element name="employer_id" type="IdentifierSimpleType"/>
+												</xs:sequence>
+											</xs:restriction>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EmployerPlanListType">
+		<xs:annotation>
+			<xs:documentation>SHOP employer-selected benefits model</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:restriction base="PlanType">
+				<xs:sequence>
+					<xs:element name="id" type="IdentifierType"/>
+					<xs:element name="name" type="xs:string"/>
+					<xs:element name="is_dental_only" type="xs:boolean"/>
+					<xs:element name="carrier" type="CarrierLinkType"/>
+					<xs:element name="metal_level" type="PlanMetalLevelNameType"/>
+					<xs:element name="coverage_type" type="QhpBenefitCoverageNameType"/>
+					<xs:sequence>
+						<xs:element name="created_at" type="xs:dateTime"/>
+						<xs:element name="modified_at" type="xs:dateTime"/>
+						<xs:element name="version" type="xs:integer" minOccurs="0"/>
+					</xs:sequence>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="EmployerRequestType">
+		<xs:annotation>
+			<xs:documentation>Service call to employer resource</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="header">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceHeaderType">
+							<xs:sequence>
+								<xs:element name="hbx_id" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>CMS-assigned Health Benefit Exchange identifier, e.g. DC0</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="submitted_timestamp" type="xs:dateTime">
+									<xs:annotation>
+										<xs:documentation>UTC date and time when event occured</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="authorization" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>Authentication/authorization credentials</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="message_id" type="xs:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Value that uniqely identifies message</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="originating_service" type="xs:anyURI" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>The urn of the requesting service</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="reply_to" type="xs:anyURI" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Designates the consumer service urn endpoint where to transmit response</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="correlation_id" type="xs:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Attribute to associate the current message with previous message ID or application-specifc ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="request">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceRequestType">
+							<xs:sequence>
+								<xs:element name="request_name" type="EmployerRequestNameType">
+									<xs:annotation>
+										<xs:documentation>Uniform Resource Name (URN) for this request e.g.; urn:openhbx:requests:v1:individual</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="parameters" type="xs:anyType" minOccurs="0"/>
+								<xs:element name="metadata" type="ServiceMetadataType" minOccurs="0"/>
+								<xs:element name="body" minOccurs="0">
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:restriction base="ServiceBodyType">
+												<xs:sequence>
+													<xs:element ref="employer"/>
+												</xs:sequence>
+											</xs:restriction>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EmployerResponseType">
+		<xs:annotation>
+			<xs:documentation>Response message for SHOP employer request</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="header">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceHeaderType">
+							<xs:sequence>
+								<xs:element name="hbx_id" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>CMS-assigned Health Benefit Exchange identifier, e.g. DC0</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="submitted_timestamp" type="xs:dateTime">
+									<xs:annotation>
+										<xs:documentation>UTC date and time when event occured</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="status" type="ServiceStatusType">
+									<xs:annotation>
+										<xs:documentation>Indicate success or failure of a request to a service</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="correlation_id" type="xs:string" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Attribute to associate the current message with previous message ID or application-specifc ID</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="metadata">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceMetadataType">
+							<xs:sequence>
+								<xs:element name="result_set" type="ServiceResultSetType"/>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="body">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="ServiceBodyType">
+							<xs:sequence>
+								<xs:element name="employers">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element ref="employer" minOccurs="0" maxOccurs="unbounded"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EmployerType">
+		<xs:annotation>
+			<xs:documentation>An HBX SHOP-participating business that employs people</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="id" type="IdentifierType">
+				<xs:annotation>
+					<xs:documentation>HBX-assigned and Carrier group ID when known</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Employer name in free-form text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="dba" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Doing Business As</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fein" type="FederalTaxIdType">
+				<xs:annotation>
+					<xs:documentation>Federal Employer Identification Number</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sic_code" type="SicCodeType" minOccurs="0"/>
+			<xs:element name="plan_years" type="PlanYearType"/>
+			<xs:element ref="contacts"/>
+			<xs:element name="is_active" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Indicates this Employer is operative on the HBX</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="comments" minOccurs="0"/>
+			<xs:group ref="ResourceTimestampGroup"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PlanYearType">
+		<xs:sequence>
+			<xs:element name="plan_year_start" type="SimpleDateType">
+				<xs:annotation>
+					<xs:documentation>Date employer plan eligibility begins</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="plan_year_end" type="SimpleDateType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Date employer plan eligibility ends</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="broker" type="IdentifierSimpleType" minOccurs="0"/>
+			<xs:element name="fte_count" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>Number of full-time-employees</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pte_count" type="xs:integer" default="0">
+				<xs:annotation>
+					<xs:documentation>Number of part-time employees</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="open_enrollment_start" type="SimpleDateType">
+				<xs:annotation>
+					<xs:documentation>Open enrollment period start date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="open_enrollment_end" type="SimpleDateType">
+				<xs:annotation>
+					<xs:documentation>Open enrollment period end date</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="plans">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="plan" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:extension base="EmployerPlanListType">
+										<xs:sequence>
+											<xs:element name="original_effective_date" type="SimpleDateType">
+												<xs:annotation>
+													<xs:documentation>Effective date coverage under this plan may begin</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="group_id" type="xs:string" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Carrier-assigned employer group identifier</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="policy_number" type="xs:string" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Carrier-assigned policy number</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+										</xs:sequence>
+									</xs:extension>
+								</xs:complexContent>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="employee_roster" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="employee" type="IdentifierSimpleType" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:group ref="ResourceTimestampGroup"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="EmployerEventNameType">
+		<xs:annotation>
+			<xs:documentation>Event notification types for SHOP employer</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:anyURI">
+			<xs:enumeration value="urn:openhbx:events:v1:employers#created"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#updated"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#deleted"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#terminated"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#reinstated"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#broker_added"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#broker_changed"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#broker_removed"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#enrollment_opened"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#enrollment_closed"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#carrier_acknowledged_group"/>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#payment_initiated">
+				<xs:annotation>
+					<xs:documentation>Employer successfully completed online payment transaction</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#coverage_period_advanced">
+				<xs:annotation>
+					<xs:documentation>Employer premium payment allocated to account</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:events:v1:employers#coverage_period_reversed">
+				<xs:annotation>
+					<xs:documentation>Employer premium payment reversed on account, e.g. NSF return</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="EmployerRequestNameType">
+		<xs:annotation>
+			<xs:documentation>Request methods for SHOP employer resource</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:anyURI">
+			<xs:enumeration value="urn:openhbx:requests:v1:employers"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#by_id"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#create"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#update"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#delete"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#terminate">
+				<xs:annotation>
+					<xs:documentation>Transition an employer's status on the Exchange to terminated</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#reinstate">
+				<xs:annotation>
+					<xs:documentation>Transition an employer's status on the Exchange from terminated to active</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#add_broker"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#remove_broker"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#enrollment">
+				<xs:annotation>
+					<xs:documentation>Provides a list of actively enrolled employees</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#assign_carrier_group">
+				<xs:annotation>
+					<xs:documentation>Sets the carrier-assigned group identifier for this employer</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#open_enrollment">
+				<xs:annotation>
+					<xs:documentation>Transition employer enrollment status to open</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#close_enrollment">
+				<xs:annotation>
+					<xs:documentation>Change employer enrollment status to closed</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#initiate_premium_payment">
+				<xs:annotation>
+					<xs:documentation>Start a premium payment transaction</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#advance_coverage_period">
+				<xs:annotation>
+					<xs:documentation>Allocate premium paid balance sufficient to fund additional coverage period</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#reverse_coverage_period">
+				<xs:annotation>
+					<xs:documentation>Debit premium paid balance due to refund, Non-Sufficient Funds (NSF) or other reversal</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#remit_payment"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#binder_premium_amount_due">
+				<xs:annotation>
+					<xs:documentation>Provide total premium amount due for an employer's first payment</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#premium_amount_due">
+				<xs:annotation>
+					<xs:documentation>Provide total premium amount due for an employer's current payment</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#nfp_employer_premium_payment"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#nfp_get_dashboard_data"/>
+			<xs:enumeration value="urn:openhbx:requests:v1:employers#nfp_get_customer_statements"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

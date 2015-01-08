@@ -19,8 +19,18 @@ class Api::V2::PremiumCalculatorController < ApplicationController
     end
 
     enrollment_cv_proxy = EnrollmentCvProxy.new(enrollment_xml)
-
     policy = enrollment_cv_proxy.policy
+
+    uri_dereference_requestor = Amqp::UriDereferenceRequestor.default
+    properties = {:routing_key => uri.resolve, :reference_uri => policy.employer_id_uri}
+    delivery_info, properties, payload = uri_dereference_requestor.request(properties, "")
+
+    if delivery_info[:status] = "404"
+      render :xml => "<errors><error>Failed to deference employer id #{policy.employer_id_uri}</error></errors>", :status => :unprocessable_entity
+      return
+    end
+
+    policy.employer_id= properties[:headers][:uri]
 
     premium_calculator = Premiums::PolicyCalculator.new
 

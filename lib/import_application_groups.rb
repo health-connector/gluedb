@@ -179,12 +179,16 @@ class ImportApplicationGroups
         application_group_builder.add_coverage_household
 
 
+        application_group_id = application_group_builder.save
+        puts "Saved #{application_group_id}"
+
+=begin
         application_group_builder.application_group.save!
         puts "Saved #{application_group_builder.application_group.id}"
           application_group_builder.save_list.each do |obj|
             obj.save!
           end
-
+=end
 
 =begin
         application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).each do |fs|

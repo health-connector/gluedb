@@ -57,13 +57,13 @@
 				</carrier>
 				<plan_year>2014</plan_year>
 				<name>BlueChoice HSA Bronze $6,000</name>
+		         </plan>
 				<individual_market>
 					<is_carrier_to_bill>true</is_carrier_to_bill>
 					<applied_aptc_amount>0.0</applied_aptc_amount>
 				</individual_market>
 				<premium_total_amount>244.17</premium_total_amount>
 				<total_responsible_amount>244.17</total_responsible_amount>
-			</plan>
 		</enrollment>
 	</policy>
 </enrollment>

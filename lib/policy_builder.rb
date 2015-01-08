@@ -3,7 +3,7 @@ class PolicyBuilder
   attr_reader :policy
 
   def initialize(params)
-    puts params.inspect
+    # puts params.inspect
     @params = params
     set_policy_params(params)
     @policy = Policy.new(params)
@@ -16,7 +16,7 @@ class PolicyBuilder
     enrollees_param.each do |enrollee_param|
       enrollee = @policy.enrollees.build(enrollee_param)
       enrollee.valid?
-      puts enrollee.errors.full_messages.inspect
+      # puts enrollee.errors.full_messages.inspect
     end
   end
 

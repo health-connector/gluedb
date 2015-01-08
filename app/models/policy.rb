@@ -517,6 +517,15 @@ class Policy
     Policy.where({:id => the_id}).first
   end
 
+  def coverage_period
+    start_date = policy_start
+    if employer_id.blank?
+       return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+    end
+    py = employer.plan_year_of(start_date)
+    (py.start_date..py.end_date)
+  end
+
   def transaction_list
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
   end

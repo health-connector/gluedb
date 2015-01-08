@@ -49,12 +49,20 @@ module Parsers
         end
       end
 
+      def employer_id_uri
+        @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id",namespaces)).content.value
+      end
+
       def employer_id
         @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id",namespaces)).content.split("/").last.value
       end
 
       def broker_npn
         @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).first.content.split("#").last.value
+      end
+
+      def employer_id=(value)
+        @employer_id = value
       end
 
       def to_hash

@@ -36,7 +36,9 @@ module Collections
 
     def policies_overlap?(a, b)
       first, second = Collections::Policies.new([a,b]).sort_by_start_date.to_a
-      return true if first.policy_end.nil?
+      if first.policy_end.nil?
+        return first.coverage_period.overlaps?(second.coverage_period)
+      end
       (first.policy_end > second.policy_start)
     end
   end

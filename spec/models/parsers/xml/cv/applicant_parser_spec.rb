@@ -25,7 +25,7 @@ describe Parsers::Xml::Cv::ApplicantParser do
   end
 
   it 'should have 1 person relationship' do
-    puts "#{@subject.is_primary_applicant}"
+    # puts "#{@subject.is_primary_applicant}"
     expect(@subject.is_primary_applicant).to eq("true")
   end
 

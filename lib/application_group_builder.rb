@@ -140,7 +140,7 @@ class ApplicationGroupBuilder
 
   def add_hbx_enrollment
 
-    puts @application_group.primary_applicant
+    # puts @application_group.primary_applicant
 
     @application_group.primary_applicant.person.policies.each do |policy|
 

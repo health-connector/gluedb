@@ -50,5 +50,4 @@ class TaxHouseholdMember
       self.errors.add(:base, "is_subscriber should be a boolean")
     end
   end
-
 end

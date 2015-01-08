@@ -25,13 +25,13 @@ class ApplicationGroupBuilder
 
   def add_applicant(applicant_params)
 
-    puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]}"
+    # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]}"
 
     if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
-      puts "Added already existing applicant"
+      # puts "Added already existing applicant"
       applicant = @application_group.applicants.where(person_id: applicant_params[:person].id).first
     else
-      puts "Added a new applicant"
+      # puts "Added a new applicant"
       if applicant_params[:is_primary_applicant] == "true"
         reset_exisiting_primary_applicant
       end
@@ -43,7 +43,7 @@ class ApplicationGroupBuilder
       set_person_demographics(member, applicant_params[:person_demographics])
       @save_list << member
       @save_list << applicant
-      puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.applicants #{applicant.inspect}"
+      # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.applicants #{applicant.inspect}"
     end
 
     applicant
@@ -80,20 +80,20 @@ class ApplicationGroupBuilder
     return @household if @household
 
     if !@is_update
-      puts "New Application Group Case"
+      # puts "New Application Group Case"
       @household = self.application_group.households.build #if new application group then create new household
       @save_list << @household
     elsif have_applicants_changed?
-      puts "Update Application Group Case - Applicants have changed. Creating new household"
+      # puts "Update Application Group Case - Applicants have changed. Creating new household"
       @household = self.application_group.households.build #if applicants have changed then create new household
       @save_list << @household
     else
-      puts "Update Application Group Case. Using latest household."
+      # puts "Update Application Group Case. Using latest household."
       #TODO to use .is_active household instead of .last
       @household = self.application_group.households.last #if update and applicants haven't changed then use the latest household in use
     end
 
-    puts "return @household"
+    # puts "return @household"
 
     return @household
 
@@ -130,6 +130,14 @@ class ApplicationGroupBuilder
 
   end
 
+  def primary_applicant_employee_applicant
+
+    employee_applicant = @application_group.primary_applicant.employee_applicant
+    employee_applicant = @application_group.primary_applicant.employee_applicant.build unless employee_applicant
+
+    employee_applicant.employer = @application_group.primary_applicant.person.employer
+  end
+
   def add_hbx_enrollment
 
     puts @application_group.primary_applicant
@@ -164,7 +172,7 @@ class ApplicationGroupBuilder
           hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
         rescue FloatDomainError
-          puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
+          # puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
           next
         end
       end
@@ -208,9 +216,10 @@ class ApplicationGroupBuilder
   end
 
   def verify_person_id(applicant)
-    if applicant.include? "concern_role"
+    if applicant.id.to_s.include? "concern_role"
 
     end
+    applicant
   end
 
   def filter_tax_household_member_params(tax_household_member_params)
@@ -226,6 +235,7 @@ class ApplicationGroupBuilder
     end
   end
 
+  ## Fetches the applicant object either from application_group or person_mapper
   def get_applicant(person_obj)
     new_applicant = self.application_group.applicants.find do |applicant|
       applicant.id == @person_mapper.applicant_map[person_obj.id].id
@@ -270,4 +280,17 @@ class ApplicationGroupBuilder
     tax_household_member
   end
 
+  def save
+    primary_applicant_employee_applicant
+    id = @application_group.save!
+    save_save_list
+    @application_group.id #return the id of saved application group
+  end
+
+  #save objects in save list
+  def save_save_list
+    save_list.each do |obj|
+      obj.save!
+    end
+  end
 end

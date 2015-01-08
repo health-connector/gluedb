@@ -8,8 +8,15 @@ class Api::V2::PremiumCalculatorController < ApplicationController
 
   def calculate
 
-
     enrollment_xml = request.body.read
+
+    enrollment_validator = EnrollmentValidator.new(enrollment_xml)
+    enrollment_validator.check_against_schema
+
+    if !enrollment_validator.valid?
+      render :xml => enrollment_validator.errors.to_xml, :status => :unprocessable_entity
+      return
+    end
 
     enrollment_cv_proxy = EnrollmentCvProxy.new(enrollment_xml)
 

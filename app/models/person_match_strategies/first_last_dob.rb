@@ -22,7 +22,11 @@ module PersonMatchStrategies
       elsif dob.kind_of?(DateTime)
         return dob
       end
-      Date.parse(dob)
+      begin
+        Date.parse(dob)
+      rescue
+        raise AmbiguousMatchError.new("Invalid DOB: #{options[:name_first]}, #{options[:name_last]}, #{options[:dob]}")
+      end
     end
 
     def select_authority_member(person, options)

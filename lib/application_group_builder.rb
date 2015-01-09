@@ -134,11 +134,11 @@ class ApplicationGroupBuilder
   def add_primary_applicant_employee_applicant
 
     #TODO verify from Dan if this logic is right
-    employee_applicant = @application_group.primary_applicant.employee_applicants.build
-
-    employee_applicant.employer = @application_group.primary_applicant.person.employer
-
-    @save_list << employee_applicant
+    if application_group.primary_applicant.person.employer
+      employee_applicant = @application_group.primary_applicant.employee_applicants.build
+      employee_applicant.employer = @application_group.primary_applicant.person.employer
+      @save_list << employee_applicant
+    end
   end
 
   def add_hbx_enrollment

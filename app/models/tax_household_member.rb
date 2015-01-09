@@ -54,8 +54,5 @@ class TaxHouseholdMember
       self.errors.add(:base, "is_subscriber should be a boolean")
     end
 
-    unless is_primary_applicant.is_a? Boolean
-      self.errors.add(:base, "is_primary_applicant should be a boolean")
-    end
   end
 end

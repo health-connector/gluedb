@@ -168,7 +168,7 @@ class ImportApplicationGroups
       begin
         #application_group_builder.add_irsgroups(ag.irs_groups)
 
-        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
 
         applicants_params = ag.applicants.map do |applicant|
           applicant.to_hash(p_tracker)

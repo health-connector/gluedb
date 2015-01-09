@@ -12,7 +12,7 @@ module Parsers::Xml::Cv
     has_many :hbx_enrollment_exemption_ids, String, xpath: 'cv:hbx_enrollment_exemption_ids/cv:hbx_enrollment_exemption_id'
 
     def to_hash
-      {
+     response = {
           id: id,
           hbx_enrollment_ids: hbx_enrollment_ids.map do |hbx_enrollment_id|
             hbx_enrollment_id
@@ -21,6 +21,8 @@ module Parsers::Xml::Cv
             hbx_enrollment_exemption_id
           end
       }
+
+     response
     end
 
   end

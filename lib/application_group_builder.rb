@@ -132,8 +132,8 @@ class ApplicationGroupBuilder
 
   def primary_applicant_employee_applicant
 
-    employee_applicant = @application_group.primary_applicant.employee_applicants
-    employee_applicant = @application_group.primary_applicant.employee_applicants.build unless employee_applicant
+    employee_applicant = @application_group.primary_applicant.employee_applicant
+    employee_applicant = @application_group.primary_applicant.employee_applicant.build unless employee_applicant
 
     employee_applicant.employer = @application_group.primary_applicant.person.employer
   end
@@ -182,6 +182,7 @@ class ApplicationGroupBuilder
   end
 
   def add_irsgroup(irs_group_params)
+    puts irs_group_params.inspect
     @application_group.irs_groups.build(irs_group_params)
   end
 
@@ -212,7 +213,6 @@ class ApplicationGroupBuilder
         new_applicant = verify_person_id(new_applicant)
         tax_household_member.applicant_id = new_applicant.id
         tax_household_member.applicant = new_applicant
-        tax_household_member.is_primary_applicant = true if tax_household_member.applicant.is_primary_applicant
       end
     end
   end

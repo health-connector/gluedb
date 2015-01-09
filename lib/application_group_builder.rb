@@ -8,15 +8,16 @@ class ApplicationGroupBuilder
     @save_list = []
     @is_update = true # we assume that this is a update existing application group workflow
     @applicants_params = param[:applicants]
-    param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
+    filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
-    @application_group = ApplicationGroup.where(e_case_id: param[:e_case_id]).first
+    @application_group = ApplicationGroup.where(e_case_id: filtered_param[:e_case_id]).first
 
     if @application_group.nil?
-      @application_group = ApplicationGroup.new(param) #we create a new application group from the xml
+      @application_group = ApplicationGroup.new(filtered_param) #we create a new application group from the xml
       @is_update = false # means this is a create
-      add_irsgroup({}) # we need a atleast 1 irsgroup hence adding a blank one
     end
+
+    add_irsgroups([{}]) # we need a atleast 1 irsgroup hence adding a blank one
 
     @application_group.updated_by = "curam_system_service"
 
@@ -100,15 +101,14 @@ class ApplicationGroupBuilder
   end
 
   def have_applicants_changed?
+
     current_list = @application_group.applicants.map do |applicant|
       applicant.person_id
     end.sort
+
     new_list = @applicants_params.map do |applicants_param|
       applicants_param[:person].id
     end.sort
-
-    #puts current_list.inspect
-    #puts new_list.inspect
 
     if current_list == new_list
       return false
@@ -182,7 +182,8 @@ class ApplicationGroupBuilder
   end
 
   def add_irsgroup(irs_group_params)
-    @application_group.irs_groups.build()
+    puts irs_group_params.inspect
+    @application_group.irs_groups.build(irs_group_params)
   end
 
   #TODO - method not implemented properly using .build(params)
@@ -192,26 +193,27 @@ class ApplicationGroupBuilder
     end
   end
 
-  def add_tax_households(tax_households_params, eligibility_determinations_params)
+  def add_tax_households(tax_households_params)
 
     tax_households_params.map do |tax_household_params|
 
       tax_household = @household.tax_households.build(filter_tax_household_params(tax_household_params))
 
+      eligibility_determinations_params = tax_household_params[:eligibility_determinations]
+
+      eligibility_determinations_params.each do |eligibility_determination_params|
+        tax_household.eligibility_determinations.build(eligibility_determination_params)
+      end
+
       tax_household_params[:tax_household_members].map do |tax_household_member_params|
         tax_household_member = tax_household.tax_household_members.build(filter_tax_household_member_params(tax_household_member_params))
-        person_uri = @person_mapper.alias_map[tax_household_member_params[:id]]
+        person_uri = @person_mapper.alias_map[tax_household_member_params[:person_id]]
         person_obj = @person_mapper.people_map[person_uri].first
         new_applicant = get_applicant(person_obj)
         new_applicant = verify_person_id(new_applicant)
         tax_household_member.applicant_id = new_applicant.id
         tax_household_member.applicant = new_applicant
       end
-    end
-
-    eligibility_determinations_params.each do |eligibility_determination_params|
-      #TODO assuming only 1tax_household. needs to be corrected later
-      @household.tax_households.first.eligibility_determinations.build(eligibility_determination_params)
     end
   end
 
@@ -223,13 +225,17 @@ class ApplicationGroupBuilder
   end
 
   def filter_tax_household_member_params(tax_household_member_params)
-    tax_household_member_params.delete_if do |k, v|
+    tax_household_member_params_clone = tax_household_member_params.clone
+
+    tax_household_member_params_clone = tax_household_member_params_clone.slice(:is_ia_eligible, :is_medicaid_chip_eligible, :is_subscriber)
+    tax_household_member_params_clone.delete_if do |k, v|
       v.nil?
     end
+    tax_household_member_params_clone
   end
 
   def filter_tax_household_params(tax_household_params)
-    tax_household_params = tax_household_params.slice(:id, :primary_applicant_id, :total_count, :total_incomes_by_year)
+    tax_household_params = tax_household_params.slice(:id, :total_count, :total_incomes_by_year)
     tax_household_params.delete_if do |k, v|
       v.nil?
     end
@@ -281,7 +287,7 @@ class ApplicationGroupBuilder
   end
 
   def save
-    primary_applicant_employee_applicant
+    #primary_applicant_employee_applicant
     id = @application_group.save!
     save_save_list
     @application_group.id #return the id of saved application group

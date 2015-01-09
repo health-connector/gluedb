@@ -18,11 +18,9 @@ module Parsers::Xml::Cv
 
     has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, xpath:'cv:tax_households'
 
-    has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+    has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, xpath: "cv:irs_groups"
 
-    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, xpath: 'cv:eligibility_determinations'
-
-    has_many :hbx_enrollments, Parsers::Xml::Cv::HbxEnrollmentParser, tag: 'hbx_enrollments'
+    has_many :hbx_enrollments, Parsers::Xml::Cv::HbxEnrollmentParser, xpath: "cv:hbx_enrollments"
 
     def individual_requests(member_id_generator, p_tracker)
       applicants.map do |applicant|
@@ -43,6 +41,7 @@ module Parsers::Xml::Cv
     end
 
     def to_hash(p_tracker=nil)
+
       response = {
           e_case_id:e_case_id.split("#").last,
           submitted_at:submitted_date,
@@ -54,9 +53,6 @@ module Parsers::Xml::Cv
           end,
           applicants: applicants.map do |applicant|
             applicant.to_hash(p_tracker)
-          end,
-          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
-            eligibility_determination.to_hash
           end
       }
     end

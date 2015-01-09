@@ -10,6 +10,7 @@ class TaxHouseholdMember
   field :is_ia_eligible, type: Boolean, default: false
   field :is_medicaid_chip_eligible, type: Boolean, default: false
   field :is_subscriber, type: Boolean, default: false
+  field :is_primary_applicant, type: Boolean, default: false
 
   include BelongsToApplicant
 
@@ -37,6 +38,10 @@ class TaxHouseholdMember
     self.is_subscriber
   end
 
+  def is_primary_applicant?
+    self.applicant.is_primary_applicant
+  end
+
   def strictly_boolean
     unless is_ia_eligible.is_a? Boolean
       self.errors.add(:base, "is_ia_eligible should be a boolean")
@@ -48,6 +53,10 @@ class TaxHouseholdMember
 
     unless is_subscriber.is_a? Boolean
       self.errors.add(:base, "is_subscriber should be a boolean")
+    end
+
+    unless is_primary_applicant.is_a? Boolean
+      self.errors.add(:base, "is_primary_applicant should be a boolean")
     end
   end
 end

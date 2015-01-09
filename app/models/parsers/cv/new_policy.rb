@@ -50,11 +50,11 @@ module Parsers
       end
 
       def employer_id_uri
-        @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id",namespaces)).content.value
+        @employer_id_uri ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id/cv:id",namespaces)).content.value
       end
 
       def employer_id
-        @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id",namespaces)).content.split("/").last.value
+        @employer_id ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:shop_market/cv:employer_link/cv:id/cv:id",namespaces)).content.split("/").last.value
       end
 
       def broker_npn
@@ -78,7 +78,8 @@ module Parsers
           :employer_fein => employer_fein,
           :tot_emp_res_amt => tot_emp_res_amt,
           :enrollees => enrollees.map(&:to_hash),
-          :employer_id => employer_id
+          :employer_id => employer_id,
+          :employer_id_uri => employer_id_uri
         }
       end
     end

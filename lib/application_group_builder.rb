@@ -5,7 +5,8 @@ class ApplicationGroupBuilder
   attr_reader :save_list
 
   def initialize(param, person_mapper)
-    @save_list = []
+    @save_list = [] #it is observed that some embedded objects are not saved.
+    # We add all embedded/associated objects to this list and save the explicitly
     @is_update = true # we assume that this is a update existing application group workflow
     @applicants_params = param[:applicants]
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
@@ -130,12 +131,14 @@ class ApplicationGroupBuilder
 
   end
 
-  def primary_applicant_employee_applicant
+  def add_primary_applicant_employee_applicant
 
-    employee_applicant = @application_group.primary_applicant.employee_applicant
-    employee_applicant = @application_group.primary_applicant.employee_applicant.build unless employee_applicant
+    #TODO verify from Dan if this logic is right
+    employee_applicant = @application_group.primary_applicant.employee_applicants.build
 
     employee_applicant.employer = @application_group.primary_applicant.person.employer
+
+    @save_list << employee_applicant
   end
 
   def add_hbx_enrollment
@@ -287,7 +290,7 @@ class ApplicationGroupBuilder
   end
 
   def save
-    #primary_applicant_employee_applicant
+    add_primary_applicant_employee_applicant
     id = @application_group.save!
     save_save_list
     @application_group.id #return the id of saved application group

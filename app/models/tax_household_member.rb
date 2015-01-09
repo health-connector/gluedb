@@ -10,7 +10,6 @@ class TaxHouseholdMember
   field :is_ia_eligible, type: Boolean, default: false
   field :is_medicaid_chip_eligible, type: Boolean, default: false
   field :is_subscriber, type: Boolean, default: false
-  field :is_primary_applicant, type: Boolean, default: false
 
   include BelongsToApplicant
 

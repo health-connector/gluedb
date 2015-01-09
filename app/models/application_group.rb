@@ -205,5 +205,11 @@ private
       return true
     end
   end
-  
+
+  #TODO need a way to fetch the employer via policy
+  def set_employee_applicant
+    #self.primary_applicant.employee_applicant.employee = primary_applicant.policy.employer if primary_applicant && primary_applicant.primary_applicant.policy && primary_applicant.policy.employer
+    return true
+  end
+
 end

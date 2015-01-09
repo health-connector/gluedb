@@ -238,7 +238,7 @@ class ApplicationGroupBuilder
   end
 
   def filter_tax_household_params(tax_household_params)
-    tax_household_params = tax_household_params.slice(:id, :total_count, :total_incomes_by_year)
+    tax_household_params = tax_household_params.slice(:id, :total_count)
     tax_household_params.delete_if do |k, v|
       v.nil?
     end

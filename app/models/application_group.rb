@@ -206,9 +206,12 @@ private
     end
   end
 
-  #TODO need a way to fetch the employer via policy
-  def set_employee_applicant
-    #self.primary_applicant.employee_applicant.employee = primary_applicant.policy.employer if primary_applicant && primary_applicant.primary_applicant.policy && primary_applicant.policy.employer
+  #TODO need to verify this logic from Dan
+  def set_employee_applicants
+    primary_applicant.person.policies do |policy|
+      employee_applicant = self.primary_applicant.employee_applicants.build
+      employee_applicant.employer = policy.employer
+    end
     return true
   end
 

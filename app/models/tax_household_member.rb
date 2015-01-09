@@ -37,6 +37,10 @@ class TaxHouseholdMember
     self.is_subscriber
   end
 
+  def is_primary_applicant?
+    self.applicant.is_primary_applicant
+  end
+
   def strictly_boolean
     unless is_ia_eligible.is_a? Boolean
       self.errors.add(:base, "is_ia_eligible should be a boolean")
@@ -49,5 +53,6 @@ class TaxHouseholdMember
     unless is_subscriber.is_a? Boolean
       self.errors.add(:base, "is_subscriber should be a boolean")
     end
+
   end
 end

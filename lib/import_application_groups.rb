@@ -182,47 +182,6 @@ class ImportApplicationGroups
         application_group_id = application_group_builder.save
         puts "Saved #{application_group_id}"
 
-=begin
-        application_group_builder.application_group.save!
-        puts "Saved #{application_group_builder.application_group.id}"
-          application_group_builder.save_list.each do |obj|
-            obj.save!
-          end
-=end
-
-=begin
-        application_group_builder.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members).flat_map(&:financial_statements).each do |fs|
-          @@logger.info "e case id:#{application_group_builder.application_group.e_case_id}\n" +
-                          "applicant id:#{fs.applicant.id}\n" +
-                          "person name:#{fs.applicant.person.name_first} #{fs.applicant.person.name_last}"
-
-          @@logger.info "Incomes #{fs.incomes.size}"
-          fs.incomes.each do |income|
-            @@logger.info "amount in cents:#{income.amount_in_cents}"
-            @@logger.info "start_date:#{income.start_date}"
-            @@logger.info "end_date:#{income.end_date}"
-            @@logger.info "frequency:#{income.frequency}"
-            @@logger.info "kind:#{income.kind}"
-            @@logger.info ""
-          end
-
-          @@logger.info "yearwise income in cents:#{fs.compute_yearwise(fs.incomes)}\n"
-
-          @@logger.info "Deductions #{fs.deductions.size}"
-          fs.deductions.each do |deduction|
-            @@logger.info "amount in cents:#{deduction.amount_in_cents}"
-            @@logger.info "start_date:#{deduction.start_date}"
-            @@logger.info "end_date:#{deduction.end_date}"
-            @@logger.info "frequency:#{deduction.frequency}"
-            @@logger.info "kind:#{deduction.kind}"
-            @@logger.info ""
-          end
-
-          @@logger.info "yearwise deduction in cents:#{fs.compute_yearwise(fs.deductions)}\n"
-
-
-        end
-=end
       rescue Exception => e
         fail_counter += 1
         puts "FAILED #{application_group_builder.application_group.id}"

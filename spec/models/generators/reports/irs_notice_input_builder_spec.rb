@@ -31,6 +31,9 @@ module Generators::Reports
 
     it 'should append monthly premiums' do 
       subject.append_monthly_premiums
+
+      expect(subject.notice.monthly_premiums.count).to eq(12)
+      expect(subject.notice.monthly_premiums.first).to be_kind_of(PdfTemplates::MonthlyPremium)
     end
   end
 end

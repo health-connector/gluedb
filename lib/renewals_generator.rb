@@ -47,8 +47,8 @@ class RenewalsGenerator
         group_policies_for_noticies(unique_policies(member_policies)).each do |policies|
           begin
             next if (@type == 'qhp') && policies[0].nil?
-            renewal_notice = Generators::Reports::RenewalNoticeInput.new
-            notice = renewal_notice.create(policies)
+            renewal_input_builder = Generators::Reports::RenewalNoticeInputBuilder.new
+            notice = renewal_input_builder.process(policies)
             @hbx_member_id = notice.primary_identifier
             write_report(notice)
           rescue Exception => e
@@ -102,28 +102,21 @@ class RenewalsGenerator
   private
 
   def write_report(notice)
-    pdf = Generators::Reports::Renewals.new(notice, @type)
-    file_name = generate_file_name
-    pdf_file_name = "#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}/#{file_name}.pdf"
-    pdf.render_file(pdf_file_name)
+    pdf = Generators::Reports::RenewalPdfReport.new(notice, @type)
+    pdf.render_file("#{Rails.root.to_s}/#{@type}_pdf_reports/#{@folder_name}/#{pdf_report_name}.pdf")
   end
 
-  def generate_file_name
+  def pdf_report_name
     @count += 1
     sequential_number = @count.to_s
     sequential_number = prepend_zeros(sequential_number, 6)
-    if @type == 'qhp'
-      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR7"
-    else
+    @type == 'qhp' ?
+      "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR7" : 
       "#{sequential_number}_HBX_03_#{@hbx_member_id}_ManualSR8"
-    end
   end
 
   def prepend_zeros(number, n)
-    number = number.to_s
-    (n - number.to_s.size).times do
-      number = number.prepend('0')
-    end
-    return number
+    (n - number.to_s.size).times { number.prepend('0') }
+    number
   end
 end

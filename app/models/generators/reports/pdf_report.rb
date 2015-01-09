@@ -3,7 +3,11 @@ module Generators::Reports
     include Prawn::Measurements
 
     def initialize(options={ })
-      super(options.merge(:margin => [50, 70]))
+      if options[:margin].nil?
+        options.merge!(:margin => [50, 70])
+      end
+      
+      super(options)
       
       font "Times-Roman"
       font_size 12

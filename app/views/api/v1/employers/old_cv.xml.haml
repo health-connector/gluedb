@@ -1,6 +1,6 @@
-%version1
+%n1:employers{"xmlns:ns1" => "http://dchealthlink.com/vocabulary/20131030/employer","xsi:schemaLocation"=>"http://dchealthlink.com/vocabulary/20131030/employer"}
   - @employer.plan_years.each do |py|
-    %n1:employer{"xmlns:n1" => "http://dchealthlink.com/vocabulary/20131030/employer", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://dchealthlink.com/vocabulary/20131030/employer employer.xsd"}
+    %n1:employer
       %n1:name= @employer.name
       %n1:fein= @employer.fein
       %n1:employer_exchange_id= @employer.hbx_id
@@ -104,4 +104,4 @@
         %n1:notes
       %n1:exchange_id= "DCHBX"
       %n1:exchange_status= @employer.is_active
-      %n1:exchange_version= @employer.version
+      %n1:exchange_version= @employer.version}

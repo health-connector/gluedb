@@ -10,6 +10,12 @@ module Parsers::Xml::Cv
 
     element :primary_applicant_id, String, xpath: "cv:primary_applicant_id/cv:id"
 
+    element :application_type, String, tag: 'application_type'
+
+    element :renewal_consent_applicant_id, String, tag: 'renewal_consent_applicant_id/cv:id'
+
+    element :renewal_consent_through_year, String, tag: 'renewal_consent_through_year'
+
     element :submitted_date, String, :tag=> "submitted_date"
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
@@ -55,6 +61,11 @@ module Parsers::Xml::Cv
             applicant.to_hash(p_tracker)
           end
       }
+
+      response[:application_type] = application_type.split('#').last  if application_type
+      response[:renewal_consent_applicant_id] = renewal_consent_applicant_id if renewal_consent_applicant_id
+      response[:renewal_consent_through_year] = renewal_consent_through_year if renewal_consent_through_year
+      response
     end
   end
 end

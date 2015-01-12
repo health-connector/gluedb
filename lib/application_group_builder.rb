@@ -103,9 +103,7 @@ class ApplicationGroupBuilder
       @household = self.application_group.households.build #if applicants have changed then create new household
       @save_list << @household
     else
-      # puts "Update Application Group Case. Using latest household."
-      #TODO to use .is_active household instead of .last
-      @household = self.application_group.households.last #if update and applicants haven't changed then use the latest household in use
+      @household = self.application_group.active_household #if update and applicants haven't changed then use the active household
     end
 
     # puts "return @household"

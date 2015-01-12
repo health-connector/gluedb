@@ -43,12 +43,25 @@ class ApplicationGroupBuilder
         m.authority?
       end.first
       set_person_demographics(member, applicant_params[:person_demographics])
+      set_alias_ids(member, applicant_params[:alias_ids])
       @save_list << member
       @save_list << applicant
       # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.applicants #{applicant.inspect}"
     end
 
     applicant
+  end
+
+  def set_alias_ids(member, alias_ids_params)
+    alias_ids_params.each do |alias_id_params|
+      if alias_id_params.include? "aceds"
+          member.aceds_id = alias_id_params.split('#').last
+      elsif alias_id_params.include? "concern_role"
+          member.e_concern_role_id = alias_id_params.split('#').last
+      elsif alias_id_params.include? "person"
+          member.e_person_id = alias_id_params.split('#').last
+      end
+    end
   end
 
   def reset_exisiting_primary_applicant
@@ -120,6 +133,7 @@ class ApplicationGroupBuilder
 
   def add_coverage_household
 
+    #TODO decide where to get submitted_at from
     coverage_household = @household.coverage_households.build({submitted_at: Time.now})
 
     @application_group.applicants.each do |applicant|

@@ -20,7 +20,6 @@ module Parsers::Xml::Cv
     has_many :employee_applicants, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
     element :is_consent_applicant, String, tag: 'is_consent_applicant'
 
-
     def to_individual_request(member_id_generator, p_tracker)
       alias_ids.each do |a_id|
         p_tracker.register_alias(a_id,id)
@@ -66,7 +65,8 @@ module Parsers::Xml::Cv
          person_demographics: person_demographics.to_hash,
          financial_statements: financial_statements.map(&:to_hash),
          employee_applicants: employee_applicants.map(&:to_hash),
-         is_consent_applicant: is_consent_applicant
+         is_consent_applicant: is_consent_applicant,
+         alias_ids: alias_ids
      }
 
      response[:person] = p_tracker[id].first if p_tracker

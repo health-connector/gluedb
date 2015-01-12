@@ -1,106 +1,107 @@
-- @employer.plan_years.each do |py|
-  %n1:employer{"xmlns:n1" => "http://dchealthlink.com/vocabulary/20131030/employer", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://dchealthlink.com/vocabulary/20131030/employer employer.xsd"}
-    %n1:name= @employer.name
-    %n1:fein= @employer.fein
-    %n1:employer_exchange_id= @employer.hbx_id
-    - if @employer.sic_code.present?
-      %n1:sic_code= @employer.sic_code
-    %n1:fte_count= py.fte_count
-    %n1:pte_count= py.pte_count
-    - if py.broker.present?
-      %n1:broker
-        %n1:npn_id= py.broker.npn
-        - if false
-          %n1:tpa_ga_fein
-    %n1:open_enrollment_start= py.open_enrollment_start
-    %n1:open_enrollment_end= py.open_enrollment_end
-    %n1:plan_year_start= py.start_date
-    - if py.end_date.present?
-      %n1:plan_year_end= py.end_date
-    - if false
-      %n1:continuation_coverage_type
-    %n1:plans
-      - carrier_cache = build_carrier_cache
-      - py.elected_plans.each do |ep|
-        %n1:plan
-          %n1:qhp_id= ep.qhp_id
-          %n1:plan_exchange_id= ep.hbx_plan_id
-          - if ep.carrier_policy_number.present?
-            %n1:policy_number= ep.carrier_policy_number
-          - if ep.carrier_employer_group_id.present?
-            %n1:group_id= ep.carrier_employer_group_id
-          %n1:carrier_id= carrier_cache[ep.carrier_id].id
-          %n1:carrier_name= carrier_cache[ep.carrier_id].name
-          %n1:plan_name= ep.plan_name
-          %n1:coverage_type= ep.coverage_type
-          %n1:original_effective_date= ep.original_effective_date
-          -if ep.renewal_effective_date.present?
-            %n1:renewal_effective_date= ep.renewal_effective_date
+%version1
+  - @employer.plan_years.each do |py|
+    %n1:employer{"xmlns:n1" => "http://dchealthlink.com/vocabulary/20131030/employer", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://dchealthlink.com/vocabulary/20131030/employer employer.xsd"}
+      %n1:name= @employer.name
+      %n1:fein= @employer.fein
+      %n1:employer_exchange_id= @employer.hbx_id
+      - if @employer.sic_code.present?
+        %n1:sic_code= @employer.sic_code
+      %n1:fte_count= py.fte_count
+      %n1:pte_count= py.pte_count
+      - if py.broker.present?
+        %n1:broker
+          %n1:npn_id= py.broker.npn
           - if false
-            %n1:out_of_state_flag
-          - if ep.metal_level.present?
-            %n1:metal_level_code= ep.metal_level
-      %n1:vcard{"xmlns:ns1" => "urn:ietf:params:xml:ns:vcard-4.0"}
-        - if @employer.name_full.present?
-          %n1:fn= @employer.name_full
-        %n1:n
-          %n1:surname= @employer.name_last
-          %n1:given= @employer.name_first
-          - if @employer.name_middle.present?
-            %n1:additional= name_middle.present?
-          - if @employer.name_pfx.present?
-            %n1:prefix= @employer.name_pfx
-          - if @employer.name_sfx.present?
-            %n1:suffix= @employer.name_sfx
-        - if false
-          %n1:org
-        - if false
-          %n1:title
-        - unless @employer.addresses.empty?
-          - @employer.addresses.each do |adr|
-            %n1:adr
-              %n1:parameters
-                %n1:type
-                  %n1:text= adr.address_type
+            %n1:tpa_ga_fein
+      %n1:open_enrollment_start= py.open_enrollment_start
+      %n1:open_enrollment_end= py.open_enrollment_end
+      %n1:plan_year_start= py.start_date
+      - if py.end_date.present?
+        %n1:plan_year_end= py.end_date
+      - if false
+        %n1:continuation_coverage_type
+      %n1:plans
+        - carrier_cache = build_carrier_cache
+        - py.elected_plans.each do |ep|
+          %n1:plan
+            %n1:qhp_id= ep.qhp_id
+            %n1:plan_exchange_id= ep.hbx_plan_id
+            - if ep.carrier_policy_number.present?
+              %n1:policy_number= ep.carrier_policy_number
+            - if ep.carrier_employer_group_id.present?
+              %n1:group_id= ep.carrier_employer_group_id
+            %n1:carrier_id= carrier_cache[ep.carrier_id].id
+            %n1:carrier_name= carrier_cache[ep.carrier_id].name
+            %n1:plan_name= ep.plan_name
+            %n1:coverage_type= ep.coverage_type
+            %n1:original_effective_date= ep.original_effective_date
+            -if ep.renewal_effective_date.present?
+              %n1:renewal_effective_date= ep.renewal_effective_date
+            - if false
+              %n1:out_of_state_flag
+            - if ep.metal_level.present?
+              %n1:metal_level_code= ep.metal_level
+        %n1:vcard{"xmlns:ns1" => "urn:ietf:params:xml:ns:vcard-4.0"}
+          - if @employer.name_full.present?
+            %n1:fn= @employer.name_full
+          %n1:n
+            %n1:surname= @employer.name_last
+            %n1:given= @employer.name_first
+            - if @employer.name_middle.present?
+              %n1:additional= name_middle.present?
+            - if @employer.name_pfx.present?
+              %n1:prefix= @employer.name_pfx
+            - if @employer.name_sfx.present?
+              %n1:suffix= @employer.name_sfx
+          - if false
+            %n1:org
+          - if false
+            %n1:title
+          - unless @employer.addresses.empty?
+            - @employer.addresses.each do |adr|
+              %n1:adr
+                %n1:parameters
+                  %n1:type
+                    %n1:text= adr.address_type
+                  - if false
+                    %n1:label
+                      %n1:text
                 - if false
-                  %n1:label
-                    %n1:text
-              - if false
-                %n1:pobox str1234
-              - if false
-                %n1:ext
-              %n1:street= adr.address_1
-              - if adr.address_2.present?
-                %n1:street= adr.address_2
-              - if adr.address_3.present?
-                %n1:street= adr.address_3
-              %n1:locality= "Washington"
-              %n1:region= "DC"
-              %n1:code= adr.zip
-              -if false
-                %n1:country
-        - unless @employer.phones.empty?
-          - @employer.phones.each do |ph|
-            %n1:tel
-              %n1:parameters
-                %n1:type
-                  %n1:text= ph.phone_type
+                  %n1:pobox str1234
                 - if false
-                  %n1:label
-                    %n1:text
-              %n1:uri= ph.phone_number
-        - unless @employer.emails.empty?
-          - @employer.emails.each do |e|
-            %n1:email
-              %n1:parameters
-                %n1:type
-                  %n1:text= e.email_type
-                - if false
-                  %n1:label
-                    %n1:text
-              %n1:text= e.email_address
-    - if false
-      %n1:notes
-    %n1:exchange_id= "DCHBX"
-    %n1:exchange_status= @employer.is_active
-    %n1:exchange_version= @employer.version
+                  %n1:ext
+                %n1:street= adr.address_1
+                - if adr.address_2.present?
+                  %n1:street= adr.address_2
+                - if adr.address_3.present?
+                  %n1:street= adr.address_3
+                %n1:locality= "Washington"
+                %n1:region= "DC"
+                %n1:code= adr.zip
+                -if false
+                  %n1:country
+          - unless @employer.phones.empty?
+            - @employer.phones.each do |ph|
+              %n1:tel
+                %n1:parameters
+                  %n1:type
+                    %n1:text= ph.phone_type
+                  - if false
+                    %n1:label
+                      %n1:text
+                %n1:uri= ph.phone_number
+          - unless @employer.emails.empty?
+            - @employer.emails.each do |e|
+              %n1:email
+                %n1:parameters
+                  %n1:type
+                    %n1:text= e.email_type
+                  - if false
+                    %n1:label
+                      %n1:text
+                %n1:text= e.email_address
+      - if false
+        %n1:notes
+      %n1:exchange_id= "DCHBX"
+      %n1:exchange_status= @employer.is_active
+      %n1:exchange_version= @employer.version

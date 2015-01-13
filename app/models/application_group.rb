@@ -28,7 +28,7 @@ class ApplicationGroup
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
-  embeds_many :households, cascade_callbacks: true
+  embeds_many :households, cascade_callbacks: true, :before_add => :reset_active_household
   accepts_nested_attributes_for :households
 
   embeds_many :comments, cascade_callbacks: true
@@ -52,6 +52,8 @@ class ApplicationGroup
   validate :integrity_of_applicant_objects
 
   validate :max_one_primary_applicant
+
+  validate :max_one_active_household
 
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
@@ -173,6 +175,12 @@ class ApplicationGroup
     self.is_active
   end
 
+  def active_household
+    self.households.find do |household|
+      household.is_active?
+    end
+  end
+
 private
 
   # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.applicants
@@ -206,10 +214,33 @@ private
     end
   end
 
-  #TODO need a way to fetch the employer via policy
-  def set_employee_applicant
-    #self.primary_applicant.employee_applicant.employee = primary_applicant.policy.employer if primary_applicant && primary_applicant.primary_applicant.policy && primary_applicant.policy.employer
+  #TODO need to verify this logic from Dan
+  def set_employee_applicants
+    primary_applicant.person.policies do |policy|
+      employee_applicant = self.primary_applicant.employee_applicants.build
+      employee_applicant.employer = policy.employer
+    end
     return true
+  end
+
+  def reset_active_household(new_household)
+    households.each do |household|
+      household.is_active = false
+    end
+    new_household.is_active = true
+  end
+
+  def max_one_active_household
+    active_households = self.households.select do |household|
+      household.is_active?
+    end
+
+    if active_households.size > 1
+      self.errors.add(:base, "Multiple active households")
+      return false
+    else
+      return true
+    end
   end
 
 end

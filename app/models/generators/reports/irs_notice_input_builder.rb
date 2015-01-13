@@ -7,10 +7,11 @@ module Generators::Reports
       @policy = policy
       @notice = PdfTemplates::IrsNoticeInput.new
       @subscriber = @policy.subscriber.person
-
+      @notice.issuer_name = @policy.plan.carrier.name
+      @notice.policy_id = @policy.eg_id
       append_recipient_address
       append_household
-      append_monthly_premiums    
+      append_monthly_premiums 
     end
 
     def append_recipient_address
@@ -27,14 +28,10 @@ module Generators::Reports
     def append_household
       @notice.recipient = build_enrollee_ele(@policy.subscriber)
       spouse = @policy.enrollees_sans_subscriber.detect { |m| m.relationship_status_code.downcase == "spouse" }
-      @notice.spouse = build_enrollee_ele(spouse)
+      @notice.spouse = build_enrollee_ele(spouse) if spouse
       enrollees = @policy.enrollees_sans_subscriber.reject { |m| m.relationship_status_code.downcase == "spouse" } 
       @notice.covered_household = enrollees.map{|enrollee| build_enrollee_ele(enrollee)}
     end
-
-    def append_monthly_premiums
-    end
-
 
     def build_enrollee_ele(enrollee)
       individual = enrollee.person
@@ -42,13 +39,41 @@ module Generators::Reports
 
       PdfTemplates::Enrolee.new({
         name: individual.full_name,
-        ssn: authority_member.ssn,
+        # ssn: authority_member.ssn,
+        ssn: '000000000',
         dob: (authority_member.dob.blank? ? nil : authority_member.dob.strftime("%m/%d/%Y")),
         subscriber: (enrollee.relationship_status_code.downcase == 'self' ? true : false),
         spouse: (enrollee.relationship_status_code.downcase == 'spouse' ? true : false),
         coverage_start_date: (enrollee.coverage_start.blank? ? nil : enrollee.coverage_start.strftime("%m/%d/%Y")),
         coverage_termination_date: (enrollee.coverage_end.blank? ? nil : enrollee.coverage_end.strftime("%m/%d/%Y"))
         })
+    end
+
+    def append_monthly_premiums
+      calender_months = { 
+        1 => "Jan",
+        2 => "Feb",
+        3 => "Mar",
+        4 => "Apr",
+        5 => "May",
+        6 => "Jun",
+        7 => "Jul",
+        8 => "Aug",
+        9 => "Sep",
+        10 => "Oct",
+        11 => "Nov",
+        12 => "Dec"
+      }
+
+      @notice.monthly_premiums = (1..12).inject([]) do |data, i|
+        data << PdfTemplates::MonthlyPremium.new({
+          serial: i,
+          calender_month: calender_months[i],
+          premium_amount: '450.00',
+          premium_amount_slcsp: '345.00',
+          monthly_aptc: '180.00'
+        })
+      end
     end
   end
 end

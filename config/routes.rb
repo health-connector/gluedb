@@ -11,12 +11,42 @@ Gluedb::Application.routes.draw do
 
   post "policy_forms", :to => 'policies#create'
 
+  resources :users
+
+  # concern :commentable do
+  #   resources :comments #, only: [:new, :create]
+  # end
+
   namespace :admin do
     namespace :settings do
       resources :hbx_policies
     end
     resources :users
   end
+
+  resources :application_groups do
+    get 'page/:page', :action => :index, :on => :collection
+
+    # resources :primary_applicant, only: [:new, :create, :update]
+    resources :applicants
+
+    member do
+      get :link_employee
+      get :challenge_identity
+    end
+
+    resources :households
+  end
+
+  resources :coverage_households
+
+  resources :tax_households do
+    resources :eligibility_determinations
+    resources :tax_household_members
+  end
+
+  resources :hbx_enrollments
+  resources :irs_groups
 
   resources :enrollment_addresses
 
@@ -26,7 +56,7 @@ Gluedb::Application.routes.draw do
   resources :member_address_changes, :only => [:new, :create]
   resources :effective_date_changes, :only => [:new, :create]
   resources :mass_silent_cancels, :only => [:new, :create]
-
+  resources :bulk_terminates, :only => [:new, :create]
 
   resources :enrollment_transmission_updates, :only => :create
 
@@ -36,6 +66,9 @@ Gluedb::Application.routes.draw do
     end
   end
 
+  resources :edi_ops_transactions do
+    resources :comments
+  end
   resources(:vocabulary_requests, :only => [:new, :create])
 
   resources :edi_transaction_set_payments
@@ -50,14 +83,7 @@ Gluedb::Application.routes.draw do
     end
   end
 
-  resources :application_groups do
-    resources :households
-    get 'page/:page', :action => :index, :on => :collection
-  end
-
-  resources :users
-
-  resources :policies, only: [:new, :show, :create, :edit, :update] do
+  resources :policies, only: [:new, :show, :create, :edit, :update, :index] do
     member do
       get :cancelterminate
       post :transmit
@@ -127,6 +153,8 @@ Gluedb::Application.routes.draw do
       resources :application_groups, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
+      resources :plans, :only => [:show]
+      resources :renewal_policies, :only => [:show, :index]
     end
   end
 

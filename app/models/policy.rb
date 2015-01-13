@@ -27,34 +27,27 @@ class Policy
   field :carrier_to_bill, type: Boolean, default: false
   field :aasm_state, type: String
   field :updated_by, type: String
+  field :is_active, type: Boolean, default: true
+
 
   validates_presence_of :eg_id
 #  validates_presence_of :plan_id
   validates_presence_of :pre_amt_tot
   validates_presence_of :tot_res_amt
-
-  index({:eg_id => 1})
-  index({:aasm_state => 1})
-  index({:eg_id => 1, :carrier_id => 1, :plan_id => 1})
+  validates_presence_of :plan_id
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
-  index({ "enrollees.m_id" => 1 })
-  index({ "enrollees.hbx_member_id" => 1 })
-  index({ "enrollees.carrier_member_id" => 1})
-  index({ "enrollees.carrier_policy_id" => 1})
-  index({ "enrollees.rel_code" => 1})
-  index({ "enrollees.coverage_start" => 1})
-  index({ "enrollees.coverage_end" => 1})
 
+  embeds_many :comments
+  accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
+
+  belongs_to :hbx_enrollment_policy, class_name: "ApplicationGroup", inverse_of: :hbx_enrollment_policies, index: true
   belongs_to :carrier, counter_cache: true, index: true
   belongs_to :broker, counter_cache: true, index: true # Assumes that broker change triggers new enrollment group
   belongs_to :plan, counter_cache: true, index: true
   belongs_to :employer, counter_cache: true, index: true
   belongs_to :responsible_party
-  belongs_to :household
-  belongs_to :application_group
-  index({:application_group_id => 1})
 
   has_many :transaction_set_enrollments,
               class_name: "Protocols::X12::TransactionSetEnrollment",
@@ -62,6 +55,18 @@ class Policy
   has_many :premium_payments, order: { paid_at: 1 }
 
   has_many :csv_transactions, :class_name => "Protocols::Csv::CsvTransaction"
+
+  index({:eg_id => 1})
+  index({:aasm_state => 1})
+  index({:eg_id => 1, :carrier_id => 1, :plan_id => 1})
+  index({ "enrollees.person_id" => 1 })
+  index({ "enrollees.m_id" => 1 })
+  index({ "enrollees.hbx_member_id" => 1 })
+  index({ "enrollees.carrier_member_id" => 1})
+  index({ "enrollees.carrier_policy_id" => 1})
+  index({ "enrollees.rel_code" => 1})
+  index({ "enrollees.coverage_start" => 1})
+  index({ "enrollees.coverage_end" => 1})
 
   before_create :generate_enrollment_group_id
   before_save :invalidate_find_cache
@@ -140,12 +145,22 @@ class Policy
 
   end
 
+  def self.default_search_order
+    [
+      ["members.coverage_start", 1]
+    ]
+  end
+
   def canceled?
     subscriber.canceled?
   end
 
   def market
-    employer.nil? ? 'individual' : 'shop'
+    is_shop? ? 'shop' : 'individual'
+  end
+
+  def is_shop?
+    !employer_id.blank?
   end
 
   def subscriber
@@ -211,11 +226,7 @@ class Policy
   end
 
   def to_cv
-    CanonicalVocabulary::EnrollmentSerializer.new(self).serialize
-  end
-
-  def self.default_search_order
-    [[:eg_id, 1]]
+    CanonicalVocabulary::EnrollmentSerializer.new(self, member_ids).serialize
   end
 
   def self.find_all_policies_for_member_id(m_id)
@@ -224,10 +235,13 @@ class Policy
     ).order_by([:eg_id])
   end
 
-  def self.search_hash(s_rex)
+  def self.search_hash(s_str)
+    clean_str = s_str.strip
+    s_rex = Regexp.new(Regexp.escape(clean_str), true)
     {
       "$or" => [
-        {"eg_id" => s_rex}
+        {"eg_id" => s_rex},
+        {"id" => s_rex}
       ]
     }
   end
@@ -266,7 +280,7 @@ class Policy
           }
         })
       if(policies.count > 1)
-        raise "More than one policy that match subkeys: eg_id=#{eg_id}, carrier_id=#{c_id}, plan_ids=#{plan_ids}"
+        raise "More than one policy that match subkeys: eg_id=#{eg_id}, plan_ids=#{plan_ids}"
       end
       policies.first
   end
@@ -308,7 +322,8 @@ class Policy
       found_enrollment.save!
       return found_enrollment
     end
-    m_enrollment.unsafe_save!
+    m_enrollment.save!
+#    m_enrollment.unsafe_save!
     m_enrollment
   end
 
@@ -348,7 +363,8 @@ class Policy
   end
 
   def self.find_active_and_unterminated_for_members_in_range(m_ids, start_d, end_d, other_params = {})
-    Policy.where(self.active_as_of_expression(end_d).merge(
+    Policy.where(
+      PolicyStatus::Active.as_of(end_d).query).where(
       {"enrollees" => {
         "$elemMatch" => {
           "m_id" => { "$in" => m_ids },
@@ -359,26 +375,21 @@ class Policy
             {:coverage_end => nil}
           ]
         }
-      } }
-    ).merge(other_params))
+      } })
+    
   end
 
   def self.find_active_and_unterminated_in_range(start_d, end_d, other_params = {})
     Policy.where(
-      self.active_as_of_expression(end_d).merge(other_params)
-    )
+      PolicyStatus::Active.as_of(end_d).query).where( other_params)
   end
 
   def self.find_terminated_in_range(start_d, end_d, other_params = {})
-    Policy.where({
-      :aasm_state => { "$ne" => "canceled" },
-      :enrollees => { "$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => { "$ne" => nil },
-          :coverage_end => {"$lte" => end_d, "$gte" => start_d}
-      }
-      }
-    }.merge(other_params)
+    Policy.where(
+      PolicyStatus::Terminated.during(
+        start_d,
+        end_d
+        ).query
     )
   end
 
@@ -404,24 +415,24 @@ class Policy
         { :aasm_state => { "$ne" => "canceled"},
           :eg_id => { "$not" => /DC0.{32}/ },
           :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$gt" => target_date}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => {"$exists" => false}
-        }}},
-        { :aasm_state => { "$ne" => "canceled"},
-          :eg_id => { "$not" => /DC0.{32}/ },
-          :enrollees => {"$elemMatch" => {
-          :rel_code => "self",
-          :coverage_start => {"$lte" => target_date},
-          :coverage_end => nil
-        }}}
+            :rel_code => "self",
+            :coverage_start => {"$lte" => target_date},
+            :coverage_end => {"$gt" => target_date}
+          }}},
+          { :aasm_state => { "$ne" => "canceled"},
+            :eg_id => { "$not" => /DC0.{32}/ },
+            :enrollees => {"$elemMatch" => {
+              :rel_code => "self",
+              :coverage_start => {"$lte" => target_date},
+              :coverage_end => {"$exists" => false}
+            }}},
+            { :aasm_state => { "$ne" => "canceled"},
+              :eg_id => { "$not" => /DC0.{32}/ },
+              :enrollees => {"$elemMatch" => {
+                :rel_code => "self",
+                :coverage_start => {"$lte" => target_date},
+                :coverage_end => nil
+              }}}
       ]
     }
   end
@@ -451,16 +462,21 @@ class Policy
     true
   end
 
-  def currently_active_for?(member_id)
-    return false unless currently_active?
+  def active_on_date_for?(date, member_id)
+    return false unless active_as_of?(date)
     en = enrollees.detect { |enr| enr.m_id == member_id }
     return false if en.nil?
-    now = Date.today
-    return false if en.coverage_start > now
+    return false if en.coverage_start > date
     return false if (en.coverage_start == en.coverage_end)
-    return false if (!en.coverage_end.nil? && en.coverage_end < now)
+    return false if (!en.coverage_end.nil? && en.coverage_end < date)
     true
   end
+
+  def currently_active_for?(member_id)
+    now = Date.today
+    active_on_date_for?(now, member_id)
+  end
+
   def future_active?
     now = Date.today
     return false if subscriber.nil?
@@ -496,8 +512,21 @@ class Policy
     Policy.where({:id => the_id}).first
   end
 
+  def coverage_period
+    start_date = policy_start
+    if employer_id.blank?
+       return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+    end
+    py = employer.plan_year_of(start_date)
+    (py.start_date..py.end_date)
+  end
+
   def transaction_list
     (transaction_set_enrollments + csv_transactions).sort_by(&:submitted_at).reverse
+  end
+
+  def is_active?
+    currently_active?
   end
 
   def cancel_via_hbx!
@@ -505,33 +534,56 @@ class Policy
     self.enrollees.each do |en|
       en.coverage_end = en.coverage_start
       en.coverage_status = 'inactive'
-      en.touch
-      self.touch
-      en.save!
     end
     self.save!
   end
 
-protected
+  def clone_for_renewal(start_date)
+    pol = Policy.new({
+      :broker => self.broker,
+      :employer_id => self.employer_id,
+      :carrier_to_bill => self.carrier_to_bill,
+      :preceding_enrollment_group_id => self.eg_id,
+      :carrier_id => self.carrier_id,
+      :responsible_party_id => self.responsible_party_id
+    })
+    cloneable_enrollees = self.enrollees.reject do |en|
+      en.canceled? || en.terminated?
+    end
+    pol.enrollees = cloneable_enrollees.map do |en|
+      en.clone_for_renewal(start_date)
+    end
+    current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
+    pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
+    pol
+  end
+
+  protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
   end
 
-private
-    def format_money(val)
-      sprintf("%.02f", val)
-    end
+  private
+  def format_money(val)
+    sprintf("%.02f", val)
+  end
 
-    def filter_delimiters(str)
-      str.to_s.gsub(',','') if str.present?
-    end
+  def filter_delimiters(str)
+    str.to_s.gsub(',','') if str.present?
+  end
 
-    def filter_non_numbers(str)
-      str.to_s.gsub(/\D/,'') if str.present?
-    end
+  def filter_non_numbers(str)
+    str.to_s.gsub(/\D/,'') if str.present?
+  end
 
-    def query_proxy
-      @query_proxy ||= Queries::PolicyAssociations.new(self)
+  def query_proxy
+    @query_proxy ||= Queries::PolicyAssociations.new(self)
+  end
+
+  def member_ids
+    self.enrollees.map do |enrollee|
+      enrollee.m_id
     end
+  end
 
 end

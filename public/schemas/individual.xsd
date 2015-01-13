@@ -409,10 +409,10 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="is_incarcerated" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="assistance_eligibilities" minOccurs="0">
+			<xs:element name="financial_statements" minOccurs="0">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="assistance_eligibility" type="AssistanceEligibilityType" maxOccurs="unbounded"/>
+						<xs:element name="assistance_eligibility" type="FinancialStatementType" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -1309,7 +1309,7 @@
 	<xs:element name="employment_status" type="EmploymentStatusNameType"/>
 	<xs:element name="eligibility_determination" type="EligibilityDeterminationType"/>
 	<xs:element name="household" type="ApplicationGroupHouseholdType"/>
-	<xs:complexType name="AssistanceEligibilityType">
+	<xs:complexType name="FinancialStatementType">
 		<xs:sequence>
 			<xs:element name="is_primary_applicant" type="xs:boolean"/>
 			<xs:element name="tax_filing_status" type="TaxFilerNameType"/>

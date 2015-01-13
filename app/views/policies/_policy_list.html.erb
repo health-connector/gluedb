@@ -1,0 +1,29 @@
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>Subscriber</th>
+      <th>Policy ID</th>
+      <th>Enrollment Group ID</th>
+      <th>Plan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= table_empty_to_human if policies.count < 1 %>
+    <% policies.each do |policy| %>
+      <tr>
+	<td>
+	  <%= link_to policy.subscriber.person.full_name, policy.subscriber.person %>
+        </td>
+	<td>
+	  <%= policy.id %>
+        </td>
+	<td>
+	  <%= policy.eg_id %>
+        </td>
+	<td>
+	  <%= policy.plan.name %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

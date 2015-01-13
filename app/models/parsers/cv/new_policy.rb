@@ -20,15 +20,23 @@ module Parsers
       end
 
       def tot_res_amt
-        @tot_res_amount ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:total_responsible_amount",namespaces)).content.split("#").last.value || "0.0"
+        @tot_res_amount ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:total_responsible_amount",namespaces)).content.split("#").last.value || 0.00
       end
 
       def pre_amt_tot
-        @pre_amt_tot ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:premium_total_amount",namespaces)).content.split("#").last.value || "0.0"
+        @pre_amt_tot ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:premium_total_amount",namespaces)).content.split("#").last.value || 0.00
+      end
+
+      def tot_emp_res_amt
+        @tot_emp_res_amt ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:shop_market/cv:total_employer_responsible_amount",namespaces)).content.value || 0.00
+      end
+
+      def employer_fein
+        @employer_fein ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:shop_market/cv:employer_link/cv:id/cv:id",namespaces)).content.split("#").last.value
       end
 
       def applied_aptc
-        @applied_aptc ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:individual_market/cv:applied_aptc_amount",namespaces)).content.split("#").last.value || "0.0"
+        @applied_aptc ||= Maybe.new(@xml.at_xpath("cv:enrollment/cv:plan/cv:individual_market/cv:applied_aptc_amount",namespaces)).content.split("#").last.value || 0.00
       end
 
       def carrier_to_bill
@@ -55,6 +63,8 @@ module Parsers
           :applied_aptc => applied_aptc,
           :carrier_to_bill => carrier_to_bill,
           :broker_npn => broker_npn,
+          :employer_fein => employer_fein,
+          :tot_emp_res_amt => tot_emp_res_amt,
           :enrollees => enrollees.map(&:to_hash)
         }
       end

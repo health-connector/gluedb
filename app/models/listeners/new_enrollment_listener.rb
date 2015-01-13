@@ -50,8 +50,12 @@ module Listeners
       add_error(:enrollment, "has no subscriber")
     end
 
-    def carrier_switch_renewal
-      add_error(:enrollment, "requires a carrier switch")
+    def carrier_switch_renewal(details)
+      add_error(:enrollment, "requires a carrier switch: new enrollment_group_ids: #{details[:new_enrollment_group_id]}, old policy: enrollment_group_id: #{details[:old_policy][:enrollment_group_id]}, policy_id: #{details[:old_policy][:policy_id]}")
+    end
+
+    def enrollees_changed_for_renewal(details)
+      add_error(:enrollment, "the number of enrollees has changed: was #{details[:old_policy]} is now #{details[:new_policy]}")
     end
 
     # Policy Errors
@@ -69,6 +73,10 @@ module Listeners
       add_policy_error(:plan, "not found for HIOS #{details[:hios_id]} and year #{details[:plan_year]}")
     end
 
+    def employer_not_found(details)
+      add_policy_error(:employer, "not found for fein #{details[:fein]}")
+    end
+
     def invalid_policy(details)
       details.each_pair do |k, v|
         add_policy_error(k, v)
@@ -77,6 +85,23 @@ module Listeners
 
     def no_enrollees
       add_policy_error(:enrollees, "is empty")
+    end
+
+    # Premium errors
+    def invalid_premium_total(details)
+      add_policy_error(:premium_total, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_employer_contribution(details)
+      add_policy_error(:employer_contribution, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_responsible_total(details)
+      add_policy_error(:responsible_total, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
+    end
+
+    def invalid_member_premium(details)
+      add_policy_error(:member_premium, "expected: #{details[:expected]}, calculated: #{details[:calculated]}")
     end
 
     def invalid_enrollee(details)

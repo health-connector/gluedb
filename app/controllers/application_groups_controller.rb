@@ -10,6 +10,8 @@ class ApplicationGroupsController < ApplicationController
 
   def show
     @application_group = ApplicationGroup.find(params[:id])
+
+    @primary_applicant = @application_group.primary_applicant
   end
 
   def edit
@@ -20,6 +22,11 @@ class ApplicationGroupsController < ApplicationController
     @application_group = ApplicationGroup.find(params[:id])
     people_to_remove.each { |p| @application_group.people.delete(p) }
     @application_group.save
+  end
+
+  def applicant_links
+    @application_group = ApplicationGroup.find(params[:id])
+    @applicants = @application_group.active_applicants
   end
 
   private

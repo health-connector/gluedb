@@ -1,0 +1,16 @@
+- model_class = EdiOpsTransaction
+- t '.title', :default => model_class.model_name.human.pluralize.titleize
+.page-header
+  = render 'shared/breadcrumb', crumbs: ['Edi Ops Transactions']
+  .row
+    .col-md-8
+    .col-md-4
+      = render 'search', url: edi_ops_transactions_path, q: @q, placeholder: 'Any sortable column'
+#issues_table= render 'issues_table'
+.row
+  .col-md-8
+    = paginate @edi_ops_transactions, theme: "twitter-bootstrap", pagination_class: "pagination-plain"
+  .col-md-4
+    %p
+      = "#{number_with_delimiter(@edi_ops_transactions.count)} / #{number_with_delimiter(EdiOpsTransaction.count)} "
+      %small (transactions selected / total)

@@ -1,72 +1,63 @@
 module Parsers::Xml::Cv
   class ApplicationGroup
-    def initialize(parser)
-      @parser = parser
+    include HappyMapper
+
+    register_namespace "cv", "http://openhbx.org/api/terms/1.0"
+
+    tag 'application_group'
+
+    namespace 'cv'
+
+    element :primary_applicant_id, String, xpath: "cv:primary_applicant_id/cv:id"
+
+    element :submitted_date, String, :tag=> "submitted_date"
+
+    element :e_case_id, String, xpath: "cv:id/cv:id"
+
+    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, xpath: "cv:applicants"
+
+    has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, xpath:'cv:tax_households'
+
+    has_many :irs_groups, Parsers::Xml::Cv::IrsGroupParser, tag: 'irs_groups'
+
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, xpath: 'cv:eligibility_determinations'
+
+    has_many :hbx_enrollments, Parsers::Xml::Cv::HbxEnrollmentParser, tag: 'hbx_enrollments'
+
+    def individual_requests(member_id_generator, p_tracker)
+      applicants.map do |applicant|
+        applicant.to_individual_request(member_id_generator, p_tracker)
+      end
     end
 
-    def at_xpath(node, xpath)
-      node.at_xpath(xpath, NAMESPACES)
+    def primary_applicant
+      if applicants.size == 1
+        applicants.first
+      else
+        applicants.detect{|applicant| applicant.id == primary_applicant_id }
+      end
     end
 
-    def primary_applicant_id
-      node = @parser.at_xpath('./ns1:primary_applicant_id', NAMESPACES)
-      (node.nil?)? nil : node.text
-    end
-    
-    def consent_applicant_id
-      node = @parser.at_xpath('./ns1:consent_applicant_id', NAMESPACES)
-      (node.nil?)? nil : node.text
+    def policies_enrolled
+      hbx_enrollments.map{|enrollment| enrollment.policy_id }
     end
 
-    def e_case_id
-      node = @parser.at_xpath('./ns1:e_case_id', NAMESPACES)
-      (node.nil?)? nil : node.text
-    end
-
-    def submitted_date
-      node = at_xpath(@parser, './ns1:submitted_date')
-      (node.nil?)? nil : node.text
-    end
-    
-    def individuals
-      results = []
-
-      elements = @parser.xpath('./ns1:applicants/ns1:applicant', NAMESPACES)
-      elements.each { |e| results << Parsers::Xml::Cv::Individual.new(e) }
-
-      results.reject(&:empty?)
-    end
-
-    def relationships
-      individuals.flat_map { |ind| ind.relationships.reject(&:empty?).map(&:to_request) }
-    end
-
-    def consent_applicant_name
-      node = @parser.at_xpath('./ns1:consent_applicant_name', NAMESPACES)
-      (node.nil?)? nil : node.text
-    end
-
-    def consent_renewal_year
-      node = @parser.at_xpath('./ns1:consent_renewal_year', NAMESPACES)
-      (node.nil?)? 0 : node.text.to_i
-    end
-
-    def coverage_renewal_year
-      node = @parser.at_xpath('./ns1:coverage_renewal_year', NAMESPACES)
-      (node.nil?)? nil : node.text
-    end
-
-    def to_request
-      {
-        consent_applicant_id: consent_applicant_id,
-        e_case_id: e_case_id,
-        primary_applicant_id: primary_applicant_id,
-        submission_date: submitted_date,
-        consent_applicant_name: consent_applicant_name,
-        consent_renewal_year: consent_renewal_year,
-        coverage_renewal_year: coverage_renewal_year,
-        people: individuals.map(&:to_request),
-        relationships: relationships
+    def to_hash
+      response = {
+          e_case_id:e_case_id.split("#").last,
+          submitted_at:submitted_date,
+          irs_groups: irs_groups.map do |irs_group|
+            irs_group.to_hash
+          end,
+          tax_households: tax_households.map do |tax_household|
+            tax_household.to_hash
+          end,
+          applicants: applicants.map do |applicant|
+            applicant.to_hash
+          end,
+          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
+            eligibility_determination.to_hash
+          end
       }
     end
   end

@@ -1,18 +1,6 @@
-= render 'shared/identity', id: nil #plan.id?
-%n1:qhp_id= plan.hios_plan_id
+= render 'shared/v2/identity', id: api_v2_plan_url(plan.id), obj: plan\
+%n1:coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
+%n1:carrier= render 'shared/v2/carrier_link_type', carrier: (Caches::MongoidCache.lookup(Carrier, plan.carrier_id) { plan.carrier })
+%n1:plan_year= plan.year
 %n1:name= plan.name
-%n1:is_dental_only_flag= (plan.coverage_type == 'dental')
-%n1:carrier= render 'shared/carrier_link_type', carrier: (Caches::MongoidCache.lookup(Carrier, plan.carrier_id) { plan.carrier })
-%n1:coverage_type= "urn:openhbx:terms:v1:benefit_coverage##{plan.coverage_type}"
-- if !rate.blank?
-  %n1:rates
-    %n1:rate
-      %n1:age= rate.age
-      %n1:effective_date= rate.rate_start_date.try(:strftime,"%Y%m%d")
-      -if rate.rate_end_date.present?
-        %n1:expire_date= rate.rate_end_date.try(:strftime,"%Y%m%d")
-      %n1:rate= rate.amount.round(2)
-      - if false
-        %n1:rate_area
-      - if false
-        %n1:tobacco_use
+%n1:is_dental_only= (plan.coverage_type == 'dental')

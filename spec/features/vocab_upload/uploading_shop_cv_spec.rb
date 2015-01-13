@@ -28,7 +28,7 @@ feature 'uploading show CV' do
 
     click_button "Upload"
 
-    expect(page).to have_content 'Upload failed.'
+    expect(page).not_to have_content 'Uploaded successfully.'
   end
 
   scenario 'a successful upload' do
@@ -41,7 +41,7 @@ feature 'uploading show CV' do
 
     click_button "Upload"
 
-    expect(page).to have_content 'Upload successful.'
+    expect(page).to have_content 'Uploaded successfully.'
   end
 
   scenario 'an enrollee\'s premium is incorrect' do
@@ -55,7 +55,7 @@ feature 'uploading show CV' do
     click_button "Upload"
 
     expect(page).to have_content 'premium_amount is incorrect'
-    expect(page).to have_content 'Upload failed.'
+    expect(page).to have_content 'Failed to Upload.'
 
   end
 
@@ -70,7 +70,7 @@ feature 'uploading show CV' do
     click_button "Upload"
 
     expect(page).to have_content 'premium_amount_total is incorrect'
-    expect(page).to have_content 'Upload failed.'
+    expect(page).to have_content 'Failed to Upload.'
   end
 
   scenario 'responsible amount is incorrect' do
@@ -84,7 +84,7 @@ feature 'uploading show CV' do
     click_button "Upload"
 
     expect(page).to have_content 'total_responsible_amount is incorrect'
-    expect(page).to have_content 'Upload failed.'
+    expect(page).to have_content 'Failed to Upload.'
   end
 
   feature 'Handling premium not found error' do
@@ -100,7 +100,7 @@ feature 'uploading show CV' do
       click_button "Upload"
 
       expect(page).to have_content 'Premium was not found in the system.'
-      expect(page).to have_content 'Upload failed.'
+      expect(page).to have_content 'Failed to Upload.'
     end
   end
 end

@@ -104,7 +104,7 @@ module CanonicalVocabulary
 
     def serialize_person(en, xml)
       member = member_lookup(en)
-      person = en.person
+      person = member.person
       serialize_contact(person, xml)
       xml['ins'].exchange_member_id(en.m_id)
       xml['ins'].individual_relationship_code(en.rel_code.capitalize)
@@ -117,7 +117,7 @@ module CanonicalVocabulary
       xml['ins'].gender_code(member.gender)
       xml['ins'].tobacco_use("Unknown")
       xml['ins'].coverage do |xml|
-        xml['ins'].plan_id_ref(policy.plan._id)
+        xml['ins'].plan_id_ref(policy.plan_id)
         xml['ins'].premium_amount(en.pre_amt)
         if en.coverage_start.nil?
           raise @policy.inspect
@@ -170,11 +170,11 @@ module CanonicalVocabulary
           xml['pln'].carrier_id_ref(carrier._id)
           xml['pln'].hios_plan_id(plan.hios_plan_id)
           xml['pln'].plan_name(plan.name)
-          xml['pln'].coverage_type(@policy.coverage_type.capitalize)
+          xml['pln'].coverage_type(plan.coverage_type.capitalize)
         end
         xml['ins'].plan_id(plan._id)
         xml['ins'].premium_amount_total(@policy.pre_amt_tot)
-        if @policy.employer.nil?
+        if @policy.employer_id.blank?
           xml['ins'].aptc_amount(@policy.applied_aptc)
         else
           xml['ins'].total_employer_responsibility_amount(@policy.tot_emp_res_amt)
@@ -221,11 +221,11 @@ module CanonicalVocabulary
     end
 
     def select_root_tag
-      @policy.employer.nil? ? "individual_market_enrollment_group" : "shop_market_enrollment_group"
+      @policy.employer_id.blank? ? "individual_market_enrollment_group" : "shop_market_enrollment_group"
     end
 
     def profile_suffix
-      @policy.employer.nil? ? "IND" : "SHP"
+      @policy.employer_id.blank? ? "IND" : "SHP"
     end
   end
 end

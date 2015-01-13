@@ -49,6 +49,11 @@ describe ChangeAddress::EligiblePolicies do
     let(:other_future_policy) { double(currently_active?: false, future_active?: true, policy_start: 2, policy_end: nil, coverage_type: health_coverage) }
     let(:policies) { [future_active_policy, other_future_policy] }
 
+    before :each do
+      allow(future_active_policy).to receive(:coverage_period).and_return((1..5))
+      allow(other_future_policy).to receive(:coverage_period).and_return((2..4))
+    end
+
     it "should have too many active policies" do
       expect(subject.too_many_active_policies?).to be_true
     end
@@ -63,6 +68,11 @@ describe ChangeAddress::EligiblePolicies do
     let(:currently_active_policy) { double(currently_active?: true, future_active?: false, policy_start: 1, policy_end: 3, coverage_type: dental_coverage) }
     let(:policies) { [future_active_policy, currently_active_policy] }
 
+    before :each do
+      allow(future_active_policy).to receive(:coverage_period).and_return((2..4))
+      allow(currently_active_policy).to receive(:coverage_period).and_return((1..3))
+    end
+
     it "should have too many active policies" do
       expect(subject.too_many_active_policies?).to be_true
     end
@@ -76,6 +86,11 @@ describe ChangeAddress::EligiblePolicies do
     let(:future_active_policy) { double(currently_active?: false, future_active?: true, policy_start: 3, policy_end: nil, coverage_type: dental_coverage) }
     let(:currently_active_policy) { double(currently_active?: true, future_active?: false, policy_start: 1, policy_end: 3, coverage_type: dental_coverage) }
     let(:policies) { [future_active_policy, currently_active_policy] }
+
+    before :each do
+      allow(future_active_policy).to receive(:coverage_period).and_return((3..4))
+      allow(currently_active_policy).to receive(:coverage_period).and_return((1..2))
+    end
 
     it "should not have too many active policies" do
       expect(subject.too_many_active_policies?).to be_false

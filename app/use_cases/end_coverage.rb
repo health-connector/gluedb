@@ -27,6 +27,53 @@ class EndCoverage
     action.execute(action_request)
   end
 
+  def execute_csv(request, listener)
+    @request = request
+    @policy = @policy_repo.where({"_id" => request[:policy_id]}).first
+
+    if (@policy.nil?)
+      listener.no_such_policy(policy_id: request[:policy_id])
+      listener.fail
+      return
+    end
+
+    affected_enrollee_ids = @request[:affected_enrollee_ids]
+
+    if (affected_enrollee_ids.nil?)
+      listener.fail(subscriber: request[:affected_enrollee_ids])
+      return
+    end
+
+    if @policy.subscriber.coverage_ended?
+      listener.policy_inactive(policy_id: request[:policy_id])
+      listener.fail(subscriber: request[:affected_enrollee_ids])
+      return
+    end
+
+    if @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
+      listener.end_date_invalid(end_date: request[:coverage_end])
+      listener.fail(subscriber: request[:affected_enrollee_ids])
+      return
+    end
+
+    enrollees_not_already_canceltermed= @policy.enrollees.select { |e| !e.canceled? && !e.terminated? }
+
+    update_policy(affected_enrollee_ids)
+
+    action = @action_factory.create_for(request)
+
+    action_request = {
+      policy_id: @policy.id,
+      operation: request[:operation],
+      reason: request[:reason],
+      affected_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
+      include_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
+      current_user: request[:current_user]
+    }
+    action.execute(action_request)
+    listener.success(subscriber: request[:affected_enrollee_ids])
+  end
+
   private
 
   def update_policy(affected_enrollee_ids)

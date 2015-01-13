@@ -18,6 +18,16 @@ module ApplicationHelper
     test ? content_tag(:span, "Authority Member", class: "label label-success") : content_tag(:span, "Non-Authority Member", class: "label label-warning")
   end
 
+  def transaction_status_to_label(ed)
+    if ed.open?
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-warning")
+    elsif ed.assigned?
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-info")
+    else
+      content_tag(:span, "#{ed.aasm_state}", class: "label label-success")
+    end
+  end
+
   # Formats a full name into upper/lower case with last name wrapped in HTML <strong> tag
   def name_to_listing(person)
     given_name = [person.name_first, person.name_middle].reject(&:nil? || empty?).join(' ')
@@ -47,6 +57,13 @@ module ApplicationHelper
     number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
   end
 
+  # Formats a number into a US Social Security Number string (nnn-nn-nnnn), hiding all but last 4 digits
+  def number_to_obscured_ssn(number)
+    return unless number
+    number_to_ssn(number)
+    number.to_s.gsub!(/\w{3}-\w{2}/, '***-**')
+  end
+
   # Formats a number into a nine-digit US Federal Entity Identification Number string (nn-nnnnnnn)
   def number_to_fein(number)
     return unless number
@@ -56,7 +73,27 @@ module ApplicationHelper
 
   # Formats a string into HTML, concatenating it with a person glyph
   def prepend_glyph_to_name(name)
-    content_tag(:span, raw("&nbsp;"), class: "fui-user") + name
+    content_tag(:span, raw("&nbsp;"), class: "glyphicon glyphicon-user") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a male glyph
+  def prepend_male_glyph_to_name(name)
+    content_tag(:i, class: "fa fa-male") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a female glyph
+  def prepend_female_glyph_to_name(name)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-female") + name
+  end
+
+  # Formats a string into HTML, concatenating it with a child glyph
+  def prepend_child_glyph_to_name(name)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-child") + name
+  end
+
+  # Formats a Font Awesome icon in HTML
+  def prepend_fa_icon(fa_icon, str)
+    content_tag(:i, raw("&nbsp;"), class: "fa fa-#{fa_icon}") + str
   end
 
   def active_menu_item(label, path, controller = nil)
@@ -101,5 +138,13 @@ module ApplicationHelper
 
   def dd_value(val)
     val.blank? ? "&nbsp;" : val
+  end
+
+  def sortable(column, title = nil)
+    fui = params[:direction] == "desc" ? "down" : "up"
+    title ||= column.titleize
+    css_class = (column == sort_column) ? "fui-triangle-#{fui}-small" : nil
+    direction = (column == params[:sort] && params[:direction] == "desc") ? "asc" : "desc"
+    ((link_to title, params.merge(:sort => column, :direction => direction, :page => nil) ) + content_tag(:sort, raw("&nbsp;"), class: css_class))
   end
 end

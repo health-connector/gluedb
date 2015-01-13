@@ -11,8 +11,6 @@ module Listeners
       end
     end
 
-    
-
     def on_message(delivery_info, properties, payload)
       event_key = delivery_info.routing_key
       qr_uri = properties.headers["qualifying_reason_uri"]
@@ -28,8 +26,7 @@ module Listeners
 
       request = NewEnrollmentRequest.from_xml(payload)
       NewEnrollment.new.execute(request, uc_listener)
-
-      channel.acknowledge(delivery_info.delivery_tag, false) 
+      channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
     def handle_success(details, policy_ids, canceled_policies)
@@ -54,7 +51,7 @@ module Listeners
 
     def handle_failure(details, errors)
       channel.default_exchange.publish(
-        JSON.dump(errors), 
+        JSON.dump(errors),
         {
           :routing_key => details[:reply_to],
           :headers => {

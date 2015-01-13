@@ -2,7 +2,7 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-#  include Mongoid::Paranoia
+  # include Mongoid::Paranoia
 
   extend Mongorder
 
@@ -20,8 +20,16 @@ class Person
   field :department, type: String, default: ""
   field :is_active, type: Boolean, default: true
 
+  # We've moved to a many-to-many
+  # field :application_group, type: Moped::BSON::ObjectId
+
+  # TODO: reference authority member by Mongo ID
+  # field :application_group, type: Moped::BSON::ObjectId
   field :authority_member_id, type: String, default: nil
   index({"authority_member_id" => 1})
+
+  # field :auth_member, type: Moped::BSON::ObjectId
+  # index({auth_member: 1})
 
   before_create :initialize_authority_member
   before_save :initialize_name_full
@@ -38,9 +46,10 @@ class Person
   index({name_last: 1, name_first:1, "emails.email_address" => 1})
   index({"emails.email_address" => 1})
 
-  belongs_to :broker
-  belongs_to :employer
-  belongs_to :household
+  #TODO - create authority member index (use Mongo indexing method that expects many empty values)
+
+  # has_and_belongs_to_many :employers, class_name: "Employer", inverse_of: :employees
+  belongs_to :employer, class_name: "Employer", inverse_of: :employees, index: true
 
   embeds_many :addresses, :inverse_of => :person
   accepts_nested_attributes_for :addresses, reject_if: proc { |attribs| attribs['address_1'].blank? }, allow_destroy: true
@@ -53,7 +62,9 @@ class Person
 
   # embeds_many :members, after_add: :generate_hbx_member_id
   embeds_many :members, cascade_callbacks: true
+
   embeds_many :person_relationships
+  accepts_nested_attributes_for :person_relationships
 
   embeds_many :responsible_parties
 #  accepts_nested_attributes_for :responsible_parties, reject_if: :all_blank, allow_destroy: true
@@ -75,12 +86,11 @@ class Person
   scope :all_over_or_equal_age, ->(age) {lte(:'members.dob' => (Date.today - age.years))}
   scope :all_under_or_equal_age, ->(age) {gte(:'members.dob' => (Date.today - age.years))}
   scope :all_with_multiple_members, exists({ :'members.1' => true })
-
   scope :by_name, order_by(name_last: 1, name_first: 1)
-  #
-  #
-  embeds_many :assistance_eligibilities
-  accepts_nested_attributes_for :assistance_eligibilities, allow_destroy: true
+
+  def application_groups
+    ApplicationGroup.where(:applicants.person_id => self.id).to_a
+  end
 
   def update_attributes_with_delta(props = {})
     old_record = self.find(self.id)
@@ -94,7 +104,8 @@ class Person
     # - the delta ("delta")
     # We have everything we need to construct whatever messages care about that data.
     # E.g. (again, ignore the naming as it is terrible)
-    Protocols::Notifier.update_notification(old_record, props, delta)
+    #Protocols::Notifier.update_notification(old_record, props, delta)
+    Protocols::Notifier.update_notification(old_record, delta) #The above statement was giving error with 3 params
 
     # Then we proceed normally
     self.update_attributes(props)
@@ -293,6 +304,10 @@ class Person
     addresses.detect { |adr| adr.address_type == "home" }
   end
 
+  def mailing_address
+    addresses.detect { |adr| adr.address_type == "mailing"} || home_address
+  end
+
   def home_phone
     phones.detect { |adr| adr.phone_type == "home" }
   end
@@ -372,6 +387,17 @@ class Person
     Person.find_for_members([member_id]).first
   end
 
+  def merge_relationship(new_rel)
+    old_relationships = self.person_relationships.select do |rel|
+      rel.relative_id == new_rel.relative_id
+    end
+    old_relationships.each do |old_rel|
+      self.person_relationships.delete(old_rel)
+    end
+    self.person_relationships << new_rel
+    self.touch
+  end
+
   private
 
   def initialize_authority_member
@@ -381,4 +407,6 @@ class Person
   def query_proxy
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
+
+
 end

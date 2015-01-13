@@ -48,6 +48,10 @@ class Enrollee
     Queries::MemberByHbxIdQuery.new(m_id).execute
   end
 
+  def calculate_premium_using(plan, rate_start_date)
+    self.pre_amt = sprintf("%.2f", plan.rate(rate_start_date, self.coverage_start, self.member.dob).amount)
+  end
+
   def merge_enrollee(m_enrollee, p_action)
     merge_without_blanking(
       m_enrollee,
@@ -87,6 +91,29 @@ class Enrollee
       end
     else
     end
+    self.save!
+  end
+
+  def clone_for_renewal(start_date)
+    attrs = self.attributes.dup
+    attrs.delete(:_id)
+    attrs.delete("_id")
+    attrs.delete(:id)
+    attrs.delete("id")
+    Enrollee.new(
+      attrs.merge({
+        :coverage_start => start_date,
+        :coverage_end => nil,
+        :pre_amt => nil,
+        :coverage_status => "active",
+        :c_id => nil,
+        :cp_id => nil,
+        :ben_stat => "active",
+        :emp_stat => "active",
+        :created_at => nil,
+        :updated_at => nil
+      })
+    )
   end
 
   def active?
@@ -94,15 +121,19 @@ class Enrollee
   end
 
   def canceled?
-    (!self.active?) && (self.coverage_start == self.coverage_end)
+    (!self.active?) && self.coverage_ended? && (self.coverage_start == self.coverage_end)
   end
 
   def terminated?
-    (!self.active?) && (self.coverage_start != self.coverage_end)
+    (!self.active?) && self.coverage_ended? && (self.coverage_start != self.coverage_end)
   end
 
   def subscriber?
     self.relationship_status_code == "self"
+  end
+
+  def reference_premium_for(plan, rate_date)
+    plan.rate(rate_date, coverage_start, member.dob).amount
   end
 
   def coverage_ended?

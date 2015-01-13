@@ -4,10 +4,14 @@
     %n1:country_code= phone.country_code
   - if phone.area_code.present?
     %n1:area_code= phone.area_code
+  %n1:phone_number= phone.phone_number
   - if phone.full_phone_number.present?
     %n1:full_phone_number= phone.full_phone_number
-  %n1:phone_number= phone.phone_number
+  - else
+    %n1:full_phone_number= phone.phone_number
   - if phone.extension.present?
     %n1:extension= phone.extension
   - if phone.primary.present?
-    %n1:preferred= phone.primary
+    %n1:is_preferred= phone.primary
+  - else
+    %n1:is_preferred= false

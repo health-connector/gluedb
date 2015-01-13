@@ -72,10 +72,11 @@ describe RenewalDetermination do
     end
 
     describe "with policies in the interval, but with a different carrier" do
-      let(:bad_policy) { double(:plan => existing_plan) }
+      let(:bad_policy) { double(:plan => existing_plan, :subscriber => existing_sub, :eg_id => nil, :id => nil) }
       let(:found_policies) { [bad_policy] }
       let(:policy_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id_new) }
       let(:existing_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id) }
+      let(:existing_sub) { double(:coverage_end => nil) }
       let(:carrier_id) { double }
       let(:carrier_id_new) { double }
 

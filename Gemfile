@@ -9,6 +9,7 @@ gem "nokogiri", "~> 1.6.1"
 gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
+gem 'virtus'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -37,6 +38,7 @@ group :test do
   gem 'database_cleaner', '1.3.0'
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
+  gem 'simplecov', :require => false, :group => :test
 end
 
 group :production do
@@ -57,3 +59,5 @@ gem 'cancancan', '~> 1.9'
 gem 'oj'
 gem 'roo'
 gem 'bh'
+gem 'nokogiri-happymapper', :require => 'happymapper'
+gem 'prawn'

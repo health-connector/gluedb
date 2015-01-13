@@ -1,4 +1,5 @@
 class Income
+
   include Mongoid::Document
   include Mongoid::Timestamps
 
@@ -36,12 +37,12 @@ class Income
   field :start_date, type: Date
   field :end_date, type: Date
   field :is_projected, type: Boolean, default: false
-  field :submission_date, type: Date
+  field :submission_date, type: DateTime
 
   embedded_in :assistance_eligibility, :inverse_of => :incomes
 
   validates :amount_in_cents, presence: true,
-  														numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  														numericality: { only_integer: true, greater_than_or_equal_to: 0, message: "%{value} is #######" }
   validates :kind, presence: true,
   												inclusion: { in: KINDS, message: "%{value} is not a valid income type" }
   validates :frequency, 	presence: true,

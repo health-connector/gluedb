@@ -1,6 +1,5 @@
-= render 'shared/v2/identity', id: carrier.id
+= render 'shared/v2/identity', id: carrier.id , obj: carrier
 %n1:name= carrier.name
 - if false #todo
   %n1:display_name= #carrier.carrier_profiles.first.profile_name
-- if false #todo
-  %n1:active_flag
+%n1:is_active= carrier.is_active

@@ -1,7 +1,10 @@
 module CanonicalVocabulary
   module Renewals
-    class RenewalReportRowBuilder
+    class RenewalReportRowBuilder 
+      include RenewalBuilder
+
       attr_reader :data_set
+
       def initialize(application_group, primary)
         @data_set = []
         @application_group = application_group
@@ -9,12 +12,12 @@ module CanonicalVocabulary
       end
 
       def append_integrated_case_number
-        @data_set << @application_group.integrated_case
+        @data_set << @application_group.e_case_id.split('#')[1]
       end
 
       def append_name_of(member)
-        @data_set << member.name_first
-        @data_set << member.name_last
+        @data_set << member.person.name_first
+        @data_set << member.person.name_last
       end
 
       def append_notice_date(notice_date)
@@ -22,16 +25,17 @@ module CanonicalVocabulary
       end
 
       def append_household_address
-        @data_set << @primary.addresses[0][:address_1]
-        @data_set << @primary.addresses[0][:address_2]
-        @data_set << @primary.addresses[0][:apt]
-        @data_set << @primary.addresses[0][:city]
-        @data_set << @primary.addresses[0][:state]
-        @data_set << @primary.addresses[0][:postal_code]
+        address = @primary.person.addresses[0]
+        @data_set << address.address_line_1
+        @data_set << address.address_line_2
+        append_blank # Apt
+        @data_set << address.location_city_name
+        @data_set << address.location_state_code
+        @data_set << address.location_postal_code
       end
 
       def append_aptc
-        append_blank 
+        append_blank
       end
 
       def append_response_date(response_date)
@@ -39,13 +43,17 @@ module CanonicalVocabulary
       end
 
       def append_policy(policy)
-        @data_set << (policy.current.nil? ? nil : policy.current[1][:plan])
-        @data_set << policy.future_plan_name
-        @data_set << policy.quoted_premium
+        if policy.current.blank?
+          3.times{|i| append_blank }
+        else
+          @data_set << policy.current.plan_name
+          @data_set << policy.current.future_plan_name
+          @data_set << policy.current.quoted_premium
+        end
       end
 
       def append_post_aptc_premium
-        append_blank  
+        append_blank
       end
 
       def append_financials
@@ -63,23 +71,23 @@ module CanonicalVocabulary
       end
 
       def append_citizenship_of(member)
-        @data_set << member.citizenship
+        @data_set << citizenship(member)
       end
 
       def append_tax_status_of(member)
-        @data_set << member.tax_status
+        @data_set << tax_status(member)
       end
 
       def append_mec_of(member)
-        @data_set << member.mec
+        @data_set << member_mec(member)
       end
 
       def append_app_group_size
-        @data_set << @application_group.size
+        @data_set << @application_group.applicants.count
       end
 
       def append_yearwise_income_of(member)
-        @data_set << member.yearwise_incomes("2014")
+        @data_set << member.income_by_year("2014")
       end
 
       def append_blank
@@ -87,15 +95,7 @@ module CanonicalVocabulary
       end
 
       def append_incarcerated(member)
-        @data_set << member.incarcerated
-      end
-
-      private 
-
-      def residency(member)
-        return member.residency unless member.residency.blank?
-        return "No Status" if @primary.addresses[0].nil?
-        @primary.addresses[0][:state].strip == "DC" ? "D.C. Resident" : "Not a D.C Resident"
+        @data_set << incarcerated?(member)
       end
     end
   end

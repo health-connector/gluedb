@@ -24,7 +24,6 @@ class Member
   field :e_person_id, type: String        # Elibility system transaction-level foreign key
   field :e_concern_role_id, type: String  # Eligibility system 'unified person' foreign key
   field :aceds_id, type: Integer          # Medicaid system foreign key
-  field :e_pdc_id, type: String
 
   field :import_source, type: String      # e.g. :b2b_gateway, :eligibility_system
   field :imported_at, type: DateTime
@@ -33,8 +32,8 @@ class Member
   # we'll store them at the policy level to avoid any issues
   #  field :carrier_id, type: String
 
-  field :dob, type: DateTime
-  field :death_date, type: DateTime
+  field :dob, type: Date
+  field :death_date, type: Date
   field :ssn, type: String
   field :gender, type: String
   field :ethnicity, type: String, default: ""
@@ -46,7 +45,8 @@ class Member
   field :citizen_status, type: String, default: 'us_citizen'
   field :is_state_resident, type: Boolean, default: true
   field :is_incarcerated, type: Boolean, default: false
-  field :is_applicant, type: Boolean, default: true
+  field :is_disabled, type: Boolean, default: false
+  field :is_pregnant, type: Boolean, default: false
 
   field :hlh, as: :tobacco_use_code, type: String, default: "unknown"
   field :lui, as: :language_code, type: String
@@ -61,6 +61,8 @@ class Member
   validates :citizen_status,
     inclusion: { in: CITIZEN_STATUS_TYPES, message: "%{value} is not a valid citizen status" },
     allow_blank: true
+
+  validate :no_pregnant_males
 
   index({"person_relationships.subject_person" => 1})
   index({"person_relationships.object_person" => 1})
@@ -135,9 +137,31 @@ class Member
     !is_incarcerated
   end
 
+  def is_state_resident?
+    self.is_state_resident
+  end
+
+  def is_incarcerated?
+    self.is_incarcerated
+  end
+
+  def is_disabled?
+    self.is_disabled
+  end
+
+  def is_pregnant?
+    self.is_pregnant
+  end
+
 protected
   def generate_hbx_member_id
     self.hbx_member_id = self.hbx_member_id || self._id.to_s
+  end
+
+  def no_pregnant_males
+    if gender == "male" && is_pregnant?
+      errors.add(:base, "is_pregnant == true invalid for male gender")
+    end
   end
 
   def dob_string

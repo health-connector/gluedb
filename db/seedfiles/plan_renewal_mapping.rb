@@ -54,7 +54,6 @@ hios_2014_to_2015 = {
         "41842DC0010033" => "41842DC0010032",
         "41842DC0010047" => "41842DC0010046",
         "41842DC0010057" => "41842DC0010056",
-        "41842DC0010053" => "41842DC0010028",
         "41842DC0010051" => "41842DC0010050",
         "41842DC0010003" => "41842DC0010002",
         "41842DC0010009" => "41842DC0010008",
@@ -132,7 +131,8 @@ hios_2014_to_2015 = {
         "75753DC0020004" => "75753DC0010030",
         "75753DC0010031" => "75753DC0010030",
         "75753DC0020002" => "75753DC0010029",
-        "75753DC0020001" => "75753DC0010028"
+        "75753DC0020001" => "75753DC0010028",
+        "41842DC0010053" => "41842DC0010052"
       }
 
 plans_2014 = Plan.where({year: 2014})
@@ -162,8 +162,10 @@ plans_2014.each do |pl|
   renewal_plan = map_for_2015[get_map_hios(pl.hios_plan_id, hios_2014_to_2015)]
   if renewal_plan.blank?
     failed_maps << pl.hios_plan_id
+  else
+    pl.renewal_plan = renewal_plan
+    pl.save!
   end
-#  pl.save!
 end
 
 puts failed_maps.inspect

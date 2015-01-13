@@ -28,6 +28,10 @@ module Parsers
         @coverage_start ||= Maybe.new(@xml.at_xpath("cv:benefit/cv:begin_date",namespaces)).content.strip.value
       end
 
+      def member_dob
+        @member_dob ||= Maybe.new(@xml.at_xpath("cv:member/cv:person_demographics/cv:birth_date", namespaces)).content.strip.fmap { |val| Date.parse(val) rescue nil }.value
+      end
+
       def to_hash
         { 
           :m_id => m_id,
@@ -35,7 +39,8 @@ module Parsers
           :ben_stat => "active",
           :emp_stat => "active",
           :pre_amt => pre_amt,
-          :coverage_start => coverage_start
+          :coverage_start => coverage_start,
+          :member => { :dob => member_dob }
         }
       end
     end

@@ -25,8 +25,8 @@ class CreateEmployer
     @employer.save!
     @listener.success
   end
-  
-  private 
+
+  private
 
   def create_plan_year
     plan_year = @plan_year_factory.make({
@@ -39,8 +39,7 @@ class CreateEmployer
       fte_count: @request[:fte_count],
       pte_count: @request[:pte_count]})
 
-    @employer.plan_years << plan_year
-    @employer.update_carriers(plan_year)
+    @employer.merge_plan_year(plan_year)
   end
 
   def create_contact

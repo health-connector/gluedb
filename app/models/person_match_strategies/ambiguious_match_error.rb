@@ -1,3 +1,3 @@
 module PersonMatchStrategies
-  class AmbiguiousMatchError < StandardError; end
+  class AmbiguousMatchError < StandardError; end
 end

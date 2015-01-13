@@ -3,11 +3,10 @@ class Employer
   include Mongoid::Timestamps
   include Mongoid::Versioning
   include Mongoid::Paranoia
+  include AASM
   include MergingModel
 
   extend Mongorder
-
-  include AASM
 
   field :name, type: String
   field :hbx_id, as: :hbx_organization_id, type: String
@@ -21,10 +20,6 @@ class Employer
   field :plan_year_end, type: Date
   field :fte_count, type: Integer
   field :pte_count, type: Integer
-  belongs_to :broker, counter_cache: true, index: true
-  embeds_many :elected_plans
-  ######
-  has_many :plan_years
 
   field :aasm_state, type: String
   field :msp_count, as: :medicare_secondary_payer_count, type: Integer
@@ -43,12 +38,16 @@ class Employer
   index({ hbx_id: 1 })
   index({ fein: 1 })
 
-  has_many :employees, class_name: 'Person', order: {name_last: 1, name_first: 1}
   has_many :premium_payments, order: { paid_at: 1 }
+  belongs_to :broker, counter_cache: true, index: true
+
+  has_many :plan_years
+  embeds_many :elected_plans
+
+  # has_and_belongs_to_many :employees, class_name: 'Person', inverse_of: :employers, order: {name_last: 1, name_first: 1}
+  has_many :employees, class_name: 'Person', inverse_of: :employer, order: {name_last: 1, name_first: 1}
   has_and_belongs_to_many :carriers, order: { name: 1 }, inverse_of: nil
   has_and_belongs_to_many :plans, order: { name: 1, hios_plan_id: 1 }
-
-  has_many :policies
 
   index({"elected_plans.carrier_employer_group_id" => 1})
   index({"elected_plans.hbx_plan_id" => 1})
@@ -100,14 +99,6 @@ class Employer
     write_attribute(:fein, val.to_s.gsub(/[^0-9]/i, ''))
   end
 
-  def plan_year_of(coverage_start_date)
-     # The #to_a is a caching thing.
-     plan_years.to_a.detect do |py|
-       (py.start_date <= coverage_start_date) &&
-         (py.end_date >= coverage_start_date)
-     end
-   end
-
   def invalidate_find_caches
     Rails.cache.delete("Employer/find/fein.#{fein}")
 #    elected_plans.each do |ep|
@@ -157,9 +148,9 @@ class Employer
   end
 
   def self.find_for_fein(e_fein)
-    Rails.cache.fetch("Employer/find/fein.#{e_fein}") do
+#    Rails.cache.fetch("Employer/find/fein.#{e_fein}") do
       Employer.where(:fein => e_fein).first
-    end
+#    end
   end
 
   def self.find_for_carrier_and_group_id(carrier_id, group_id)
@@ -197,22 +188,36 @@ class Employer
     end
   end
 
+  def plan_year_of(coverage_start_date)
+    # The #to_a is a caching thing.
+    plan_years.to_a.detect do |py|
+      (py.start_date <= coverage_start_date) &&
+        (py.end_date >= coverage_start_date)
+    end
+  end
+
+  def renewal_plan_year_of(coverage_start_date)
+    plan_year_of(coverage_start_date + 1.year)
+  end
+
   def merge_plan_year(incoming)
     existing = self.plan_years.detect { |py| py.match(incoming) }
     if(existing)
       existing.merge_without_blanking(incoming,
-        :open_enrollment_start,
-        :open_enrollment_end,
-        :start_date,
-        :end_date,
-        :fte_count,
-        :pte_count
-      )
+                                      :open_enrollment_start,
+                                      :open_enrollment_end,
+                                      :start_date,
+                                      :end_date,
+                                      :fte_count,
+                                      :pte_count
+                                     )
       merge_broker(existing,incoming)
       EmployerElectedPlansMerger.merge(existing, incoming)
       update_carriers(existing)
     else
-      self.plan_years << incoming
+      update_carriers(incoming)
+      incoming.employer = self
+      incoming.save!
     end
   end
 

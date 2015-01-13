@@ -22,14 +22,37 @@
           - carrier_cache = build_carrier_cache
           - py.elected_plans.each do |ep|
             %n1:plan
-              = render 'shared/v2/identity', id: ep.id, obj: ep
+              = render 'shared/v2/identity', id: api_v2_plan_url(ep.id), obj: ep
               %n1:name= ep.plan_name
-              %n1:is_dental_only_flag= ep.coverage_type == 'dental'
+              %n1:is_dental_only= ep.coverage_type == 'dental'
               %n1:carrier= render 'shared/v2/carrier_link_type', carrier: carrier_cache[ep.carrier_id]
+              %n1:metal_level= "urn:openhbx:terms:v1:plan_metal_level##{ep.metal_level.downcase}"
+              %n1:coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{ep.coverage_type}"
+              = render 'shared/v2/timestamp', record: py
               %n1:original_effective_date= ep.original_effective_date.try(:strftime,"%Y%m%d")
               - if ep.carrier_employer_group_id.present?
                 %n1:group_id= ep.carrier_employer_group_id
               - if ep.carrier_policy_number.present?
                 %n1:policy_number= ep.carrier_policy_number
-              %n1:coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{ep.coverage_type}"
-              %n1:metal_level= "urn:openhbx:terms:v1:plan_metal_level##{ep.metal_level.downcase}"
+
+%n1:contacts
+  %n1:contact
+    %n1:id
+      %n1:id= api_v2_employer_url(employer.id)
+    %n1:person_name
+      %n1:person_surname= employer.name_last
+      %n1:person_given_name= employer.name_first
+    - unless employer.addresses.empty?
+      %n1:addresses
+        - employer.addresses.each do |address|
+          = render 'shared/v2/address', address: address
+    - unless employer.emails.empty?
+      %n1:emails
+        - employer.emails.each do |email|
+          = render 'shared/v2/email', email: email
+    - unless employer.phones.empty?
+      %n1:phones
+        - employer.phones.each do |phone|
+          = render 'shared/v2/phone', phone: phone
+%n1:is_active= employer.is_active?
+= render 'shared/v2/timestamp', record: employer

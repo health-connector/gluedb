@@ -20,7 +20,7 @@ class CancelTerminate
 
   validate :term_date_valid?, :unless => :is_cancel?
   validate :selected_at_least_one?
-  validate :non_aptc?
+  validate :non_aptc_dependents?
   validates_presence_of :reason
 
   def initialize(props = {})
@@ -42,8 +42,9 @@ class CancelTerminate
     @operation == "cancel"
   end
 
-  def non_aptc?
-    errors.add(:people, ": cannot effect members with aptc") unless @policy.applied_aptc == 0.00
+  def non_aptc_dependents?
+    subscriber_cancel = @people.select { |e| e[:role] == "self" }.first.include_selected
+    errors.add(:people, ": cannot effect dependents with aptc") unless @policy.applied_aptc == 0.00 || subscriber_cancel == "1"
   end
 
   def selected_at_least_one?

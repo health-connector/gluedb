@@ -55,7 +55,7 @@
 <%= render 'edi_transaction_table', transactions: t %>
 
 
-<% if can? :edit, current_user %>
+<% if can? :read, :all %>
   <h6>Premium Payments</h6>
   <%= render 'payments_table', premium_payments: p.premium_payments %>
 <% end %>

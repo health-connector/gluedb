@@ -184,6 +184,12 @@ class ApplicationGroup
     return household
   end
 
+  def find_irs_group_by_irs_group_id(irs_group_id)
+    self.irs_groups.detect do |irs_group|
+      irs_group.id == irs_group_id
+    end
+  end
+
 private
 
   # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.applicants

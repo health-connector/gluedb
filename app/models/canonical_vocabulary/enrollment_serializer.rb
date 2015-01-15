@@ -26,6 +26,7 @@ module CanonicalVocabulary
 
     def builder(xml = Nokogiri::XML::Builder.new)
       xml['ins'].send(select_root_tag.to_sym, XMLNSES) do |xml|
+        serialize_broker(xml)
         xml['ins'].exchange_policy_id(@policy.enrollment_group_id)
         serialize_subscriber(xml)
         serialize_members(xml)
@@ -35,6 +36,16 @@ module CanonicalVocabulary
         serialize_plan(xml)
       end
       xml
+    end
+
+    def serialize_broker(xml)
+      broker = @policy.broker
+      if !broker.blank?
+        xml['ins'].broker do |xml|
+          xml['ins'].broker_name(broker.name_full)
+          xml['ins'].broker_npn(broker.npn)
+        end
+      end
     end
 
     def serialize_rp(xml)

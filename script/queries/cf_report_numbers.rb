@@ -19,12 +19,12 @@ pols_2015 = Policy.where({
     :rel_code => "self",
     :coverage_start => {"$gt" => Date.new(2014,12,31)},
     :coverage_end => nil
-  }}, :plan_id => {"$in" => plan_ids}})
+  }}, :plan_id => {"$in" => plan_ids}, :employer_id => {"$ne" => nil}})
 
 puts pols_2015.length
 
 # Includes terminations!
-pols_2014 = Policy.where(PolicyStatus::Active.as_of(Date.new(2014, 12, 31)).query).where({:plan_id => {"$in" => plan_ids}})
+pols_2014 = Policy.where(PolicyStatus::Active.as_of(Date.new(2014, 12, 31)).query).where({:plan_id => {"$in" => plan_ids}, :employer_id => {"$ne" => nil}})
 
 puts pols_2014.length
 
@@ -84,6 +84,7 @@ enrollee_amount_2015 = 0
 
 health_2015 = []
 dental_2015 = []
+new_enrollments = []
 
 pols_2015.each do |pol|
   if is_health_renewal?(pol, p_repo, ct_cache, subs_from_2014)
@@ -95,6 +96,8 @@ pols_2015.each do |pol|
     else
       different_plan_renewals << pol.id
     end
+  else
+    new_enrollments << pol.id
   end
   if is_health?(pol, ct_cache)
     health_2015 << pol.id
@@ -105,6 +108,7 @@ end
 
 puts "2015 Health Policies: #{health_2015.length}"
 puts "2015 Dental Policies #{dental_2015.length}"
+puts "New Enrollments: #{new_enrollments.length}"
 puts "Renewals: #{renewals.length}"
 puts "Renewal - Same Plan: #{same_plan_renewals.length}"
 puts "Renewal - Different Plan: #{different_plan_renewals.length}"

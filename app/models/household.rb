@@ -12,7 +12,7 @@ class Household
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   # embedded belongs_to :irs_group association
-  field :irs_group_id, type: Moped::BSON::ObjectId
+  field :irs_group_id
 
   field :is_active, type: Boolean, default: true
   field :effective_start_date, type: Date
@@ -100,7 +100,7 @@ class Household
   end
 
   def set_submitted_at
-    self.submitted_at = tax_households.sort_by(&:updated_at).last.updated_at
+    self.submitted_at = tax_households.sort_by(&:updated_at).last.updated_at if tax_households.length > 0
     self.submitted_at = parent.updated_at unless self.submitted_at
     true
   end

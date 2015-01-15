@@ -35,6 +35,8 @@ class CoverageHousehold
 
     return unless application_group
 
+    return if application_group.primary_applicant.person.policies.length == 0 #if no policies
+
     people_in_coverage_household = self.applicants.flat_map(&:person) - [nil]
 
     enrollees = application_group.primary_applicant.person.policies.flat_map(&:enrollees).uniq
@@ -46,7 +48,7 @@ class CoverageHousehold
     same_people = people_in_coverage_household.map(&:id).uniq.sort == people_in_policies.map(&:id).uniq.sort
 
     unless same_people
-      self.errors.add(:base, "Applicants in coverage household are not the same as people covered in policies")
+      self.errors.add(:base, "Applicants in coverage household are not the same as enrollees covered in policies")
     end
   end
 

@@ -229,7 +229,8 @@ module Parsers
 
         if employer_loop.specified_as_group?
           employer = Employer.find_for_carrier_and_group_id(carrier_id, employer_loop.group_id)
-        else
+        end
+        if employer.blank?
           new_employer = Employer.new(
             :name => employer_loop.name,
             :fein => employer_loop.fein

@@ -14,7 +14,7 @@
 
 		<div class="panel-body">
 			<ul class="list-group">
-				<% policies = Policy.find_all_policies_for_member_id(member.hbx_member_id).sort_by{ |p| p.subscriber.coverage_start } %>
+				<% policies = Policy.find_all_policies_for_member_id(member.hbx_member_id).sort_by{ |p| p.subscriber.coverage_start }.reverse %>
 				<% policies.each do |policy| %>
 					<li class="list-group-item"><%= render 'policy_detail', p: policy if  policy_market(policy) == "Individual" || (can? :read, :all) %></li>
 				<% end %>

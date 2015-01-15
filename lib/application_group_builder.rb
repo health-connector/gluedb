@@ -1,3 +1,5 @@
+require "irs_groups/irs_group_builder"
+
 class ApplicationGroupBuilder
 
   attr_reader :application_group
@@ -18,7 +20,7 @@ class ApplicationGroupBuilder
       @is_update = false # means this is a create
     end
 
-    add_irsgroups([{}]) # we need a atleast 1 irsgroup hence adding a blank one
+    #add_irsgroups([{}]) # we need a atleast 1 irsgroup hence adding a blank one
 
     @application_group.updated_by = "curam_system_service"
 
@@ -105,8 +107,6 @@ class ApplicationGroupBuilder
     else
       @household = self.application_group.active_household #if update and applicants haven't changed then use the active household
     end
-
-    # puts "return @household"
 
     return @household
 
@@ -196,16 +196,10 @@ class ApplicationGroupBuilder
 
   end
 
-  def add_irsgroup(irs_group_params)
-    puts irs_group_params.inspect
-    @application_group.irs_groups.build(irs_group_params)
-  end
-
-  #TODO - method not implemented properly using .build(params)
-  def add_irsgroups(irs_groups_params)
-    irs_groups_params.map do |irs_group_params|
-      add_irsgroup(irs_group_params)
-    end
+  def add_irsgroups
+    return if @is_update
+    irs_group = IrsGroupBuilder.new(self.application_group).build
+    @save_list << irs_group
   end
 
   def add_tax_households(tax_households_params)
@@ -303,6 +297,7 @@ class ApplicationGroupBuilder
 
   def save
     add_primary_applicant_employee_applicant
+    add_irsgroups
     id = @application_group.save!
     save_save_list
     @application_group.id #return the id of saved application group

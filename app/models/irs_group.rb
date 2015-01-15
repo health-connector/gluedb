@@ -4,8 +4,12 @@ class IrsGroup
 
   embedded_in :application_group
 
+  after_save :set_househould_irs_group_id
+
   # Unique identifier for this Household used for reporting enrollment and premium tax credits to IRS
   auto_increment :hbx_assigned_id, seed: 9999
+
+  auto_increment :_id, seed: 1000000000000000 #The 16digit IrsGroup identifier as required by IRS
 
   field :effective_start_date, type: Date
   field :effective_end_date, type: Date
@@ -28,6 +32,11 @@ class IrsGroup
  
   def is_active?
     self.is_active
+  end
+
+  private
+  def set_househould_irs_group_id
+    self.application_group.active_household.irs_group_id = self._id if self.application_group && self.application_group.active_household
   end
 
 end

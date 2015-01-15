@@ -176,9 +176,12 @@ class ApplicationGroup
   end
 
   def active_household
-    self.households.find do |household|
+
+    household = self.households.detect do |household|
       household.is_active?
     end
+
+    return household
   end
 
 private

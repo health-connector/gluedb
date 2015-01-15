@@ -14,17 +14,19 @@ class ApplicationGroupBuilder
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
     @application_group = ApplicationGroup.where(e_case_id: filtered_param[:e_case_id]).first
-
+    @new_applicants = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
     if @application_group.nil?
       @application_group = ApplicationGroup.new(filtered_param) #we create a new application group from the xml
       @is_update = false # means this is a create
     end
 
-    #add_irsgroups([{}]) # we need a atleast 1 irsgroup hence adding a blank one
-
     @application_group.updated_by = "curam_system_service"
 
     get_household
+  end
+
+  def build
+
   end
 
   def add_applicant(applicant_params)
@@ -41,6 +43,9 @@ class ApplicationGroupBuilder
       end
 
       applicant = @application_group.applicants.build(filter_applicant_params(applicant_params))
+
+      @new_applicants << applicant
+
       member = applicant.person.members.select do |m|
         m.authority?
       end.first
@@ -95,7 +100,6 @@ class ApplicationGroupBuilder
   def get_household
 
     return @household if @household
-
     if !@is_update
       # puts "New Application Group Case"
       @household = self.application_group.households.build #if new application group then create new household
@@ -131,10 +135,12 @@ class ApplicationGroupBuilder
 
   def add_coverage_household
 
+    return if @new_applicants.length == 0
+
     #TODO decide where to get submitted_at from
     coverage_household = @household.coverage_households.build({submitted_at: Time.now})
 
-    @application_group.applicants.each do |applicant|
+    @new_applicants.each do |applicant|
       if applicant.is_coverage_applicant
         coverage_household_member = coverage_household.coverage_household_members.build
         coverage_household_member.applicant_id = applicant.id
@@ -196,6 +202,7 @@ class ApplicationGroupBuilder
 
   end
 
+  #TODO currently only handling case we create new application case, where 1 irs group is built with 1 coverage household.
   def add_irsgroups
     return if @is_update
     irs_group = IrsGroupBuilder.new(self.application_group).build

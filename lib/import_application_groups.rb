@@ -116,6 +116,7 @@ class ImportApplicationGroups
     member_id_generator = MemberIdGen.new(20000000)
     p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
+
     puts "PARSING START"
 
     ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
@@ -132,8 +133,6 @@ class ImportApplicationGroups
         value = uc.validate(ig_request, listener)
       end
 
-      puts "all_valid :#{all_valid}"
-
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
         value = uc.commit(ig_request, listener)
@@ -141,7 +140,6 @@ class ImportApplicationGroups
 
       application_group_builder = ApplicationGroupBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
-      puts "created  application_group_builder"
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
 
@@ -163,8 +161,6 @@ class ImportApplicationGroups
 
       end
 
-      puts "added relationships"
-
       begin
         #application_group_builder.add_irsgroups(ag.irs_groups)
 
@@ -177,7 +173,6 @@ class ImportApplicationGroups
         application_group_builder.add_financial_statements(applicants_params)
         application_group_builder.add_hbx_enrollment
         application_group_builder.add_coverage_household
-
 
         application_group_id = application_group_builder.save
         puts "Saved #{application_group_id}"

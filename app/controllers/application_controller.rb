@@ -24,11 +24,11 @@ class ApplicationController < ActionController::Base
   end
 
   def id_not_found
-    render file: 'public/404.html', status: 404
+    render file: 'public/404', status: 404, formats: [:html]
   end
 
   def access_denied
-    render file: 'public/403.html', status: 403
+    render file: 'public/403', status: 403, formats: [:html]
   end
 
   private

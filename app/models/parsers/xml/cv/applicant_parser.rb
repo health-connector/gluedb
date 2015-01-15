@@ -15,10 +15,10 @@ module Parsers::Xml::Cv
     element :is_primary_applicant, String, tag: 'is_primary_applicant'
     element :tax_household_id, String, tag: 'tax_household_id'
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
-    element :is_head_of_household, String, tag: 'is_head_of_household'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
     has_many :employee_applicants, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
+    element :is_consent_applicant, String, tag: 'is_consent_applicant'
 
     def to_individual_request(member_id_generator, p_tracker)
       alias_ids.each do |a_id|
@@ -62,10 +62,11 @@ module Parsers::Xml::Cv
          applicant_id: id,
          is_primary_applicant: is_primary_applicant,
          is_coverage_applicant: is_coverage_applicant,
-         is_head_of_household:is_head_of_household,
          person_demographics: person_demographics.to_hash,
          financial_statements: financial_statements.map(&:to_hash),
-         employee_applicants: employee_applicants.map(&:to_hash)
+         employee_applicants: employee_applicants.map(&:to_hash),
+         is_consent_applicant: is_consent_applicant,
+         alias_ids: alias_ids
      }
 
      response[:person] = p_tracker[id].first if p_tracker

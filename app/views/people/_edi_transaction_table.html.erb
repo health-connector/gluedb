@@ -8,7 +8,9 @@
         <th>State</th>
         <th>Submitted at</th>
         <th>Ack/Nak at</th>
-        <th>Action</th>
+        <% if can? :read, current_user %>
+          <th>Action</th>
+        <% end %>
       </tr>
     </thead>
     <tbody>
@@ -18,13 +20,17 @@
         <td><%= trans_aasm_state(trans) %></td>
         <td><%= trans.submitted_at.to_date %></td>
         <td><%= trans.ack_nak_processed_at.to_date unless trans.ack_nak_processed_at.blank? %></td>
-	<% if trans.kind_of?(Protocols::X12::TransactionSetHeader) %>
-		<td><%= link_to "View detail", edi_transaction_set_path(trans) %></td>
-	<% elsif trans.kind_of?(Protocols::Csv::CsvTransaction) %>
-		<td><%= link_to "View detail", csv_transaction_path(trans) %></td>
-	<% else %>
-		<td>&nbsp;</td>
-        <% end %>
+        <td>
+          <% if can? :read, current_user %>
+            <% if trans.kind_of?(Protocols::X12::TransactionSetHeader) %>
+              <%= link_to "View detail", edi_transaction_set_path(trans) %>
+            <% elsif trans.kind_of?(Protocols::Csv::CsvTransaction) %>
+              <%= link_to "View detail", csv_transaction_path(trans) %>
+            <% else %>
+              &nbsp;
+            <% end %>
+          <% end %>
+        </td>
       </tr>
       <% end %>
     </tbody>

@@ -117,6 +117,9 @@ module Parsers
                 employer = nil
                 if employer_loop.specified_as_group?
                   employer = Employer.find_for_carrier_and_group_id(@carrier.id, employer_loop.group_id)
+                  if employer.blank?
+                    employer = Employer.find_for_fein(employer_loop.fein)
+                  end
                 else
                   employer = Employer.find_for_fein(employer_loop.fein)
                 end

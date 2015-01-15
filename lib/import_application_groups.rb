@@ -125,7 +125,6 @@ class ImportApplicationGroups
     ags.each do |ag|
       puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
 
-      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash, p_tracker)
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
       uc = CreateOrUpdatePerson.new
       all_valid = ig_requests.all? do |ig_request|
@@ -133,13 +132,16 @@ class ImportApplicationGroups
         value = uc.validate(ig_request, listener)
       end
 
-      next unless all_valid
+      puts "all_valid :#{all_valid}"
 
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
         value = uc.commit(ig_request, listener)
       end
 
+      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash(p_tracker), p_tracker)
+
+      puts "created  application_group_builder"
       #applying person objects in person relationships for each applicant.
       ag.applicants.each do |applicant|
 
@@ -161,9 +163,12 @@ class ImportApplicationGroups
 
       end
 
+      puts "added relationships"
+
       begin
         #application_group_builder.add_irsgroups(ag.irs_groups)
-        application_group_builder.add_tax_households(ag.to_hash[:tax_households], ag.to_hash[:eligibility_determinations])
+
+        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
 
         applicants_params = ag.applicants.map do |applicant|
           applicant.to_hash(p_tracker)
@@ -173,8 +178,9 @@ class ImportApplicationGroups
         application_group_builder.add_hbx_enrollment
         application_group_builder.add_coverage_household
 
-        application_group_builder.application_group.save!
-        puts "Saved #{application_group_builder.application_group.id}"
+
+        application_group_id = application_group_builder.save
+        puts "Saved #{application_group_id}"
 
       rescue Exception => e
         fail_counter += 1

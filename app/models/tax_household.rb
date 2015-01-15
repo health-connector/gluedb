@@ -54,10 +54,17 @@ class TaxHousehold
   end
 
   def is_eligibility_determined?
-    self.is_eligibility_determined
+    if self.elegibility_determinizations.size > 0
+      true
+    else
+      false
+    end
   end
 
-  def applicant_ids
-    tax_household_members.map(&:applicant_id)
+  #primary applicant is the tax household member who is the subscriber
+  def primary_applicant
+    tax_household_members.detect do |tax_household_member|
+      tax_household_member.is_subscriber == true
+    end
   end
 end

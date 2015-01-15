@@ -1,4 +1,3 @@
-
 application_group = ApplicationGroup.limit(10)
 application_group = ApplicationGroup.first.to_a
 # application_group = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
@@ -8,14 +7,14 @@ def migrate_relationships(app_group)
   app_group.person_relationships.each do |rel|
 
     # Use relationships to construct AG membership and move relationships to Person model
-    subject   = Person.find(rel["subject_person"])
-    relative  = Person.find(rel["object_person"])
+    subject = Person.find(rel["subject_person"])
+    relative = Person.find(rel["object_person"])
     relationship = rel["relationship_kind"]
 
     subject.person_relationships << PersonRelationship.new(
         relative: relative,
         kind: relationship
-      )
+    )
     subject.updated_by = "renewal_migration_service"
     subject.save!
 
@@ -24,13 +23,13 @@ def migrate_relationships(app_group)
       relative.person_relationships << PersonRelationship.new(
           relative: relative,
           kind: "self"
-        )
+      )
 
       # Add relationship to 'subject individual'
       pr = PersonRelationship.new(
           relative: subject,
           kind: relationship
-        )
+      )
       # Flip the relationship
       relative.person_relationships << pr.invert_relationship
 
@@ -96,7 +95,7 @@ def build_enrollments(app_group)
 
         em = HbxEnrollmentMember.new(
             applicant: appl,
-            premium_amount_in_dollars: enrollee.pre_amt
+            premium_amount_in_cents: enrollee.pre_amt
         )
 
         em.is_subscriber = true if (enrollee.rel_code == "self")
@@ -118,11 +117,11 @@ application_group.each do |ag|
   hh = Household.new(
       application_group: ag,
       submitted_at: Time.now
-    )
+  )
   ch = CoverageHousehold.new(
       household: hh,
       submitted_at: Time.now
-    )
+  )
 
   # Move the ApplicationGroup relationships to repsective Person models
   migrate_relationships(ag)
@@ -148,5 +147,4 @@ application_group.each do |ag|
   # build financial_statements
 
   # build eligibility_determinations
-
 end

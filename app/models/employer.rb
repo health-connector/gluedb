@@ -191,8 +191,7 @@ class Employer
   def plan_year_of(coverage_start_date)
     # The #to_a is a caching thing.
     plan_years.to_a.detect do |py|
-      (py.start_date <= coverage_start_date) &&
-        (py.end_date >= coverage_start_date)
+      (py.start_date <= coverage_start_date) && (py.end_date >= coverage_start_date)
     end
   end
 

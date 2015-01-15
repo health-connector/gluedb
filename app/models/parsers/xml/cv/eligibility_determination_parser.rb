@@ -13,19 +13,21 @@ module Parsers::Xml::Cv
         value.to_i
     }
     element :determination_date, String, tag: "determination_date"
-    has_many :applicants, Parsers::Xml::Cv::ApplicantParser, tag: 'applicants'
+    element :benchmark_plan_id, String, tag: 'benchmark_plan_id/cv:id/cv:id'
 
     def to_hash
-      {
+      response = {
           id: id,
           household_state: household_state,
           maximum_aptc: maximum_aptc,
           csr_percent_as_integer: csr_percent,
           determination_date: determination_date,
-          persons: applicants.map do |applicant|
-            applicant.person.to_hash
-          end
+          benchmark_plan_id: benchmark_plan_id
       }
+
+      response[:household_state] = response[:household_state].split('#').last if response[:household_state]
+
+      response
     end
 
   end

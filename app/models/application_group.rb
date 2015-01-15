@@ -28,7 +28,7 @@ class ApplicationGroup
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
 
-  embeds_many :households, cascade_callbacks: true
+  embeds_many :households, cascade_callbacks: true, :before_add => :reset_active_household
   accepts_nested_attributes_for :households
 
   embeds_many :comments, cascade_callbacks: true
@@ -49,6 +49,12 @@ class ApplicationGroup
 
   validate :no_duplicate_applicants
 
+  validate :integrity_of_applicant_objects
+
+  validate :max_one_primary_applicant
+
+  validate :max_one_active_household
+
   scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
 
@@ -60,8 +66,9 @@ class ApplicationGroup
   end
 
   def latest_household
-    return households.first if households.size = 1
-    households.sort_by(&:submitted_at).last.submitted_at
+    return households.first if households.size == 1
+    persisted_household = households.select(&:persisted?) - [nil] #remove any nils
+    persisted_household.sort_by(&:submitted_at).last
   end
 
   def active_applicants
@@ -154,7 +161,7 @@ class ApplicationGroup
 
   def people_relationship_map
     map = Hash.new
-    people.each do |person|      
+    people.each do |person|
       map[person] = person_relationships.detect { |r| r.object_person == person.id }.relationship_kind
     end
     map
@@ -168,10 +175,72 @@ class ApplicationGroup
     self.is_active
   end
 
+  def active_household
+    self.households.find do |household|
+      household.is_active?
+    end
+  end
+
 private
 
-  def validate_one_and_only_one_primary_applicant
-    # applicants.detect { |a| a.is_primary_applicant? }
+  # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.applicants
+  def integrity_of_applicant_objects
+
+    applicants_in_application_group = self.applicants - [nil]
+
+    # puts applicants_in_application_group.map(&:id).inspect
+
+    tax_household_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:tax_households).flat_map(&:tax_household_members).map(&:applicant_id))
+
+    coverage_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:coverage_households).flat_map(&:coverage_household_members).map(&:applicant_id))
+
+    tax_household_applicants_valid && coverage_applicants_valid
+  end
+
+  def are_arrays_of_applicants_same?(base_set, test_set)
+    base_set.uniq.sort == test_set.uniq.sort
+  end
+
+  def max_one_primary_applicant
+    primary_applicants = self.applicants.select do |applicant|
+      applicant.is_primary_applicant == true
+    end
+
+    if primary_applicants.size > 1
+      self.errors.add(:base, "Multiple primary applicants")
+      return false
+    else
+      return true
+    end
+  end
+
+  #TODO need to verify this logic from Dan
+  def set_employee_applicants
+    primary_applicant.person.policies do |policy|
+      employee_applicant = self.primary_applicant.employee_applicants.build
+      employee_applicant.employer = policy.employer
+    end
+    return true
+  end
+
+  def reset_active_household(new_household)
+    households.each do |household|
+      household.is_active = false
+    end
+    new_household.is_active = true
+  end
+
+  def max_one_active_household
+    active_households = self.households.select do |household|
+      household.is_active?
+    end
+
+    if active_households.size > 1
+      self.errors.add(:base, "Multiple active households")
+      return false
+    else
+      return true
+    end
   end
 
 end

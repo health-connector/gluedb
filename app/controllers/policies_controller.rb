@@ -1,4 +1,7 @@
 class PoliciesController < ApplicationController
+
+  load_and_authorize_resource
+
   def new
     @form = PolicyForm.new(application_group_id: params[:application_group_id], household_id: params[:household_id])
   end

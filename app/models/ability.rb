@@ -11,8 +11,10 @@ class Ability
     elsif user.role == "edi_ops"
       can :manage, :all
       cannot :modify, User
-    else
+    elsif user.role == "user"
       can :read, :all
+    elsif user.role == "service"
+      can :read, Person
     end
 
   end

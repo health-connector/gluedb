@@ -1,5 +1,5 @@
 module PdfTemplates
-  class NoticeInput
+  class RenewalNoticeInput
     include Virtus.model
 
     attribute :primary_name, String
@@ -11,8 +11,11 @@ module PdfTemplates
     attribute :health_plan_name, String
     attribute :dental_plan_name, String
     attribute :health_premium, String
+    attribute :health_aptc, String
+    attribute :health_responsible_amt, String
     attribute :dental_premium, String
-
+    attribute :dental_aptc, String
+    attribute :dental_responsible_amt, String
     attribute :notice_date, Date
   end
 end

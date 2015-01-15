@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://openhbx.org/api/terms/1.0"
+            targetNamespace="http://openhbx.org/api/terms/1.0"
+            elementFormDefault="qualified">
+  <xsd:include schemaLocation="common.xsd"/>
+  
+  <xsd:complexType name="DocumentRecordType" abstract="true">
+    <xsd:sequence>
+      <xsd:element name="document_id" type="xsd:string"/>
+      <xsd:element name="document_name" type="xsd:string"/>
+      <xsd:element name="properties" type="xsd:anyType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="document" type="xsd:base64Binary" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <xsd:element name="DocumentRecord" abstract="true" type="DocumentRecordType"/>
+  
+  <xsd:element name="statement_document" substitutionGroup="DocumentRecord">
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:restriction base="DocumentRecordType">
+          <xsd:sequence>
+            <xsd:element name="document_id" type="xsd:string"/>
+            <xsd:element name="document_name" type="xsd:string"/>
+            <xsd:element name="document" type="xsd:base64Binary" minOccurs="0"/>
+          </xsd:sequence>
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="get_document_request">
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:restriction base="ServiceRequestType">
+          <xsd:sequence>
+            <xsd:element name="request_name">
+              <xsd:simpleType>
+                  <xsd:restriction base="xsd:anyURI">
+                    <xsd:enumeration value="urn:openhbx:requests:v1:document#by_id"/>
+                  </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:element>
+            <!--
+            TODO: FIGURE OUT HOW TO GET THESE IN HERE
+            <xsd:element ref="correlation_id" minOccurs="0"/>
+            <xsd:element ref="message_id" minOccurs="0"/>
+            <xsd:element name="reply_to" type="xsd:anyURI" minOccurs="0"/>
+            -->
+            <xsd:element name="parameters" type="DocumentRequestParametersType"/>
+          </xsd:sequence>
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="create_document_request">
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:restriction base="ServiceRequestType">
+          <xsd:sequence>
+            <xsd:element name="request_name">
+              <xsd:simpleType>
+                  <xsd:restriction base="xsd:anyURI">
+                    <xsd:enumeration value="urn:openhbx:requests:v1:document#create"/>
+                  </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:element>
+            <!--
+            TODO: FIGURE OUT HOW TO GET THESE IN HERE
+            <xsd:element ref="correlation_id" minOccurs="0"/>
+            <xsd:element ref="message_id" minOccurs="0"/>
+            <xsd:element name="reply_to" type="xsd:anyURI" minOccurs="0"/>
+            -->
+            <xsd:element name="body">
+              <xsd:complexType>
+                <xsd:sequence>
+                  <xsd:element ref="DocumentRecord"/>
+                </xsd:sequence>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:complexType name="DocumentRequestParametersType">
+        <xsd:sequence>
+          <xsd:element name="document_id" type="xsd:string"/>
+          <xsd:element name="document_name" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>

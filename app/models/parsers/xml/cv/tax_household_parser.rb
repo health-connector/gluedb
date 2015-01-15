@@ -13,10 +13,11 @@ module Parsers::Xml::Cv
     has_many :total_incomes_by_year,  Parsers::Xml::Cv::IncomeByYearParser, xpath: 'cv:total_incomes_by_year'
     element :is_active, Boolean, tag:'is_active'
     has_many :tax_household_members, Parsers::Xml::Cv::TaxHouseholdMemberParser, xpath: 'cv:tax_household_members'
+    has_many :eligibility_determinations, Parsers::Xml::Cv::EligibilityDeterminationParser, xpath: "cv:eligibility_determinations"
 
 
     def to_hash
-      {
+      response = {
           id: id,
           primary_applicant_id: primary_applicant_id,
           total_count: tax_household_size_total_count,
@@ -25,8 +26,13 @@ module Parsers::Xml::Cv
           end,
           tax_household_members: tax_household_members.map do |tax_household_member|
             tax_household_member.to_hash
+          end,
+          eligibility_determinations: eligibility_determinations.map do |eligibility_determination|
+            eligibility_determination.to_hash
           end
       }
+
+      response
     end
   end
 end

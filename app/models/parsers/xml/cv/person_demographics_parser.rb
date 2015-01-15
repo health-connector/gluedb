@@ -30,7 +30,10 @@ module Parsers::Xml::Cv
       response = {
           is_state_resident:is_state_resident,
           citizen_status:citizen_status,
-          marital_status:marital_status
+          marital_status:marital_status,
+          death_date: death_date,
+          race: race,
+          ethnicity: ethnicity
       }
       response.merge(individual_request)
     end

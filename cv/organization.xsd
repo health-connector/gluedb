@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2014 rel. 2 (x64) (http://www.altova.com) by Dan Thomas (private) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://openhbx.org/api/terms/1.0" targetNamespace="http://openhbx.org/api/terms/1.0" elementFormDefault="qualified">
+	<xs:include schemaLocation="common.xsd"/>
+	<xs:include schemaLocation="links.xsd"/>
+	<xs:element name="organization">
+		<xs:annotation>
+			<xs:documentation>Comment describing your root element</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="OrganizationType" abstract="true">
+		<xs:annotation>
+			<xs:documentation>Base class for companies and agencies</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="id" type="IdentifierType"/>
+			<xs:element name="name" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Organization formal name in free-form text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="dba" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Doing Business As in free-form text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="display_name" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Organization name as presesnted in UI</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="abbreviation" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Organization name in shortened, free-form text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fein" type="FederalTaxIdType" minOccurs="0"/>
+			<xs:element ref="addresses" minOccurs="0"/>
+			<xs:element name="website" type="xs:anyURI" minOccurs="0"/>
+			<xs:element ref="phones" minOccurs="0"/>
+			<xs:element ref="emails" minOccurs="0"/>
+			<xs:element ref="contacts" minOccurs="0"/>
+			<xs:element name="is_active" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Indicator that organization  is operative on the HBX</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="extended_attributes" type="xs:anyType" minOccurs="0"/>
+			<xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CarrierType">
+		<xs:annotation>
+			<xs:documentation>A health insurance company</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:restriction base="OrganizationType">
+				<xs:sequence>
+					<xs:element name="id" type="IdentifierType"/>
+					<xs:element name="name" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Organization formal name in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="dba" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Doing Business As in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="display_name" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name as presesnted in UI</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="abbreviation" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name in shortened, free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="fein" type="FederalTaxIdType" minOccurs="0"/>
+					<xs:element name="website" type="xs:anyURI" minOccurs="0"/>
+					<xs:element ref="phones" minOccurs="0"/>
+					<xs:element ref="emails" minOccurs="0"/>
+					<xs:element ref="contacts" minOccurs="0"/>
+					<xs:element name="is_active" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Indicator that organization  is operative on the HBX</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="BrokerType">
+		<xs:annotation>
+			<xs:documentation>An insurance specialist who provides advice and sells insurance to businesses and consumers</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:restriction base="OrganizationType">
+				<xs:sequence>
+					<xs:element name="id" type="IdentifierType"/>
+					<xs:element name="name" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Organization formal name in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="dba" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Doing Business As in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="display_name" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name as presesnted in UI</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="abbreviation" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name in shortened, free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="website" type="xs:anyURI" minOccurs="0"/>
+					<xs:element ref="phones" minOccurs="0"/>
+					<xs:element ref="emails" minOccurs="0"/>
+					<xs:element ref="contacts" minOccurs="0"/>
+					<xs:element name="is_active" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Indicator that organization  is operative on the HBX</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="extended_attributes" type="TpaType" minOccurs="0"/>
+					<xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="HbxType">
+		<xs:annotation>
+			<xs:documentation>Health Benefit Exchange organization</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:restriction base="OrganizationType">
+				<xs:sequence>
+					<xs:element name="id" type="IdentifierType"/>
+					<xs:element name="name" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Organization formal name in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="dba" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Doing Business As in free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="display_name" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name as presesnted in UI</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="abbreviation" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Organization name in shortened, free-form text</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="fein" type="FederalTaxIdType" minOccurs="0"/>
+					<xs:element ref="addresses" minOccurs="0"/>
+					<xs:element name="website" type="xs:anyURI" minOccurs="0"/>
+					<xs:element ref="phones" minOccurs="0"/>
+					<xs:element ref="emails" minOccurs="0"/>
+					<xs:element ref="contacts" minOccurs="0"/>
+					<xs:element name="is_active" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Indicator that organization  is operative on the HBX</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="extended_attributes" type="xs:anyType" minOccurs="0"/>
+					<xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+		<xs:complexType name="ResponsibleEntityType">
+		<xs:annotation>
+			<xs:documentation>An Entitity's HBX activity associated with sponsoring insurance coverage for others</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="entity_identifier" type="EntityNameType"/>
+			<xs:element name="organization" type="OrganizationType" minOccurs="0"/>
+			<xs:element name="policies" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="policy" type="PolicyLinkType" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="EntityNameType">
+		<xs:restriction base="xs:anyURI">
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#case_manager"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#key_person"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#parent"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#responsible_party"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#guardian"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#ex_spouse"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#significant_other"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#legal_representative"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#power_of_attorney"/>
+			<xs:enumeration value="urn:openhbx:terms:v1:entity#other_insured"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

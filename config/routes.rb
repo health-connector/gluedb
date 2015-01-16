@@ -139,6 +139,9 @@ Gluedb::Application.routes.draw do
         member do
           get :old_cv
         end
+        collection do
+          get :old_group_index
+        end
       end
       resources :policies, :only => [:show, :index]
       resources :application_groups, :only => [:show, :index]

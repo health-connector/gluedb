@@ -1,2 +1,3 @@
 %employers{"xmlns:ns1" => "http://dchealthlink.com/vocabulary/20131030/employer","xmlns"=>"http://dchealthlink.com/vocabulary/20131030/employer"}
- = render 'api/v1/employers/old_detail', employer: @employer
+  - @employers.each do |employer|
+    = render 'api/v1/employers/old_detail', employer: employer

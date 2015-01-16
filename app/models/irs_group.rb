@@ -4,6 +4,8 @@ class IrsGroup
 
   embedded_in :application_group
 
+  before_save :set_effective_start_date
+  before_save :set_effective_end_date
   after_save :set_househould_irs_group_id
 
   # Unique identifier for this Household used for reporting enrollment and premium tax credits to IRS
@@ -39,4 +41,11 @@ class IrsGroup
     self.application_group.active_household.irs_group_id = self._id if self.application_group && self.application_group.active_household
   end
 
+  def set_effective_start_date
+    self.effective_start_date = application_group.active_household.effective_start_date
+  end
+
+  def set_effective_end_date
+    self.effective_end_date = application_group.active_household.effective_end_date
+  end
 end

@@ -5,7 +5,8 @@ class Household
 
   embedded_in :application_group
 
-  before_save :set_effective_end_date
+  before_save :set_effective_start_date
+  before_save :set_effective_end_date # set_effective_start_date should be done before this
   before_save :reset_is_active_for_previous
   before_save :set_submitted_at
 
@@ -87,6 +88,7 @@ class Household
   def set_effective_end_date
     return true unless self.effective_start_date
     latest_household = self.application_group.latest_household
+    return if self == latest_household
     latest_household.effective_end_date = self.effective_start_date - 1.day
     true
   end
@@ -101,7 +103,12 @@ class Household
 
   def set_submitted_at
     self.submitted_at = tax_households.sort_by(&:updated_at).last.updated_at if tax_households.length > 0
-    self.submitted_at = parent.updated_at unless self.submitted_at
+    self.submitted_at = parent.submitted_at unless self.submitted_at
+    true
+  end
+
+  def set_effective_start_date
+    self.effective_start_date =  application_group.submitted_at
     true
   end
 

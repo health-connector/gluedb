@@ -42,10 +42,10 @@ class IrsGroup
   end
 
   def set_effective_start_date
-    self.effective_start_date = application_group.active_household.effective_start_date
+    self.effective_start_date = application_group.active_household.effective_start_date if application_group.active_household
   end
 
   def set_effective_end_date
-    self.effective_end_date = application_group.active_household.effective_end_date
+    self.effective_end_date = application_group.active_household.effective_end_date if application_group.active_household
   end
 end

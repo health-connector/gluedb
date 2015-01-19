@@ -121,11 +121,13 @@ class Enrollee
   end
 
   def canceled?
-    (!self.active?) && self.coverage_ended? && (self.coverage_start == self.coverage_end)
+    return false unless coverage_ended?
+    (self.coverage_start >= self.coverage_end)
   end
 
   def terminated?
-    (!self.active?) && self.coverage_ended? && (self.coverage_start != self.coverage_end)
+    return false unless coverage_ended?
+    (self.coverage_start < self.coverage_end)
   end
 
   def subscriber?

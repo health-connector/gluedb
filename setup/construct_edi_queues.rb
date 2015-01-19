@@ -43,6 +43,8 @@ class EdiQueueSetup
     
     emake_q = queue(Listeners::EnrollmentCreator.queue_name)
     emake_q.bind(req_exchange, :routing_key => "enrollment.create")
+    eval_q = queue(Listeners::EnrollmentValidator.queue_name)
+    eval_q.bind(req_exchange, :routing_key => "enrollment.validate")
     pmatch_q = queue(Listeners::PersonMatcher.queue_name)
     pmatch_q.bind(req_exchange, :routing_key => "person.match")
 

@@ -572,32 +572,6 @@ class Policy
     pol
   end
 
-
-  def clone_with_plan(plan)
-    pol = Policy.new({
-      :broker => self.broker,
-      :employer_id => self.employer_id,
-      :carrier_to_bill => self.carrier_to_bill,
-      :preceding_enrollment_group_id => self.eg_id,
-      :carrier_id => self.carrier_id,
-      :responsible_party_id => self.responsible_party_id
-      })
-
-    cloneable_enrollees = self.enrollees.reject do |en|
-      en.canceled?
-    end
-
-    pol.enrollees = cloneable_enrollees.map do |en|
-      en.clone_for_renewal(self.subscriber.coverage_start)
-    end
-
-    pol.plan = plan
-
-    # current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
-    # pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
-    pol
-  end
-
   def changes_over_time?
     eligible_enrollees = self.enrollees.reject do |en|
       en.canceled?
@@ -637,4 +611,5 @@ class Policy
       enrollee.m_id
     end
   end
+
 end

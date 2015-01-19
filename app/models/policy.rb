@@ -172,6 +172,10 @@ class Policy
     enrollees.detect { |m| m.relationship_status_code == "self" }
   end
 
+  def spouse
+    enrollees.detect { |m| m.relationship_status_code == "spouse" && !m.canceled? }
+  end
+
   def enrollees_sans_subscriber
     enrollees.reject { |e| e.relationship_status_code == "self" }
   end
@@ -594,6 +598,18 @@ class Policy
     pol
   end
 
+  def changes_over_time?
+    eligible_enrollees = self.enrollees.reject do |en|
+      en.canceled?
+    end
+    starts = eligible_enrollees.map(&:coverage_start).uniq
+    return true if (starts.length > 1)
+    end_dates = eligible_enrollees.map do |en|
+      en.coverage_end.blank? ? self.coverage_period_end : en.coverage_end
+    end
+    end_dates.uniq.length > 1
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
@@ -620,17 +636,5 @@ class Policy
     self.enrollees.map do |enrollee|
       enrollee.m_id
     end
-  end
-
-  def changes_over_time?
-    eligible_enrollees = policy.enrollees.reject do |en|
-      en.canceled?
-    end
-    starts = eligible_enrollees.map(&:coverage_start).uniq
-    return true if (starts.length > 1)
-    end_dates = eligible_enrollees.map do |en|
-      en.coverage_end.blank? ? self.coverage_period_end ? en.coverage_end
-    end
-    end_dates.uniq.length > 1
   end
 end

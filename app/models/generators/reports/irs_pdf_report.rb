@@ -32,12 +32,10 @@ module Generators::Reports
       end
 
       bounding_box([col2, y_pos], :width => 150) do
-        #stroke_bound
         text @notice.policy_id
       end
 
       bounding_box([col3, y_pos], :width => 200) do
-        #stroke_bound
         text @notice.issuer_name
       end
 
@@ -55,17 +53,14 @@ module Generators::Reports
       y_pos = cursor
 
       bounding_box([col1, y_pos], :width => 100) do
-        #stroke_bound
         text @notice.recipient.coverage_start_date
       end
 
       bounding_box([col2, y_pos], :width => 100) do
-        #stroke_bound
         text @notice.recipient.coverage_termination_date.to_s
       end
 
       bounding_box([col3, y_pos], :width => 200) do
-        #stroke_bound
         text @notice.recipient_address.street_1
       end
 
@@ -73,17 +68,14 @@ module Generators::Reports
       y_pos = cursor
 
       bounding_box([col1, y_pos], :width => 120) do
-        #stroke_bound
         text @notice.recipient_address.city
       end
 
       bounding_box([col2, y_pos], :width => 100) do
-        #stroke_bound
         text @notice.recipient_address.state
       end
 
       bounding_box([col3, y_pos], :width => 100) do
-        #stroke_bound
         text @notice.recipient_address.zip
       end
     end
@@ -95,17 +87,14 @@ module Generators::Reports
       y_pos = cursor
 
       bounding_box([col1, y_pos], :width => 240) do
-        #stroke_bound
         text enrollee.name
       end
 
       bounding_box([col3, y_pos], :width => 100) do
-        #stroke_bound
         text enrollee.ssn
       end
 
       bounding_box([col4, y_pos], :width => 100) do
-        #stroke_bound
         text enrollee.dob
       end    
     end
@@ -121,25 +110,19 @@ module Generators::Reports
 
       @notice.covered_household.each do |individual|
         bounding_box([col1, y_pos], :width => 150) do
-          #stroke_bounds
           text individual.name
         end
         bounding_box([col2, y_pos], :width => 100) do
-          #stroke_bounds
           text individual.ssn
         end
         bounding_box([col3, y_pos], :width => 100) do
-          #stroke_bounds
           text individual.dob
         end
         bounding_box([col4, y_pos], :width => 100) do
-          #stroke_bounds
           text individual.coverage_start_date
         end
         bounding_box([col5, y_pos], :width => 100) do
-          #stroke_bounds
-          # text individual.coverage_termination_date.to_s
-          text "12/31/2014"
+          text individual.coverage_termination_date
         end
         y_pos = y_pos - 24
       end      
@@ -151,36 +134,42 @@ module Generators::Reports
       col3 = mm2pt(125.50)
       y_pos = 304
 
-      @notice.monthly_premiums.each_with_index do |monthly_premium, index|
-        bounding_box([col1, y_pos], :width => 100) do
-          #stroke_bounds
-          text "$ "+monthly_premium.premium_amount, :align => :right
-        end
-        bounding_box([col2, y_pos], :width => 130) do
-          #stroke_bounds
-          text "$ "+monthly_premium.premium_amount_slcsp, :align => :right
-        end
-        bounding_box([col3, y_pos], :width => 120) do
-          #stroke_bounds
-          text monthly_premium.monthly_aptc, :align => :right
+      (1..12).each do |index|
+        monthly_premium = @notice.monthly_premiums.detect{|p| p.serial == index}
+        if monthly_premium
+          bounding_box([col1, y_pos], :width => 100) do
+            text number_to_currency(monthly_premium.premium_amount), :align => :right
+          end
+
+          if @notice.has_aptc
+            bounding_box([col2, y_pos], :width => 130) do
+              text number_to_currency(monthly_premium.premium_amount_slcsp), :align => :right
+            end
+
+            bounding_box([col3, y_pos], :width => 120) do
+              text number_to_currency(monthly_premium.monthly_aptc), :align => :right
+            end
+          end
         end
         y_pos = y_pos - 24
       end
 
       premium_total = @notice.monthly_premiums.inject(0.0){|sum, premium|  sum + premium.premium_amount.to_f}
-      slcsp_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.premium_amount_slcsp.to_f}
-      aptc_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
-
       bounding_box([col1, y_pos], :width => 100) do
-        text "$ #{premium_total.round(2)}", :align => :right
+        text number_to_currency(premium_total), :align => :right
       end
 
-      bounding_box([col2, y_pos], :width => 130) do
-        text "$ #{slcsp_total.round(2)}", :align => :right
-      end
-
-      bounding_box([col3, y_pos], :width => 120) do
-        text "", :align => :right
+      if @notice.has_aptc
+        slcsp_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.premium_amount_slcsp.to_f}
+        aptc_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
+ 
+        bounding_box([col2, y_pos], :width => 130) do
+          text number_to_currency(slcsp_total), :align => :right
+        end
+  
+        bounding_box([col3, y_pos], :width => 120) do
+          text number_to_currency(aptc_total), :align => :right
+        end
       end
     end
   end

@@ -7,9 +7,8 @@ class ApplicationGroupBuilder
   attr_reader :save_list
 
   def initialize(param, person_mapper)
-    @save_list = [] #it is observed that some embedded objects are not saved.
-    # We add all embedded/associated objects to this list and save the explicitly
-    @is_update = true # we assume that this is a update existing application group workflow
+    @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
+    @is_update = true # true = we update an existing application group, false = we create a new application group
     @applicants_params = param[:applicants]
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
@@ -204,10 +203,18 @@ class ApplicationGroupBuilder
 
   #TODO currently only handling case we create new application case, where 1 irs group is built with 1 coverage household.
   def add_irsgroups
-    return if @is_update
-    irs_group = IrsGroupBuilder.new(self.application_group).build
-    @save_list << irs_group
+    if @is_update
+      irs_group_builder = IrsGroupBuilder.new(self.application_group.id)
+      irs_group_builder.update
+    else
+      irs_group_builder = IrsGroupBuilder.new(self.application_group.id)
+      irs_group_builder.build
+      irs_group_builder.save
+    end
   end
+
+
+
 
   def add_tax_households(tax_households_params)
 
@@ -304,7 +311,6 @@ class ApplicationGroupBuilder
 
   def save
     add_primary_applicant_employee_applicant
-    add_irsgroups
     id = @application_group.save!
     save_save_list
     @application_group.id #return the id of saved application group

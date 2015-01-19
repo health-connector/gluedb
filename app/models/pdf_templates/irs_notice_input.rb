@@ -10,5 +10,6 @@ module PdfTemplates
     attribute :spouse, PdfTemplates::Enrolee
     attribute :covered_household, Array[PdfTemplates::Enrolee]
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
+    attribute :has_aptc, Boolean, :default => false
   end
 end

@@ -7,7 +7,7 @@ class PolicyDisposition
   def initialize(pol)
     @policy = pol
     @start_date = pol.policy_start
-    @end_date = pol.coverage_end.blank? ? pol.coverage_period.end : pol.coverage_end
+    @end_date = pol.policy_end.blank? ? pol.coverage_period.end : pol.policy_end
     @changes_over_time = @policy.changes_over_time?
     @enrollees = @policy.enrollees.reject do |en|
       en.canceled?

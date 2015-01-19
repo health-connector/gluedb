@@ -509,6 +509,7 @@ class Policy
   def policy_start
     subscriber.coverage_start
   end
+
   def policy_end
     subscriber.coverage_end
   end
@@ -524,6 +525,10 @@ class Policy
     end
     py = employer.plan_year_of(start_date)
     (py.start_date..py.end_date)
+  end
+
+  def coverage_period_end
+    coverage_period.end
   end
 
   def transaction_list
@@ -591,4 +596,15 @@ class Policy
     end
   end
 
+  def changes_over_time?
+    eligible_enrollees = policy.enrollees.reject do |en|
+      en.canceled?
+    end
+    starts = eligible_enrollees.map(&:coverage_start).uniq
+    return true if (starts.length > 1)
+    end_dates = eligible_enrollees.map do |en|
+      en.coverage_end.blank? ? self.coverage_period_end ? en.coverage_end
+    end
+    end_dates.uniq.length > 1
+  end
 end

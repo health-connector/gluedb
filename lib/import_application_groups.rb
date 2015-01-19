@@ -175,6 +175,9 @@ class ImportApplicationGroups
         application_group_builder.add_coverage_household
 
         application_group_id = application_group_builder.save
+
+        application_group_builder.add_irsgroups
+
         puts "Saved #{application_group_id}"
 
       rescue Exception => e

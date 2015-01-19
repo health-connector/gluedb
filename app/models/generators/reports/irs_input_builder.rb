@@ -1,5 +1,5 @@
 module Generators::Reports  
-  class IrsNoticeInputBuilder
+  class IrsInputBuilder
 
     attr_reader :notice
 
@@ -29,8 +29,8 @@ module Generators::Reports
       @notice.recipient = build_enrollee_ele(@policy.subscriber)
       spouse = @policy.enrollees_sans_subscriber.detect { |m| m.relationship_status_code.downcase == "spouse" }
       @notice.spouse = build_enrollee_ele(spouse) if spouse
-      enrollees = @policy.enrollees_sans_subscriber.reject { |m| m.relationship_status_code.downcase == "spouse" } 
-      @notice.covered_household = enrollees.map{|enrollee| build_enrollee_ele(enrollee)}
+      # enrollees = @policy.enrollees_sans_subscriber.reject { |m| m.relationship_status_code.downcase == "spouse" } 
+      @notice.covered_household = @policy.enrollees.map{|enrollee| build_enrollee_ele(enrollee)}
     end
 
     def build_enrollee_ele(enrollee)
@@ -50,30 +50,22 @@ module Generators::Reports
     end
 
     def append_monthly_premiums
-      calender_months = { 
-        1 => "Jan",
-        2 => "Feb",
-        3 => "Mar",
-        4 => "Apr",
-        5 => "May",
-        6 => "Jun",
-        7 => "Jul",
-        8 => "Aug",
-        9 => "Sep",
-        10 => "Oct",
-        11 => "Nov",
-        12 => "Dec"
-      }
-
       @notice.monthly_premiums = (1..12).inject([]) do |data, i|
         data << PdfTemplates::MonthlyPremium.new({
           serial: i,
-          calender_month: calender_months[i],
-          premium_amount: '450.00',
-          premium_amount_slcsp: '345.00',
-          monthly_aptc: '180.00'
+          premium_amount: @policy.pre_amt_tot,
+          premium_amount_slcsp: silver_plan_premium,
+          monthly_aptc: ''
         })
       end
+    end
+
+    def silver_plan_premium
+      calc = Premiums::PolicyCalculator.new
+      silver_plan = Plan.where({ "year" => 2014, "hios_plan_id" => "86052DC0400001-01" }).first
+      clone_pol = @policy.clone_with_plan(silver_plan)
+      calc.apply_calculations(clone_pol)
+      clone_pol.pre_amt_tot
     end
   end
 end

@@ -26,6 +26,11 @@ module Generators::Reports
       col4 = mm2pt(145.50)
       y_pos = 790.86 - mm2pt(37.15) - 45
 
+      bounding_box([col1, y_pos], :width => 100) do
+        #stroke_bound
+        text 'DC'
+      end
+
       bounding_box([col2, y_pos], :width => 150) do
         #stroke_bound
         text @notice.policy_id
@@ -40,7 +45,11 @@ module Generators::Reports
       fill_enrollee(@notice.recipient)
 
       move_down(12)
-      fill_enrollee(@notice.spouse) if @notice.spouse
+      if @notice.spouse
+        fill_enrollee(@notice.spouse)
+      else
+        move_down(13)
+      end
 
       move_down(11)
       y_pos = cursor
@@ -106,7 +115,7 @@ module Generators::Reports
       col2 = mm2pt(67.50)
       col3 = mm2pt(98.50)
       col4 = mm2pt(128.50)
-      col5 = mm2pt(145.50)
+      col5 = mm2pt(159.50)
 
       y_pos = 472
 
@@ -129,7 +138,8 @@ module Generators::Reports
         end
         bounding_box([col5, y_pos], :width => 100) do
           #stroke_bounds
-          text individual.coverage_termination_date.to_s
+          # text individual.coverage_termination_date.to_s
+          text "12/31/2014"
         end
         y_pos = y_pos - 24
       end      
@@ -152,7 +162,7 @@ module Generators::Reports
         end
         bounding_box([col3, y_pos], :width => 120) do
           #stroke_bounds
-          text "$ "+monthly_premium.monthly_aptc, :align => :right
+          text monthly_premium.monthly_aptc, :align => :right
         end
         y_pos = y_pos - 24
       end
@@ -162,15 +172,15 @@ module Generators::Reports
       aptc_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
 
       bounding_box([col1, y_pos], :width => 100) do
-        text "$ "+premium_total.to_s, :align => :right
+        text "$ #{premium_total.round(2)}", :align => :right
       end
 
       bounding_box([col2, y_pos], :width => 130) do
-        text "$ "+slcsp_total.to_s, :align => :right
+        text "$ #{slcsp_total.round(2)}", :align => :right
       end
 
       bounding_box([col3, y_pos], :width => 120) do
-        text "$ "+aptc_total.to_s, :align => :right
+        text "", :align => :right
       end
     end
   end

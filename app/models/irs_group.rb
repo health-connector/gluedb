@@ -6,7 +6,6 @@ class IrsGroup
 
   before_save :set_effective_start_date
   before_save :set_effective_end_date
-  after_save :set_househould_irs_group_id
 
   # Unique identifier for this Household used for reporting enrollment and premium tax credits to IRS
   auto_increment :hbx_assigned_id, seed: 9999
@@ -37,10 +36,6 @@ class IrsGroup
   end
 
   private
-  def set_househould_irs_group_id
-    self.application_group.active_household.irs_group_id = self._id if self.application_group && self.application_group.active_household
-  end
-
   def set_effective_start_date
     self.effective_start_date = application_group.active_household.effective_start_date if application_group.active_household
   end

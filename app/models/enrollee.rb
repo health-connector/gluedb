@@ -122,7 +122,7 @@ class Enrollee
 
   def canceled?
     return false unless coverage_ended?
-    (self.coverage_start <= self.coverage_end)
+    (self.coverage_start >= self.coverage_end)
   end
 
   def terminated?

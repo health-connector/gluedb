@@ -1,5 +1,5 @@
 module Parsers::Xml::Cv
-  class ApplicationGroup
+  class FamilyParser
     include HappyMapper
 
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"

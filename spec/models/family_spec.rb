@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe ApplicationGroup do
+describe Family do
 
   let(:p0) {Person.create!(name_first: "Dan", name_last: "Aurbach")}
   let(:p1) {Person.create!(name_first: "Patrick", name_last: "Carney")}
@@ -12,7 +12,7 @@ describe ApplicationGroup do
 
   describe "instantiates object." do
     it "sets and gets all basic model fields" do
-      ag = ApplicationGroup.new(
+      ag = Family.new(
           e_case_id: "6754632abc",
           renewal_consent_through_year: 2017,
           applicants: [a0, a1],
@@ -37,7 +37,7 @@ describe ApplicationGroup do
   describe "manages embedded associations." do
 
     let(:ag) {
-      ApplicationGroup.create!(
+      Family.create!(
           e_case_id: "6754632abc", 
           renewal_consent_through_year: 2017, 
           submitted_date: Date.today,
@@ -174,7 +174,7 @@ describe ApplicationGroup do
       expect(policy.hbx_enrollment._id).to eql(ag.hbx_enrollments.first._id)
 
       # Verify the Broker side of association
-      expect(broker.application_groups.first._id).to eql(ag._id)
+      expect(broker.families.first._id).to eql(ag._id)
     end
   end
 end

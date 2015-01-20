@@ -1,4 +1,4 @@
-class ApplicationGroup
+class Family
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning

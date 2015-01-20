@@ -1,14 +1,14 @@
 <div class="page-header">
  <%= render 'shared/breadcrumb', crumbs: [
       link_to('Application Groups', application_groups_path),
-      link_to(@edit_form.application_group.id, application_group_path(@edit_form.application_group)),
+      link_to(@edit_form.family.id, application_group_path(@edit_form.family)),
       'Edit'
     ]
   %>
 </div>
 <div class="col-md-4 col-md-offset-4"> 
-  <%= link_to('New Person', new_person_path(application_group_id: @edit_form.application_group.id)) %>
-  <%= form_for(@edit_form, url: application_group_path(@edit_form.application_group), method: :put) do |f| %>
+  <%= link_to('New Person', new_person_path(application_group_id: @edit_form.family.id)) %>
+  <%= form_for(@edit_form, url: application_group_path(@edit_form.family), method: :put) do |f| %>
     <table class="table table-condensed">
       <thead>
         <tr>

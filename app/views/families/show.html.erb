@@ -1,10 +1,10 @@
-<%- model_class = ApplicationGroup -%>
+<%- model_class = Family -%>
 <%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
 <div class="page-header">
   <%- #pid = @application_group.person_relationships.first.subject_person -%>
   <%= render 'shared/breadcrumb', crumbs: [
     link_to('Application Groups', application_groups_path),
-    @application_group.id
+    @family.id
       # Person.find(pid).name_full
     ]
     %>
@@ -20,7 +20,7 @@
 
     <div class="row">
       <div class="col-md-5">
-        <%= render 'group_panel', person: @primary_applicant, application_group: @application_group   %>
+        <%= render 'group_panel', person: @primary_applicant, application_group: @family   %>
       </div>
 
       <div class="col-md-5">
@@ -45,11 +45,11 @@
 
     <div class="row">
       <div class="col-md-5">
-        <%= render 'enrolled_plans_panel', person: @primary_applicant, application_group: @application_group   %>
+        <%= render 'enrolled_plans_panel', person: @primary_applicant, application_group: @family   %>
       </div>
 
       <div class="col-md-5">
-        <%= render 'insurance_assistance_panel', person: @primary_applicant, application_group: @application_group   %>
+        <%= render 'insurance_assistance_panel', person: @primary_applicant, application_group: @family   %>
       </div>
     </div>
 

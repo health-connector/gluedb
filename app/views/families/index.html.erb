@@ -1,4 +1,4 @@
-<%- model_class = ApplicationGroup -%>
+<%- model_class = Family -%>
 <%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
 <div class="page-header">
   <%= render 'shared/breadcrumb', crumbs: ['Application Groups'] %>
@@ -11,13 +11,13 @@
   </div>
 </div>
 
-<%= render "application_group_list", application_groups: @application_groups %>
+<%= render "application_group_list", application_groups: @families %>
 
 <div class="row">
   <div class="col-md-8">
-    <%= paginate @application_groups, theme: "twitter-bootstrap", pagination_class: "pagination-plain" %>
+    <%= paginate @families, theme: "twitter-bootstrap", pagination_class: "pagination-plain" %>
   </div>
   <div class="rol-md-4">
-    <p><%= "#{number_with_delimiter(@application_groups.count)} / #{number_with_delimiter(ApplicationGroup.count)} " %><small>(Application Groups selected / total)</small></p>
+    <p><%= "#{number_with_delimiter(@families.count)} / #{number_with_delimiter(Family.count)} " %><small>(Application Groups selected / total)</small></p>
   </div>
 </div>

@@ -35,7 +35,7 @@ module Generators::Reports
       coverage_end = enrollee.coverage_end.blank? ? @policy.coverage_period.end : enrollee.coverage_end
       PdfTemplates::Enrolee.new({
         name: enrollee.person.full_name,
-        ssn: '000000000', # ssn: authority_member.ssn
+        ssn: 'XXXXXXXXX', # ssn: authority_member.ssn
         dob: format_date(authority_member.dob),
         coverage_start_date: format_date(enrollee.coverage_start),
         coverage_termination_date: format_date(coverage_end)

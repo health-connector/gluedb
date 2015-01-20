@@ -7,7 +7,7 @@ class PolicyDisposition
   def initialize(pol)
     @policy = pol
     @start_date = pol.policy_start
-    @end_date = pol.policy_end.blank? ? pol.coverage_period.end : pol.policy_end
+    @end_date = pol.policy_end.blank? ? pol.coverage_period_end : pol.policy_end
     @changes_over_time = @policy.changes_over_time?
     @enrollees = @policy.enrollees.reject do |en|
       en.canceled?
@@ -15,7 +15,7 @@ class PolicyDisposition
   end
 
   def changes_over_time?
-    @changed_over_time
+    @changes_over_time
   end
 
   def as_of(date, other_plan = nil)
@@ -46,7 +46,7 @@ class PolicyDisposition
            (en.coverage_end >= date))
     end
     pol.enrollees = copied_enrollees.map { |ce| clone_enrollee(ce) }
-    pc = PolicyCalculator.new
+    pc = ::Premiums::PolicyCalculator.new
     pc.apply_calculations(pol)
     pol
   end

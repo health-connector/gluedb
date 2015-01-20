@@ -26,7 +26,7 @@ describe IrsGroupBuilder do
 
   it 'application group household has been assigned the id of the irs group' do
     irs_group = @irs_group_builder.build
-    irs_group.save
+    @irs_group_builder.save
     expect(irs_group.id).to eq(@application_group.active_household.irs_group_id)
   end
 end

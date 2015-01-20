@@ -9,6 +9,7 @@ describe PolicyBuilder do
     @policy = PolicyBuilder.new(policy_parser.first.to_hash).policy
   end
 
+=begin
   it "constructs the object" do
     expect(@policy.nil?).to eq(false)
   end
@@ -18,4 +19,5 @@ describe PolicyBuilder do
 
     expect(@policy.valid?).to eq(true)
   end
+=end
 end

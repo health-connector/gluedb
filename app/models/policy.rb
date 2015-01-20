@@ -569,7 +569,7 @@ class Policy
   end
 
   def changes_over_time?
-    eligible_enrollees = policy.enrollees.reject do |en|
+    eligible_enrollees = self.enrollees.reject do |en|
       en.canceled?
     end
     starts = eligible_enrollees.map(&:coverage_start).uniq

@@ -611,5 +611,4 @@ class Policy
       enrollee.m_id
     end
   end
-
 end

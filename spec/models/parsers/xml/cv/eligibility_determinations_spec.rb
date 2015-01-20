@@ -37,8 +37,4 @@ describe Parsers::Xml::Cv::EligibilityDeterminationParser do
     expect(@subject.determination_date).to eq(determination_date)
   end
 
-  it 'should have 2 applicants' do
-    expect(@subject.applicants.size).to eq(2)
-  end
-
 end

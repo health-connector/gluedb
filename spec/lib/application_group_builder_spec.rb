@@ -24,11 +24,6 @@ describe ApplicationGroupBuilder do
     @application_group = @application_group_builder.application_group
   }
 
-  it 'initialized with 1)person_mapper, 2)params and creates a 3)household and a 4)irs group' do
-    expect(@application_group.e_case_id).to eq('12345')
-    expect(@application_group.households.size).to eq(1)
-    expect(@application_group.irs_groups.size).to eq(1)
-  end
 
 =begin
   it 'adds an applicant' do

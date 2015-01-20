@@ -1,8 +1,8 @@
-class Applicant
+class FamilyMember
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  embedded_in :application_group
+  embedded_in :family
 
   # Person responsible for this application group
   field :is_primary_applicant, type: Boolean, default: false
@@ -35,7 +35,7 @@ class Applicant
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+    self.family
   end
 
   def person=(person_instance)

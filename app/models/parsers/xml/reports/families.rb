@@ -21,12 +21,12 @@ module Parsers::Xml::Reports
       @root.at_xpath("n1:id").text
     end
 
-    def applicants
+    def family_members
       @root.xpath("n1:applicants/n1:applicant")
     end
 
     def applicant_person_ids
-      applicants.map {|e| e.at_xpath("n1:person/n1:id").text.match(/\w+$/)[0]}.uniq
+      family_members.map {|e| e.at_xpath("n1:person/n1:id").text.match(/\w+$/)[0]}.uniq
     end
 
     def primary_applicant_id

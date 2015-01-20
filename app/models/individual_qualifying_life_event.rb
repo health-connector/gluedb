@@ -29,6 +29,6 @@ class IndividualQualifyingLifeEvent < QualifyingLifeEvent
 	]
 
 	validates_presence_of :start_date, :end_date
-  embedded_in :application_group
+  embedded_in :family
 
 end

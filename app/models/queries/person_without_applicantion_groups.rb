@@ -4,7 +4,7 @@ module Queries
     end
 
     def execute
-      people_in_application_groups = ApplicationGroup.all.flat_map(&:applicants).flat_map(&:person).compact.uniq
+      people_in_application_groups = Family.all.flat_map(&:family_members).flat_map(&:person).compact.uniq
       all_people = Person.all
       all_people - people_in_application_groups
     end

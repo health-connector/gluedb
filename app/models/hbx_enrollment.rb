@@ -75,9 +75,9 @@ class HbxEnrollment
     self.is_active
   end
 
-  def application_group
+  def family
     return nil unless household
-    household.application_group
+    household.family
   end
 
   def applicant_ids

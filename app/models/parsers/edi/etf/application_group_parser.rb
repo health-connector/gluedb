@@ -129,7 +129,7 @@ module Parsers
         end
 
         def new_application_groups(primary_member_key, loop_lookup, people_lookup)
-          new_group = ApplicationGroup.new
+          new_group = Family.new
           create_relationship_triples(primary_member_key, loop_lookup, people_lookup).each do |rt|
               new_group.person_relationships << PersonRelationship.new({
                 :subject_person => rt[0],
@@ -141,7 +141,7 @@ module Parsers
         end
 
         def find_existing_application_groups(person_ids)
-          ApplicationGroup.where(
+          Family.where(
             "$or" => [
               {
                 "person_relationships.subject_person" => { "$in" => person_ids }

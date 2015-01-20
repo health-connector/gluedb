@@ -2,7 +2,7 @@ class IrsGroup
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  embedded_in :application_group
+  embedded_in :family
 
   before_save :set_effective_start_date
   before_save :set_effective_end_date
@@ -23,7 +23,7 @@ class IrsGroup
 
   def parent
     raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+    self.family
   end
 
   # embedded association: has_many :tax_households
@@ -37,10 +37,10 @@ class IrsGroup
 
   private
   def set_effective_start_date
-    self.effective_start_date = application_group.active_household.effective_start_date if application_group.active_household
+    self.effective_start_date = family.active_household.effective_start_date if family.active_household
   end
 
   def set_effective_end_date
-    self.effective_end_date = application_group.active_household.effective_end_date if application_group.active_household
+    self.effective_end_date = family.active_household.effective_end_date if family.active_household
   end
 end

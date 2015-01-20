@@ -30,9 +30,9 @@ class HbxEnrollmentMember
     end
   end
 
-  def application_group
+  def family
     return nil unless hbx_enrollment
-    hbx_enrollment.application_group
+    hbx_enrollment.family
   end
 
   def is_subscriber?

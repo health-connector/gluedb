@@ -1,12 +1,12 @@
 <div class="page-header">
   <%= render 'shared/breadcrumb', crumbs: [
-      link_to('Application Group', application_group_path(@application_group.id)),
+      link_to('Application Group', application_group_path(@family.id)),
       'New Policy'
     ]
   %>
 </div>
 <%= form_for @sep do |f| %>
-  <%= hidden_field_tag 'application_group_id', @application_group.id %>
+  <%= hidden_field_tag 'application_group_id', @family.id %>
   <%#= f.hidden_field :application_group %>
   <div class="row">
     <div class="col-md-2 text-center">

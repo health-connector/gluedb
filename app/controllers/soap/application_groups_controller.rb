@@ -17,7 +17,7 @@ class Soap::ApplicationGroupsController < Soap::SoapController
       return
     end
 
-    @groups = ApplicationGroup.find([application_group_id])
+    @groups = Family.find([application_group_id])
 
     @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s} group:#{@groups.inspect}"
 

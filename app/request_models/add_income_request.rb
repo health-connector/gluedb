@@ -2,8 +2,8 @@ class AddIncomeRequest
   def self.from_xml(doc)
     request_model = {}
 
-    app_group = ApplicationGroup.new(doc.at_xpath('/n1:application_group/', namespaces))
-    app_group.applicants.each do |applicant|
+    app_group = Family.new(doc.at_xpath('/n1:application_group/', namespaces))
+    app_group.family_members.each do |applicant|
       request_model[:person_id] = applicant.person.id
       request_model[:incomes] = []
       

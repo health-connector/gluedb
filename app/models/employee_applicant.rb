@@ -4,7 +4,7 @@ class EmployeeApplicant
 
   STATUS = %W[active full_time part_time terminated leave_of_absense retired]
 
-  embedded_in :applicant
+  embedded_in :family_member
 
   field :employer_id, type: Moped::BSON::ObjectId
 

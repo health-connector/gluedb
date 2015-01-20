@@ -68,7 +68,7 @@ module CanonicalVocabulary
       end
 
       def build_report
-        builder = RenewalReportRowBuilder.new(@application_group, @primary)
+        builder = RenewalReportRowBuilder.new(@family, @primary)
 
         builder.append_integrated_case_number
         builder.append_notice_date("10/10/2014")

@@ -88,8 +88,8 @@ class Person
   scope :all_with_multiple_members, exists({ :'members.1' => true })
   scope :by_name, order_by(name_last: 1, name_first: 1)
 
-  def application_groups
-    ApplicationGroup.where(:applicants.person_id => self.id).to_a
+  def families
+    Family.where(:family_members.person_id => self.id).to_a
   end
 
   def update_attributes_with_delta(props = {})
@@ -347,7 +347,7 @@ class Person
     ([self._id] + other_ids).uniq
   end
 
-  def application_groups
+  def families
     query_proxy.application_groups
   end
 

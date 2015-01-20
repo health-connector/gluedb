@@ -3,7 +3,7 @@ class AddPerson
   end
 
   def execute(person, relationship)
-    group = person.application_group
+    group = person.family
     
     relationship = (group.person_relationships.empty?) ? 'self' : relationship
 

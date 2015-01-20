@@ -3,7 +3,7 @@ module CanonicalVocabulary
 
     class PolicyBuilder
       def initialize(application_group)
-        @application_group = application_group
+        @family = application_group
         generate_policy_details
       end
 
@@ -13,7 +13,7 @@ module CanonicalVocabulary
       end
 
       def generate_policy_details
-        policy_ids = @application_group.policies_enrolled
+        policy_ids = @family.policies_enrolled
         renewals_xml = Net::HTTP.get(URI.parse("http://localhost:3000/api/v1/renewal_policies?ids[]=#{policy_ids.join("&ids[]=")}&user_token=zUzBsoTSKPbvXCQsB4Ky"))
         renewals = Nokogiri::XML(policies_xml).root.xpath("n1:renewal_policy")
         # renewals = [ File.open(Rails.root.to_s + "/renewal_772.xml") ]

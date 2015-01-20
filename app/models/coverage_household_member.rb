@@ -9,9 +9,9 @@ class CoverageHouseholdMember
 
   include BelongsToApplicant
 
-  def application_group
+  def family
     return nil unless coverage_household
-    coverage_household.application_group
+    coverage_household.family
   end
 
   def is_subscriber?

@@ -58,7 +58,7 @@ class PeopleController < ApplicationController
     respond_to do |format|
       if @person.save
         AddPerson.new.execute(@person, @person.relationship)
-        format.html { redirect_to @person.application_group, notice: 'Person was successfully created.' }
+        format.html { redirect_to @person.family, notice: 'Person was successfully created.' }
         format.json { render json: @person, status: :created, location: @person }
       else
         format.html { render action: "new" }

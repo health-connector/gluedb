@@ -35,14 +35,14 @@ class FinancialStatement
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
 
-  def application_group
+  def family
     return nil unless tax_household_member
-    tax_household_member.application_group
+    tax_household_member.family
   end
 
   def applicant
     return nil unless tax_household_member
-    tax_household_member.applicant
+    tax_household_member.family_member
   end
 
   def eligibility_determination=(ed_instance)

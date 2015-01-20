@@ -22,8 +22,8 @@ class Family
   has_and_belongs_to_many :qualifying_life_events
 
   # All current and former members of this group
-  embeds_many :applicants, cascade_callbacks: true
-  accepts_nested_attributes_for :applicants
+  embeds_many :family_members, cascade_callbacks: true
+  accepts_nested_attributes_for :family_members
 
   embeds_many :irs_groups, cascade_callbacks: true
   accepts_nested_attributes_for :irs_groups
@@ -55,11 +55,11 @@ class Family
 
   validate :max_one_active_household
 
-  scope :all_with_multiple_applicants, exists({ :'applicants.1' => true })
+  scope :all_with_multiple_applicants, exists({ :'family_members.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
 
   def no_duplicate_applicants
-    applicants.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
+    family_members.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
       errors.add(:base, "Duplicate applicants for person: #{k}\n" +
                          "Applicants: #{v.inspect}")
     end
@@ -72,7 +72,7 @@ class Family
   end
 
   def active_applicants
-    applicants.find_all { |a| a.is_active? }
+    family_members.find_all { |a| a.is_active? }
   end
 
   def employers
@@ -92,15 +92,15 @@ class Family
   end
 
   def primary_applicant
-    applicants.detect { |a| a.is_primary_applicant? }
+    family_members.detect { |a| a.is_primary_applicant? }
   end
 
   def consent_applicant
-    applicants.detect { |a| a.is_consent_applicant? }
+    family_members.detect { |a| a.is_consent_applicant? }
   end
 
   def find_applicant_by_person(person)
-    applicants.detect { |a| a.person_id == person._id }
+    family_members.detect { |a| a.person_id == person._id }
   end
 
   def person_is_applicant?(person)
@@ -192,10 +192,10 @@ class Family
 
 private
 
-  # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.applicants
+  # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.family_members
   def integrity_of_applicant_objects
 
-    applicants_in_application_group = self.applicants - [nil]
+    applicants_in_application_group = self.family_members - [nil]
 
     # puts applicants_in_application_group.map(&:id).inspect
 
@@ -211,7 +211,7 @@ private
   end
 
   def max_one_primary_applicant
-    primary_applicants = self.applicants.select do |applicant|
+    primary_applicants = self.family_members.select do |applicant|
       applicant.is_primary_applicant == true
     end
 

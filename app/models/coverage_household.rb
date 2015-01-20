@@ -22,9 +22,9 @@ class CoverageHousehold
     end
   end
 
-  def application_group
+  def family
     return nil unless household
-    household.application_group
+    household.family
   end
 
   def applicant_ids
@@ -33,13 +33,13 @@ class CoverageHousehold
 
   def integrity_of_coverage_household_members
 
-    return unless application_group
+    return unless family
 
-    return if application_group.primary_applicant.person.policies.length == 0 #if no policies
+    return if family.primary_applicant.person.policies.length == 0 #if no policies
 
-    people_in_coverage_household = self.applicants.flat_map(&:person) - [nil]
+    people_in_coverage_household = self.family_members.flat_map(&:person) - [nil]
 
-    enrollees = application_group.primary_applicant.person.policies.flat_map(&:enrollees).uniq
+    enrollees = family.primary_applicant.person.policies.flat_map(&:enrollees).uniq
 
     people_in_policies = enrollees.map do |enrollee|
       Person.find_by_member_id(enrollee.m_id)

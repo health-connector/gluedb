@@ -21,9 +21,9 @@ class EligibilityDetermination
 
   include HasApplicants
 
-  def application_group
+  def family
     return nil unless tax_household
-    tax_household.application_group
+    tax_household.family
   end
 
   def benchmark_plan=(benchmark_plan_instance)

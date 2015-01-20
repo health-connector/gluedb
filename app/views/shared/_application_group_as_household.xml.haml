@@ -1,11 +1,11 @@
-= render 'shared/identity', id: api_v1_application_group_url(application_group.id)
--if application_group.e_case_id.present?
-  %n1:e_pdc_id= application_group.e_case_id
-%n1:primary_applicant_id= application_group.primary_applicant_id
+= render 'shared/identity', id: api_v1_application_group_url(family.id)
+-if family.e_case_id.present?
+  %n1:e_pdc_id= family.e_case_id
+%n1:primary_applicant_id= family.primary_applicant_id
 %n1:type= "PDC"
-%n1:size= application_group.people.count
+%n1:size= family.people.count
 %n1:total_incomes
-  - application_group.total_incomes_by_year.each_pair do |k, v|
+  - family.total_incomes_by_year.each_pair do |k, v|
     %n1:total_income
       %n1:calendar_year=k
       %n1:total_income=v

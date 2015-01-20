@@ -6,7 +6,7 @@ class Api::V1::ApplicationGroupsController < ApplicationController
       search['_id'] = {"$in" => params[:ids]}
     end
 
-    @groups = ApplicationGroup.where(search)
+    @groups = Family.where(search)
 
     page_number = params[:page]
     page_number ||= 1
@@ -32,7 +32,7 @@ class Api::V1::ApplicationGroupsController < ApplicationController
 
   def show
     Caches::MongoidCache.with_cache_for(Carrier) do
-      @group = ApplicationGroup.find(params[:id])
+      @group = Family.find(params[:id])
       render 'show'
     end
   end

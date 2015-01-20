@@ -20,9 +20,9 @@ class TaxHouseholdMember
     tax_household.eligibility_determinations
   end
 
-  def application_group
+  def family
     return nil unless tax_household
-    tax_household.application_group
+    tax_household.family
   end
 
   def is_ia_eligible?
@@ -38,7 +38,7 @@ class TaxHouseholdMember
   end
 
   def is_primary_applicant?
-    self.applicant.is_primary_applicant
+    self.family_member.is_primary_applicant
   end
 
   def strictly_boolean

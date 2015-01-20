@@ -3,7 +3,7 @@ class Household
   include Mongoid::Timestamps
   include HasApplicants
 
-  embedded_in :application_group
+  embedded_in :family
 
   before_save :set_effective_start_date
   before_save :set_effective_end_date # set_effective_start_date should be done before this
@@ -48,8 +48,8 @@ class Household
   end
 
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+    raise "undefined parent ApplicationGroup" unless self.family
+    self.family
   end
 
   def irs_group=(irs_instance)
@@ -87,14 +87,14 @@ class Household
   # before start of the current household's effective_start_date
   def set_effective_end_date
     return true unless self.effective_start_date
-    latest_household = self.application_group.latest_household
+    latest_household = self.family.latest_household
     return if self == latest_household
     latest_household.effective_end_date = self.effective_start_date - 1.day
     true
   end
 
   def reset_is_active_for_previous
-    latest_household = self.application_group.latest_household
+    latest_household = self.family.latest_household
     active_value = self.is_active
     latest_household.is_active = false
     self.is_active = active_value
@@ -108,7 +108,7 @@ class Household
   end
 
   def set_effective_start_date
-    self.effective_start_date =  application_group.submitted_at
+    self.effective_start_date =  family.submitted_at
     true
   end
 

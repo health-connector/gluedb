@@ -16,11 +16,11 @@
 
   </div>
   <div class="panel-body">
-  <% application_group.financial_statements.each do |fs| %>
+  <% family.financial_statements.each do |fs| %>
   <% end %>
 
   <h6>Eligibility Determinations</h6>
-  <% application_group.eligibility_determinations.each do |ed| %>
+  <% family.eligibility_determinations.each do |ed| %>
     <dl class="dl-horizontal">
       <dt>Head of Household</dt>
       <dd><%= ed.primary_applicant %></dd>
@@ -36,7 +36,7 @@
   <% end %>
 
 
-  <% application_group.tax_households.each do |fs| %>
+  <% family.tax_households.each do |fs| %>
   <% end %>
 
 
@@ -44,7 +44,7 @@
   <% @active_policies = person.active_policies %>
   <% @future_policies = person.future_active_policies %>
 
-  <% application_group.hbx_enrollments.each do |e| %>
+  <% family.hbx_enrollments.each do |e| %>
 
     <% policy    = e.policy %>
 

@@ -48,9 +48,9 @@ class TaxHousehold
     members.size 
   end
 
-  def application_group
+  def family
     return nil unless household
-    household.application_group   
+    household.family
   end
 
   def is_eligibility_determined?

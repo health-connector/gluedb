@@ -1,10 +1,10 @@
 module HasApplicants
-  def applicants
-    return [] unless application_group
-    application_group.applicants.select { |apl| applicant_ids.include?(apl._id) }
+  def family_members
+    return [] unless family
+    family.family_members.select { |apl| applicant_ids.include?(apl._id) }
   end
 
   def people
-    applicants.map(&:person)
+    family_members.map(&:person)
   end
 end

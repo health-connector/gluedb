@@ -52,12 +52,12 @@
         <dd><%= mail_to email.email_address %></a></dd>
       </dl>
     <% end %>
-    <% if application_group.applicants.size < 2 %>
+    <% if family.family_members.size < 2 %>
       <%= link_to(applicant_links_application_group_path) do %>
         <p>There is 1 person in this <%= "group" %></p>
       <% end %>
     <% else %>
-      <p><%= "There are #{ application_group.applicants.size } people in this #{ link_to 'group', application_group_path(application_group) }" %></p>
+      <p><%= "There are #{ family.family_members.size } people in this #{ link_to 'group', application_group_path(family) }" %></p>
     <% end %>
   </div>
 </div>

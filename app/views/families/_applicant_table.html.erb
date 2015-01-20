@@ -11,8 +11,8 @@
     </tr>
   </thead>
   <tbody>
-    <%= table_empty_to_human if applicants.size < 1 %>
-    <% applicants.each do |a| %>
+    <%= table_empty_to_human if family_members.size < 1 %>
+    <% family_members.each do |a| %>
     <tr>
       <td><span class="fui-credit-card">&nbsp;</span> <%= a.full_name %></td>
       <td><%= a.authority_member.hbx_member_id %></td>

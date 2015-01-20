@@ -24,17 +24,17 @@ module CanonicalVocabulary
       end
       
       def setup(application_group)
-        @application_group = application_group
+        @family = application_group
 
         # individuals = find_many_individuals_by_id(@application_group.applicant_person_ids)
         # @primary = individuals.detect { |i| (i.id == @application_group.primary_applicant_id || individuals.count == 1) }
-        @primary = @application_group.primary_applicant
+        @primary = @family.primary_applicant
         raise "Primary Applicant Address Not Present" if @primary.person.addresses.empty?
 
-        @other_members = @application_group.applicants.reject { |i| i == @primary }
+        @other_members = @family.family_members.reject { |i| i == @primary }
 
-        @dental = PolicyProjection.new(@application_group, "dental")
-        @health = PolicyProjection.new(@application_group, "health")
+        @dental = PolicyProjection.new(@family, "dental")
+        @health = PolicyProjection.new(@family, "health")
 
         if @health.current.nil? && @dental.current.nil?
           raise "No active health or dental policy"

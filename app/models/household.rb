@@ -13,7 +13,7 @@ class Household
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   # embedded belongs_to :irs_group association
-  field :irs_group_id, type: String
+  field :irs_group_id
 
   field :is_active, type: Boolean, default: true
   field :effective_start_date, type: Date

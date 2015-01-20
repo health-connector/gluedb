@@ -6,6 +6,7 @@ class Policy
   include AASM
 
   extend Mongorder
+  include MoneyMath
 
   attr_accessor :coverage_start
 
@@ -566,6 +567,10 @@ class Policy
     current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
     pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
     pol
+  end
+
+  def ehb_premium
+    as_dollars(self.pre_amt_tot * self.plan.ehb)
   end
 
   def changes_over_time?

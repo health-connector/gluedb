@@ -17,7 +17,7 @@ class EditApplicationGroupForm
   attr_accessor :application_group
 
   def initialize(params = {})
-    @application_group = ApplicationGroup.find(params[:id])
+    @family = Family.find(params[:id])
       
     if (false)
       ppl_hash = params[:edit_application_form].fetch(:people_attributes) { {} }
@@ -34,7 +34,7 @@ class EditApplicationGroupForm
   private
 
     def group_members
-      @application_group.people.map do |person|
+      @family.people.map do |person|
         GroupMember.new(remove_selected: false, name: person.name_full, person_id: person.id)
       end
     end

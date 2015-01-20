@@ -21,18 +21,18 @@ describe ApplicationGroupBuilder do
   before(:each){
     @params = { e_case_id:'12345', submitted_date:'05052014'}
     @application_group_builder = ApplicationGroupBuilder.new(@params, person_mapper)
-    @application_group = @application_group_builder.application_group
+    @family = @application_group_builder.family
   }
 
 
 =begin
   it 'adds an applicant' do
     @application_group_builder.add_applicant(applicant_params)
-    expect(@application_group.applicants.size).to eq(1)
+    expect(@application_group.family_members.size).to eq(1)
   end
 =end
 
   it "saves successfully" do
-    expect(@application_group.save!).to eq(true)
+    expect(@family.save!).to eq(true)
   end
 end

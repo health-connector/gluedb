@@ -4,7 +4,7 @@ nodes = datas.xpath("ns1:application_groups/ns1:application_group", {ns1: 'http:
 
 Person.collection.where.update_all({"$set" => {"financial_statements"=> []}})
 Person.collection.where.update_all({"$set" => {"person_relationships"=> []}})
-ApplicationGroup.delete_all
+Family.delete_all
 puts "Purged....now for the fun!"
 
 
@@ -15,7 +15,7 @@ pb = ProgressBar.create(
 )
 
 nodes.each do |node|
-  parser = Parsers::Xml::Cv::ApplicationGroup.new(node)
+  parser = Parsers::Xml::Cv::FamilyParser.new(node)
   req = parser.to_request
   cd_importer = ImportCuramData.new
   cd_importer.execute(req)

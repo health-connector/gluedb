@@ -33,7 +33,7 @@ class RenewalReports
   private
 
   def valid_application_group?(group_id)
-    group = ApplicationGroup.find(group_id)
+    group = Family.find(group_id)
     return false if group.nil?
     with_no_authoriy = group.people.detect{|people| people.authority_member.blank?}
     with_no_authoriy.nil? ? true : false

@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :application_group do
+  factory :family do
     
   end
 end

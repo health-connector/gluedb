@@ -32,11 +32,11 @@ class PolicyForm
     @application_group_id = params[:application_group_id]
     @household_id = params[:household_id]
     
-    @application_group = ApplicationGroup.find(@application_group_id)
+    @family = Family.find(@application_group_id)
     @carriers = Carrier.all
 
       
-    @people = @application_group.people.map do |p| 
+    @people = @family.people.map do |p|
       SubmittedPerson.new(
         name: p.name_full, 
         include_selected: true, 

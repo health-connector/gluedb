@@ -1,14 +1,14 @@
 require 'rails_helper'
 
-describe Parsers::Xml::Cv::ApplicationGroup do
+describe Parsers::Xml::Cv::FamilyParser do
 
-  let(:application_group) {
+  let(:family) {
     f = File.open(File.join(Rails.root, "spec", "data", "application_group.xml"))
     f.read
   }
 
   subject {
-    Parsers::Xml::Cv::ApplicationGroup.parse(application_group, :single => true)
+    Parsers::Xml::Cv::FamilyParser.parse(family, :single => true)
   }
 
   let(:individual1) {double(name_last:"Ramirez", name_first:"vroom", name_full:"vroom Ramirez", id:"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542")}
@@ -62,59 +62,59 @@ describe Parsers::Xml::Cv::ApplicationGroup do
   end
 
   it 'should have 2 people' do
-    expect(subject.applicants.length).to eql(2)
+    expect(subject.family_members.length).to eql(2)
   end
 
 
   describe "the first applicant" do
     it 'should have the person object)' do
-      expect(subject.applicants.first.person.id).to eql(applicant_id)
-      expect(subject.applicants.first.person.name_first).to eql(individual1.name_first)
-      expect(subject.applicants.first.person.name_last).to eql(individual1.name_last)
-      expect(subject.applicants.first.person.name_full).to eql(individual1.name_full)
-      expect(subject.applicants.first.person.addresses.first.address_line_1).to eql(address_line_1)
-      expect(subject.applicants.first.person.addresses.first.location_city_name).to eql(location_city_name)
-      expect(subject.applicants.first.person.addresses.first.location_state).to eql(location_state)
-      expect(subject.applicants.first.person.addresses.first.location_state_code).to eql(location_state_code)
-      expect(subject.applicants.first.person.addresses.first.location_postal_code).to eql(location_postal_code)
-      expect(subject.applicants.first.person.addresses.first.type).to eql(type)
-      #expect(subject.applicants.first.person.emails).to eql(emails)
-      #expect(subject.applicants.first.person.phones).to eql(phones)
+      expect(subject.family_members.first.person.id).to eql(applicant_id)
+      expect(subject.family_members.first.person.name_first).to eql(individual1.name_first)
+      expect(subject.family_members.first.person.name_last).to eql(individual1.name_last)
+      expect(subject.family_members.first.person.name_full).to eql(individual1.name_full)
+      expect(subject.family_members.first.person.addresses.first.address_line_1).to eql(address_line_1)
+      expect(subject.family_members.first.person.addresses.first.location_city_name).to eql(location_city_name)
+      expect(subject.family_members.first.person.addresses.first.location_state).to eql(location_state)
+      expect(subject.family_members.first.person.addresses.first.location_state_code).to eql(location_state_code)
+      expect(subject.family_members.first.person.addresses.first.location_postal_code).to eql(location_postal_code)
+      expect(subject.family_members.first.person.addresses.first.type).to eql(type)
+      #expect(subject.family_members.first.person.emails).to eql(emails)
+      #expect(subject.family_members.first.person.phones).to eql(phones)
     end
 
     it 'should have person name first' do
-      expect(subject.applicants.first.person.name_first).to eql(individual1.name_first)
+      expect(subject.family_members.first.person.name_first).to eql(individual1.name_first)
     end
 
     it 'should have person name full' do
-      expect(subject.applicants.first.person.name_full).to eql(individual1.name_full)
+      expect(subject.family_members.first.person.name_full).to eql(individual1.name_full)
     end
 
     it 'should have 1 person relationship with relationship_uri, subject_individual_id, object_individual_id' do
-      expect(subject.applicants.first.person_relationships.size).to eq(1)
-      expect(subject.applicants.first.person_relationships.first.subject_individual_id).to eq(subject_individual_id)
-      expect(subject.applicants.first.person_relationships.first.relationship_uri).to eq(relationship_uri)
-      expect(subject.applicants.first.person_relationships.first.object_individual_id).to eq(object_individual_id)
+      expect(subject.family_members.first.person_relationships.size).to eq(1)
+      expect(subject.family_members.first.person_relationships.first.subject_individual_id).to eq(subject_individual_id)
+      expect(subject.family_members.first.person_relationships.first.relationship_uri).to eq(relationship_uri)
+      expect(subject.family_members.first.person_relationships.first.object_individual_id).to eq(object_individual_id)
     end
 
     it 'should have 1 person demographics with ssn, sex, date of birth..' do
-      expect(subject.applicants.first.person_demographics.sex).to eq(sex)
-      expect(subject.applicants.first.person_demographics.ssn).to eq(ssn)
-      expect(subject.applicants.first.person_demographics.birth_date).to eq(birth_date)
+      expect(subject.family_members.first.person_demographics.sex).to eq(sex)
+      expect(subject.family_members.first.person_demographics.ssn).to eq(ssn)
+      expect(subject.family_members.first.person_demographics.birth_date).to eq(birth_date)
     end
 
 
     it 'should have 1 financial statement with tax_filing_status, is_tax_filing_together, incomes, deductions, alternative_benefits' do
-      expect(subject.applicants.first.financial_statements.size).to eq(1)
-      expect(subject.applicants.first.financial_statements.first.tax_filing_status).to eq(tax_filing_status)
-      expect(subject.applicants.first.financial_statements.first.is_tax_filing_together).to eq(is_tax_filing_together)
-      expect(subject.applicants.first.financial_statements.first.incomes.size).to eq(0)
-      expect(subject.applicants.first.financial_statements.first.deductions.size).to eq(0)
-      expect(subject.applicants.first.financial_statements.first.alternative_benefits.size).to eq(0)
+      expect(subject.family_members.first.financial_statements.size).to eq(1)
+      expect(subject.family_members.first.financial_statements.first.tax_filing_status).to eq(tax_filing_status)
+      expect(subject.family_members.first.financial_statements.first.is_tax_filing_together).to eq(is_tax_filing_together)
+      expect(subject.family_members.first.financial_statements.first.incomes.size).to eq(0)
+      expect(subject.family_members.first.financial_statements.first.deductions.size).to eq(0)
+      expect(subject.family_members.first.financial_statements.first.alternative_benefits.size).to eq(0)
     end
 
     it "should return the primary_applicant_id" do
-      expect(subject.applicants.first.is_primary_applicant).to eq(is_primary_applicant)
+      expect(subject.family_members.first.is_primary_applicant).to eq(is_primary_applicant)
     end
 
   end

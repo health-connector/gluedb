@@ -1,18 +1,18 @@
 require 'rails_helper'
 
-describe Applicant do
+describe FamilyMember do
 
   let(:b0) {Broker.create!(b_type: "broker", npn: "987432010", name_last: "popeye")}
   let(:p0) {Person.create!(name_first: "Dan", name_last: "Aurbach")}
   let(:p1) {Person.create!(name_first: "Patrick", name_last: "Carney")}
-  let(:ag) {ApplicationGroup.create()}
+  let(:ag) {Family.create()}
 
   describe "indexes specified fields" do
   end
 
   describe "instantiates object." do
     it "sets and gets all basic model fields and embeds in parent class" do
-      a = Applicant.new(
+      a = FamilyMember.new(
         person: p0,
         broker: b0,
         is_primary_applicant: true,
@@ -21,7 +21,7 @@ describe Applicant do
         is_active: true
         )
 
-      a.application_group = ag
+      a.family = ag
 
       expect(a.broker.npn).to eql(b0.npn)
       expect(a.broker_id).to eql(b0._id)

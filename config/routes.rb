@@ -24,11 +24,11 @@ Gluedb::Application.routes.draw do
     resources :users
   end
 
-  resources :application_groups do
+  resources :families do
     get 'page/:page', :action => :index, :on => :collection
 
     # resources :primary_applicant, only: [:new, :create, :update]
-    resources :applicants
+    resources :family_members
 
     member do
       get :link_employee
@@ -144,7 +144,7 @@ Gluedb::Application.routes.draw do
         end
       end
       resources :policies, :only => [:show, :index]
-      resources :application_groups, :only => [:show, :index]
+      resources :families, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
     end
@@ -153,7 +153,7 @@ Gluedb::Application.routes.draw do
       resources :people, :only => [:show, :index]
       resources :employers, :only => [:show, :index]
       resources :policies, :only => [:show, :index]
-      resources :application_groups, :only => [:show, :index]
+      resources :families, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
       resources :plans, :only => [:show]
@@ -191,7 +191,7 @@ Gluedb::Application.routes.draw do
         get 'wsdl'
       end
     end
-    resources :application_groups, :only => [] do
+    resources :families, :only => [] do
       collection do
         post 'get_by_application_group_id'
         get 'wsdl'

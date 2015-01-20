@@ -4,8 +4,8 @@ describe Family do
 
   let(:p0) {Person.create!(name_first: "Dan", name_last: "Aurbach")}
   let(:p1) {Person.create!(name_first: "Patrick", name_last: "Carney")}
-  let(:a0) {Applicant.new(person: p0, primary_applicant: true, consent_applicant: true)}
-  let(:a1) {Applicant.new(person: p1)}
+  let(:a0) {FamilyMember.new(person: p0, primary_applicant: true, consent_applicant: true)}
+  let(:a1) {FamilyMember.new(person: p1)}
   let(:plan) {Plan.new(coverage_type: 'health', market_type: 'individual')}
 
 
@@ -15,7 +15,7 @@ describe Family do
       ag = Family.new(
           e_case_id: "6754632abc",
           renewal_consent_through_year: 2017,
-          applicants: [a0, a1],
+          family_members: [a0, a1],
           submitted_date: Date.today,
           is_active: true,
           updated_by: "rspec"
@@ -27,7 +27,7 @@ describe Family do
       expect(ag.submitted_date).to eql(Date.today)
       expect(ag.updated_by).to eql("rspec")
 
-      expect(ag.applicants.size).to eql(2)
+      expect(ag.family_members.size).to eql(2)
       expect(ag.primary_applicant.id).to eql(a0.id)
       expect(ag.primary_applicant.person.name_first).to eql("Dan")
       expect(ag.consent_applicant.person.name_last).to eql("Aurbach")
@@ -41,7 +41,7 @@ describe Family do
           e_case_id: "6754632abc", 
           renewal_consent_through_year: 2017, 
           submitted_date: Date.today,
-          applicants: [p0, p1],
+          family_members: [p0, p1],
           primary_applicant: p0,
           consent_applicant: p0,
           irs_groups: [IrsGroup.new()]
@@ -52,7 +52,7 @@ describe Family do
       TaxHousehold.new(
         primary_applicant: p0,
         irs_group: ag.irs_groups.first,
-        applicants: [a0, a1]
+        family_members: [a0, a1]
       )
     }
 
@@ -60,7 +60,7 @@ describe Family do
       EligibilityDetermination.new(
         csr_percent: 0.73,
         max_aptc_in_dollars: 165.00,
-        applicants: [Applicant.new(
+        family_members: [FamilyMember.new(
                             e_pdc_id: "qwerty",
                             person: p0,
                             is_ia_eligible: true,
@@ -79,7 +79,7 @@ describe Family do
         allocated_aptc_in_dollars: 125.00,
         elected_aptc_in_dollars: 115.00,
         csr_percent: 0.71,
-        applicants: [a0]
+        family_members: [a0]
       )
     }
 
@@ -90,7 +90,7 @@ describe Family do
         certificate_number: "123zxy987",
         start_date: Date.today - 60,
         end_date: Date.today + 60,
-        applicants: [Applicant.new(
+        family_members: [FamilyMember.new(
                             person: p1,
                             is_ia_eligible: true,
                             is_medicaid_chip_eligible: true
@@ -107,15 +107,15 @@ describe Family do
       ag.hbx_enrollment_exemptions = [hx]
 
       expect(ag.eligibility_determinations.first.csr_percent_as_integer).to eq(73)
-      expect(ag.eligibility_determinations.first.applicants.first.is_ia_eligible).to eq(true)
+      expect(ag.eligibility_determinations.first.family_members.first.is_ia_eligible).to eq(true)
 
       expect(ag.tax_households.first.primary_applicant_id).to eql(p0.id)
-      expect(ag.tax_households.first.applicants.first.person._id).to eql(a0.person_id)
+      expect(ag.tax_households.first.family_members.first.person._id).to eql(a0.person_id)
 
       expect(ag.hbx_enrollments.first.primary_applicant_id).to eql(p0.id)
       expect(ag.hbx_enrollments.first.eligibility_determination.id).to eq(ed.id)
       expect(ag.hbx_enrollments.first.allocated_aptc_in_cents).to eql(12500)
-      expect(ag.hbx_enrollments.first.applicants.first.person_id).to eql(a0.person_id)
+      expect(ag.hbx_enrollments.first.family_members.first.person_id).to eql(a0.person_id)
 
       expect(ag.hbx_enrollment_exemptions.first.certificate_number).to eql("123zxy987")
 

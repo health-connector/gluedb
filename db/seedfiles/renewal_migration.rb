@@ -1,5 +1,5 @@
-application_group = ApplicationGroup.limit(10)
-application_group = ApplicationGroup.first.to_a
+application_group = Family.limit(10)
+application_group = Family.first.to_a
 # application_group = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
 
 # Move person_relationships from ApplicationGroup to Person model
@@ -49,10 +49,10 @@ def build_applicant_list(app_group)
     relationship = rel["relationship_kind"]
 
     if relationship == "self"
-      appl = Applicant.new(person: p0, is_primary_applicant: true, is_consent_applicant: true)
+      appl = FamilyMember.new(person: p0, is_primary_applicant: true, is_consent_applicant: true)
       primary_appl = appl
     else
-      appl = Applicant.new(person: p1)
+      appl = FamilyMember.new(person: p1)
     end
     applicants << appl
   end
@@ -89,12 +89,12 @@ def build_enrollments(app_group)
       begin
         person = Person.find_for_member_id(enrollee.m_id)
         # puts "Person: #{person.inspect}"
-        app_group.applicants << Applicant.new(person: person) unless app_group.person_is_applicant?(person)
+        app_group.family_members << FamilyMember.new(person: person) unless app_group.person_is_applicant?(person)
         appl = app_group.find_applicant_by_person(person)
         # puts "Applicant: #{appl}"
 
         em = HbxEnrollmentMember.new(
-            applicant: appl,
+            family_member: appl,
             premium_amount_in_cents: enrollee.pre_amt
         )
 
@@ -115,7 +115,7 @@ end
 application_group.each do |ag|
 
   hh = Household.new(
-      application_group: ag,
+      family: ag,
       submitted_at: Time.now
   )
   ch = CoverageHousehold.new(
@@ -131,7 +131,7 @@ application_group.each do |ag|
   # Build hbx_enrollments
   hh.hbx_enrollments = build_enrollments(ag)
 
-  ag.applicants.each do |applicant|
+  ag.family_members.each do |applicant|
     ch.coverage_household_members << applicant if applicant.is_coverage_applicant
   end
 

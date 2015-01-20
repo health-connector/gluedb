@@ -5,7 +5,7 @@ active_pols = Policy.where(Policy.active_as_of_expression(Date.new(2014, 12, 31)
 }))
 
 def create_me_a_group(sub, people)
-  ApplicationGroup.create!(
+  Family.create!(
     :primary_applicant_id => sub,
     :person_ids => people
   )
@@ -20,7 +20,7 @@ end
 active_pols.each do |pol|
   sub = pol.subscriber.person.id
   member_people = pol.enrollees.map { |en| en.person.id }
-  ags = ApplicationGroup.where(
+  ags = Family.where(
     :person_ids => {
       "$elemMatch" => { "$in" => [sub]}
     }

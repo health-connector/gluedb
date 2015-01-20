@@ -7,7 +7,7 @@ puts active_pols.count.to_s
 active_pols.map do |pol|
   subscriber_person = pol.subscriber.person.id
   member_people = pol.enrollees.map { |en| en.person.id }
-  ags = ApplicationGroup.where(
+  ags = Family.where(
     :person_ids => {
       "$elemMatch" => { "$in" => member_people }
     }

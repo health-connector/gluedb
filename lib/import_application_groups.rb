@@ -119,7 +119,7 @@ class ImportApplicationGroups
 
     puts "PARSING START"
 
-    ags = Parsers::Xml::Cv::ApplicationGroup.parse(xml.root.canonicalize)
+    ags = Parsers::Xml::Cv::FamilyParser.parse(xml.root.canonicalize)
     puts "PARSING DONE"
     puts "Total number of application groups :#{ags.size}"
     fail_counter = 0
@@ -133,6 +133,8 @@ class ImportApplicationGroups
         value = uc.validate(ig_request, listener)
       end
 
+      puts all_valid
+
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
         value = uc.commit(ig_request, listener)
@@ -141,7 +143,7 @@ class ImportApplicationGroups
       application_group_builder = ApplicationGroupBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
       #applying person objects in person relationships for each applicant.
-      ag.applicants.each do |applicant|
+      ag.family_members.each do |applicant|
 
         applicant.to_relationships.each do |relationship_hash|
 
@@ -166,7 +168,7 @@ class ImportApplicationGroups
 
         application_group_builder.add_tax_households(ag.to_hash[:tax_households])
 
-        applicants_params = ag.applicants.map do |applicant|
+        applicants_params = ag.family_members.map do |applicant|
           applicant.to_hash(p_tracker)
         end
 
@@ -182,11 +184,11 @@ class ImportApplicationGroups
 
       rescue Exception => e
         fail_counter += 1
-        puts "FAILED #{application_group_builder.application_group.id}"
+        puts "FAILED #{application_group_builder.family.id}"
 
-        @@logger.info "Applicants #{application_group_builder.application_group.applicants.size}}\n"
+        @@logger.info "Applicants #{application_group_builder.family.family_members.size}}\n"
 
-        application_group_builder.application_group.applicants.each do |applicant|
+        application_group_builder.family.family_members.each do |applicant|
           @@logger.info "#{applicant.inspect}"
         end
 

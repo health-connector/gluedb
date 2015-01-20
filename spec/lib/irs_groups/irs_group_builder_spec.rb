@@ -4,9 +4,9 @@ require 'irs_groups/irs_group_builder'
 describe IrsGroupBuilder do
 
   before(:each) do
-    @application_group = ApplicationGroup.new
-    @application_group.households.build({is_active:true})
-    @irs_group_builder = IrsGroupBuilder.new(@application_group)
+    @family = Family.new
+    @family.households.build({is_active:true})
+    @irs_group_builder = IrsGroupBuilder.new(@family)
   end
 
   it 'returns a IrsGroup object' do
@@ -27,6 +27,6 @@ describe IrsGroupBuilder do
   it 'application group household has been assigned the id of the irs group' do
     irs_group = @irs_group_builder.build
     @irs_group_builder.save
-    expect(irs_group.id).to eq(@application_group.active_household.irs_group_id)
+    expect(irs_group.id).to eq(@family.active_household.irs_group_id)
   end
 end

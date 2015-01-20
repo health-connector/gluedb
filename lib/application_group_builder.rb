@@ -2,24 +2,24 @@ require "irs_groups/irs_group_builder"
 
 class ApplicationGroupBuilder
 
-  attr_reader :application_group
+  attr_reader :family
 
   attr_reader :save_list
 
   def initialize(param, person_mapper)
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
     @is_update = true # true = we update an existing application group, false = we create a new application group
-    @applicants_params = param[:applicants]
+    @applicants_params = param[:family_members]
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
-    @application_group = ApplicationGroup.where(e_case_id: filtered_param[:e_case_id]).first
+    @family = Family.where(e_case_id: filtered_param[:e_case_id]).first
     @new_applicants = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
-    if @application_group.nil?
-      @application_group = ApplicationGroup.new(filtered_param) #we create a new application group from the xml
+    if @family.nil?
+      @family = Family.new(filtered_param) #we create a new application group from the xml
       @is_update = false # means this is a create
     end
 
-    @application_group.updated_by = "curam_system_service"
+    @family.updated_by = "curam_system_service"
 
     get_household
   end
@@ -30,18 +30,16 @@ class ApplicationGroupBuilder
 
   def add_applicant(applicant_params)
 
-    # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]}"
-
-    if @application_group.applicants.map(&:person_id).include? applicant_params[:person].id
-      # puts "Added already existing applicant"
-      applicant = @application_group.applicants.where(person_id: applicant_params[:person].id).first
+    if @family.family_members.map(&:person_id).include? applicant_params[:person].id
+       #puts "Added already existing applicant"
+      applicant = @family.family_members.where(person_id: applicant_params[:person].id).first
     else
-      # puts "Added a new applicant"
+       #puts "Added a new applicant"
       if applicant_params[:is_primary_applicant] == "true"
         reset_exisiting_primary_applicant
       end
 
-      applicant = @application_group.applicants.build(filter_applicant_params(applicant_params))
+      applicant = @family.family_members.build(filter_applicant_params(applicant_params))
 
       @new_applicants << applicant
 
@@ -52,7 +50,7 @@ class ApplicationGroupBuilder
       set_alias_ids(member, applicant_params[:alias_ids])
       @save_list << member
       @save_list << applicant
-      # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.applicants #{applicant.inspect}"
+      # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.family_members #{applicant.inspect}"
     end
 
     applicant
@@ -71,7 +69,7 @@ class ApplicationGroupBuilder
   end
 
   def reset_exisiting_primary_applicant
-    @application_group.applicants.each do |applicant|
+    @family.family_members.each do |applicant|
       applicant.is_primary_applicant = false
     end
   end
@@ -91,9 +89,12 @@ class ApplicationGroupBuilder
         :is_primary_applicant,
         :is_coverage_applicant,
         :person)
+
     applicant_params.delete_if do |k, v|
       v.nil?
     end
+
+    applicant_params
   end
 
   def get_household
@@ -101,14 +102,14 @@ class ApplicationGroupBuilder
     return @household if @household
     if !@is_update
       # puts "New Application Group Case"
-      @household = self.application_group.households.build #if new application group then create new household
+      @household = self.family.households.build #if new application group then create new household
       @save_list << @household
     elsif have_applicants_changed?
       # puts "Update Application Group Case - Applicants have changed. Creating new household"
-      @household = self.application_group.households.build #if applicants have changed then create new household
+      @household = self.family.households.build #if applicants have changed then create new household
       @save_list << @household
     else
-      @household = self.application_group.active_household #if update and applicants haven't changed then use the active household
+      @household = self.family.active_household #if update and applicants haven't changed then use the active household
     end
 
     return @household
@@ -117,7 +118,7 @@ class ApplicationGroupBuilder
 
   def have_applicants_changed?
 
-    current_list = @application_group.applicants.map do |applicant|
+    current_list = @family.family_members.map do |applicant|
       applicant.person_id
     end.sort
 
@@ -151,9 +152,9 @@ class ApplicationGroupBuilder
   def add_primary_applicant_employee_applicant
 
     #TODO verify from Dan if this logic is right
-    if application_group.primary_applicant.person.employer
-      employee_applicant = @application_group.primary_applicant.employee_applicants.build
-      employee_applicant.employer = @application_group.primary_applicant.person.employer
+    if family.primary_applicant.person.employer
+      employee_applicant = @family.primary_applicant.employee_applicants.build
+      employee_applicant.employer = @family.primary_applicant.person.employer
       @save_list << employee_applicant
     end
   end
@@ -162,11 +163,11 @@ class ApplicationGroupBuilder
 
     # puts @application_group.primary_applicant
 
-    @application_group.primary_applicant.person.policies.each do |policy|
+    @family.primary_applicant.person.policies.each do |policy|
 
       hbx_enrollement = @household.hbx_enrollments.build
       hbx_enrollement.policy = policy
-      @application_group.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
+      @family.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
       #hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
       #hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
       #hbx_enrollement.primary_applicant = alpha_person
@@ -184,10 +185,10 @@ class ApplicationGroupBuilder
         begin
           person = Person.find_for_member_id(enrollee.m_id)
 
-          @application_group.applicants << Applicant.new(person: person) unless @application_group.person_is_applicant?(person)
-          applicant = @application_group.find_applicant_by_person(person)
+          @family.family_members << FamilyMember.new(person: person) unless @family.person_is_applicant?(person)
+          applicant = @family.find_applicant_by_person(person)
 
-          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({applicant: applicant,
+          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: applicant,
                                                                                  premium_amount_in_cents: enrollee.pre_amt})
           hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
@@ -204,10 +205,10 @@ class ApplicationGroupBuilder
   #TODO currently only handling case we create new application case, where 1 irs group is built with 1 coverage household.
   def add_irsgroups
     if @is_update
-      irs_group_builder = IrsGroupBuilder.new(self.application_group.id)
+      irs_group_builder = IrsGroupBuilder.new(self.family.id)
       irs_group_builder.update
     else
-      irs_group_builder = IrsGroupBuilder.new(self.application_group.id)
+      irs_group_builder = IrsGroupBuilder.new(self.family.id)
       irs_group_builder.build
       irs_group_builder.save
     end
@@ -232,7 +233,7 @@ class ApplicationGroupBuilder
         new_applicant = get_applicant(person_obj)
         new_applicant = verify_person_id(new_applicant)
         tax_household_member.applicant_id = new_applicant.id
-        tax_household_member.applicant = new_applicant
+        tax_household_member.family_member = new_applicant
       end
     end
   end
@@ -263,7 +264,7 @@ class ApplicationGroupBuilder
 
   ## Fetches the applicant object either from application_group or person_mapper
   def get_applicant(person_obj)
-    new_applicant = self.application_group.applicants.find do |applicant|
+    new_applicant = self.family.family_members.find do |applicant|
       applicant.id == @person_mapper.applicant_map[person_obj.id].id
     end
     new_applicant = @person_mapper.applicant_map[person_obj.id] unless new_applicant
@@ -297,7 +298,7 @@ class ApplicationGroupBuilder
   end
 
   def find_tax_household_member(applicant)
-    tax_household_members = self.application_group.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
+    tax_household_members = self.family.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
 
     tax_household_member = tax_household_members.find do |tax_household_member|
       tax_household_member.applicant_id == applicant.id
@@ -308,9 +309,9 @@ class ApplicationGroupBuilder
 
   def save
     add_primary_applicant_employee_applicant
-    id = @application_group.save!
+    id = @family.save!
     save_save_list
-    @application_group.id #return the id of saved application group
+    @family.id #return the id of saved application group
   end
 
   #save objects in save list

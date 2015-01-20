@@ -17,6 +17,19 @@ module Generators::Reports
     end
 
     def fill_envelope
+      x_pos = mm2pt(21.83) - @margin[0]
+      y_pos = 790.86 - mm2pt(57.15) - 65
+
+      bounding_box([x_pos, y_pos], :width => 300) do
+        fill_primary_address
+      end
+    end
+
+    def fill_primary_address
+      text @notice.primary_name
+      text @address.street_1
+      text @address.street_2 unless @address.street_2.blank?
+      text "#{@address.city}, #{@address.state} #{@address.zip}"      
     end
 
     def fill_subscriber_details

@@ -1,14 +1,12 @@
 class IrsGroupBuilder
 
-=begin
   def initialize(application_group)
-    @application_group = application_group
-  end
-=end
 
-  def initialize(application_group_id)
-    @application_group = ApplicationGroup.find(application_group_id)
-    puts "@application_group #{@application_group.households.inspect}"
+    if(application_group.is_a? String)
+      @application_group = ApplicationGroup.find(application_group)
+    else
+      @application_group = application_group
+    end
   end
 
   def build
@@ -28,31 +26,21 @@ class IrsGroupBuilder
   end
 
 
+  # returns true if we take the irsgroup from previous household and apply it to new household.
+  # this happens when the number of coverage households has remained the same.
+  # returns false otherswise. i.e. when we have to split/merge irsgroups
   def retain_irs_group?
-
-    puts "@application_group.households.size #{@application_group.households.size}"
     all_households = @application_group.households.sort_by(&:submitted_at)
-
-    puts "all_households #{all_households.length}"
     return false if all_households.length == 1
 
     previous_household, current_household = all_households[all_households.length-2, all_households.length]
-
-    puts "#{current_household.coverage_households.length} == #{previous_household.coverage_households.length}"
     current_household.coverage_households.length == previous_household.coverage_households.length
-
   end
 
   def assign_exisiting_irs_group_to_new_household
-
     all_households = @application_group.households.sort_by(&:submitted_at)
-
     previous_household, current_household = all_households[all_households.length-2, all_households.length]
-
     current_household.irs_group_id =  previous_household.irs_group_id
     current_household.save!
-
-    puts "current_household.irs_group_id #{current_household.irs_group_id}"
-
   end
 end

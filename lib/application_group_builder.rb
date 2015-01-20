@@ -213,9 +213,6 @@ class ApplicationGroupBuilder
     end
   end
 
-
-
-
   def add_tax_households(tax_households_params)
 
     tax_households_params.map do |tax_household_params|

@@ -2,10 +2,10 @@ class IrsGroupBuilder
 
   def initialize(application_group)
 
-    if(application_group.is_a? String)
-      @application_group = ApplicationGroup.find(application_group)
-    else
+    if(application_group.is_a? ApplicationGroup)
       @application_group = application_group
+    else
+      @application_group = ApplicationGroup.find(application_group)
     end
   end
 

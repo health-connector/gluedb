@@ -1,4 +1,4 @@
-class EmployeeApplicant
+class EmployeeFamilyMember
   include Mongoid::Document
   include Mongoid::Timestamps
 

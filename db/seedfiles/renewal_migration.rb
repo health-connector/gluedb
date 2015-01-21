@@ -126,7 +126,7 @@ application_group.each do |ag|
   # Move the ApplicationGroup relationships to repsective Person models
   migrate_relationships(ag)
 
-  ag.applicants = build_applicant_list(ag)
+  ag.family_members = build_applicant_list(ag)
 
   # Build hbx_enrollments
   hh.hbx_enrollments = build_enrollments(ag)

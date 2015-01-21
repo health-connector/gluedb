@@ -224,10 +224,10 @@ private
   end
 
   #TODO need to verify this logic from Dan
-  def set_employee_applicants
+  def set_employee_family_members
     primary_applicant.person.policies do |policy|
-      employee_applicant = self.primary_applicant.employee_applicants.build
-      employee_applicant.employer = policy.employer
+      employee_family_member = self.primary_applicant.employee_family_members.build
+      employee_family_member.employer = policy.employer
     end
     return true
   end

@@ -17,7 +17,7 @@ module Parsers::Xml::Cv
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
-    has_many :employee_applicants, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
+    has_many :employee_family_members, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
     element :is_consent_applicant, String, tag: 'is_consent_applicant'
 
     def to_individual_request(member_id_generator, p_tracker)
@@ -64,7 +64,7 @@ module Parsers::Xml::Cv
          is_coverage_applicant: is_coverage_applicant,
          person_demographics: person_demographics.to_hash,
          financial_statements: financial_statements.map(&:to_hash),
-         employee_applicants: employee_applicants.map(&:to_hash),
+         employee_family_members: employee_family_members.map(&:to_hash),
          is_consent_applicant: is_consent_applicant,
          alias_ids: alias_ids
      }

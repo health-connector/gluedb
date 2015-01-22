@@ -3,7 +3,8 @@ module Generators::Reports
     include ActionView::Helpers::NumberHelper
 
     def initialize(notice)
-      template = "#{Rails.root}/f1095a.pdf"
+      template = "#{Rails.root}/1095a_template.pdf"
+
       super({:template => template, :margin => [30, 55]})
       font_size 11
 
@@ -11,6 +12,8 @@ module Generators::Reports
       @margin = [30, 70]
 
       fill_envelope
+      fill_coverletter
+      go_to_page(5)
       fill_subscriber_details
       fill_household_details
       fill_preimum_details
@@ -21,15 +24,31 @@ module Generators::Reports
       y_pos = 790.86 - mm2pt(57.15) - 65
 
       bounding_box([x_pos, y_pos], :width => 300) do
-        fill_primary_address
+        fill_recipient_contact
       end
     end
 
-    def fill_primary_address
-      text @notice.primary_name
-      text @address.street_1
-      text @address.street_2 unless @address.street_2.blank?
-      text "#{@address.city}, #{@address.state} #{@address.zip}"      
+    def fill_coverletter
+      go_to_page(3)
+
+      bounding_box([35, 538], :width => 200) do
+        text "#{Date.today.strftime('%m/%d/%Y')}"
+      end
+
+      bounding_box([35, 510], :width => 300) do
+        fill_recipient_contact
+      end
+
+      bounding_box([62, 421], :width => 200) do
+        text "#{@notice.recipient.name}:"
+      end
+    end
+
+    def fill_recipient_contact
+      text @notice.recipient.name
+      text @notice.recipient_address.street_1
+      text @notice.recipient_address.street_2 unless @notice.recipient_address.street_2.blank?
+      text "#{@notice.recipient_address.city}, #{@notice.recipient_address.state} #{@notice.recipient_address.zip}"      
     end
 
     def fill_subscriber_details
@@ -53,6 +72,9 @@ module Generators::Reports
       end
 
       move_down(12)
+      if @notice.recipient.blank?
+        raise "no subscriber!!"
+      end
       fill_enrollee(@notice.recipient)
 
       move_down(12)

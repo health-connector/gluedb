@@ -5,7 +5,7 @@ FactoryGirl.define do
     applied_aptc_in_cents 1000
     elected_aptc_in_cents 1000
     is_active true
-    submitted_at DateTime.today
+    submitted_at DateTime.now
 
     after(:create) do |hbx_enrollment|
 

@@ -77,6 +77,10 @@ module Listeners
       add_policy_error(:employer, "not found for fein #{details[:fein]}")
     end
 
+    def no_employer_contribution_data(details)
+      add_policy_error(:employer, "has no contribution data: fein #{details[:employer_fein]}, date #{details[:coverage_start]}")
+    end
+
     def invalid_policy(details)
       details.each_pair do |k, v|
         add_policy_error(k, v)

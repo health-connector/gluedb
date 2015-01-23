@@ -10,11 +10,13 @@ module Services
       reason = p_action.downcase
       operation = (p_action.downcase == "initial_enrollment") ? "add" : "change"
       v_destination = (p_action.downcase == "initial_enrollment") ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
-      routing_key = "policy.initial_enrollment"
-      if (reason == "renewal")
-        routing_key = "policy.renewal"
-      elsif
-        routing_key = "policy.maintenance"
+      routing_key = case reason
+      when "renewal"
+        "policy.renewal"
+      when "initial_enrollment"
+        "policy.initial_enrollment"
+      else
+        "policy.maintenance"
       end
       xml_body = serialize(policy, operation, reason)
       with_channel do |channel|

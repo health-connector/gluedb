@@ -14,6 +14,20 @@ module Policies
       plan_year = request[:plan_year]
       broker_npn = request[:broker_npn]
       enrollees = request[:enrollees].dup.map { |val| val.reject { |k,v| k == :member } }
+      ens = request[:enrollees]
+      if enrollees.blank?
+        listener.no_enrollees
+        return false
+      end
+      s_enrollee = ens.detect do |enrollee|
+        enrollee[:rel_code] == 'self'
+      end
+      if s_enrollee.nil?
+        listener.no_subscriber_for_policies
+        return false
+      end
+      sub = Enrollee.new(s_enrollee)
+      coverage_start = sub.coverage_start
       employer_fein = request[:employer_fein]
       existing_policy = @policy_factory.find_for_group_and_hios(eg_id, hios_id)
       if !existing_policy.blank?
@@ -28,6 +42,18 @@ module Policies
         if employer.blank?
           listener.employer_not_found(:fein => employer_fein)
           fail = true
+        end
+      end
+      if !employer.blank?
+        plan_year = employer.plan_year_of(coverage_start)
+        if plan_year.blank?
+          listener.no_employer_contribution_data({:employer_fein => employer_fein, :coverage_start => coverage_start})
+          return false
+        else
+          if plan_year.contribution_strategy.blank?
+            listener.no_employer_contribution_data({:employer_fein => employer_fein, :coverage_start => coverage_start})
+            return false
+          end
         end
       end
       if !broker_npn.blank?
@@ -105,6 +131,19 @@ module Policies
         cpol.cancel_via_hbx!
         listener.policy_canceled(cpol.id)
       end
+    end
+
+    def coverage_start_for(request, listener)
+      ens = request[:enrollees]
+      s_enrollee = ens.detect do |enrollee|
+        enrollee[:rel_code] == 'self'
+      end
+      if s_enrollee.nil?
+        listener.no_subscriber_for_policies
+        return false
+      end
+      enrollee = Enrollee.new(s_enrollee)
+      coverage_start = enrollee.coverage_start
     end
   end
 end

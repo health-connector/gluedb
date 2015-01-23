@@ -62,7 +62,7 @@ class RenewalDetermination
   def spot_carrier_switch(listener, start_date, eg_id, plan, policies, employer)
     coverage_end = Date.new(start_date.year, 12, 31)
     if !employer.blank?
-      py = employer.plan_year_for(start_date)
+      py = employer.plan_year_of(start_date)
       coverage_end = py.end_date
     end
     coverage_period = (start_date..coverage_end)

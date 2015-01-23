@@ -39,47 +39,54 @@ class RenewalDetermination
       plan_year = policy[:plan_year]
       eg_id = policy[:enrollment_group_id]
       plan = @plan_finder.find_by_hios_id_and_year(hios_id, plan_year)
+      employer_fein = policy[:employer_fein]
+      employer = nil
+      if !employer_fein.blank?
+        employer = Employer.find_for_fein(employer_fein)
+        if employer.blank?
+          listener.employer_not_found(:fein => employer_fein)
+          return false
+        end
+      end
       if plan.blank?
         listener.plan_not_found(:hios_id => hios_id, :plan_year => plan_year)
         return false
       end
-      # TODO: Check if content of enrollees differs
-      renewal_threshold = coverage_start - 1.day
-      date_market_different_carrier = policies.select do |pol|
-        (pol.plan.coverage_type == plan.coverage_type) &&
-          pol.active_as_of?(renewal_threshold) &&
-          (pol.subscriber.coverage_end != renewal_threshold) &&
-          (pol.plan.carrier_id != plan.carrier_id)
-      end
-      if date_market_different_carrier.any?
-        date_market_different_carrier.each do |op|
-        listener.carrier_switch_renewal(
-          :new_enrollment_group_id => eg_id,
-          :old_policy => {
-            :enrollment_group_id => op.eg_id,
-            :policy_id => op.id
-          }
-        )
-        end
+      if spot_carrier_switch(listener, coverage_start, eg_id, plan, policies, employer)
         return false
-      end
-      date_market_renewal = policies.select do |pol|
-        (pol.plan.coverage_type == plan.coverage_type) &&
-          pol.active_as_of?(renewal_threshold)
-      end
-      date_market_renewal.each do |r_pol|
-        candidate_enrollees = r_pol.enrollees.select do |en|
-          r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
-            (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
-        end
-        if (candidate_enrollees.length != policy[:enrollees].length)
-          listener.enrollees_changed_for_renewal({
-            :old_policy => candidate_enrollees.length,
-            :new_policy => policy[:enrollees].length
-          })
-        end
       end
     end
     true
+  end
+
+  def spot_carrier_switch(listener, start_date, eg_id, plan, policies, employer)
+    coverage_end = Date.new(start_date.year, 12, 31)
+    if !employer.blank?
+      py = employer.plan_year_for(start_date)
+      coverage_end = py.end_date
+    end
+    coverage_period = (start_date..coverage_end)
+    new_policy = OpenStruct.new(:coverage_period => coverage_period, :carrier_id => plan.carrier_id)
+    policies_to_check = policies.reject do |pol|
+      pol.canceled? || (pol.policy_start == coverage_start) || (pol.coverage_type.downcase != plan.coverage_type.downcase)
+    end
+    interactions = [
+      ::PolicyInteractions::InitialEnrollment.new,
+      ::PolicyInteractions::Renewal.new,
+      ::PolicyInteractions::PlanChange.new
+    ]
+    cs_renewals = policies_to_check.select do |pol|
+      !interactions.any? { |pi| pi.qualfies?([pol], new_policy) }
+    end
+    cs_renewals.each do |op|
+      listener.carrier_switch_renewal(
+        :new_enrollment_group_id => eg_id,
+        :old_policy => {
+          :enrollment_group_id => op.eg_id,
+          :policy_id => op.id
+        }
+      )
+    end
+    cs_renewals.any?
   end
 end

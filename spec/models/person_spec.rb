@@ -316,7 +316,8 @@ describe Person do
   describe '#future_active_policies' do
     let(:person) { Person.new(name_first: 'Joe', name_last: 'Dirt', members: [member]) }
     let(:member) { Member.new(hbx_member_id: '1', gender: 'male', ssn: '11111111111')}
-    let(:policy) { Policy.new(eg_id: '1', enrollees: [enrollee]) }
+    let(:policy) { Policy.new(eg_id: '1', enrollees: [enrollee], plan: plan ) }
+    let(:plan) { build(:plan) }
     let(:enrollee) do
       Enrollee.new(
         m_id: member.hbx_member_id,

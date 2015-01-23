@@ -68,7 +68,7 @@ class RenewalDetermination
     coverage_period = (start_date..coverage_end)
     new_policy = OpenStruct.new(:coverage_period => coverage_period, :carrier_id => plan.carrier_id)
     policies_to_check = policies.reject do |pol|
-      pol.canceled? || (pol.policy_start == coverage_start) || (pol.coverage_type.downcase != plan.coverage_type.downcase)
+      pol.canceled? || (pol.policy_start == start_date) || (pol.coverage_type.downcase != plan.coverage_type.downcase)
     end
     interactions = [
       ::PolicyInteractions::InitialEnrollment.new,
@@ -76,7 +76,7 @@ class RenewalDetermination
       ::PolicyInteractions::PlanChange.new
     ]
     cs_renewals = policies_to_check.select do |pol|
-      !interactions.any? { |pi| pi.qualfies?([pol], new_policy) }
+      !interactions.any? { |pi| pi.qualifies?([pol], new_policy) }
     end
     cs_renewals.each do |op|
       listener.carrier_switch_renewal(

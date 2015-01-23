@@ -161,6 +161,10 @@ class Policy
     subscriber.canceled?
   end
 
+  def terminated?
+    subscriber.terminated?
+  end
+
   def market
     is_shop? ? 'shop' : 'individual'
   end
@@ -525,11 +529,23 @@ class Policy
 
   def coverage_period
     start_date = policy_start
+    if !policy_end.nil?
+       return (start_date..policy_end)
+    end
     if employer_id.blank?
-       return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+       return (start_date..Date.new(start_date.year, 12, 31))
     end
     py = employer.plan_year_of(start_date)
-    (py.start_date..py.end_date)
+    (start_date..py.end_date)
+  end
+
+  def coverage_year
+      start_date = policy_start
+      if employer_id.blank?
+        return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+      end
+      py = employer.plan_year_of(start_date)
+      (py.start_date..py.end_date)
   end
 
   def coverage_period_end

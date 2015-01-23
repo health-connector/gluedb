@@ -2,12 +2,12 @@ module Generators::Reports
   class IrsYearlyXml
     include ActionView::Helpers::NumberHelper
 
-    CV_API_URL = "http://localhost:3000/api/v1/"
-
     NS = { 
       "xmlns:air5.0" => "urn:us:gov:treasury:irs:ext:aca:air:5.0",
-      "xmlns:batchreq" => "urn:us:gov:treasury:irs:msg:form1095atransmissionupstreammessage",
       "xmlns:irs" => "urn:us:gov:treasury:irs:common",
+      "xmlns:batchreq" => "urn:us:gov:treasury:irs:msg:form1095atransmissionupstreammessage",
+      "xmlns:batchresp"=> "urn:us:gov:treasury:irs:msg:form1095atransmissionexchrespmessage",
+      "xmlns:reqack"=> "urn:us:gov:treasury:irs:msg:form1095atransmissionexchackngmessage",
       "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance"
     }
 
@@ -18,7 +18,7 @@ module Generators::Reports
     def serialize
       Nokogiri::XML::Builder.new { |xml|
         xml['batchreq'].Form1095ATransmissionUpstream(NS) do |xml|
-          xml['air5.0'].Form1095AUpstreamDetail do |xml|
+          xml['air5.0'].Form1095AUpstreamDetail(:recordType => "", :lineNum => "0") do |xml|
             serialize_headers(xml)
             serialize_policy(xml)
             serialize_recipient(xml)

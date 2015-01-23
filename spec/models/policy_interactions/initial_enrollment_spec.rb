@@ -23,7 +23,7 @@ describe PolicyInteractions::InitialEnrollment do
   describe "with a policy from a directly previous coverage period, which is terminated" do
     let(:previous_policy) { instance_double("Policy", :coverage_period => (Date.new(2014,1,1)..Date.new(2014, 12,31)), :terminated? => true) }
     let(:existing_policies) { [previous_policy] }
-    it "should not qualify for initial enrollment" do
+    it "should qualify for initial enrollment" do
       expect(subject.qualifies?(existing_policies, new_policy)).to be_truthy
     end
   end

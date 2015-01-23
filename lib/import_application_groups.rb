@@ -133,7 +133,7 @@ class ImportApplicationGroups
         value = uc.validate(ig_request, listener)
       end
 
-      puts all_valid
+      @@logger.info "#{DateTime.now.to_s}" + "Family e_case_id:#{application_group_builder.family.e_case_id}" + "message:'CreateOrUpdatePerson did not succees for all'" unless all_valid
 
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
@@ -184,15 +184,10 @@ class ImportApplicationGroups
 
       rescue Exception => e
         fail_counter += 1
-        puts "FAILED #{application_group_builder.family.id}"
+        puts "FAILED #{application_group_builder.family.id} e_case_id:#{application_group_builder.family.e_case_id}"
 
-        @@logger.info "Applicants #{application_group_builder.family.family_members.size}}\n"
-
-        application_group_builder.family.family_members.each do |applicant|
-          @@logger.info "#{applicant.inspect}"
-        end
-
-        @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s}\n"+
+        @@logger.info "#{DateTime.now.to_s}" +
+                          "Family e_case_id:#{application_group_builder.family.e_case_id}\n" +
                           "message:#{e.message}\n" +
                           "backtrace:#{e.backtrace.inspect}\n"
       end

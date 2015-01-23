@@ -31,15 +31,15 @@ module Generators::Reports
     def fill_coverletter
       go_to_page(3)
 
-      bounding_box([35, 538], :width => 200) do
+      bounding_box([15, 538], :width => 200) do
         text "#{Date.today.strftime('%m/%d/%Y')}"
       end
 
-      bounding_box([35, 510], :width => 300) do
+      bounding_box([15, 510], :width => 300) do
         fill_recipient_contact
       end
 
-      bounding_box([62, 421], :width => 200) do
+      bounding_box([44, 416], :width => 200) do
         text "#{@notice.recipient.name}:"
       end
     end

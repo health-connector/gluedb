@@ -45,12 +45,12 @@ module Policies
         end
       end
       if !employer.blank?
-        plan_year = employer.plan_year_of(coverage_start)
-        if plan_year.blank?
+        py = employer.plan_year_of(coverage_start)
+        if py.blank?
           listener.no_employer_contribution_data({:employer_fein => employer_fein, :coverage_start => coverage_start})
           return false
         else
-          if plan_year.contribution_strategy.blank?
+          if py.contribution_strategy.blank?
             listener.no_employer_contribution_data({:employer_fein => employer_fein, :coverage_start => coverage_start})
             return false
           end

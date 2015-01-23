@@ -528,7 +528,16 @@ class Policy
        return (start_date..Date.new(start_date.year, 12, 31))
     end
     py = employer.plan_year_of(start_date)
-    (py.start_date..py.end_date)
+    (start_date..py.end_date)
+  end
+
+  def coverage_year
+      start_date = policy_start
+      if employer_id.blank?
+        return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+      end
+      py = employer.plan_year_of(start_date)
+      (py.start_date..py.end_date)
   end
 
   def coverage_period_end

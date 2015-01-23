@@ -11,5 +11,6 @@ module PdfTemplates
     attribute :covered_household, Array[PdfTemplates::Enrolee]
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
     attribute :has_aptc, Boolean, :default => false
+    attribute :yearly_premium, PdfTemplates::YearlyPremium
   end
 end

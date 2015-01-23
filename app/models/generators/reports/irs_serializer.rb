@@ -2,34 +2,28 @@ module Generators::Reports
   class IrsSerializer
     class << self
 
-      def serialize_assisted
+      def generate_notices
+        # Currently its for APTC
         active_policies.where(PolicyQueries.with_aptc).each do |policy|
           if is_valid_policy?(policy)
             notice = Generators::Reports::IrsInputBuilder.new(policy).notice
             render_pdf(notice)
             render_xml(notice)
           end
-        end
-      end
-
-      def serialize_unassisted
-        active_policies.where(PolicyQueries.without_aptc) do |policy|
-          if is_valid_policy?(policy)
-            notice = Generators::Reports::IrsInputBuilder.new(policy).notice
-            render_pdf(notice)
-            render_xml(notice)
-          end
-        end
+        end     
       end
 
       def render_xml(notice)
-        xml_notice = Generators::Reports::IrsXmlReport.new(input)
-        xml_notice.render_file("#{Rails.root.to_s}/irs_xml_notices/sample.xml")
+        xml_report = Generators::Reports::IrsYearlyXml.new(notice).serialize.to_xml(:indent => 2)
+
+        File.open("#{Rails.root.to_s}/sample.xml", 'w') do |file|
+          file.write xml_report
+        end
       end
 
       def render_pdf(notice)
-        pdf_notice = Generators::Reports::IrsPdfReport.new(notice_input)
-        pdf_notice.render_file("#{Rails.root.to_s}/irs_sample_#{policy.id}.pdf")
+        pdf_notice = Generators::Reports::IrsPdfReport.new(notice)
+        pdf_notice.render_file("#{Rails.root.to_s}/irs_sample.pdf")
       end
 
       def active_policies

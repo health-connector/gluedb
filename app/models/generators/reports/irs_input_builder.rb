@@ -19,6 +19,7 @@ module Generators::Reports
  
       append_policy_enrollees
       append_monthly_premiums
+      append_yearly_premiums
     end
 
     def append_policy_enrollees
@@ -37,7 +38,11 @@ module Generators::Reports
         ssn: authority_member.ssn, # 'xxxxxxxxx'
         dob: format_date(authority_member.dob),
         coverage_start_date: format_date(enrollee.coverage_start),
-        coverage_termination_date: format_date(coverage_end)
+        coverage_termination_date: format_date(coverage_end),
+        name_first: enrollee.person.name_first,
+        name_middle: enrollee.person.name_middle,
+        name_last: enrollee.person.name_last,
+        name_sfx: enrollee.person.name_sfx
       })
     end
 
@@ -61,6 +66,24 @@ module Generators::Reports
 
         data << premium_amounts
       end
+    end
+
+    def append_yearly_premiums
+      yearly_premium = {
+        premium_amount: @notice.monthly_premiums.inject(0.0){|sum, premium|  sum + premium.premium_amount.to_f}
+      }
+
+      slcsp_amount = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.premium_amount_slcsp.to_f}
+      aptc_amount = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
+
+      if @policy.applied_aptc > 0
+        yearly_premium.merge!({
+          slcsp_premium_amount: slcsp_amount,
+          aptc_amount: aptc_amount
+        })
+      end
+
+      @notice.yearly_premium = PdfTemplates::YearlyPremium.new(yearly_premium)
     end
 
     private

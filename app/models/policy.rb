@@ -161,6 +161,10 @@ class Policy
     subscriber.canceled?
   end
 
+  def terminated?
+    subscriber.terminated?
+  end
+
   def market
     is_shop? ? 'shop' : 'individual'
   end

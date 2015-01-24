@@ -13,7 +13,7 @@ module Generators::Reports
 
       fill_envelope
       fill_coverletter
-      go_to_page(5)
+      go_to_page(4)
       fill_subscriber_details
       fill_household_details
       fill_preimum_details
@@ -29,17 +29,17 @@ module Generators::Reports
     end
 
     def fill_coverletter
-      go_to_page(3)
+      go_to_page(2)
 
-      bounding_box([15, 538], :width => 200) do
+      bounding_box([15, 553], :width => 200) do
         text "#{Date.today.strftime('%m/%d/%Y')}"
       end
 
-      bounding_box([15, 510], :width => 300) do
+      bounding_box([15, 525], :width => 300) do
         fill_recipient_contact
       end
 
-      bounding_box([44, 416], :width => 200) do
+      bounding_box([44, 430], :width => 200) do
         text "#{@notice.recipient.name}:"
       end
     end

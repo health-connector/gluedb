@@ -1,8 +1,6 @@
 module PdfTemplates
   class IrsNoticeInput
     include Virtus.model
-
-    attribute :policy_number, String
     attribute :policy_id, String
     attribute :issuer_name, String
     attribute :recipient_address, PdfTemplates::NoticeAddress

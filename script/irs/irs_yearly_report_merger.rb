@@ -43,7 +43,6 @@ module Irs
         @consolidated_doc.xpath('//batchreq:Form1095ATransmissionUpstream', XMLNS).each do |node|
           new_node = xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).first
           node.add_child(new_node)
-          puts node.to_xml
         end
       end
 

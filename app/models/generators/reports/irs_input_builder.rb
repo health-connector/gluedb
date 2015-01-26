@@ -13,13 +13,20 @@ module Generators::Reports
       @notice = PdfTemplates::IrsNoticeInput.new
 
       @notice.issuer_name = @policy.plan.carrier.name
-      @notice.policy_id = @policy.eg_id
+      @notice.policy_id = prepend_zeros(@policy.id.to_s, 6)
       @notice.has_aptc = true if @policy.applied_aptc > 0
       @notice.recipient_address = PdfTemplates::NoticeAddress.new(address_to_hash(@subscriber.addresses[0]))
  
       append_policy_enrollees
       append_monthly_premiums
       append_yearly_premiums
+      reset_variables
+    end
+
+    def reset_variables
+      @policy_disposition = nil
+      @subscriber = nil
+      @policy = nil
     end
 
     def append_policy_enrollees
@@ -35,7 +42,7 @@ module Generators::Reports
       coverage_end = enrollee.coverage_end.blank? ? @policy.coverage_period.end : enrollee.coverage_end
       PdfTemplates::Enrolee.new({
         name: enrollee.person.full_name,
-        ssn: authority_member.ssn, # 'xxxxxxxxx'
+        ssn: number_to_ssn(authority_member.ssn),
         dob: format_date(authority_member.dob),
         coverage_start_date: format_date(enrollee.coverage_start),
         coverage_termination_date: format_date(coverage_end),
@@ -93,6 +100,12 @@ module Generators::Reports
       date.strftime("%m/%d/%Y")
     end
 
+    def number_to_ssn(number)
+      return unless number
+      delimiter = "-"
+      number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
+    end
+
     def address_to_hash(address)
       {
         street_1: address.address_1,
@@ -101,6 +114,11 @@ module Generators::Reports
         state: address.state,
         zip: address.zip
       }
+    end
+
+    def prepend_zeros(number, n)
+      (n - number.to_s.size).times { number.prepend('0') }
+      number
     end
   end
 end

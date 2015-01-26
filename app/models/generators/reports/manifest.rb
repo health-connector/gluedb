@@ -40,18 +40,18 @@ module Generators::Reports
           checksum: Digest::MD5.file(file).hexdigest,
           binarysize: File.size(file),
           filename: File.basename(file),
-          sequence_id: File.basename(file).match(/^\d+/)[0]
+          sequence_id: File.basename(file).match(/\d{5}/)[0]
         })
       end
     end
 
     def serialize_batch_data(xml)
       xml['ns2'].BatchMetadata do |xml|
-        xml.BatchID '2014-10-06T09:00:00Z'
+        xml.BatchID Time.now.utc.iso8601
         xml.BatchPartnerID '02.DC*.SBE.001.001'
         xml.BatchAttachmentTotalQuantity @manifest.file_count
         xml['ns4'].BatchCategoryCode 'IRS_EOY_IND_REQ'
-        xml.BatchTransmissionQuantity @manifest.file_count
+        xml.BatchTransmissionQuantity 1
       end
     end
 
@@ -65,7 +65,7 @@ module Generators::Reports
     def serialize_service_data(xml)
       xml['ns4'].ServiceSpecificData do |xml|
         xml.ReportPeriod do |xml|
-          xml['ns3'].YearMonth '2014-01'
+          xml['ns3'].YearMonth '2014'
         end
       end
     end

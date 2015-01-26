@@ -20,7 +20,7 @@ describe RenewalDetermination do
     :hios_id => hios_id
   } }
 
-  let(:coverage_type) { double }
+  let(:coverage_type) { "health" }
   let(:plan_year) { double }
   let(:hios_id) { double }
   let(:subscriber_person) { { :hbx_member_id => "12345" } }
@@ -72,7 +72,7 @@ describe RenewalDetermination do
     end
 
     describe "with policies in the interval, but with a different carrier" do
-      let(:bad_policy) { double(:plan => existing_plan, :subscriber => existing_sub, :eg_id => nil, :id => nil) }
+      let(:bad_policy) { instance_double("Policy", :plan => existing_plan, :subscriber => existing_sub, :eg_id => nil, :id => nil, :canceled? => false, :coverage_type => coverage_type, :coverage_period => (Date.new(2014,12,1)..Date.new(2014,12,31)), :terminated? => false, :carrier_id => carrier_id) }
       let(:found_policies) { [bad_policy] }
       let(:policy_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id_new) }
       let(:existing_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id) }
@@ -82,7 +82,7 @@ describe RenewalDetermination do
 
       before :each do
         allow(plan_finder).to receive(:find_by_hios_id_and_year).with(hios_id, plan_year).and_return(policy_plan)        
-        allow(bad_policy).to receive(:active_as_of?).with(Date.new(2014,12,31)).and_return(true)
+        allow(bad_policy).to receive(:policy_start).and_return(Date.new(2014,12,1))
       end
 
       it "should notify the listener of the error" do

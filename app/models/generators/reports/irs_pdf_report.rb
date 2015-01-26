@@ -2,7 +2,8 @@ module Generators::Reports
   class IrsPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
-    def initialize(notice)
+    def initialize(notice, multiple = false)
+      @multiple = multiple
       template = "#{Rails.root}/1095a_template.pdf"
 
       super({:template => template, :margin => [30, 55]})
@@ -31,15 +32,15 @@ module Generators::Reports
     def fill_coverletter
       go_to_page(3)
 
-      bounding_box([15, 538], :width => 200) do
+      bounding_box([15, 553], :width => 200) do
         text "#{Date.today.strftime('%m/%d/%Y')}"
       end
 
-      bounding_box([15, 510], :width => 300) do
+      bounding_box([15, 525], :width => 300) do
         fill_recipient_contact
       end
 
-      bounding_box([44, 416], :width => 200) do
+      bounding_box([44, 430], :width => 200) do
         text "#{@notice.recipient.name}:"
       end
     end
@@ -78,7 +79,7 @@ module Generators::Reports
       fill_enrollee(@notice.recipient)
 
       move_down(12)
-      if @notice.spouse
+      if @notice.spouse && @notice.has_aptc
         fill_enrollee(@notice.spouse)
       else
         move_down(13)
@@ -96,7 +97,11 @@ module Generators::Reports
       end
 
       bounding_box([col3, y_pos], :width => 200) do
-        text @notice.recipient_address.street_1
+        street_address = @notice.recipient_address.street_1
+        if !@notice.recipient_address.street_2.blank?
+          street_address += ", #{@notice.recipient_address.street_2}"
+        end
+        text street_address
       end
 
       move_down(12)
@@ -125,13 +130,15 @@ module Generators::Reports
         text enrollee.name
       end
 
-      bounding_box([col3, y_pos], :width => 100) do
-        text enrollee.ssn
+      if !enrollee.ssn.blank?
+        bounding_box([col3, y_pos], :width => 100) do
+          text enrollee.ssn
+        end
+      else
+        bounding_box([col4, y_pos], :width => 100) do
+          text enrollee.dob
+        end
       end
-
-      bounding_box([col4, y_pos], :width => 100) do
-        text enrollee.dob
-      end    
     end
 
     def fill_household_details
@@ -143,15 +150,21 @@ module Generators::Reports
 
       y_pos = 472
 
-      @notice.covered_household.each do |individual|
+      covered_household = @notice.covered_household[0..4]
+      covered_household = @notice.covered_household[5..9] if @multiple
+
+      covered_household.each do |individual|
         bounding_box([col1, y_pos], :width => 150) do
           text individual.name
         end
-        bounding_box([col2, y_pos], :width => 100) do
-          text individual.ssn
-        end
-        bounding_box([col3, y_pos], :width => 100) do
-          text individual.dob
+        if !individual.ssn.blank?
+          bounding_box([col2, y_pos], :width => 100) do
+            text individual.ssn
+          end
+        else
+          bounding_box([col3, y_pos], :width => 100) do
+            text individual.dob
+          end
         end
         bounding_box([col4, y_pos], :width => 100) do
           text individual.coverage_start_date
@@ -189,21 +202,17 @@ module Generators::Reports
         y_pos = y_pos - 24
       end
 
-      premium_total = @notice.monthly_premiums.inject(0.0){|sum, premium|  sum + premium.premium_amount.to_f}
       bounding_box([col1, y_pos], :width => 100) do
-        text number_to_currency(premium_total), :align => :right
+        text number_to_currency(@notice.yearly_premium.premium_amount), :align => :right
       end
 
       if @notice.has_aptc
-        slcsp_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.premium_amount_slcsp.to_f}
-        aptc_total = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
- 
         bounding_box([col2, y_pos], :width => 130) do
-          text number_to_currency(slcsp_total), :align => :right
+          text number_to_currency(@notice.yearly_premium.slcsp_premium_amount), :align => :right
         end
   
         bounding_box([col3, y_pos], :width => 120) do
-          text number_to_currency(aptc_total), :align => :right
+          text number_to_currency(@notice.yearly_premium.aptc_amount), :align => :right
         end
       end
     end

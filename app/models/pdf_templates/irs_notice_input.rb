@@ -1,8 +1,6 @@
 module PdfTemplates
   class IrsNoticeInput
     include Virtus.model
-
-    attribute :policy_number, String
     attribute :policy_id, String
     attribute :issuer_name, String
     attribute :recipient_address, PdfTemplates::NoticeAddress
@@ -11,5 +9,6 @@ module PdfTemplates
     attribute :covered_household, Array[PdfTemplates::Enrolee]
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
     attribute :has_aptc, Boolean, :default => false
+    attribute :yearly_premium, PdfTemplates::YearlyPremium
   end
 end

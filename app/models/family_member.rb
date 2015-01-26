@@ -34,7 +34,7 @@ class FamilyMember
   validates_presence_of :person_id, :is_primary_applicant, :is_coverage_applicant
 
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
+    raise "undefined parent family" unless family
     self.family
   end
 

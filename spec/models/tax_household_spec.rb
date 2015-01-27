@@ -116,27 +116,4 @@ describe TaxHousehold do
   end
 =end
 
-  describe "being found or created using a list of people" do
-
-    let(:people) {
-      [double("person1", :id => 1), double("person2", :id => 2)]
-    }
-
-    it "should create a new one when no matching instance is found" do
-      expect(Household).to receive(:where).with({
-        "person_ids" => { "$all" => [1,2], "$size" => 2}
-      }).and_return([])
-      expect(Household).to receive(:create!).with({ :people => people })
-      Household.create_for_people(people)
-    end
-
-    it "should do nothing if it already exists" do
-      expect(Household).to receive(:where).with({
-        "person_ids" => { "$all" => [1,2], "$size" => 2 }
-      }).and_return([1])
-      expect(Household).not_to receive(:create!).with({ :people => people })
-      Household.create_for_people(people)
-    end
-  end
-
 end

@@ -25,8 +25,8 @@ class Api::V2::PeopleController < ApplicationController
   
   def get_person_by_ssn
     ssn = Regexp.new(Regexp.escape(params[:ssn].to_s))
-    first_name = Regexp.new(Regexp.escape(params[:ssn].to_s))
-    dob = Regexp.new(Regexp.escape(params[:ssn].to_s))
+    first_name = Regexp.new(Regexp.escape(params[:first_name].to_s))
+    dob = Regexp.new(Regexp.escape(params[:date_of_birth].to_s))
     
     @people = Queries::ExistingPersonQuery.new(ssn, first_name, dob)
   end

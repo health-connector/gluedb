@@ -34,7 +34,7 @@
 			<% end %>
 	        <% if !p.broker.blank? %>
 		<dt>Broker</dt>
-		<dd><%= p.broker.name %></dd>
+		<dd><%= p.broker.full_name %></dd>
 		<% end %>
 	        <dt>Created</dt>
 	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>

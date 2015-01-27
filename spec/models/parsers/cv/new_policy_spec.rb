@@ -23,4 +23,9 @@ describe Parsers::Cv::NewPolicy do
   it 'should read employer id' do
     expect(@policy_parser.employer_id).to eq('53e6731deb899a460302a120')
   end
+
+  it 'should read the broker npn' do
+    expect(@policy_parser.broker_npn).to eq('broker npn for testing')
+    expect(@policy_parser.to_hash[:broker_npn]).to eq('broker npn for testing')
+  end
 end

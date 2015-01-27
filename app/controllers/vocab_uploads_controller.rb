@@ -1,5 +1,6 @@
 class VocabUploadsController < ApplicationController
   load_and_authorize_resource :class => "VocabUpload"
+  rescue_from Parsers::Xml::Enrollment::Enrollee::ShopEnrollee::BeginDateOutsidePlanYearsError, with: :redirect_back_with_message
 
   def new
     @vocab_upload = VocabUpload.new(:submitted_by => current_user.email)

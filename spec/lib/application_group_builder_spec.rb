@@ -19,7 +19,7 @@ describe ApplicationGroupBuilder do
   }
 
   before(:each){
-    @params = { e_case_id:'12345', submitted_date:'05052014'}
+    @params = { e_case_id:'12345', submitted_at:DateTime.now}
     @application_group_builder = ApplicationGroupBuilder.new(@params, person_mapper)
     @family = @application_group_builder.family
   }
@@ -31,6 +31,12 @@ describe ApplicationGroupBuilder do
     expect(@application_group.family_members.size).to eq(1)
   end
 =end
+
+  it "builds a valid family object" do
+    expect(@family.class.name).to eq('Family')
+    expect(@family.valid?).to be_true
+
+  end
 
   it "saves successfully" do
     expect(@family.save!).to eq(true)

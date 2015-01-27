@@ -5,10 +5,10 @@ class Household
 
   embedded_in :family
 
-  before_save :set_effective_start_date
-  before_save :set_effective_end_date # set_effective_start_date should be done before this
-  before_save :reset_is_active_for_previous
-  before_save :set_submitted_at
+  before_validation :set_effective_start_date
+  before_validation :set_effective_end_date # set_effective_start_date should be done before this
+  before_validation :reset_is_active_for_previous
+  before_validation :set_submitted_at
 
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
@@ -108,7 +108,7 @@ class Household
   end
 
   def set_effective_start_date
-    self.effective_start_date =  family.submitted_at
+    self.effective_start_date =  parent.submitted_at
     true
   end
 

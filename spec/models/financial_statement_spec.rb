@@ -92,8 +92,6 @@ end
 
       income_hash = financial_statement.compute_yearwise(financial_statement.incomes)
 
-      puts "income_hash[2012] #{income_hash[2012]}"
-
       expect(((income_hash[2012]) - 10000).abs).to be < TEN_DOLLARS
 
     end

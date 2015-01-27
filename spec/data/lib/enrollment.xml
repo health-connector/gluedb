@@ -6,6 +6,11 @@
     <n1:id>
       <n1:id>http://10.83.85.127/api/v2/policies/1112</n1:id>
     </n1:id>
+    <n1:broker>
+	    <n1:id>
+		    <n1:id>broker npn for testing</n1:id>
+	    </n1:id>
+    </n1:broker>
 
     <n1:enrollees>
       <n1:enrollee>

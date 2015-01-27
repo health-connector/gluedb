@@ -6,7 +6,12 @@ module Parsers::Xml::Enrollment
       @benefit_begin_date = benefit_begin_date
     end
 
+    class BeginDateOutsidePlanYearsError < StandardError
+
+    end
+
     def rate_period_date
+      raise BeginDateOutsidePlanYearsError, "Benefit begin date of #{@benefit_begin_date} does not fall into any plan years of #{@employer.name} (fein: #{@employer.fein})" if @employer.plan_year_of(@benefit_begin_date).nil?
       @employer.plan_year_of(@benefit_begin_date).start_date
     end
   end

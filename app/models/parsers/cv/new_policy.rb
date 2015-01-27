@@ -58,7 +58,7 @@ module Parsers
       end
 
       def broker_npn
-        @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).first.content.split("#").last.value
+        @broker_npn ||= Maybe.new(@xml.at_xpath("cv:broker/cv:id/cv:id", namespaces)).content.split("#").last.value
       end
 
       def employer_id=(value)

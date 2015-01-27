@@ -104,6 +104,13 @@ module Policies
         employer = Employer.find_for_fein(employer_fein)
       end
 
+      create_params = request.merge({
+        :plan => plan,
+        :carrier => plan.carrier,
+        :broker => broker,
+        :employer => employer
+      })
+      raise create_params.inspect
       policy = @policy_factory.new(request.merge({
         :plan => plan,
         :carrier => plan.carrier,

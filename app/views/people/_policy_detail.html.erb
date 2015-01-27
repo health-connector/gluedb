@@ -33,6 +33,10 @@
 				<% end %>
 			<% end %>
 			<dt>Created</dt>
+			<% if !p.broker.nil? %>
+				<dt>Broker</dt>
+				<dd><%= p.broker.name %></dt>
+			<% end%>
 	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>
 	  	<dt>Updated</dt>
 	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>

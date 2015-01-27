@@ -110,14 +110,12 @@ module Policies
         :broker => broker,
         :employer => employer
       })
-      policy = @policy_factory.new(request.merge({
+      policy = @policy_factory.create(request.merge({
         :plan => plan,
         :carrier => plan.carrier,
         :broker => broker,
         :employer => employer
       }))
-      policy.save!
-      raise policy.broker.inspect
       p_calc = Premiums::PolicyCalculator.new
       p_calc.apply_calculations(policy)
       policy.save! 

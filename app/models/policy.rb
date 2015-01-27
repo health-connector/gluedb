@@ -6,6 +6,7 @@ class Policy
   include AASM
 
   extend Mongorder
+  include MoneyMath
 
   attr_accessor :coverage_start
 
@@ -158,6 +159,10 @@ class Policy
 
   def canceled?
     subscriber.canceled?
+  end
+
+  def terminated?
+    subscriber.terminated?
   end
 
   def market
@@ -509,6 +514,7 @@ class Policy
   def policy_start
     subscriber.coverage_start
   end
+
   def policy_end
     subscriber.coverage_end
   end
@@ -519,11 +525,27 @@ class Policy
 
   def coverage_period
     start_date = policy_start
+    if !policy_end.nil?
+       return (start_date..policy_end)
+    end
     if employer_id.blank?
-       return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+       return (start_date..Date.new(start_date.year, 12, 31))
     end
     py = employer.plan_year_of(start_date)
-    (py.start_date..py.end_date)
+    (start_date..py.end_date)
+  end
+
+  def coverage_year
+      start_date = policy_start
+      if employer_id.blank?
+        return (Date.new(start_date.year, 1, 1)..Date.new(start_date.year, 12, 31))
+      end
+      py = employer.plan_year_of(start_date)
+      (py.start_date..py.end_date)
+  end
+
+  def coverage_period_end
+    coverage_period.end
   end
 
   def transaction_list
@@ -561,6 +583,22 @@ class Policy
     current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
     pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
     pol
+  end
+
+  def ehb_premium
+    as_dollars(self.pre_amt_tot * self.plan.ehb)
+  end
+
+  def changes_over_time?
+    eligible_enrollees = self.enrollees.reject do |en|
+      en.canceled?
+    end
+    starts = eligible_enrollees.map(&:coverage_start).uniq
+    return true if (starts.length > 1)
+    end_dates = eligible_enrollees.map do |en|
+      en.coverage_end.blank? ? self.coverage_period_end : en.coverage_end
+    end
+    end_dates.uniq.length > 1
   end
 
   protected

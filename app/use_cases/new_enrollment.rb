@@ -21,40 +21,9 @@ class NewEnrollment
 
   def execute(request, orig_listener)
     listener = PersonMappingListener.new(orig_listener)
-    failed = false
     individuals = request[:individuals]
     policies = request[:policies]
-    if individuals.blank?
-      listener.no_individuals
-      listener.fail
-      return
-    else
-      people_failed = false
-      individuals.each_with_index do |ind, idx|
-        listener.set_current_person(idx)
-        people_failed = people_failed || !@update_person_use_case.validate(ind, listener)
-      end
-      failed = failed || people_failed
-    end
-    if policies.blank?
-      listener.no_policies
-      listener.fail
-      return
-    else
-      policies_failed = false
-      policies.each_with_index do |pol, idx|
-        listener.set_current_policy(idx)
-        policies_failed = policies_failed || !@create_policy_use_case.validate(pol, listener)
-      end
-      failed = failed || policies_failed
-      if failed
-        listener.fail
-        return
-      end
-    end
-
-    failed = failed || !@renewal_determination.validate(request, listener)
-
+    failed = !validate(request, listener)
     if failed
       listener.fail
     else
@@ -67,6 +36,40 @@ class NewEnrollment
       end
       listener.success
     end
+  end
+
+  def validate(request, listener)
+    failed = false
+    individuals = request[:individuals]
+    policies = request[:policies]
+    if individuals.blank?
+      listener.no_individuals
+      return false
+    else
+      people_failed = false
+      individuals.each_with_index do |ind, idx|
+        listener.set_current_person(idx)
+        people_failed = people_failed || !@update_person_use_case.validate(ind, listener)
+      end
+      failed = failed || people_failed
+    end
+    if policies.blank?
+      listener.no_policies
+      return false
+    else
+      policies_failed = false
+      policies.each_with_index do |pol, idx|
+        listener.set_current_policy(idx)
+        policies_failed = policies_failed || !@create_policy_use_case.validate(pol, listener)
+      end
+      failed = failed || policies_failed
+      if failed
+        return false
+      end
+    end
+
+    failed = failed || !@renewal_determination.validate(request, listener)
+    return !failed
   end
 
   def remap_enrollees(pol, listener)

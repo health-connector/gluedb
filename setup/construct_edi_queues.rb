@@ -43,6 +43,8 @@ class EdiQueueSetup
     
     emake_q = queue(Listeners::EnrollmentCreator.queue_name)
     emake_q.bind(req_exchange, :routing_key => "enrollment.create")
+    eval_q = queue(Listeners::EnrollmentValidator.queue_name)
+    eval_q.bind(req_exchange, :routing_key => "enrollment.validate")
     pmatch_q = queue(Listeners::PersonMatcher.queue_name)
     pmatch_q.bind(req_exchange, :routing_key => "person.match")
 
@@ -63,9 +65,14 @@ class EdiQueueSetup
     can_cv_q = gate_queue(ec, "legacy.policy.cancels")
     can_cv_q.bind(req_exchange, { :routing_key => "policy.cancel" })
 
+    m_cv_q = gate_queue(ec, "legacy.policy.maintenance")
+    m_cv_q.bind(req_exchange, { :routing_key => "policy.maintenance" })
+
+
     ob_cv_q = gate_queue(ec, "legacy.policy.outbound")
     ob_cv_q.bind(req_exchange, { :routing_key => "policy.initial_enrollment" })
     ob_cv_q.bind(req_exchange, { :routing_key => "policy.renewal" })
+    ob_cv_q.bind(req_exchange, { :routing_key => "policy.maintenance" })
     ob_cv_q.bind(req_exchange, { :routing_key => "policy.cancel" })
 
   end

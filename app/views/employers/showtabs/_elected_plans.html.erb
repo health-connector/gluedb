@@ -32,12 +32,12 @@
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-append-content">
             <% @employer.carriers.each_with_index do |carrier, index| %>
-              <li class="<%= 'active' if index==0 %>"><a href="#<%= carrier.id %>"><%= carrier.name %></a></li>
+              <li class="<%= 'active' if index==0 %>"><a href="#<%= "#{carrier.id}#{plan_year.start_date.year}" %>"><%= carrier.name %></a></li>
             <% end %>
           </ul>
           <div class="tab-content">
             <% @employer.carriers.each_with_index do |carrier, index| %>
-              <div class="tab-pane <%= 'active' if index==0 %>" id="<%= carrier.id %>">
+              <div class="tab-pane <%= 'active' if index==0 %>" id="<%= "#{carrier.id}#{plan_year.start_date.year}" %>">
                 <%= render "employers/showtabs/elected_plans_table", elected_plans: plan_year.elected_plans.select { |p| p.carrier_id == carrier.id } %>
               </div>
             <% end %>

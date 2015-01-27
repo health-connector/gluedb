@@ -3,7 +3,7 @@ module PersonMatchStrategies
     def match(options = {})
       name_first_regex = Regexp.compile(Regexp.escape(options[:name_first].to_s.strip.downcase), true)
       name_last_regex = Regexp.compile(Regexp.escape(options[:name_last].to_s.strip.downcase), true)
-      search_dob = cast_dob(options[:dob])
+      search_dob = cast_dob(options[:dob], options)
       found_people = Person.where({"members.dob" => search_dob, "name_first" => name_first_regex, "name_last" => name_last_regex})
       if found_people.any?
         if found_people.many?
@@ -16,7 +16,7 @@ module PersonMatchStrategies
       end
     end
 
-    def cast_dob(dob)
+    def cast_dob(dob, options)
       if dob.kind_of?(Date)
         return dob
       elsif dob.kind_of?(DateTime)

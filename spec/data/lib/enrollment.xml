@@ -6,6 +6,11 @@
     <n1:id>
       <n1:id>http://10.83.85.127/api/v2/policies/1112</n1:id>
     </n1:id>
+    <n1:broker>
+	    <n1:id>
+		    <n1:id>broker npn for testing</n1:id>
+	    </n1:id>
+    </n1:broker>
 
     <n1:enrollees>
       <n1:enrollee>
@@ -73,7 +78,7 @@
           </n1:person_demographics>
 
           <n1:employer_links>
-            <n1:employer_link><n1:id>http://10.83.85.127/api/v1/employers/53e6731deb899a460302a120</n1:id>
+		  <n1:employer_link><n1:id><n1:id>http://10.83.85.127/api/v1/employers/53e6731deb899a460302a120</n1:id></n1:id>
               <n1:name>United States Senate</n1:name>
             </n1:employer_link>
           </n1:employer_links>
@@ -185,7 +190,7 @@
 
       </n1:plan>
       <n1:shop_market>
-        <n1:employer_link><n1:id>http://10.83.85.127/api/v1/employers/53e6731deb899a460302a120</n1:id>
+	      <n1:employer_link><n1:id><n1:id>http://10.83.85.127/api/v1/employers/53e6731deb899a460302a120</n1:id></n1:id>
           <n1:name>United States Senate</n1:name>
         </n1:employer_link>
         <n1:total_employer_responsible_amount>11.1</n1:total_employer_responsible_amount>

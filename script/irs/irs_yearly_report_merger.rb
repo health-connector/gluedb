@@ -25,6 +25,9 @@ module Irs
     def read
       Dir.foreach(@dir) do |file_name|
         next if file_name == '.' or file_name == '..' or file_name == @output_file_name
+        next unless file_name.split('.').last.eql?'xml'
+
+        puts file_name
         file_path = File.join(@dir, file_name)
         xml = File.open(file_path)
         @xml_docs << Nokogiri::XML(xml)

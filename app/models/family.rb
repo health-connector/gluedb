@@ -195,6 +195,8 @@ private
   # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.family_members
   def integrity_of_applicant_objects
 
+    return if self.households.blank?
+
     applicants_in_application_group = self.family_members - [nil]
 
     # puts applicants_in_application_group.map(&:id).inspect
@@ -240,6 +242,9 @@ private
   end
 
   def max_one_active_household
+
+    return true if self.households.blank?
+
     active_households = self.households.select do |household|
       household.is_active?
     end

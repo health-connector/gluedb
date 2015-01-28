@@ -1,7 +1,7 @@
 %n1:individual{"xmlns:n1" => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://openhbx.org/api/terms/1.0 individual.xsd"}
   %n1:person
     %n1:id
-      %n1:id= person.authority_member.id
+      %n1:id= person.authority_member.hbx_member_id
     %n1:is_authoratative= person.is_authoritative?
     %n1:alias_ids
     - person.members.each do |member|

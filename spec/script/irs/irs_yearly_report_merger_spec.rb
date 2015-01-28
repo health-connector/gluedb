@@ -5,7 +5,7 @@ require 'nokogiri'
 describe Irs::IrsYearlyReportMerger do
 
   before(:all) do
-    @dir = "/Users/CitadelFirm/Downloads/projects/hbx/irs_xmls"
+    @dir =  Rails.root.join('spec','data', 'script', 'irs', 'irs_xmls')
     @irs_yearly_report_merger = Irs::IrsYearlyReportMerger.new(@dir)
     @xml_docs = @irs_yearly_report_merger.read
   end

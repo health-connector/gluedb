@@ -19,6 +19,7 @@ class ApplicationGroupBuilder
       @is_update = false # means this is a create
     end
 
+    @family.submitted_at = filtered_param[:submitted_at]
     @family.updated_by = "curam_system_service"
 
     get_household

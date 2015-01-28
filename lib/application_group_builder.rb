@@ -150,16 +150,6 @@ class ApplicationGroupBuilder
 
   end
 
-  def add_primary_applicant_employee_family_member
-
-    #TODO verify from Dan if this logic is right
-    if family.primary_applicant.person.employer
-      employee_family_member = @family.primary_applicant.employee_family_members.build
-      employee_family_member.employer = @family.primary_applicant.person.employer
-      @save_list << employee_family_member
-    end
-  end
-
   def add_hbx_enrollment
 
     # puts @application_group.primary_applicant
@@ -309,7 +299,6 @@ class ApplicationGroupBuilder
   end
 
   def save
-    add_primary_applicant_employee_family_member
     id = @family.save!
     save_save_list
     @family.id #return the id of saved application group

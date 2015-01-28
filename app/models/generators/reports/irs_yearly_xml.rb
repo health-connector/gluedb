@@ -11,7 +11,8 @@ module Generators::Reports
       "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance"
     }
 
-    def initialize(notice)
+    def initialize(notice, sequence_num)
+      @sequence_num = sequence_num
       @notice = notice
     end
 
@@ -31,7 +32,7 @@ module Generators::Reports
     end
 
     def serialize_headers(xml)
-      xml['air5.0'].RecordSequenceNum 00001
+      xml['air5.0'].RecordSequenceNum @sequence_num
       xml['irs'].TaxYr 2014
       xml['irs'].CorrectedInd false
       xml['air5.0'].CorrectedRecordSequenceNum

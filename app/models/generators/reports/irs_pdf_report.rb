@@ -132,7 +132,7 @@ module Generators::Reports
 
       if !enrollee.ssn.blank?
         bounding_box([col3, y_pos], :width => 100) do
-          text enrollee.ssn
+          text mask_ssn(enrollee.ssn)
         end
       else
         bounding_box([col4, y_pos], :width => 100) do
@@ -159,7 +159,7 @@ module Generators::Reports
         end
         if !individual.ssn.blank?
           bounding_box([col2, y_pos], :width => 100) do
-            text individual.ssn
+            text mask_ssn(individual.ssn)
           end
         else
           bounding_box([col3, y_pos], :width => 100) do
@@ -215,6 +215,18 @@ module Generators::Reports
           text number_to_currency(@notice.yearly_premium.aptc_amount), :align => :right
         end
       end
+    end
+
+    def number_to_ssn(number)
+      return unless number
+      delimiter = "-"
+      number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
+    end
+
+    def mask_ssn(ssn)
+      ssn = number_to_ssn(ssn)
+      last_digits = ssn.match(/\d{4}$/)[0]
+      "***-**-#{last_digits}"
     end
   end
 end

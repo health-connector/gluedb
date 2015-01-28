@@ -32,7 +32,11 @@
 					<dd><%= link_to p.responsible_person.name_full, person_path(p.responsible_person) %></dd>
 				<% end %>
 			<% end %>
-			<dt>Created</dt>
+	        <% if !p.broker.blank? %>
+		<dt>Broker</dt>
+		<dd><%= p.broker.full_name %></dd>
+		<% end %>
+	        <dt>Created</dt>
 	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>
 	  	<dt>Updated</dt>
 	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>

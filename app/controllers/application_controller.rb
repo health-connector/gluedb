@@ -31,6 +31,11 @@ class ApplicationController < ActionController::Base
     render file: 'public/403', status: 403, formats: [:html]
   end
 
+  def redirect_back_with_message(exception)
+    flash_message(:warning, "#{exception}")
+    redirect_to :back
+  end
+
   private
 
   def authenticate_user_from_token!

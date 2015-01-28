@@ -6,7 +6,7 @@ describe PolicyInteractions::Renewal do
   let(:existing_policies) { [] }
 
   describe "with no exising policies" do
-    it "should qualify for renewal" do
+    it "should not qualify for renewal" do
       expect(subject.qualifies?(existing_policies, new_policy)).to be_falsey
     end
   end

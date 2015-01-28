@@ -6,9 +6,9 @@ class Household
   embedded_in :family
 
   before_validation :set_effective_start_date
-  before_validation :set_effective_end_date # set_effective_start_date should be done before this
+  before_validation :set_effective_end_date #, :if => lambda {|household| household.effective_end_date.blank? } # set_effective_start_date should be done before this
   before_validation :reset_is_active_for_previous
-  before_validation :set_submitted_at
+  before_validation :set_submitted_at #, :if => lambda {|household| household.submitted_at.blank? }
 
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
@@ -33,18 +33,18 @@ class Household
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  #TODO uncomment
   validates :effective_start_date, presence: true
 
-  #TODO uncomment
   validate :effective_end_date_gt_effective_start_date
 
   def effective_end_date_gt_effective_start_date
-    if effective_end_date && effective_start_date
+
+    return if effective_end_date.nil?
+    return if effective_start_date.nil?
+
       if effective_end_date < effective_start_date
         self.errors.add(:base, "The effective end date should be earlier or equal to effective start date")
       end
-    end
   end
 
   def parent
@@ -87,8 +87,10 @@ class Household
   # before start of the current household's effective_start_date
   def set_effective_end_date
     return true unless self.effective_start_date
+
     latest_household = self.family.latest_household
-    return if self == latest_household
+    return true if self == latest_household
+
     latest_household.effective_end_date = self.effective_start_date - 1.day
     true
   end
@@ -102,12 +104,16 @@ class Household
   end
 
   def set_submitted_at
+    return true unless self.submitted_at.blank?
+
     self.submitted_at = tax_households.sort_by(&:updated_at).last.updated_at if tax_households.length > 0
     self.submitted_at = parent.submitted_at unless self.submitted_at
     true
   end
 
   def set_effective_start_date
+    return true unless self.effective_start_date.blank?
+
     self.effective_start_date =  parent.submitted_at
     true
   end

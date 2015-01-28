@@ -26,22 +26,19 @@ module Irs
       read
       merge
       write
-      sanity_check
     end
 
     def sanity_check
       xml_doc = Nokogiri::XML(File.open("#{@dir}/#{@output_file_name}"))
-      elements = xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).count
-      puts "----total docs in folder #{@xml_docs.count}"
-      puts "----total docs in merge xml #{elements}"
+      element_count = xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).count
+      "file count #{@xml_docs.count} elements count #{element_count}"
     end
 
-    def self.count_reports_in_directory
-      @dir = "#{Rails.root}/irs_h41/FEP0020DC.DSH.EOYIN.D150127.T180947000.P.IN"
-      Dir.glob(@dir+'/*.xml').each do |filepath|
+    def self.total_records_in_transmission(folder)
+      @dir = "#{Rails.root}/#{folder}"
+      Dir.glob(@dir+'/*.xml').inject([]) do |data, filepath|
         xml_doc = Nokogiri::XML(File.open(filepath))
-        elements = xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).count
-        puts "----total docs in merge xml #{elements}"
+        data << xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).count
       end
     end
 
@@ -57,7 +54,6 @@ module Irs
         xml_doc = @xml_docs[0]
         xml_doc.xpath("//irs:SSN", XMLNS).each do |ssn_node|
           update_ssn = Maybe.new(ssn_node.content).strip.gsub("-","").value
-          puts update_ssn.inspect
           ssn_node.content = update_ssn
         end
         @consolidated_doc = xml_doc
@@ -70,7 +66,6 @@ module Irs
           new_node = xml_doc.xpath('//batchreq:Form1095ATransmissionUpstream/air5.0:Form1095AUpstreamDetail', XMLNS).first
           new_node.xpath("//irs:SSN", XMLNS).each do |ssn_node|
             update_ssn = Maybe.new(ssn_node.content).strip.gsub("-","").value
-            puts update_ssn.inspect
             ssn_node.content = update_ssn
           end
           node.add_child(new_node)

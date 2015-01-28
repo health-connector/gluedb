@@ -30,7 +30,7 @@ describe Parsers::Xml::Cv::EligibilityDeterminationParser do
   end
 
   it 'should have an csr_percent' do
-    expect(@subject.csr_percent).to eq(csr_percent)
+    expect(@subject.csr_percent).to eq(csr_percent.to_f)
   end
 
   it 'should have an determination_date' do

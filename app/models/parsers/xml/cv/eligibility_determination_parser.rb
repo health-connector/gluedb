@@ -10,7 +10,7 @@ module Parsers::Xml::Cv
     element :household_state, String, tag: "household_state"
     element :maximum_aptc, String, tag: "maximum_aptc"
     element :csr_percent, Integer, tag: "csr_percent", lambda: ->(value) {
-        value.to_i
+        value.to_f
     }
     element :determination_date, String, tag: "determination_date"
     element :benchmark_plan_id, String, tag: 'benchmark_plan_id/cv:id/cv:id'

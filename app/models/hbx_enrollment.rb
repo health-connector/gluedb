@@ -16,8 +16,8 @@ class HbxEnrollment
   field :is_active, type: Boolean, default: true 
   field :submitted_at, type: DateTime
   field :aasm_state, type: String
-
   field :policy_id, type: Integer
+  field :employer_id, type: Moped::BSON::ObjectId
 
   embeds_many :hbx_enrollment_members
 
@@ -82,6 +82,15 @@ class HbxEnrollment
 
   def applicant_ids
     hbx_enrollment_members.map(&:applicant_id)
+  end
+
+  def employer=(employer_instance)
+    return unless employer_instance.is_a? Employer
+    self.employer_id = employer_instance._id
+  end
+
+  def employer
+    Employer.find(self.employer_id) unless self.employer_id.blank?
   end
 
 end

@@ -1,6 +1,7 @@
 module PersonMatchStrategies
   class FirstLastDob
     def match(options = {})
+      return [nil, nil] if options[:dob].blank?
       name_first_regex = Regexp.compile(Regexp.escape(options[:name_first].to_s.strip.downcase), true)
       name_last_regex = Regexp.compile(Regexp.escape(options[:name_last].to_s.strip.downcase), true)
       search_dob = cast_dob(options[:dob], options)

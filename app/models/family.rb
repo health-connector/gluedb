@@ -195,7 +195,7 @@ private
   # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.family_members
   def integrity_of_applicant_objects
 
-    return if self.households.blank?
+    return true if self.households.blank?
 
     applicants_in_application_group = self.family_members - [nil]
 

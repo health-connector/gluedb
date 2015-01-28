@@ -124,6 +124,9 @@ class ImportApplicationGroups
     puts "Total number of application groups :#{ags.size}"
     fail_counter = 0
     ags.each do |ag|
+
+      begin
+
       puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
 
       ig_requests = ag.individual_requests(member_id_generator, p_tracker)
@@ -163,7 +166,7 @@ class ImportApplicationGroups
 
       end
 
-      begin
+
         #application_group_builder.add_irsgroups(ag.irs_groups)
 
         application_group_builder.add_tax_households(ag.to_hash[:tax_households])
@@ -184,10 +187,10 @@ class ImportApplicationGroups
 
       rescue Exception => e
         fail_counter += 1
-        puts "FAILED #{application_group_builder.family.id} e_case_id:#{application_group_builder.family.e_case_id}"
+        puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
 
         @@logger.info "#{DateTime.now.to_s}" +
-                          "Family e_case_id:#{application_group_builder.family.e_case_id}\n" +
+                          "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
                           "message:#{e.message}\n" +
                           "backtrace:#{e.backtrace.inspect}\n"
       end

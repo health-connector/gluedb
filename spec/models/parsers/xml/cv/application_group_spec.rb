@@ -19,7 +19,7 @@ describe Parsers::Xml::Cv::FamilyParser do
 
   let(:primary_applicant_id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
 
-  let(:submitted_date) {"20131204"}
+  let(:submitted_date) {"2013-10-31T18:18:59.000000"}
 
   let(:e_case_id) {"urn:openhbx:hbx:dc0:resources:v1:curam:integrated_case#2063332"}
 
@@ -54,7 +54,7 @@ describe Parsers::Xml::Cv::FamilyParser do
   let(:household_state) {"urn:openhbx:terms:v1:household_state#cs7"}
   let(:maximum_aptc) {"0"}
   let(:csr_percent) {"0.0"}
-  let(:determination_date) {"20131204"}
+  let(:determination_date) {"2013-10-31T18:18:59.000000"}
 
 
   it 'should return e_case_id' do
@@ -130,7 +130,7 @@ describe Parsers::Xml::Cv::FamilyParser do
 
 
   it "should return the submitted_date" do
-    expect(subject.submitted_date).to eq(submitted_date)
+    expect(subject.submitted_at.to_s).to eq(submitted_date.to_s)
   end
 
 end

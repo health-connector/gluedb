@@ -1,7 +1,7 @@
 class Household
   include Mongoid::Document
   include Mongoid::Timestamps
-  include HasApplicants
+  include HasFamilyMembers
 
   embedded_in :family
 

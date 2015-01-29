@@ -1,7 +1,7 @@
 class CoverageHousehold
   include Mongoid::Document
   include Mongoid::Timestamps
-  include HasApplicants
+  include HasFamilyMembers
 
   # The pool of all applicants eligible for enrollment during a certain time period
 

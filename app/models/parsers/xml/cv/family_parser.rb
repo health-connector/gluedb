@@ -16,7 +16,7 @@ module Parsers::Xml::Cv
 
     element :renewal_consent_through_year, String, tag: 'renewal_consent_through_year'
 
-    element :submitted_date, String, :tag=> "submitted_date"
+    element :submitted_at, String, :tag=> "submitted_date"
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 
@@ -51,7 +51,7 @@ module Parsers::Xml::Cv
 
       response = {
           e_case_id:e_case_id.split("#").last,
-          submitted_at:submitted_date,
+          submitted_at:submitted_at,
           irs_groups: irs_groups.map do |irs_group|
             irs_group.to_hash
           end,

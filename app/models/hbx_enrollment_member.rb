@@ -12,7 +12,7 @@ class HbxEnrollmentMember
   field :end_date, type: Date
 
 
-  include BelongsToApplicant
+  include BelongsToFamilyMember
 
   #TODO uncomment
   #validates :start_date, presence: true

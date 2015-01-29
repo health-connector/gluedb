@@ -1,5 +1,5 @@
 module Queries
-  class PersonWithoutApplicationGroups
+  class PersonWithNoFamilies
     def initialize
     end
 

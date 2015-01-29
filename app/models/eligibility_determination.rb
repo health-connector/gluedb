@@ -19,7 +19,7 @@ class EligibilityDetermination
 
   validates_presence_of :determination_date, :max_aptc_in_cents, :csr_percent_as_integer
 
-  include HasApplicants
+  include HasFamilyMembers
 
   def family
     return nil unless tax_household

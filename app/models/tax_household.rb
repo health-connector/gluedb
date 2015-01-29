@@ -1,7 +1,7 @@
 class TaxHousehold
   include Mongoid::Document
   include Mongoid::Timestamps
-  include HasApplicants
+  include HasFamilyMembers
 
   # A set of applicants, grouped according to IRS and ACA rules, who are considered a single unit
   # when determining eligibility for Insurance Assistance and Medicaid

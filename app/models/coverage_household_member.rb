@@ -7,7 +7,7 @@ class CoverageHouseholdMember
   field :applicant_id, type: Moped::BSON::ObjectId
   field :is_subscriber, type: Boolean, default: false
 
-  include BelongsToApplicant
+  include BelongsToFamilyMember
 
   def family
     return nil unless coverage_household

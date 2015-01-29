@@ -1,4 +1,4 @@
-module BelongsToApplicant
+module BelongsToFamilyMember
   def family_member
     return nil unless family
     family.family_members.detect { |apl| applicant_id == apl._id }

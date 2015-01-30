@@ -348,11 +348,11 @@ class Person
   end
 
   def families
-    query_proxy.application_groups
+    query_proxy.families
   end
 
   def relationships_in_group
-    group = application_groups.first
+    group = families.first
     group.person_relationships.select { |r| r.object_person == id }
   end
 

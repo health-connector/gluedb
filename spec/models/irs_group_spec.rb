@@ -16,8 +16,8 @@ describe IrsGroup do
     expect(@irs_group.effective_end_date).to eq(@family.active_household.effective_end_date)
   end
 
-  it 'should set a 16 digit id' do
+  it 'should set a 16 digit hbx_assigned_id' do
     @irs_group_builder.save
-    expect(@irs_group.id.to_s.length).to eq(16)
+    expect(@irs_group.hbx_assigned_id.to_s.length).to eq(16)
   end
 end

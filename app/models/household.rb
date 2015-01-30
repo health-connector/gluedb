@@ -13,7 +13,7 @@ class Household
   # field :e_pdc_id, type: String  # Eligibility system PDC foreign key
 
   # embedded belongs_to :irs_group association
-  field :irs_group_id
+  field :irs_group_id, type: Moped::BSON::ObjectId
 
   field :is_active, type: Boolean, default: true
   field :effective_start_date, type: Date
@@ -33,9 +33,9 @@ class Household
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  validates :effective_start_date, presence: true
+  #validates :effective_start_date, presence: true
 
-  validate :effective_end_date_gt_effective_start_date
+  #validate :effective_end_date_gt_effective_start_date
 
   def effective_end_date_gt_effective_start_date
 
@@ -58,7 +58,7 @@ class Household
   end
 
   def irs_group
-    parent.irs_group.find(self.irs_group_id)
+    parent.irs_groups.find(self.irs_group_id)
   end
 
   def is_active?

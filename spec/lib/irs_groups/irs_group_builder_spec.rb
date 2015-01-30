@@ -18,10 +18,10 @@ describe IrsGroupBuilder do
     expect(irs_group.valid?).to eq(true)
   end
 
-  it 'returns a IrsGroup object with Id of length 16' do
+  it 'returns a IrsGroup object with hbx_assigned_id of length 16' do
     irs_group = @irs_group_builder.build
     @irs_group_builder.save
-    expect(irs_group.id.to_s.length).to eq(16)
+    expect(irs_group.hbx_assigned_id.to_s.length).to eq(16)
   end
 
   it 'application group household has been assigned the id of the irs group' do

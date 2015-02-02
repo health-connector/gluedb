@@ -4,7 +4,7 @@ class FamilyMember
 
   embedded_in :family
 
-  # Person responsible for this application group
+  # Person responsible for this family
   field :is_primary_applicant, type: Boolean, default: false
 
   # Person is applying for coverage

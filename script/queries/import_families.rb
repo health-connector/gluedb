@@ -1,9 +1,9 @@
-path = "/Users/CitadelFirm/Downloads/projects/hbx/ApplicantionsGroups_4.xml"
+path = "/Users/CitadelFirm/Downloads/projects/hbx/RenewalReports_150121233949247.xml"
 
-@@logger = Logger.new("#{Rails.root}/log/import_application_groups.log")
+@@logger = Logger.new("#{Rails.root}/log/family_#{Time.now.utc.iso8601}.log")
 
 begin
-  iag = ImportApplicationGroups.new(path)
+  iag = ImportFamilies.new(path)
   iag.run
 rescue Exception=>e
   @@logger.info "#{DateTime.now.to_s} class:#{self.class.name} method:#{__method__.to_s}\n"+

@@ -1,6 +1,6 @@
-class ImportApplicationGroups
+class ImportFamilies
 
-  @@logger = Logger.new("#{Rails.root}/log/import_application_groups.log")
+  @@logger = Logger.new("#{Rails.root}/log/family_#{Time.now.utc.iso8601}.log")
 
   class PersonImportListener
 
@@ -143,7 +143,7 @@ class ImportApplicationGroups
         value = uc.commit(ig_request, listener)
       end
 
-      application_group_builder = ApplicationGroupBuilder.new(ag.to_hash(p_tracker), p_tracker)
+      family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
       #applying person objects in person relationships for each applicant.
       ag.family_members.each do |applicant|
@@ -161,31 +161,29 @@ class ImportApplicationGroups
           subject_person.merge_relationship(person_relationship)
         end
 
-        new_applicant = application_group_builder.add_applicant(applicant.to_hash(p_tracker))
+        new_applicant = family_builder.add_family_member(applicant.to_hash(p_tracker))
         p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
 
       end
 
-      puts "family_members.size in import #{application_group_builder.family.family_members.size}"
-
 
       #application_group_builder.add_irsgroups(ag.irs_groups)
 =begin
-        application_group_builder.add_tax_households(ag.to_hash[:tax_households])
+        family_builder.add_tax_households(ag.to_hash[:tax_households])
 
         applicants_params = ag.family_members.map do |applicant|
           applicant.to_hash(p_tracker)
         end
 
-        application_group_builder.add_financial_statements(applicants_params)
-        application_group_builder.add_hbx_enrollment
-        application_group_builder.add_coverage_household
+        family_builder.add_financial_statements(applicants_params)
+        family_builder.add_hbx_enrollment
+        family_builder.add_coverage_household
 
-        application_group_id = application_group_builder.save
+        application_group_id = family_builder.save
 =end
         #application_group_builder.add_irsgroups
 
-        family = application_group_builder.build
+        family = family_builder.build
 
         puts "Saved #{family.id}"
 

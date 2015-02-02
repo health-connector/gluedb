@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe ApplicationGroupBuilder do
+describe FamilyBuilder do
 
   let(:person_mapper){
     double();
@@ -20,7 +20,7 @@ describe ApplicationGroupBuilder do
 
   before(:each){
     @params = { e_case_id:'12345', submitted_at:DateTime.now}
-    @application_group_builder = ApplicationGroupBuilder.new(@params, person_mapper)
+    @application_group_builder = FamilyBuilder.new(@params, person_mapper)
     @family = @application_group_builder.family
   }
 

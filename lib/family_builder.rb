@@ -1,6 +1,6 @@
 require "irs_groups/irs_group_builder"
 
-class ApplicationGroupBuilder
+class FamilyBuilder
 
   attr_reader :family
 
@@ -36,7 +36,7 @@ class ApplicationGroupBuilder
     return_obj
   end
 
-  def add_applicant(applicant_params)
+  def add_family_member(applicant_params)
 
     if @family.family_members.map(&:person_id).include? applicant_params[:person].id
        #puts "Added already existing applicant"

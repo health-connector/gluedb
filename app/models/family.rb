@@ -47,21 +47,21 @@ class Family
   index({aasm_state:  1})
   index({submitted_date:  1})
 
-  validate :no_duplicate_applicants
+  validate :no_duplicate_family_members
 
-  validate :integrity_of_applicant_objects
+  validate :integrity_of_family_member_objects
 
   validate :max_one_primary_applicant
 
   validate :max_one_active_household
 
-  scope :all_with_multiple_applicants, exists({ :'family_members.1' => true })
+  scope :all_with_multiple_family_members, exists({ :'family_members.1' => true })
   scope :all_with_household, exists({ :'households.0' => true })
 
-  def no_duplicate_applicants
+  def no_duplicate_family_members
     family_members.group_by { |appl| appl.person_id }.select { |k, v| v.size > 1 }.each_pair do |k, v|
-      errors.add(:base, "Duplicate applicants for person: #{k}\n" +
-                         "Applicants: #{v.inspect}")
+      errors.add(:base, "Duplicate family_members for person: #{k}\n" +
+                         "family_members: #{v.inspect}")
     end
   end
 
@@ -71,7 +71,7 @@ class Family
     persisted_household.sort_by(&:submitted_at).last
   end
 
-  def active_applicants
+  def active_family_members
     family_members.find_all { |a| a.is_active? }
   end
 
@@ -99,12 +99,12 @@ class Family
     family_members.detect { |a| a.is_consent_applicant? }
   end
 
-  def find_applicant_by_person(person)
+  def find_family_member_by_person(person)
     family_members.detect { |a| a.person_id == person._id }
   end
 
-  def person_is_applicant?(person)
-    return true unless find_applicant_by_person(person).blank?
+  def person_is_family_member?(person)
+    return true unless find_family_member_by_person(person).blank?
   end
 
   aasm do
@@ -192,23 +192,21 @@ class Family
 
 private
 
-  # This method will return true only if all the applicants in tax_household_members and coverage_household_members are present in self.family_members
-  def integrity_of_applicant_objects
+  # This method will return true only if all the family_members in tax_household_members and coverage_household_members are present in self.family_members
+  def integrity_of_family_member_objects
 
     return true if self.households.blank?
 
-    applicants_in_application_group = self.family_members - [nil]
+    family_members_in_application_group = self.family_members - [nil]
 
-    # puts applicants_in_application_group.map(&:id).inspect
+    tax_household_family_members_valid = are_arrays_of_family_members_same?(family_members_in_application_group.map(&:id), self.households.flat_map(&:tax_households).flat_map(&:tax_household_members).map(&:applicant_id))
 
-    tax_household_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:tax_households).flat_map(&:tax_household_members).map(&:applicant_id))
+    coverage_family_members_valid = are_arrays_of_family_members_same?(family_members_in_application_group.map(&:id), self.households.flat_map(&:coverage_households).flat_map(&:coverage_household_members).map(&:applicant_id))
 
-    coverage_applicants_valid = are_arrays_of_applicants_same?(applicants_in_application_group.map(&:id), self.households.flat_map(&:coverage_households).flat_map(&:coverage_household_members).map(&:applicant_id))
-
-    tax_household_applicants_valid && coverage_applicants_valid
+    tax_household_family_members_valid && coverage_family_members_valid
   end
 
-  def are_arrays_of_applicants_same?(base_set, test_set)
+  def are_arrays_of_family_members_same?(base_set, test_set)
     base_set.uniq.sort == test_set.uniq.sort
   end
 

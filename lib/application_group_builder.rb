@@ -10,6 +10,7 @@ class ApplicationGroupBuilder
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
     @is_update = true # true = we update an existing application group, false = we create a new application group
     @applicants_params = param[:family_members]
+    @params = param
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
     @family = Family.where(e_case_id: filtered_param[:e_case_id]).first
@@ -26,7 +27,13 @@ class ApplicationGroupBuilder
   end
 
   def build
-
+    add_tax_households(@params.to_hash[:tax_households])
+    add_financial_statements(@params[:family_members])
+    add_hbx_enrollment
+    add_coverage_household
+    return_obj = save
+    add_irsgroups
+    return_obj
   end
 
   def add_applicant(applicant_params)
@@ -247,7 +254,7 @@ class ApplicationGroupBuilder
   end
 
   def filter_tax_household_params(tax_household_params)
-    tax_household_params = tax_household_params.slice(:id, :total_count)
+    tax_household_params = tax_household_params.slice(:id)
     tax_household_params.delete_if do |k, v|
       v.nil?
     end
@@ -279,6 +286,26 @@ class ApplicationGroupBuilder
     end
   end
 
+=begin
+  def add_financial_statements(applicants_params)
+    applicants_params.map do |applicant_params|
+      applicant_params[:financial_statements].each do |financial_statement_params|
+        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
+        financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
+        financial_statement_params[:incomes].each do |income_params|
+          financial_statement.incomes.build(income_params)
+        end
+        financial_statement_params[:deductions].each do |deduction_params|
+          financial_statement.deductions.build(deduction_params)
+        end
+        financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
+          financial_statement.alternate_benefits.build(alternative_benefit_params)
+        end
+      end
+    end
+  end
+=end
+
   def filter_financial_statement_params(financial_statement_params)
 
     financial_statement_params = financial_statement_params.slice(:type, :is_tax_filing_together, :tax_filing_status)
@@ -301,7 +328,7 @@ class ApplicationGroupBuilder
   def save
     id = @family.save!
     save_save_list
-    @family.id #return the id of saved application group
+    @family #return the saved family
   end
 
   #save objects in save list

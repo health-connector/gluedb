@@ -166,9 +166,11 @@ class ImportApplicationGroups
 
       end
 
+      puts "family_members.size in import #{application_group_builder.family.family_members.size}"
 
-        #application_group_builder.add_irsgroups(ag.irs_groups)
 
+      #application_group_builder.add_irsgroups(ag.irs_groups)
+=begin
         application_group_builder.add_tax_households(ag.to_hash[:tax_households])
 
         applicants_params = ag.family_members.map do |applicant|
@@ -180,10 +182,12 @@ class ImportApplicationGroups
         application_group_builder.add_coverage_household
 
         application_group_id = application_group_builder.save
+=end
+        #application_group_builder.add_irsgroups
 
-        application_group_builder.add_irsgroups
+        family = application_group_builder.build
 
-        puts "Saved #{application_group_id}"
+        puts "Saved #{family.id}"
 
       rescue Exception => e
         fail_counter += 1

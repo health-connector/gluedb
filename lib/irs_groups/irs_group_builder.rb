@@ -21,6 +21,7 @@ class IrsGroupBuilder
 
   def update
     assign_exisiting_irs_group_to_new_household
+    @irs_group = @family.active_household.irs_group
   end
 
 

@@ -29,4 +29,16 @@ describe IrsGroupBuilder do
     @irs_group_builder.save
     expect(irs_group.id).to eq(@family.active_household.irs_group_id)
   end
+
+  context 'update family' do
+    it 'retains IrsGroup of previously active household and assigns it to current household' do
+      irs_group = @irs_group_builder.build
+      @irs_group_builder.save
+      @family.households.build({is_active:true})
+      @family.save
+      @irs_group_builder = IrsGroupBuilder.new(@family)
+      irs_group2 = @irs_group_builder.update
+      expect(irs_group.id).to eq(irs_group2.id)
+    end
+  end
 end

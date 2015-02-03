@@ -32,7 +32,8 @@ module Generators::Reports
     end
 
     def serialize_headers(xml)
-      xml['air5.0'].RecordSequenceNum @sequence_num
+      # xml['air5.0'].RecordSequenceNum @sequence_num
+      xml['air5.0'].RecordSequenceNum @notice.policy_id.to_i
       xml['irs'].TaxYr 2014
       xml['irs'].CorrectedInd false
       xml['air5.0'].CorrectedRecordSequenceNum

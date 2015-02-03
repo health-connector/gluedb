@@ -26,7 +26,7 @@ class FamiliesController < ApplicationController
 
   def applicant_links
     @family = Family.find(params[:id])
-    @applicants = @family.active_applicants
+    @applicants = @family.active_family_members
   end
 
   private

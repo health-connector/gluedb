@@ -89,8 +89,8 @@ def build_enrollments(app_group)
       begin
         person = Person.find_for_member_id(enrollee.m_id)
         # puts "Person: #{person.inspect}"
-        app_group.family_members << FamilyMember.new(person: person) unless app_group.person_is_applicant?(person)
-        appl = app_group.find_applicant_by_person(person)
+        app_group.family_members << FamilyMember.new(person: person) unless app_group.person_is_family_member?(person)
+        appl = app_group.find_family_member_by_person(person)
         # puts "Applicant: #{appl}"
 
         em = HbxEnrollmentMember.new(

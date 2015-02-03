@@ -33,7 +33,7 @@ class Household
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  #validates :effective_start_date, presence: true
+  validates :effective_start_date, presence: true
 
   #validate :effective_end_date_gt_effective_start_date
 

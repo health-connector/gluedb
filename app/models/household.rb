@@ -48,7 +48,7 @@ class Household
   end
 
   def parent
-    raise "undefined parent ApplicationGroup" unless self.family
+    raise "undefined parent family" unless self.family
     self.family
   end
 

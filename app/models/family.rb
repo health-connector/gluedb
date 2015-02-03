@@ -45,7 +45,7 @@ class Family
   index({e_case_id:  1})
   index({is_active:  1})
   index({aasm_state:  1})
-  index({submitted_date:  1})
+  index({submitted_at:  1})
 
   validate :no_duplicate_family_members
 

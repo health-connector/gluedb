@@ -36,29 +36,29 @@ class FamilyBuilder
     return_obj
   end
 
-  def add_family_member(applicant_params)
+  def add_family_member(family_member_params)
 
-    if @family.family_members.map(&:person_id).include? applicant_params[:person].id
+    if @family.family_members.map(&:person_id).include? family_member_params[:person].id
        #puts "Added already existing applicant"
-      applicant = @family.family_members.where(person_id: applicant_params[:person].id).first
+      applicant = @family.family_members.where(person_id: family_member_params[:person].id).first
     else
        #puts "Added a new applicant"
-      if applicant_params[:is_primary_applicant] == "true"
+      if family_member_params[:is_primary_applicant] == "true"
         reset_exisiting_primary_applicant
       end
 
-      applicant = @family.family_members.build(filter_applicant_params(applicant_params))
+      applicant = @family.family_members.build(filter_applicant_params(family_member_params))
 
       @new_applicants << applicant
 
       member = applicant.person.members.select do |m|
         m.authority?
       end.first
-      set_person_demographics(member, applicant_params[:person_demographics])
-      set_alias_ids(member, applicant_params[:alias_ids])
+      set_person_demographics(member, family_member_params[:person_demographics])
+      set_alias_ids(member, family_member_params[:alias_ids])
       @save_list << member
       @save_list << applicant
-      # puts "applicant_params[:is_primary_applicant] #{applicant_params[:is_primary_applicant]} @application_group.family_members #{applicant.inspect}"
+      # puts "family_member_params[:is_primary_applicant] #{family_member_params[:is_primary_applicant]} @application_group.family_members #{applicant.inspect}"
     end
 
     applicant
@@ -183,8 +183,8 @@ class FamilyBuilder
         begin
           person = Person.find_for_member_id(enrollee.m_id)
 
-          @family.family_members << FamilyMember.new(person: person) unless @family.person_is_applicant?(person)
-          applicant = @family.find_applicant_by_person(person)
+          @family.family_members << FamilyMember.new(person: person) unless @family.person_is_family_member?(person)
+          applicant = @family.find_family_member_by_person(person)
 
           hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: applicant,
                                                                                  premium_amount_in_cents: enrollee.pre_amt})
@@ -288,9 +288,9 @@ class FamilyBuilder
 
 =begin
   def add_financial_statements(applicants_params)
-    applicants_params.map do |applicant_params|
-      applicant_params[:financial_statements].each do |financial_statement_params|
-        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
+    applicants_params.map do |family_member_params|
+      family_member_params[:financial_statements].each do |financial_statement_params|
+        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_member_params[:person].id])
         financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)

@@ -18,7 +18,7 @@ class Broker
   field :npn, type: String
   field :is_active, type: Boolean, default: true
 
-  has_many :policies, order: {name_last: 1, name_first: 1}
+  has_many :policies, inverse_of: :broker
   has_many :people
 
   ####move

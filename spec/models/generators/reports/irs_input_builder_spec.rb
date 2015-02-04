@@ -4,7 +4,7 @@ module Generators::Reports
   describe IrsInputBuilder do
     subject { IrsInputBuilder.new(policy) }
 
-    let(:policy) { double(subscriber: subscriber, enrollees: [subscriber, dependent1, dependent2], policy_start: policy_start, policy_end: policy_end, plan: plan, eg_id: 212131212, applied_aptc: 0) }
+    let(:policy) { double(id: 24, subscriber: subscriber, enrollees: [subscriber, dependent1, dependent2], policy_start: policy_start, policy_end: policy_end, plan: plan, eg_id: 212131212, applied_aptc: 0) }
     let(:plan) { double(carrier: carrier) }
     let(:carrier) { double(name: 'Care First')}
     let(:policy_start) { Date.new(2014, 1, 1) }
@@ -13,7 +13,7 @@ module Generators::Reports
     let(:dependent1) { double(person: person, relationship_status_code: 'Spouse', coverage_start: policy_start, coverage_end: policy_end) }
     let(:dependent2) { double(person: person, relationship_status_code: 'Child', coverage_start: policy_start, coverage_end: policy_end) }
 
-    let(:person) { double(full_name: 'dan thomas', addresses: [address], authority_member: authority_member) }
+    let(:person) { double(full_name: 'Ann B Mcc', addresses: [address], authority_member: authority_member, name_first: 'Ann', name_middle: 'B', name_last: 'Mcc', name_sfx: '') }
     let(:authority_member) { double(ssn: '342321212', dob: (Date.today - 20.years)) }
     let(:address) { double(address_1: 'Wilson Building', address_2: 'Suite 100', city: 'Washington DC', state: 'DC', zip: '20002') }
 
@@ -28,7 +28,7 @@ module Generators::Reports
     }
 
     let(:mock_disposition) { double(enrollees: policy.enrollees, start_date: policy_start, end_date: policy_end ) }
-    let(:mock_policy) { double(pre_amt_tot: 0.0)}
+    let(:mock_policy) { double(pre_amt_tot: 0.0, ehb_premium: 100.17, applied_aptc: 55.45)}
 
     before(:each) do
       allow(PolicyDisposition).to receive(:new).with(policy).and_return(mock_disposition)

@@ -7,6 +7,11 @@ class EndCoverageRequest
         affected_enrollee_ids << v[:m_id]
       end
     end
+
+    if details[:people_attributes].detect{|k,v|  v[:role] == "self"}[1][:include_selected] == "1"
+      affected_enrollee_ids = details[:people_attributes].map{|k,v| v[:m_id]}
+    end
+
     {
       policy_id: form_params[:id],
       affected_enrollee_ids: affected_enrollee_ids,

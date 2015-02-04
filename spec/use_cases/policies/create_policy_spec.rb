@@ -11,7 +11,7 @@ describe Policies::CreatePolicy do
   let(:plan) { double(:carrier => carrier) }
   let(:subscriber) { double(:person => person, :coverage_start => coverage_start) }
   let(:enrollees) { [subscriber_hash] }
-  let(:subscriber_hash) { { }}
+  let(:subscriber_hash) { { :rel_code => "self" }}
   let(:policy_factory) { double(:new => new_policy) }
   let(:new_policy) { double(:valid? => valid_policy, :errors => policy_errors, :enrollees => []) }
   let(:valid_policy) { true }
@@ -118,7 +118,7 @@ describe Policies::CreatePolicy do
     end
 
     it "should create the policy" do
-      expect(policy_factory).to receive(:create!).with(create_params).and_return(policy)
+      expect(policy_factory).to receive(:create).with(create_params).and_return(policy)
       expect(listener).to receive(:policy_created).with(policy_id)
       subject.commit(request, listener)
     end
@@ -128,7 +128,7 @@ describe Policies::CreatePolicy do
       let(:existing_policies) { [to_be_cancelled_policy] }
 
       it "should tell the listener to cancel that policy" do
-        expect(policy_factory).to receive(:create!).and_return(policy)
+        expect(policy_factory).to receive(:create).and_return(policy)
         expect(listener).to receive(:policy_created).with(policy_id)
         expect(to_be_cancelled_policy).to receive(:cancel_via_hbx!)
         expect(listener).to receive(:policy_canceled).with("1234")
@@ -147,7 +147,7 @@ describe Policies::CreatePolicy do
       end
 
       it "should create the policy" do
-        expect(policy_factory).to receive(:create!).with(broker_create_params).and_return(policy)
+        expect(policy_factory).to receive(:create).with(broker_create_params).and_return(policy)
         expect(listener).to receive(:policy_created).with(policy_id)
         subject.commit(broker_request, listener)
       end

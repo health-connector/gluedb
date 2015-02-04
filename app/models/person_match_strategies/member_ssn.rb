@@ -12,11 +12,22 @@ module PersonMatchStrategies
             person = run_filters(found_people, options, filters)
             return select_authority_member(person.first, options)
           else
+            validate_no_ssn_mismatch(options, found_people.first)
             return select_authority_member(found_people.first, options)
           end
         end
       end
       [nil, nil]
+    end
+
+    def validate_no_ssn_mismatch(options, person)
+      l_name_down = Maybe.new(person.name_last).downcase.value
+      f_name_down = Maybe.new(person.name_first).downcase.value
+      l_name_match = Maybe.new(options[:name_last]).downcase.value
+      f_name_match = Maybe.new(options[:name_first]).downcase.value
+      if (l_name_down != l_name_match) || (f_name_down != f_name_match)
+        raise AmbiguousMatchError.new("SSN/Name mismatch #{options[:ssn]}, #{f_name_match}, #{l_name_match}; person has #{f_name_down}, #{l_name_down}")
+      end
     end
 
     def select_authority_member(person, options)

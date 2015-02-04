@@ -17,7 +17,7 @@
       <td><%= p.carrier.name %></td>
       <td><%= p.carrier_employer_group_id %></td>
       <td><%= p.carrier_policy_number %></td>
-      <td><%= link_to p.plan_name, plan_path(p) %></td>
+      <td><%= link_to p.plan_name, plan_path(p.plan) %></td>
       <td><%= p.coverage_type %></td>
       <td><%= p.metal_level %></td>
       <td><%= p.original_effective_date %></td>

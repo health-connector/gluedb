@@ -7,11 +7,17 @@ module Services
     def self.publish(q_reason_uri, p_id)
       policy = Policy.where(:id => p_id).first
       p_action = policy_action(policy)
-      reason = (p_action.downcase == "renewal") ? "renewal" : "initial_enrollment"
-      operation = (p_action.downcase == "renewal") ? "change" : "add"
-      routing_key = (p_action.downcase == "renewal") ? "policy.renewal" : "policy.initial_enrollment"
-      v_destination = (p_action.downcase == "renewal") ? "hbx.maintenance_messages" : "hbx.enrollment_messages"
-
+      reason = p_action.downcase
+      operation = (p_action.downcase == "initial_enrollment") ? "add" : "change"
+      v_destination = (p_action.downcase == "initial_enrollment") ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
+      routing_key = case reason
+      when "renewal"
+        "policy.renewal"
+      when "initial_enrollment"
+        "policy.initial_enrollment"
+      else
+        "policy.maintenance"
+      end
       xml_body = serialize(policy, operation, reason)
       with_channel do |channel|
         channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
@@ -19,7 +25,7 @@ module Services
           :reply_to => v_destination,
           :headers => {
             :file_name => "#{p_id}.xml",
-            :submitted_by => "trey.evans@dchbx.info",
+            :submitted_by => "trey.evans@dc.gov",
             :vocabulary_destination => v_destination
           }
         })
@@ -51,13 +57,20 @@ module Services
       subscriber = policy.subscriber
       coverage_start = subscriber.coverage_start
       sub_person = subscriber.person
-      has_renewal_match = sub_person.policies.any? do |pol|
-        (pol.plan.coverage_type == policy.plan.coverage_type) &&
-          pol.active_as_of?(coverage_start - 1.day) &&
-          (pol.id != policy.id) &&
-          (pol.carrier_id == policy.carrier_id)
+      policies_to_check = sub_person.policies.reject do |pol|
+        pol.canceled? || (pol.id == policy.id) || (pol.coverage_type.downcase != policy.coverage_type.downcase)
       end
-      has_renewal_match ? "renewal" : "initial_enrollment"
+      initial_enrollment =  ::PolicyInteractions::InitialEnrollment.new
+      renewal = ::PolicyInteractions::Renewal.new
+      plan_change = ::PolicyInteractions::PlanChange.new
+
+      if initial_enrollment.qualifies?(policies_to_check, policy)
+        "initial_enrollment"
+      elsif renewal.qualifies?(policies_to_check, policy)
+        "renewal"
+      elsif plan_change.qualifies?(policies_to_check, policy)
+        "plan_change"
+      end
     end
   end
 end

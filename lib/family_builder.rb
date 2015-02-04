@@ -8,13 +8,19 @@ class FamilyBuilder
 
   def initialize(param, person_mapper)
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
+    @new_applicants = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
+
+    if param.nil? || person_mapper.nil?
+      initialize_with_nil_params
+      return
+    end
+
     @is_update = true # true = we update an existing application group, false = we create a new application group
     @applicants_params = param[:family_members]
     @params = param
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
     @family = Family.where(e_case_id: filtered_param[:e_case_id]).first
-    @new_applicants = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
     if @family.nil?
       @family = Family.new(filtered_param) #we create a new application group from the xml
       @is_update = false # means this is a create
@@ -25,6 +31,16 @@ class FamilyBuilder
 
     get_household
   end
+
+  def initialize_with_nil_params
+    @is_update = false
+    @family = Family.new
+    @family.e_case_id = (0...12).map { (65 + rand(26)).chr }.join
+    @family.submitted_at = DateTime.now
+    @family.updated_by = "curam_system_service"
+    get_household
+  end
+
 
   def build
     add_tax_households(@params.to_hash[:tax_households])
@@ -54,8 +70,8 @@ class FamilyBuilder
       member = applicant.person.members.select do |m|
         m.authority?
       end.first
-      set_person_demographics(member, family_member_params[:person_demographics])
-      set_alias_ids(member, family_member_params[:alias_ids])
+      set_person_demographics(member, family_member_params[:person_demographics]) if family_member_params[:person_demographics]
+      set_alias_ids(member, family_member_params[:alias_ids]) if family_member_params[:alias_ids]
       @save_list << member
       @save_list << applicant
       # puts "family_member_params[:is_primary_applicant] #{family_member_params[:is_primary_applicant]} @application_group.family_members #{applicant.inspect}"

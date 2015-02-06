@@ -20,6 +20,7 @@ class IrsGroupBuilder
   end
 
   def update
+    return if  @family.households.length < 2
     assign_exisiting_irs_group_to_new_household
     @irs_group = @family.active_household.irs_group
   end

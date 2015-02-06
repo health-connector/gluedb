@@ -136,7 +136,7 @@ class ImportFamilies
         value = uc.validate(ig_request, listener)
       end
 
-      @@logger.info "#{DateTime.now.to_s}" + "Family e_case_id:#{ag.to_hash[:e_case_id]}" + "message:'CreateOrUpdatePerson did not succeed for all'" unless all_valid
+      @@logger.error "#{DateTime.now.to_s}" + "Family e_case_id:#{ag.to_hash[:e_case_id]}" + "message:'CreateOrUpdatePerson did not succeed for all'" unless all_valid
 
       ig_requests.each do |ig_request|
         listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
@@ -191,7 +191,7 @@ class ImportFamilies
         fail_counter += 1
         puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
 
-        @@logger.info "#{DateTime.now.to_s}" +
+        @@logger.error "#{DateTime.now.to_s}" +
                           "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
                           "message:#{e.message}\n" +
                           "backtrace:#{e.backtrace.inspect}\n"

@@ -8,7 +8,7 @@ class FamilyBuilder
 
   def initialize(param, person_mapper)
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
-    @new_applicants = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
+    @new_family_members = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
 
     if param.nil? || person_mapper.nil?
       initialize_with_nil_params
@@ -16,7 +16,7 @@ class FamilyBuilder
     end
 
     @is_update = true # true = we update an existing application group, false = we create a new application group
-    @applicants_params = param[:family_members]
+    @family_members_params = param[:family_members]
     @params = param
     filtered_param = param.slice(:e_case_id, :submitted_at, :e_status_code, :application_type)
     @person_mapper = person_mapper
@@ -45,7 +45,7 @@ class FamilyBuilder
   def build
     add_tax_households(@params.to_hash[:tax_households])
     add_financial_statements(@params[:family_members])
-    add_hbx_enrollment
+    add_hbx_enrollments
     add_coverage_household
     return_obj = save
     add_irsgroups
@@ -55,29 +55,28 @@ class FamilyBuilder
   def add_family_member(family_member_params)
 
     if @family.family_members.map(&:person_id).include? family_member_params[:person].id
-       #puts "Added already existing applicant"
-      applicant = @family.family_members.where(person_id: family_member_params[:person].id).first
+       #puts "Added already existing family_member"
+      family_member = @family.family_members.where(person_id: family_member_params[:person].id).first
     else
-       #puts "Added a new applicant"
+       #puts "Added a new family_member"
       if family_member_params[:is_primary_applicant] == "true"
         reset_exisiting_primary_applicant
       end
 
-      applicant = @family.family_members.build(filter_applicant_params(family_member_params))
+      family_member = @family.family_members.build(filter_family_member_params(family_member_params))
 
-      @new_applicants << applicant
+      @new_family_members << family_member
 
-      member = applicant.person.members.select do |m|
+      member = family_member.person.members.select do |m|
         m.authority?
       end.first
       set_person_demographics(member, family_member_params[:person_demographics]) if family_member_params[:person_demographics]
       set_alias_ids(member, family_member_params[:alias_ids]) if family_member_params[:alias_ids]
       @save_list << member
-      @save_list << applicant
-      # puts "family_member_params[:is_primary_applicant] #{family_member_params[:is_primary_applicant]} @application_group.family_members #{applicant.inspect}"
+      @save_list << family_member
     end
 
-    applicant
+    family_member
   end
 
   def set_alias_ids(member, alias_ids_params)
@@ -93,8 +92,8 @@ class FamilyBuilder
   end
 
   def reset_exisiting_primary_applicant
-    @family.family_members.each do |applicant|
-      applicant.is_primary_applicant = false
+    @family.family_members.each do |family_member|
+      family_member.is_primary_applicant = false
     end
   end
 
@@ -108,17 +107,17 @@ class FamilyBuilder
     member.marital_status = person_demographics_params["marital_status"] if person_demographics_params["marital_status"]
   end
 
-  def filter_applicant_params(applicant_params)
-    applicant_params = applicant_params.slice(
+  def filter_family_member_params(family_member_params)
+    family_member_params = family_member_params.slice(
         :is_primary_applicant,
         :is_coverage_applicant,
         :person)
 
-    applicant_params.delete_if do |k, v|
+    family_member_params.delete_if do |k, v|
       v.nil?
     end
 
-    applicant_params
+    family_member_params
   end
 
   def get_household
@@ -128,7 +127,7 @@ class FamilyBuilder
       # puts "New Application Group Case"
       @household = self.family.households.build #if new application group then create new household
       @save_list << @household
-    elsif have_applicants_changed?
+    elsif have_family_members_changed?
       # puts "Update Application Group Case - Applicants have changed. Creating new household"
       @household = self.family.households.build #if applicants have changed then create new household
       @save_list << @household
@@ -140,14 +139,14 @@ class FamilyBuilder
 
   end
 
-  def have_applicants_changed?
+  def have_family_members_changed?
 
-    current_list = @family.family_members.map do |applicant|
-      applicant.person_id
+    current_list = @family.family_members.map do |family_member|
+      family_member.person_id
     end.sort
 
-    new_list = @applicants_params.map do |applicants_param|
-      applicants_param[:person].id
+    new_list = @family_members_params.map do |family_member_params|
+      family_member_params[:person].id
     end.sort
 
     if current_list == new_list
@@ -159,61 +158,61 @@ class FamilyBuilder
 
   def add_coverage_household
 
-    return if @new_applicants.length == 0
+    return if @new_family_members.length == 0
 
     #TODO decide where to get submitted_at from
     coverage_household = @household.coverage_households.build({submitted_at: Time.now})
 
-    @new_applicants.each do |applicant|
-      if applicant.is_coverage_applicant
+    @new_family_members.each do |family_member|
+      if family_member.is_coverage_applicant
         coverage_household_member = coverage_household.coverage_household_members.build
-        coverage_household_member.applicant_id = applicant.id
+        coverage_household_member.applicant_id = family_member.id
       end
     end
 
   end
 
-  def add_hbx_enrollment
-
-    # puts @application_group.primary_applicant
+  def add_hbx_enrollments
 
     @family.primary_applicant.person.policies.each do |policy|
-
-      hbx_enrollement = @household.hbx_enrollments.build
-      hbx_enrollement.policy = policy
-      @family.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
-      #hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
-      #hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
-      #hbx_enrollement.primary_applicant = alpha_person
-      #hbx_enrollement.allocated_aptc_in_dollars = policy.allocated_aptc
-      hbx_enrollement.enrollment_group_id = policy.eg_id
-      hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
-      hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
-      hbx_enrollement.submitted_at = Time.now
-
-      hbx_enrollement.kind = "employer_sponsored" unless policy.employer_id.blank?
-      hbx_enrollement.kind = "unassisted_qhp" if (hbx_enrollement.applied_aptc_in_cents == 0 && policy.employer.blank?)
-      hbx_enrollement.kind = "insurance_assisted_qhp" if (hbx_enrollement.applied_aptc_in_cents > 0 && policy.employer.blank?)
-
-      policy.enrollees.each do |enrollee|
-        begin
-          person = Person.find_for_member_id(enrollee.m_id)
-
-          @family.family_members << FamilyMember.new(person: person) unless @family.person_is_family_member?(person)
-          applicant = @family.find_family_member_by_person(person)
-
-          hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: applicant,
-                                                                                 premium_amount_in_cents: enrollee.pre_amt})
-          hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
-
-        rescue FloatDomainError
-          # puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
-          next
-        end
-      end
-
+      add_hbx_enrollment(policy)
     end
+  end
 
+  def add_hbx_enrollment(policy)
+
+    hbx_enrollement = @household.hbx_enrollments.build
+    hbx_enrollement.policy = policy
+    @family.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
+    #hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
+    #hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
+    #hbx_enrollement.primary_applicant = alpha_person
+    #hbx_enrollement.allocated_aptc_in_dollars = policy.allocated_aptc
+    hbx_enrollement.enrollment_group_id = policy.eg_id
+    hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
+    hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
+    hbx_enrollement.submitted_at = Time.now
+
+    hbx_enrollement.kind = "employer_sponsored" unless policy.employer_id.blank?
+    hbx_enrollement.kind = "unassisted_qhp" if (hbx_enrollement.applied_aptc_in_cents == 0 && policy.employer.blank?)
+    hbx_enrollement.kind = "insurance_assisted_qhp" if (hbx_enrollement.applied_aptc_in_cents > 0 && policy.employer.blank?)
+
+    policy.enrollees.each do |enrollee|
+      begin
+        person = Person.find_for_member_id(enrollee.m_id)
+
+        @family.family_members << FamilyMember.new(person: person) unless @family.person_is_family_member?(person)
+        family_member = @family.find_family_member_by_person(person)
+
+        hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: family_member,
+                                                                               premium_amount_in_cents: enrollee.pre_amt})
+        hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
+
+      rescue FloatDomainError
+        # puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
+        next
+      end
+    end
   end
 
   #TODO currently only handling case we create new application case, where 1 irs group is built with 1 coverage household.
@@ -244,19 +243,19 @@ class FamilyBuilder
         tax_household_member = tax_household.tax_household_members.build(filter_tax_household_member_params(tax_household_member_params))
         person_uri = @person_mapper.alias_map[tax_household_member_params[:person_id]]
         person_obj = @person_mapper.people_map[person_uri].first
-        new_applicant = get_applicant(person_obj)
-        new_applicant = verify_person_id(new_applicant)
-        tax_household_member.applicant_id = new_applicant.id
-        tax_household_member.family_member = new_applicant
+        new_family_member = get_family_member(person_obj)
+        new_family_member = verify_person_id(new_family_member)
+        tax_household_member.applicant_id = new_family_member.id
+        tax_household_member.family_member = new_family_member
       end
     end
   end
 
-  def verify_person_id(applicant)
-    if applicant.id.to_s.include? "concern_role"
+  def verify_person_id(family_member)
+    if family_member.id.to_s.include? "concern_role"
 
     end
-    applicant
+    family_member
   end
 
   def filter_tax_household_member_params(tax_household_member_params)
@@ -276,18 +275,18 @@ class FamilyBuilder
     end
   end
 
-  ## Fetches the applicant object either from application_group or person_mapper
-  def get_applicant(person_obj)
-    new_applicant = self.family.family_members.find do |applicant|
-      applicant.id == @person_mapper.applicant_map[person_obj.id].id
+  ## Fetches the family_member object either from application_group or person_mapper
+  def get_family_member(person_obj)
+    new_family_member = self.family.family_members.find do |family_member|
+      family_member.id == @person_mapper.applicant_map[person_obj.id].id
     end
-    new_applicant = @person_mapper.applicant_map[person_obj.id] unless new_applicant
+    new_family_member = @person_mapper.applicant_map[person_obj.id] unless new_family_member
   end
 
-  def add_financial_statements(applicants_params)
-    applicants_params.map do |applicant_params|
-      applicant_params[:financial_statements].each do |financial_statement_params|
-        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[applicant_params[:person].id])
+  def add_financial_statements(family_members_params)
+    family_members_params.map do |family_member_params|
+      family_member_params[:financial_statements].each do |financial_statement_params|
+        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_member_params[:person].id])
         financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)
@@ -303,10 +302,10 @@ class FamilyBuilder
   end
 
 =begin
-  def add_financial_statements(applicants_params)
-    applicants_params.map do |family_member_params|
-      family_member_params[:financial_statements].each do |financial_statement_params|
-        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_member_params[:person].id])
+  def add_financial_statements(family_members_params)
+    family_members_params.map do |family_members_params|
+      family_members_params[:financial_statements].each do |financial_statement_params|
+        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_members_params[:person].id])
         financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
         financial_statement_params[:incomes].each do |income_params|
           financial_statement.incomes.build(income_params)
@@ -331,11 +330,11 @@ class FamilyBuilder
     end
   end
 
-  def find_tax_household_member(applicant)
+  def find_tax_household_member(family_member)
     tax_household_members = self.family.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
 
     tax_household_member = tax_household_members.find do |tax_household_member|
-      tax_household_member.applicant_id == applicant.id
+      tax_household_member.applicant_id == family_member.id
     end
 
     tax_household_member
@@ -350,7 +349,7 @@ class FamilyBuilder
   #save objects in save list
   def save_save_list
     save_list.each do |obj|
-      obj.save!
+      obj.save! unless obj.nil?
     end
   end
 end

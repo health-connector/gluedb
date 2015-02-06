@@ -562,6 +562,7 @@ class Policy
     self.enrollees.each do |en|
       en.coverage_end = en.coverage_start
       en.coverage_status = 'inactive'
+      en.employment_status_code = 'terminated'
     end
     self.save!
   end

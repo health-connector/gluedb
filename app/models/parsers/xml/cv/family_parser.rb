@@ -16,7 +16,7 @@ module Parsers::Xml::Cv
 
     element :renewal_consent_through_year, String, tag: 'renewal_consent_through_year'
 
-    element :submitted_at, String, :tag=> "submitted_date"
+    element :submitted_at, String, :tag=> "submitted_at"
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 

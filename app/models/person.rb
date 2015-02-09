@@ -398,6 +398,19 @@ class Person
     self.touch
   end
 
+  def find_relationship_to(other_person)
+
+    relationship = person_relationships.detect do |person_relationship|
+      person_relationship.relative_id == other_person.id
+    end
+
+    if relationship
+      return relationship.kind
+    else
+      return nil
+    end
+  end
+
   private
 
   def initialize_authority_member

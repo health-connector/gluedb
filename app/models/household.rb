@@ -2,6 +2,7 @@ class Household
   include Mongoid::Document
   include Mongoid::Timestamps
   include HasFamilyMembers
+  include Mongoid::EmbeddedErrors
 
   embedded_in :family
 

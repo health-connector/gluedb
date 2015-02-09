@@ -251,7 +251,8 @@ class Policy
     {
       "$or" => [
         {"eg_id" => s_rex},
-        {"id" => s_rex}
+        {"id" => s_rex.source},
+        {"enrollees.m_id" => s_rex}
       ]
     }
   end
@@ -386,7 +387,7 @@ class Policy
           ]
         }
       } })
-    
+
   end
 
   def self.find_active_and_unterminated_in_range(start_d, end_d, other_params = {})
@@ -561,6 +562,7 @@ class Policy
     self.enrollees.each do |en|
       en.coverage_end = en.coverage_start
       en.coverage_status = 'inactive'
+      en.employment_status_code = 'terminated'
     end
     self.save!
   end

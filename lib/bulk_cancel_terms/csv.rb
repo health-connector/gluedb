@@ -24,6 +24,10 @@ module BulkCancelTerms
       @errors <<  "End date of #{details[:end_date]} is invalid"
     end
 
+    def no_contribution_strategy(details = {})
+      @errors << "#{details[:message]}"
+    end
+
     def fail(details = {})
       @csv << (@request.to_a + ["#{details[:subscriber]}"] + ["error", @errors.join])
     end

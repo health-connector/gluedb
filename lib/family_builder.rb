@@ -165,11 +165,27 @@ class FamilyBuilder
 
     @new_family_members.each do |family_member|
       if family_member.is_coverage_applicant
+        if valid_relationship?(family_member)
         coverage_household_member = coverage_household.coverage_household_members.build
         coverage_household_member.applicant_id = family_member.id
+        else
+          raise "Relationship #{@family.primary_applicant.person.find_relationship_to(family_member)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
+        end
       end
     end
 
+  end
+
+  def valid_relationship?(family_member)
+    return true if @family.primary_applicant.id == family_member.id
+
+    valid_relationships = %w{spouse life_partner child}
+
+    if valid_relationships.include? @family.primary_applicant.person.find_relationship_to(family_member)
+        return true
+    else
+      return false
+    end
   end
 
   def add_hbx_enrollments
@@ -183,12 +199,7 @@ class FamilyBuilder
 
     hbx_enrollement = @household.hbx_enrollments.build
     hbx_enrollement.policy = policy
-    @family.primary_applicant.broker_id = Broker.find(policy.broker_id) unless policy.broker_id.blank?
-    #hbx_enrollement.employer = Employer.find(policy.employer_id) unless policy.employer_id.blank?
-    #hbx_enrollement.broker   = Broker.find(policy.broker_id) unless policy.broker_id.blank?
-    #hbx_enrollement.primary_applicant = alpha_person
-    #hbx_enrollement.allocated_aptc_in_dollars = policy.allocated_aptc
-    hbx_enrollement.enrollment_group_id = policy.eg_id
+    @family.primary_applicant.broker_id = Broker.find(policy.broker_id).id unless policy.broker_id.blank?
     hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
     hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
     hbx_enrollement.submitted_at = Time.now

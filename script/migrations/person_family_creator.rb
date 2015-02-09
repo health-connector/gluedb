@@ -29,10 +29,9 @@ class PersonFamilyCreator
       family_member_hash = {
           is_primary_applicant: true,
           is_coverage_applicant: true,
-          is_consent_applicant: true
+          is_consent_applicant: true,
+          person: person
       }
-
-      family_member_hash[:person] = person
 
       family_builder.add_family_member(family_member_hash)
       family_builder.add_hbx_enrollments

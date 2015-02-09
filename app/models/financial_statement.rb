@@ -4,7 +4,7 @@ class FinancialStatement
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  TAX_FILING_STATUS_TYPES = %W(tax_filer tax_dependent non_filer)
+  TAX_FILING_STATUS_TYPES = %W(tax_filer single joint separate dependent non_filer)
 
   field :tax_filing_status, type: String
   field :is_tax_filing_together, type: Boolean

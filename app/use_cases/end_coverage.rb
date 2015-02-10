@@ -39,7 +39,7 @@ class EndCoverage
 
     affected_enrollee_ids = @request[:affected_enrollee_ids]
 
-    if (affected_enrollee_ids.nil?)
+    if (affected_enrollee_ids.nil? || affected_enrollee_ids.empty?)
       listener.fail(subscriber: request[:affected_enrollee_ids])
       return
     end
@@ -58,27 +58,33 @@ class EndCoverage
 
     enrollees_not_already_canceltermed= @policy.enrollees.select { |e| !e.canceled? && !e.terminated? }
 
-    update_policy(affected_enrollee_ids)
+    begin
+      update_policy(affected_enrollee_ids)
+    rescue NoContributionStrategyError => e
+      listener.no_contribution_strategy(message: e.message)
+      listener.fail(subscriber: request[:affected_enrollee_ids] )
+    else
+      action = @action_factory.create_for(request)
 
-    action = @action_factory.create_for(request)
+      action_request =
+      {
+        policy_id: @policy.id,
+        operation: request[:operation],
+        reason: request[:reason],
+        affected_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
+        include_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
+        current_user: request[:current_user]
+      }
 
-    action_request = {
-      policy_id: @policy.id,
-      operation: request[:operation],
-      reason: request[:reason],
-      affected_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
-      include_enrollee_ids: enrollees_not_already_canceltermed.map(&:m_id),
-      current_user: request[:current_user]
-    }
-    action.execute(action_request)
-    listener.success(subscriber: request[:affected_enrollee_ids])
+      action.execute(action_request)
+      listener.success(subscriber: request[:affected_enrollee_ids])
+    end
   end
 
   private
 
   def update_policy(affected_enrollee_ids)
     subscriber = @policy.subscriber
-    employer_contribution_percentage = @policy.employer_contribution / @policy.total_premium_amount
 
     if(affected_enrollee_ids.include?(subscriber.m_id))
       end_coverage_for_everyone
@@ -86,14 +92,23 @@ class EndCoverage
       end_coverage_for_ids(affected_enrollee_ids)
     end
 
-    @policy.total_responsible_amount = @policy.total_premium_amount - total_credit_adjustment(employer_contribution_percentage)
-
+    @policy.total_responsible_amount = @policy.total_premium_amount - total_credit_adjustment
     @policy.updated_by = @request[:current_user]
     @policy.save
   end
 
-  def total_credit_adjustment(percent)
-    @policy.employer_contribution = (@policy.total_premium_amount * percent).truncate(2)
+  def total_credit_adjustment
+    if @policy.is_shop?
+      strategy = @policy.employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
+      raise NoContributionStrategyError, "No contribution strategy found for #{@policy.employer.name} (fein: #{@policy.employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+      rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
+      @policy.enrollees.reject{ |e| e.coverage_status == "inactive" }
+      @policy.employer_contribution = strategy.contribution_for(@policy)
+      @policy.enrollees << rejected
+      @policy.employer_contribution
+    else
+      @policy.applied_aptc
+    end
   end
 
   def end_coverage_for_everyone
@@ -131,11 +146,16 @@ class EndCoverage
 
   def end_coverage_for(enrollee, date)
     enrollee.coverage_status = 'inactive'
+    enrollee.employment_status_code = 'terminated'
 
     if(@request[:operation] == 'cancel')
       enrollee.coverage_end = enrollee.coverage_start
     else
       enrollee.coverage_end = date
     end
+  end
+
+  class NoContributionStrategyError < StandardError
+
   end
 end

@@ -1,0 +1,14 @@
+- if !member_documents.empty?
+  .row
+    .col-md-12
+      %h4 Documents
+      %table.table
+        %thead
+          %tr
+            %th Type
+            %th Name
+        %tbody
+          - member_documents.each do |doc|
+            %tr
+              %td= doc.document_kind
+              %td= link_to(doc.document_name, (ExchangeInformation.file_storage_uri + doc.document_id))

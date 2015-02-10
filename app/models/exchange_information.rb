@@ -16,7 +16,8 @@ class ExchangeInformation
     'request_exchange',
     'event_exchange',
     'environment',
-    'hbx_id'
+    'hbx_id',
+    'file_storage_uri'
   ]
 
   attr_reader :config

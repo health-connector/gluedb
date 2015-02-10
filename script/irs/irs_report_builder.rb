@@ -2,18 +2,77 @@ require 'spreadsheet'
 require 'csv'
 
 module Irs
-  class ExcelReportBuilder
+  class IrsReportBuilder
 
-    def initialize
+    MONTHS = {
+      1 => 'Jan',
+      2 => 'Feb',
+      3 => 'Mar',
+      4 => 'Apr',
+      5 => 'May',
+      6 => 'Jun',
+      7 => 'Jul',
+      8 => 'Aug',
+      9 => 'Sep',
+      10 => 'Oct',
+      11 => 'Nov',
+      12 => 'Dec'
+    }
+
+    def export_excel
       @workbook = Spreadsheet::Workbook.new
       @sheet = @workbook.create_worksheet :name => 'report' 
+      @count = 0
+
+      build_1095a_report('1095a_excel.xls')
+    end
+
+    def irs_report_for_errors(irs_errors)
+      CSV.open("#{Rails.root}/1095a_report_for_ids.csv", "wb") do |csv|
+        csv << ["Sequence Number", "Error"] + column_names
+        irs_errors.each do |irs_error|
+          policy_id = irs_error[2]
+          policy = Policy.find(policy_id)
+          @notice = Generators::Reports::IrsInputBuilder.new(policy, multi_version_aptc?(policy)).notice
+          build_1095a_row(policy)
+          csv << [irs_error[0], irs_error[1]] + @data
+        end
+      end
+    end
+
+    def export_csv
+      @count = 0
+      CSV.open("#{Rails.root}/1095a_report.csv", "wb") do |csv|
+        csv << column_names
+        CSV.foreach("#{Rails.root}/1095as_filtered.csv") do |row|
+          policy = Policy.find(row[0].strip)
+          begin
+            active_enrollees = policy.enrollees.reject{|en| en.canceled?}
+            next if active_enrollees.empty? || rejected_policy?(policy)
+            next if [8026, 23120, 16245, 16246, 19203, 22375, 8376, 12057, 28798, 12153, 8642, 22015, 22167, 22168, 17584].include?(policy.id)
+            @count += 1
+            if @count % 50 == 0
+              puts "---#{@count}"
+            end
+            @notice = Generators::Reports::IrsInputBuilder.new(policy, multi_version_aptc?(policy)).notice
+            build_1095a_row(policy)
+            csv << @data
+          rescue Exception => e
+            puts policy.id
+          end
+        end
+      end
+    end
+
+    def column_names
+      columns = ['POLICY ID', 'EG ID', 'CARRIER', 'HBX ID']
+      5.times {|i| columns += ["NAME#{i+1}", "SSN#{i+1}", "DOB#{i+1}", "BEGINDATE#{i+1}", "ENDDATE#{i+1}"]}
+      12.times {|i| columns += ["#{MONTHS[i+1]} PREMIUM", "#{MONTHS[i+1]} SLCSP", "#{MONTHS[i+1]} APTC"]}
+      columns
     end
 
     def append_column_names
-      columns = ['POLICY ID']
-      5.times {|i| columns += ["NAME#{i+1}", "SSN#{i+1}", "DOB#{i+1}", "BEGINDATE#{i+1}", "ENDDATE#{i+1}"]}
-      12.times {|i| columns += ["PREMIUM#{i+1}", "SLCSP#{i+1}", "APTC#{i+1}"]}
-      @sheet.row(0).concat columns
+      @sheet.row(0).concat column_names
     end
 
     def build_1095a_report(file)
@@ -22,11 +81,19 @@ module Irs
       CSV.foreach("#{Rails.root}/1095as_filtered.csv") do |row|
         policy = Policy.find(row[0].strip)
         begin
-          next if policy.applied_aptc == 0
+          # next if policy.applied_aptc == 0
+
           active_enrollees = policy.enrollees.reject{|en| en.canceled?}
-          next if active_enrollees.empty? || active_enrollees.size == 1
-          @notice = Generators::Reports::IrsInputBuilder.new(policy).notice
-          build_1095a_row
+          next if active_enrollees.empty? || rejected_policy?(policy)
+          # next unless multi_version_aptc?(policy)
+
+          @count += 1
+          if @count % 50 == 0 
+            puts "---#{@count}"
+          end
+
+          @notice = Generators::Reports::IrsInputBuilder.new(policy, multi_version_aptc?(policy)).notice
+          build_1095a_row(policy)
           @sheet.row(index).concat @data
         rescue Exception => e
           puts policy.id
@@ -34,7 +101,7 @@ module Irs
         index += 1
       end
 
-      @workbook.write "#{Rails.root.to_s}/aptc_multiple_enrollees.xls"
+      @workbook.write "#{Rails.root.to_s}/#{file}"
     end
 
     def export_as_1095a(policies, file)
@@ -55,6 +122,23 @@ module Irs
       @workbook.write "#{Rails.root.to_s}/#{file}.xls"
     end
 
+    def multi_version_aptc?(policy)
+      if policy.version > 1
+        aptcs = policy.versions.map(&:applied_aptc).map{ |x| x.to_f }
+        if aptcs.uniq.size > 1 || (aptcs.uniq[0] != policy.applied_aptc.to_f)
+          return true
+        end
+      end
+      false
+    end
+
+    def rejected_policy?(policy)
+      edi_transactions = Protocols::X12::TransactionSetEnrollment.where({ "policy_id" => policy.id })
+      if edi_transactions.count == 1 && edi_transactions.first.aasm_state == 'rejected'
+        return true
+      end
+      false
+    end
 
     def export_policy_versions(policies, file)
       columns = ['POLICY ID', "HBX Member Id", "Coverage Start", "Coverage End", "Member Count", "APTC"]
@@ -65,8 +149,8 @@ module Irs
       policies.each do |policy|
         begin
           @data = [ 
-            policy.id, 
-            policy.subscriber.hbx_member_id, 
+            policy.id,
+            policy.subscriber.hbx_member_id,
             policy.subscriber.coverage_start.strftime("%m-%d-%Y"), 
             policy.subscriber.coverage_end.blank? ? nil : policy.subscriber.coverage_end.strftime("%m-%d-%Y"),
             policy.enrollees.reject{|en| en.canceled?}.size,
@@ -91,8 +175,13 @@ module Irs
       @workbook.write "#{Rails.root.to_s}/#{file}.xls"
     end
 
-    def build_1095a_row
-      @data = [ @notice.policy_id ]
+    def build_1095a_row(policy)
+      @data = [ 
+        @notice.policy_id,
+        policy.eg_id,
+        policy.plan.carrier.name,
+        policy.subscriber.m_id
+      ]
       append_coverage_household
       append_premiums
     end

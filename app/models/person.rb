@@ -394,8 +394,12 @@ class Person
     old_relationships.each do |old_rel|
       self.person_relationships.delete(old_rel)
     end
-    self.person_relationships << new_rel
+
+    relationship = self.person_relationships.build({relative: new_rel.relative, kind: new_rel.kind})
+    relationship.save
+    self.save
     self.touch
+    self.reload
   end
 
   def find_relationship_to(other_person)

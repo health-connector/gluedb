@@ -42,7 +42,7 @@ module Generators::Reports
       coverage_end = enrollee.coverage_end.blank? ? @policy.coverage_period.end : enrollee.coverage_end
       PdfTemplates::Enrolee.new({
         name: enrollee.person.full_name,
-        ssn: number_to_ssn(authority_member.ssn),
+        ssn: authority_member.ssn,
         dob: format_date(authority_member.dob),
         coverage_start_date: format_date(enrollee.coverage_start),
         coverage_termination_date: format_date(coverage_end),
@@ -98,12 +98,6 @@ module Generators::Reports
     def format_date(date)
       return nil if date.blank?
       date.strftime("%m/%d/%Y")
-    end
-
-    def number_to_ssn(number)
-      return unless number
-      delimiter = "-"
-      number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
     end
 
     def address_to_hash(address)

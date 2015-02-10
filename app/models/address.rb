@@ -1,6 +1,7 @@
 class Address
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mongoid::EmbeddedErrors
 
   include MergingModel
 

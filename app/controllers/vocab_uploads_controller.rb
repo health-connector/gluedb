@@ -20,6 +20,10 @@ class VocabUploadsController < ApplicationController
     end
   end
 
+  def aptc_too_large(details)
+    flash_message_now(:error, "aptc value is too large. " + details_text(details))
+  end
+
   def group_has_incorrect_responsible_amount(details)
     flash_message_now(:error, "total_responsible_amount is incorrect. " + details_text(details))
   end

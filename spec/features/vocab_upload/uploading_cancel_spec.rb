@@ -15,7 +15,7 @@ feature 'uploading a cancel/term CV' do
     sign_in_with(user.email, user.password)
 
     # Note: The file fixture is dependent on this record.
-    plan = Plan.new(coverage_type: 'health', hios_plan_id: '11111111111111-11', year: 2014)
+    plan = Plan.new(coverage_type: 'health', hios_plan_id: '11111111111111-11', year: 2014, ehb: 0.5)
     plan.premium_tables << premium
     plan.save!
   end

@@ -77,18 +77,18 @@ module Premiums
       end
 
       def pre_amt_tot=(val)
-         unless @expected_pre_amt_tot.to_f == val.to_f
-           @listener.invalid_premium_total(:expected => @expected_pre_amt_tot.to_f, :calculated => val.to_f)
-           @valid = false
-         end
+        unless @expected_pre_amt_tot.to_f == val.to_f
+          @listener.invalid_premium_total(:expected => @expected_pre_amt_tot.to_f, :calculated => val.to_f)
+          @valid = false
+        end
         @pre_amt_tot = val
       end
 
       def tot_emp_res_amt=(val)
-         unless @expected_tot_emp_res_amt.to_f == val.to_f
-           @listener.invalid_employer_contribution(:expected => @expected_tot_emp_res_amt.to_f, :calculated => val.to_f)
-           @valid = false
-         end
+        unless @expected_tot_emp_res_amt.to_f == val.to_f
+          @listener.invalid_employer_contribution(:expected => @expected_tot_emp_res_amt.to_f, :calculated => val.to_f)
+          @valid = false
+        end
         @tot_emp_res_amt = val
       end
 
@@ -98,6 +98,14 @@ module Premiums
            @valid = false
          end
         @tot_res_amt = val
+      end
+
+      def applied_aptc=(val)
+         unless @applied_aptc.to_f == val.to_f
+           @listener.invalid_aptc_amount(:expected => @applied_aptc.to_f, :calculated => val.to_f)
+           @valid = false
+         end
+        @applied_aptc= val
       end
     end
 

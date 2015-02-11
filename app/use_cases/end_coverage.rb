@@ -86,29 +86,26 @@ class EndCoverage
   def update_policy(affected_enrollee_ids)
     subscriber = @policy.subscriber
 
-    if(affected_enrollee_ids.include?(subscriber.m_id))
-      end_coverage_for_everyone
-    else
-      end_coverage_for_ids(affected_enrollee_ids)
-    end
-
-    @policy.total_responsible_amount = @policy.total_premium_amount - total_credit_adjustment
-    @policy.updated_by = @request[:current_user]
-    @policy.save
-  end
-
-  def total_credit_adjustment
     if @policy.is_shop?
       strategy = @policy.employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
       raise NoContributionStrategyError, "No contribution strategy found for #{@policy.employer.name} (fein: #{@policy.employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
-      rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
-      @policy.enrollees.reject{ |e| e.coverage_status == "inactive" }
-      @policy.employer_contribution = strategy.contribution_for(@policy)
-      @policy.enrollees << rejected
-      @policy.employer_contribution
-    else
-      @policy.applied_aptc
     end
+
+    premium_calculator = Premiums::PolicyCalculator.new
+
+    if(affected_enrollee_ids.include?(subscriber.m_id))
+      premium_calculator.apply_calculations(@policy)
+      end_coverage_for_everyone
+    else
+      end_coverage_for_ids(affected_enrollee_ids)
+      rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
+      @policy.enrollees.reject!{ |e| e.coverage_status == "inactive" }
+      premium_calculator.apply_calculations(@policy)
+      @policy.enrollees << rejected
+    end
+
+    @policy.updated_by = @request[:current_user]
+    @policy.save
   end
 
   def end_coverage_for_everyone

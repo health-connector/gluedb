@@ -5,7 +5,7 @@ describe Premiums::PolicyRequestValidator do
   let(:hios_id) { "12345" }
   let(:plan_year) { "2005" }
 
-  let(:plan) { double }
+  let(:plan) { double(:ehb => 0.5) }
   let(:listener) { double }
   let(:request) { {
     :hios_id => hios_id,

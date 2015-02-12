@@ -8,7 +8,7 @@ module PdfTemplates
     attribute :qhp_issuer_ein, String
     attribute :coverage_start, String
     attribute :coverage_end, String
-    attribute :covered_household, Array[PdfTemplates::Member]
+    attribute :covered_household, Array[PdfTemplates::Enrollee]
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
     attribute :has_aptc, Boolean, :default => false
     attribute :yearly_premium, PdfTemplates::YearlyPremium

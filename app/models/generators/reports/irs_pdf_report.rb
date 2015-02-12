@@ -96,7 +96,7 @@ module Generators::Reports
         text @notice.recipient.coverage_termination_date.to_s
       end
 
-      bounding_box([col3, y_pos], :width => 200) do
+      bounding_box([col3, y_pos], :width => 250) do
         street_address = @notice.recipient_address.street_1
         if !@notice.recipient_address.street_2.blank?
           street_address += ", #{@notice.recipient_address.street_2}"

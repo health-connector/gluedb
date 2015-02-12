@@ -254,7 +254,8 @@ class Policy
     {
       "$or" => [
         {"eg_id" => s_rex},
-        {"id" => s_rex}
+        {"id" => s_rex.source},
+        {"enrollees.m_id" => s_rex}
       ]
     }
   end
@@ -564,6 +565,7 @@ class Policy
     self.enrollees.each do |en|
       en.coverage_end = en.coverage_start
       en.coverage_status = 'inactive'
+      en.employment_status_code = 'terminated'
     end
     self.save!
   end

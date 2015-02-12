@@ -74,8 +74,18 @@ module Premiums
 
         policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.tot_emp_res_amt)
       else
+        clean_aptc(policy)
         policy.tot_res_amt = as_dollars(policy.pre_amt_tot) - as_dollars(policy.applied_aptc)
       end
+    end
+
+    def clean_aptc(policy)
+      plan = policy.plan
+      premium_total = as_dollars(policy.pre_amt_tot)
+      given_aptc = as_dollars(policy.applied_aptc)
+      max_aptc = as_dollars(premium_total * plan.ehb)
+      correct_aptc = (given_aptc > max_aptc) ? max_aptc : given_aptc
+      policy.applied_aptc = correct_aptc
     end
 
     def get_employer(policy)

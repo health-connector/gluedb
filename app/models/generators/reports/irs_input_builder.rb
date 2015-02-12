@@ -5,16 +5,29 @@ module Generators::Reports
  
     IRS_YEAR = 2014
 
-    def initialize(policy)
+    SLCSP_CORRECTIONS = {
+      7884 => 721.07,
+      8269 => 396.61, 
+      8393 => 480.38, 
+      12236 => 743.3, 
+      15585 => 575.26, 
+      15824 => 486.55, 
+      19846 => 216.47
+    }
+
+    def initialize(policy, multi_version=false)
       @policy = policy
       @policy_disposition = PolicyDisposition.new(policy)
       @subscriber = @policy.subscriber.person
+      if multi_version
+        @multi_version_pol = Generators::Reports::MultiVersionAptcLookup.new(policy)
+      end
 
       @notice = PdfTemplates::IrsNoticeInput.new
 
       @notice.issuer_name = @policy.plan.carrier.name
       @notice.policy_id = prepend_zeros(@policy.id.to_s, 6)
-      @notice.has_aptc = true if @policy.applied_aptc > 0
+      # @notice.has_aptc = true if @policy.applied_aptc > 0
       @notice.recipient_address = PdfTemplates::NoticeAddress.new(address_to_hash(@subscriber.addresses[0]))
  
       append_policy_enrollees
@@ -60,19 +73,39 @@ module Generators::Reports
           premium_amount: @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1)).ehb_premium
         }
 
-        if @policy.applied_aptc > 0
-          calc = Premiums::PolicyCalculator.new
-          silver_plan = Plan.where({ "year" => 2014, "hios_plan_id" => "86052DC0400001-01" }).first
-          silver_plan_premium = @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1), silver_plan).ehb_premium
+        @notice.has_aptc = if @multi_version_pol
+          @multi_version_pol.assisted?
+        else 
+          @policy.applied_aptc > 0
+        end
+
+        if @notice.has_aptc
+          
+          if SLCSP_CORRECTIONS[@policy.id]
+            silver_plan_premium = SLCSP_CORRECTIONS[@policy.id]
+          else
+            silver_plan = Plan.where({ "year" => 2014, "hios_plan_id" => "86052DC0400001-01" }).first
+            silver_plan_premium = @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1), silver_plan).ehb_premium
+          end
+
+          aptc_amt = @multi_version_pol.nil? ? 
+          @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1)).applied_aptc :
+          @multi_version_pol.aptc_as_of(Date.new(IRS_YEAR, i, 1))
 
           premium_amounts.merge!({
             premium_amount_slcsp: silver_plan_premium,
-            monthly_aptc: @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1)).applied_aptc
+            monthly_aptc: aptc_amt
           })
         end
 
-        data << premium_amounts
+        if @notice.has_aptc && premium_amounts[:monthly_aptc].nil?
+          data << nil
+        else
+          data << premium_amounts
+        end
       end
+
+      @notice.monthly_premiums.compact!
     end
 
     def append_yearly_premiums
@@ -83,7 +116,7 @@ module Generators::Reports
       slcsp_amount = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.premium_amount_slcsp.to_f}
       aptc_amount = @notice.monthly_premiums.inject(0.0){|sum, premium| sum + premium.monthly_aptc.to_f}
 
-      if @policy.applied_aptc > 0
+      if @notice.has_aptc
         yearly_premium.merge!({
           slcsp_premium_amount: slcsp_amount,
           aptc_amount: aptc_amount

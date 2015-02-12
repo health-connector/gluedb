@@ -604,6 +604,16 @@ class Policy
     end_dates.uniq.length > 1
   end
 
+  def rejected?
+    edi_transactions = Protocols::X12::TransactionSetEnrollment.where({ "policy_id" => self.id })
+    (edi_transactions.count == 1 && edi_transactions.first.aasm_state == 'rejected') ? true : false
+  end
+
+  def has_no_enrollees?
+    active_enrollees = self.enrollees.reject{|en| en.canceled?}
+    active_enrollees.empty? ? true : false
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s

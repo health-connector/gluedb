@@ -27,6 +27,7 @@ class Income
 		tax_exempt_interest
 		unemployment_insurance
 		wages_and_salaries
+    income_from_irs
 	)
 
   FREQUENCIES = %W(biweekly daily half_yearly monthly quarterly weekly yearly)

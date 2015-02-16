@@ -3,8 +3,9 @@ module Generators::Reports
 
     attr_accessor :irs_group
 
-    def initialize(family)
+    def initialize(family, months)
       @family = family
+      @months = months
       @irs_group = PdfTemplates::IrsGroup.new
     end
 
@@ -32,6 +33,7 @@ module Generators::Reports
 
       @irs_group.households = households
     end
+
 
     def build_associated_policies
       tax_households = @irs_group.households.map{|x| x.tax_households}
@@ -62,14 +64,25 @@ module Generators::Reports
         })
     end
 
-    def build_tax_household(tax_household)
-      PdfTemplates::TaxHousehold.new({
-        primary: build_tax_member(tax_household.primary),
-        spouse: build_tax_member(tax_household.spouse), 
-        dependents: tax_household.dependents.map{|dependent| build_tax_member(dependent)},
-        policies: build_tax_household_pols(tax_household)
-        })
+    def build_tax_household
+      build_household_coverage
+      coverages = (1..@months).inject([]) do  |coverages, month| 
+        coverages << nil # build_household_coverage
+      end
+
+      @irs_group.tax_households << PdfTemplates::TaxHousehold.new({
+        tax_household_coverages: coverages
+      })    
     end
+
+    # def build_tax_household(tax_household)
+    #   PdfTemplates::TaxHousehold.new({
+    #     primary: build_tax_member(tax_household.primary),
+    #     spouse: build_tax_member(tax_household.spouse), 
+    #     dependents: tax_household.dependents.map{|dependent| build_tax_member(dependent)},
+    #     policies: build_tax_household_pols(tax_household)
+    #     })
+    # end
 
     def build_tax_member(household_member)
       return nil if household_member.nil?

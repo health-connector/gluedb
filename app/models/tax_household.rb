@@ -25,6 +25,39 @@ class TaxHousehold
   embeds_many :eligibility_determinations
 
 
+  def members_with_financials
+    tax_household_members.reject{|m| m.financial_statements.empty? }
+  end
+
+  def primary
+    members_with_financials.detect{|m| ['tax_filer', 'single', 'joint', 'separate'].include?(m.financial_statements[0].tax_filing_status) }
+  end
+
+  def spouse
+    members_with_financials.detect{|m| m.family_member.person.person_relationships[0] && ['spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+  end
+
+  def dependents
+    members_with_financials.select{|m| m.family_member.person.person_relationships[0] && !['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+  end
+
+  def coverage_as_of(date)
+    pols = []
+    members_with_financials.select{|m|
+       pols += m.family_member.person.policies
+    }
+    
+    coverages = []
+    pols.uniq.select do |pol|
+      if pol.subscriber.coverage_start > Date.new((date.year - 1),12,31) && pol.subscriber.coverage_start < Date.new(date.year,12,31)
+        policy_disposition = PolicyDisposition.new(pol)
+        coverages << pol if (policy_disposition.start_date.month..policy_disposition.end_date.month).include?(date.month)
+      end
+    end
+
+    coverages.map{|x| x.id}
+  end
+
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i
   end

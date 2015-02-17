@@ -10,104 +10,78 @@ module Generators::Reports
     end
 
     def process
-      build_households
+      build_taxhouseholds
       build_associated_policies
     end
 
-    # NEED TO IMPLEMENT
-    def valid_households
-      if @family.households.count > 1
-        @family.households      
-      else
-        @family.households
-      end
-    end
-
-    # TODO: WHAT IF TWO HOUSEHOLDS CREATED IN SAME MONTH
-    def build_households
-      households = []
-
-      valid_households.each do |household| 
-        households << build_household(household)
-      end
-
-      @irs_group.households = households
-    end
-
-
     def build_associated_policies
-      tax_households = @irs_group.households.map{|x| x.tax_households}
-      policies = tax_households.flatten.inject([]) do |data, tax_household|
-        data << tax_household.policies
-      end
-      pols = get_valid_policies(policies.flatten.uniq)
+      pols = get_valid_policies(@irs_group.policy_ids)
       if pols.empty?
         raise 'No valid policies to report!!'
       end
 
-      @irs_group.policies = pols.inject([]){|data, pol| data << Generators::Reports::IrsInputBuilder.new(pol)}
+      @irs_group.policies = pols.inject([]) do |data, pol| 
+        data << Generators::Reports::IrsInputBuilder.new(pol)
+      end
     end
 
-    def build_household(household)
-      tax_households = []
-
-      household.tax_households.each do |tax_household|
-        tax_households << build_tax_household(tax_household)
+    def build_taxhouseholds
+      tax_households = if @family.has_aptc?
+        @family.households.inject([]) { |data, household| data << household.tax_households }
+      else
+        @family.households.inject([]) { |data, household| data << household.coverage_households }
       end
 
-      if tax_households.empty?
-        tax_households << build_tax_household(household.coverage_households[0])
+      @irs_group.tax_households = tax_households.flatten.inject([]) do |data, tax_household|
+        data << build_taxhousehold(tax_household)
       end
-
-      PdfTemplates::Household.new({
-        tax_households: tax_households
-        })
     end
 
-    def build_tax_household
-      build_household_coverage
+    def build_taxhousehold(tax_household)
       coverages = (1..@months).inject([]) do  |coverages, month| 
-        coverages << nil # build_household_coverage
+        coverages << build_household_coverage(tax_household, month)
       end
 
-      @irs_group.tax_households << PdfTemplates::TaxHousehold.new({
+      PdfTemplates::TaxHousehold.new({
         tax_household_coverages: coverages
       })    
     end
 
-    # def build_tax_household(tax_household)
-    #   PdfTemplates::TaxHousehold.new({
-    #     primary: build_tax_member(tax_household.primary),
-    #     spouse: build_tax_member(tax_household.spouse), 
-    #     dependents: tax_household.dependents.map{|dependent| build_tax_member(dependent)},
-    #     policies: build_tax_household_pols(tax_household)
-    #     })
-    # end
+    def build_household_coverage(tax_household, month)
+      PdfTemplates::TaxHouseholdCoverage.new({
+        calender_month: month,
+        primary: build_tax_member(tax_household.primary, true),
+        spouse: build_tax_member(tax_household.spouse), 
+        dependents: tax_household.dependents.map{ |dependent| build_tax_member(dependent) },
+        policy_ids: tax_household.coverage_as_of(Date.new(2014, month, 1))
+      })
+    end
 
-    def build_tax_member(household_member)
-      return nil if household_member.nil?
+    def build_tax_member(household_member, is_primary = false)
+      return if household_member.blank?
+
       person = household_member.family_member.person
-      return nil if person.authority_member.nil?
+      member = person.authority_member
+      return if member.blank?
+
       PdfTemplates::Enrollee.new({
         name: person.full_name,
-        ssn: person.authority_member.ssn,
-        dob: format_date(person.authority_member.dob),
-        address: build_address(household_member)
-        })
+        ssn: member.ssn,
+        dob: format_date(member.dob),
+        address: build_address(household_member, is_primary)
+      })
     end
 
-    def build_tax_household_pols(tax_household)
-      (1..12).inject({}) do |data, i|
-        data[i] = tax_household.coverage_as_of(Date.new(2014, i, 1))
-        data
-      end
-    end
-
-    def build_address(household_member)
+    def build_address(household_member, is_primary)
       address = household_member.family_member.person.addresses[0]
-      if address.nil?
-        primary_member = household_member.kind_of?(TaxHouseholdMember) ? household_member.tax_household.primary : household_member.coverage_hosuehold.primary
-        address = primary_member.family_member.person.addresses[0]
+      address ||= @primary_address
+
+      if is_primary
+        if address.nil?
+          raise 'Primary address missing'
+        else
+          @primary_address = address
+        end
       end
 
       PdfTemplates::NoticeAddress.new({
@@ -116,20 +90,21 @@ module Generators::Reports
         city: address.city,
         state: address.state,
         zip: address.zip
-        })
+      })
     end
 
+    # Implement for SHOP  
     def build_employer_mec(employer)
-      nil
     end
 
-    def get_valid_policies(pols)
+    private
+
+    def get_valid_policies(policy_ids)
+      pols = policy_ids.inject([]) {|pols, id| pols << Policy.find(id)}
       pols.reject!{|pol| pol.rejected?}
       pols.reject!{|pol| pol.has_no_enrollees?}
       pols
     end
-
-    private
 
     def format_date(date)
       return nil if date.blank?

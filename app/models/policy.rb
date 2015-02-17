@@ -254,7 +254,8 @@ class Policy
     {
       "$or" => [
         {"eg_id" => s_rex},
-        {"id" => s_rex}
+        {"id" => s_rex.source},
+        {"enrollees.m_id" => s_rex}
       ]
     }
   end
@@ -564,6 +565,7 @@ class Policy
     self.enrollees.each do |en|
       en.coverage_end = en.coverage_start
       en.coverage_status = 'inactive'
+      en.employment_status_code = 'terminated'
     end
     self.save!
   end
@@ -602,6 +604,16 @@ class Policy
       en.coverage_end.blank? ? self.coverage_period_end : en.coverage_end
     end
     end_dates.uniq.length > 1
+  end
+
+  def rejected?
+    edi_transactions = Protocols::X12::TransactionSetEnrollment.where({ "policy_id" => self.id })
+    (edi_transactions.count == 1 && edi_transactions.first.aasm_state == 'rejected') ? true : false
+  end
+
+  def has_no_enrollees?
+    active_enrollees = self.enrollees.reject{|en| en.canceled?}
+    active_enrollees.empty? ? true : false
   end
 
   protected

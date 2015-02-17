@@ -13,5 +13,7 @@ module PdfTemplates
     attribute :name_last, String
     attribute :name_middle, String
     attribute :name_sfx, String
+    attribute :address, PdfTemplates::NoticeAddress
+    attribute :employer, PdfTemplates::EmployerMec
   end
 end

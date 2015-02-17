@@ -8,7 +8,7 @@ describe Policies::CreatePolicy do
   let(:existing_policy) { nil }
   let(:plan_year) { "2015" }
   let(:carrier) { double }
-  let(:plan) { double(:carrier => carrier) }
+  let(:plan) { double(:carrier => carrier, :ehb => 0.0) }
   let(:subscriber) { double(:person => person, :coverage_start => coverage_start) }
   let(:enrollees) { [subscriber_hash] }
   let(:subscriber_hash) { { :rel_code => "self" }}
@@ -112,6 +112,7 @@ describe Policies::CreatePolicy do
       allow(policy).to receive(:is_shop?).and_return(false)
       allow(policy).to receive(:pre_amt_tot=)
       allow(policy).to receive(:tot_res_amt=)
+      allow(policy).to receive(:applied_aptc=)
       allow(policy).to receive(:save!)
       allow(policy).to receive(:pre_amt_tot).and_return(0.00)
       allow(policy).to receive(:applied_aptc).and_return(0.00)

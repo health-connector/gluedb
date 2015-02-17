@@ -26,6 +26,7 @@
     <h4><%= prepend_glyph_to_name(@person.full_name) %></h4>
     <%= render 'member_detail', person: @person %>
     <%= render 'shared/contact', obj: @person %>
+    <%= render 'member_documents', member_documents: @member_documents %>
     <%= render 'comments/comment_panel', commentable: @person %>
   </div>
 </div>

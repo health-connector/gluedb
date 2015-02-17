@@ -62,4 +62,30 @@ class CoverageHousehold
 
     (all_tax_household_members.length == tax_household_members_with_medicaid.length)
   end
+
+  def primary
+    self.coverage_household_members.detec{|m| m.family_member.is_primary_applicant }
+  end
+
+  def spouse
+    self.coverage_household_members.detect{|m| ['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+  end
+
+  def dependents
+    self.coverage_household_members.select{|m| !['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+  end
+
+  def coverage_as_of(date)
+    pols = self.household.hbx_enrollments.map{|enrollment| enrollment.policy }
+    
+    coverages = []
+    pols.uniq.select do |pol|
+      if pol.subscriber.coverage_start > Date.new((date.year - 1),12,31) && pol.subscriber.coverage_start < Date.new(date.year,12,31)
+        policy_disposition = PolicyDisposition.new(pol)
+        coverages << pol if (policy_disposition.start_date.month..policy_disposition.end_date.month).include?(date.month)
+      end
+    end
+
+    coverages.map{|x| x.id}
+  end
 end

@@ -1,5 +1,5 @@
 module PdfTemplates
-  class Enrolee
+  class Enrollee
     include Virtus.model
 
     attribute :name, String

@@ -53,7 +53,7 @@ module Generators::Reports
       authority_member = enrollee.person.authority_member
       return nil if authority_member.nil?
       coverage_end = enrollee.coverage_end.blank? ? @policy.coverage_period.end : enrollee.coverage_end
-      PdfTemplates::Enrolee.new({
+      PdfTemplates::Enrollee.new({
         name: enrollee.person.full_name,
         ssn: authority_member.ssn,
         dob: format_date(authority_member.dob),

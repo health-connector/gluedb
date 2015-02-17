@@ -51,8 +51,8 @@ module Generators::Reports
     end
 
     it 'should append household' do
-      expect(subject.notice.recipient).to be_kind_of(PdfTemplates::Enrolee)
-      expect(subject.notice.spouse).to be_kind_of(PdfTemplates::Enrolee)
+      expect(subject.notice.recipient).to be_kind_of(PdfTemplates::Enrollee)
+      expect(subject.notice.spouse).to be_kind_of(PdfTemplates::Enrollee)
     end
 
     it 'should append monthly premiums' do

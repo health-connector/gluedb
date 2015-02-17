@@ -2,6 +2,8 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
+  include Mongoid::EmbeddedErrors
+
   # include Mongoid::Paranoia
 
   extend Mongorder
@@ -394,11 +396,15 @@ class Person
     old_relationships.each do |old_rel|
       self.person_relationships.delete(old_rel)
     end
-    self.person_relationships << new_rel
+
+    relationship = self.person_relationships.build({relative: new_rel.relative, kind: new_rel.kind})
+    relationship.save
+    self.save
     self.touch
+    self.reload
   end
 
-  def find_relationship_to(other_person)
+  def find_relationship_with(other_person)
 
     relationship = person_relationships.detect do |person_relationship|
       person_relationship.relative_id == other_person.id

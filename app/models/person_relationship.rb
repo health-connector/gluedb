@@ -1,6 +1,7 @@
 class PersonRelationship
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mongoid::EmbeddedErrors
 
   embedded_in :person
 
@@ -42,7 +43,11 @@ class PersonRelationship
     "other_relationship",
     "unrelated",
     "great_grandparent",
-    "great_grandchild"
+    "great_grandchild",
+    "father_or_mother",
+    "stepson_or_stepdaughter",
+    "grandfather_or_grandmother",
+    "brother_or_sister"
   ]
 
   INVERSE_MAP = {

@@ -8,7 +8,7 @@ class PolicyHbxEnrollmentCreator
   def create
       hbx_enrollement = @family.active_household.hbx_enrollments.build
       hbx_enrollement.policy = @policy
-      @family.primary_applicant.broker_id = Broker.find(@policy.broker_id) unless @policy.broker_id.blank?
+      @family.primary_applicant.broker_id = Broker.find(@policy.broker_id).id unless @policy.broker_id.blank?
 
       hbx_enrollement.enrollment_group_id = @policy.eg_id
       hbx_enrollement.elected_aptc_in_dollars = @policy.elected_aptc

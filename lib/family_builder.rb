@@ -55,10 +55,10 @@ class FamilyBuilder
   def add_family_member(family_member_params)
 
     if @family.family_members.map(&:person_id).include? family_member_params[:person].id
-       #puts "Added already existing family_member"
+      #puts "Added already existing family_member"
       family_member = @family.family_members.where(person_id: family_member_params[:person].id).first
     else
-       #puts "Added a new family_member"
+      #puts "Added a new family_member"
       if family_member_params[:is_primary_applicant] == "true"
         reset_exisiting_primary_applicant
       end
@@ -82,11 +82,11 @@ class FamilyBuilder
   def set_alias_ids(member, alias_ids_params)
     alias_ids_params.each do |alias_id_params|
       if alias_id_params.include? "aceds"
-          member.aceds_id = alias_id_params.split('#').last
+        member.aceds_id = alias_id_params.split('#').last
       elsif alias_id_params.include? "concern_role"
-          member.e_concern_role_id = alias_id_params.split('#').last
+        member.e_concern_role_id = alias_id_params.split('#').last
       elsif alias_id_params.include? "person"
-          member.e_person_id = alias_id_params.split('#').last
+        member.e_person_id = alias_id_params.split('#').last
       end
     end
   end
@@ -166,23 +166,24 @@ class FamilyBuilder
     @new_family_members.each do |family_member|
       if family_member.is_coverage_applicant
         if valid_relationship?(family_member)
-        coverage_household_member = coverage_household.coverage_household_members.build
-        coverage_household_member.applicant_id = family_member.id
+          coverage_household_member = coverage_household.coverage_household_members.build
+          coverage_household_member.applicant_id = family_member.id
         else
-          raise "Relationship #{@family.primary_applicant.person.find_relationship_to(family_member)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
+          $logger.error "e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}\n" +
+                            "applicant.person.person_relationships #{@family.primary_applicant.person.person_relationships.inspect}\n"
         end
       end
     end
-
   end
 
   def valid_relationship?(family_member)
-    return true if @family.primary_applicant.id == family_member.id
+    return true if @family.primary_applicant.nil? #responsible party case
+    return true if @family.primary_applicant.person.id == family_member.person.id
 
-    valid_relationships = %w{spouse life_partner child}
+    valid_relationships = %w{self spouse life_partner child ward foster_child adopted_child stepson_or_stepdaughter}
 
-    if valid_relationships.include? @family.primary_applicant.person.find_relationship_to(family_member)
-        return true
+    if valid_relationships.include? @family.primary_applicant.person.find_relationship_with(family_member.person)
+      return true
     else
       return false
     end
@@ -190,12 +191,16 @@ class FamilyBuilder
 
   def add_hbx_enrollments
 
+    return if @family.primary_applicant.nil?
+
     @family.primary_applicant.person.policies.each do |policy|
       add_hbx_enrollment(policy)
     end
   end
 
   def add_hbx_enrollment(policy)
+
+    return if @family.primary_applicant.nil?
 
     hbx_enrollement = @household.hbx_enrollments.build
     hbx_enrollement.policy = policy
@@ -211,16 +216,13 @@ class FamilyBuilder
     policy.enrollees.each do |enrollee|
       begin
         person = Person.find_for_member_id(enrollee.m_id)
-
         @family.family_members << FamilyMember.new(person: person) unless @family.person_is_family_member?(person)
         family_member = @family.find_family_member_by_person(person)
-
         hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: family_member,
                                                                                premium_amount_in_cents: enrollee.pre_amt})
         hbx_enrollement_member.is_subscriber = true if (enrollee.rel_code == "self")
 
       rescue FloatDomainError
-        # puts "Error: invalid premium amount for enrollee: #{enrollee.inspect}"
         next
       end
     end

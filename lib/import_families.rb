@@ -2,8 +2,8 @@ require 'fileutils'
 
 class ImportFamilies
 
-  @@logger = Logger.new("#{Rails.root}/log/family_#{Time.now.to_s.gsub(' ','')}.log")
-  @@error_dir = File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ','')}")
+  $logger = Logger.new("#{Rails.root}/log/family_#{Time.now.to_s.gsub(' ', '')}.log")
+  $error_dir = File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
 
   class PersonImportListener
 
@@ -72,6 +72,7 @@ class ImportFamilies
     end
 
     def register_person(p_uri, person, member)
+      #puts "\np_uri, person, member #{p_uri}\n"
       existing_record = nil
       existing_key = nil
       @people_map.each_pair do |k, v|
@@ -120,57 +121,66 @@ class ImportFamilies
     p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
 
-    puts "PARSING START"
+    puts "Input file:#{@file_path}"
 
     ags = Parsers::Xml::Cv::FamilyParser.parse(xml.root.canonicalize)
-    puts "PARSING DONE"
-    puts "Total number of application groups :#{ags.size}"
+
+    puts "Total number of families:#{ags.size}"
+
     fail_counter = 0
+
     ags.each do |ag|
 
       begin
 
-      puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
+        #puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
 
-      ig_requests = ag.individual_requests(member_id_generator, p_tracker)
-      uc = CreateOrUpdatePerson.new
-      all_valid = ig_requests.all? do |ig_request|
-        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-        value = uc.validate(ig_request, listener)
-      end
-
-      @@logger.error "#{DateTime.now.to_s}" + "Family e_case_id:#{ag.to_hash[:e_case_id]}" + "message:'CreateOrUpdatePerson did not succeed for all'" unless all_valid
-
-      ig_requests.each do |ig_request|
-        listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-        value = uc.commit(ig_request, listener)
-      end
-
-      family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
-
-      #applying person objects in person relationships for each applicant.
-      ag.family_members.each do |applicant|
-
-        applicant.to_relationships.each do |relationship_hash|
-
-          subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
-          object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
-          subject_person = p_tracker[subject_person_id_uri].first
-
-          person_relationship = PersonRelationship.new
-          person_relationship.relative = p_tracker[object_person_id_uri].first
-          person_relationship.kind = relationship_hash[:relationship]
-
-          subject_person.merge_relationship(person_relationship)
+        ig_requests = ag.individual_requests(member_id_generator, p_tracker)
+        uc = CreateOrUpdatePerson.new
+        all_valid = ig_requests.all? do |ig_request|
+          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+          value = uc.validate(ig_request, listener)
         end
 
-        new_applicant = family_builder.add_family_member(applicant.to_hash(p_tracker))
-        p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
+        ig_requests.each do |ig_request|
+          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+          value = uc.commit(ig_request, listener)
+        end
 
-      end
+        family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
+
+        #applying person objects in person relationships for each applicant.
+        ag.family_members.each do |applicant|
 
 
-      #application_group_builder.add_irsgroups(ag.irs_groups)
+          applicant.to_relationships.each do |relationship_hash|
+
+            subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
+            object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
+
+            #puts "subject_person_id_uri #{subject_person_id_uri}"
+            #puts "object_person_id_uri #{object_person_id_uri}"
+            #puts "\np_tracker.people_map #{p_tracker.people_map.keys.inspect}"
+            #puts "\np_tracker.alias_map #{p_tracker.alias_map.keys.inspect}"
+            #puts "\np_tracker.applicant_map #{p_tracker.applicant_map.keys.inspect}"
+
+            subject_person = p_tracker[subject_person_id_uri].first
+
+            person_relationship = PersonRelationship.new
+            person_relationship.relative = p_tracker[object_person_id_uri].first
+            person_relationship.kind = relationship_hash[:relationship]
+
+            subject_person.merge_relationship(person_relationship)
+          end
+
+          new_applicant = family_builder.add_family_member(applicant.to_hash(p_tracker))
+
+          p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
+
+        end
+
+
+        #application_group_builder.add_irsgroups(ag.irs_groups)
 =begin
         family_builder.add_tax_households(ag.to_hash[:tax_households])
 
@@ -188,16 +198,16 @@ class ImportFamilies
 
         family = family_builder.build
 
-        puts "Saved #{family.id}"
+        #puts "Saved e_case_id:#{ag.to_hash[:e_case_id]}"
 
       rescue Exception => e
         fail_counter += 1
-        puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
+        #puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
+        $logger.error "#{DateTime.now.to_s}" +
+                           "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
+                           "message:#{e.message}\n" +
+                           "backtrace:#{e.backtrace.inspect}\n"
         write_error_file(ag, e.message)
-        @@logger.error "#{DateTime.now.to_s}" +
-                          "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
-                          "message:#{e.message}\n" +
-                          "backtrace:#{e.backtrace.inspect}\n"
       end
     end
 
@@ -208,19 +218,25 @@ class ImportFamilies
   #xml_obj is a happy mapper object
   def write_error_file(xml_obj, error_message)
 
-    FileUtils.mkdir_p @@error_dir
+    begin
+      FileUtils.mkdir_p $error_dir
 
-    time_stamp = Time.now.to_i
+      time_stamp = Time.now.to_i
 
-    xml_path = "#{@@error_dir}/#{xml_obj.to_hash[:e_case_id]}_#{time_stamp}.xml"
-    error_file_path = "#{@@error_dir}/#{xml_obj.to_hash[:e_case_id]}_#{time_stamp}.error"
+      xml_path = "#{$error_dir}/#{xml_obj.to_hash[:e_case_id]}_#{time_stamp}.xml"
+      error_file_path = "#{$error_dir}/#{xml_obj.to_hash[:e_case_id]}_#{time_stamp}.error"
 
-    File.open(xml_path,"w") do |f|
-      f.write(xml_obj.to_xml)
-    end
+      File.open(xml_path, "w") do |f|
+        f.write(xml_obj.to_xml)
+      end
 
-    File.open(error_file_path, "w") do |f|
-      f.write(error_message)
+      File.open(error_file_path, "w") do |f|
+        f.write(error_message)
+      end
+    rescue Exception => e
+      $logger.error "#{DateTime.now.to_s}" +
+                         "write_error_file failed " + "message:#{e.message}\n" +
+                         "backtrace:#{e.backtrace.inspect}\n"
     end
   end
 end

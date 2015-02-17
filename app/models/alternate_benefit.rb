@@ -16,7 +16,8 @@ class AlternateBenefit
 		veterans_benefits
     naf_health_benefit_program
     health_care_for_peace_corp_volunteers
-	)
+    state_supplementary_payment
+    department_of_defense_non_appropriated_health_benefits)
 
   field :kind, type: String
   field :start_date, type: Date

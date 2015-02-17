@@ -19,11 +19,13 @@ module Parsers::Xml::Cv
     element :is_incarcerated, String, tag: "is_incarcerated"
 
     def individual_request
-      {
+      response = {
           :dob => birth_date,
           :ssn => ssn,
           :gender => sex.split("#").last
       }
+      response[:ssn] = "" if response[:ssn].eql?('999999999')
+      response
     end
 
     def to_hash

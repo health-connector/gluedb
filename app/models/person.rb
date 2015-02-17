@@ -404,7 +404,7 @@ class Person
     self.reload
   end
 
-  def find_relationship_to(other_person)
+  def find_relationship_with(other_person)
 
     relationship = person_relationships.detect do |person_relationship|
       person_relationship.relative_id == other_person.id

@@ -44,7 +44,7 @@ describe Family do
       family = Family.create!(
           e_case_id: "6754632abc",
           renewal_consent_through_year: 2017,
-          submitted_date: Date.today,
+          submitted_at: Date.today,
           family_members: [a0, a1],
           irs_groups: [IrsGroup.new()]
       );

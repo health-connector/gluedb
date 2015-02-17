@@ -169,7 +169,7 @@ class FamilyBuilder
           coverage_household_member = coverage_household.coverage_household_members.build
           coverage_household_member.applicant_id = family_member.id
         else
-          $logger.error "e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_to(family_member)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}\n" +
+          $logger.error "e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}\n" +
                             "applicant.person.person_relationships #{@family.primary_applicant.person.person_relationships.inspect}\n"
         end
       end
@@ -182,7 +182,7 @@ class FamilyBuilder
 
     valid_relationships = %w{self spouse life_partner child ward foster_child adopted_child stepson_or_stepdaughter}
 
-    if valid_relationships.include? @family.primary_applicant.person.find_relationship_to(family_member.person)
+    if valid_relationships.include? @family.primary_applicant.person.find_relationship_with(family_member.person)
       return true
     else
       return false

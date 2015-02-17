@@ -18,7 +18,7 @@ class CoverageHousehold
 
   def presence_of_coverage_household_members
     if self.coverage_household_members.size == 0
-      self.errors.add(:base, "Should have atleast one coverage_household_member")
+        self.errors.add(:base, "should have atleast one coverage_household_member") unless all_tax_household_members_medicaid?
     end
   end
 
@@ -52,4 +52,14 @@ class CoverageHousehold
     end
   end
 
+  def all_tax_household_members_medicaid?
+
+    all_tax_household_members = household.tax_households.flat_map(&:tax_household_members)
+
+    tax_household_members_with_medicaid = all_tax_household_members.select do |tax_household_member|
+      tax_household_member.is_medicaid_chip_eligible?
+    end
+
+    (all_tax_household_members.length == tax_household_members_with_medicaid.length)
+  end
 end

@@ -35,7 +35,8 @@ class VocabUpload
       validations = [
         Validators::PremiumValidator.new(change_request, plan, listener),
         Validators::PremiumTotalValidatorFactory.create_for(change_request, listener),
-        Validators::PremiumResponsibleValidator.new(change_request, listener)
+        Validators::PremiumResponsibleValidator.new(change_request, listener),
+        Validators::AptcValidator.new(change_request, plan, listener)
       ]
 
       if validations.any? { |v| v.validate == false }

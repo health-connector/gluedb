@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "2.1.2"
+set :branch,      "2.2.0"
 set :rails_env,       "production"
 set :deploy_to,       "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -43,7 +43,7 @@ namespace :deploy do
     run "cp #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
     run "ln -s #{deploy_to}/shared/pids #{release_path}/pids"
   end
-  
+
   desc "Restart nginx and unicorn"
   task :restart, :except => { :no_release => true } do
     sudo "service nginx restart"
@@ -61,7 +61,7 @@ namespace :deploy do
   task :stop, :except => { :no_release => true } do
     run "#{try_sudo} service unicorn stop"
     run "#{try_sudo} service nginx stop"
-  end  
+  end
 
   task :cleanup_old, :except => {:no_release => true} do
     count = fetch(:keep_releases, 5).to_i

@@ -336,18 +336,40 @@ describe Policy do
     it 'collects all active enrollees' do
       expect(policy.active_enrollees).to eq [active_enrollee]
     end
-    
   end
 end
 
 describe Policy do
   let(:eg_id) { "1234" }
-  let(:subscriber) { Enrollee.new(:coverage_end => nil, :coverage_start => Date.today.prev_year, :rel_code => "self") }
+  let(:subscriber) { Enrollee.new(:coverage_end => nil, :coverage_start => Date.new(Date.today.year, 1, 1), :rel_code => "self") }
   let(:enrollees) { [subscriber]}
   subject { Policy.new({
     :eg_id => eg_id,
     :enrollees => enrollees
   })}
+
+  context 'builds the correct search hash' do
+
+    let (:search_hash) { Policy.search_hash("1234") }
+    let (:params_hash_array) {search_hash.values_at("$or").flatten.flatten}
+
+    it "should be matching any of the keys" do
+      expect(search_hash).to include("$or")
+    end
+
+    it "should be matching on enrollment group id" do
+      expect(params_hash_array.any? { |hash| hash['eg_id'] == /1234/i }).to be_true
+    end
+
+    it "should be matching on policy id" do
+      expect(params_hash_array.any? { |hash| hash['id'] == "1234" }).to be_true
+    end
+
+    it "should be matching on member id's on enrollees" do
+      expect(params_hash_array.any? { |hash| hash['enrollees.m_id'] == /1234/i }).to be_true
+    end
+
+  end
 
   context "with an active subscriber" do
     it "should be currently active" do
@@ -355,7 +377,7 @@ describe Policy do
     end
 
     context "with a currently active enrollee" do
-      let(:enrollee) { Enrollee.new(:m_id => "12354", :coverage_end => nil, :coverage_start => Date.today.prev_year) }
+      let(:enrollee) { Enrollee.new(:m_id => "12354", :coverage_end => nil, :coverage_start => (Date.new(Date.today.year, 1, 1))) }
       let(:enrollees) { [subscriber, enrollee] }
 
       it "should be currently_active_for enrollee" do

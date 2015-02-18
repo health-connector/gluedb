@@ -21,7 +21,7 @@ module Clients
       ensure
         conn.close
       end
-      rescue
+      rescue Bunny::TCPConnectionFailed => e
         []
       end
     end

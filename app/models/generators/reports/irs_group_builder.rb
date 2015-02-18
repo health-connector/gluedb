@@ -10,18 +10,19 @@ module Generators::Reports
     end
 
     def process
+      @irs_group.identification_num = @family.irs_groups.first.hbx_assigned_id
       build_taxhouseholds
-      build_associated_policies
+      build_insurance_policies
     end
 
-    def build_associated_policies
+    def build_insurance_policies
       pols = get_valid_policies(@irs_group.policy_ids)
       if pols.empty?
         raise 'No valid policies to report!!'
       end
 
-      @irs_group.policies = pols.inject([]) do |data, pol| 
-        data << Generators::Reports::IrsInputBuilder.new(pol)
+      @irs_group.insurance_policies = pols.inject([]) do |data, pol| 
+        data << Generators::Reports::IrsInputBuilder.new(pol).notice
       end
     end
 
@@ -68,6 +69,10 @@ module Generators::Reports
         name: person.full_name,
         ssn: member.ssn,
         dob: format_date(member.dob),
+        name_first: person.name_first,
+        name_middle: person.name_middle,
+        name_last: person.name_last,
+        name_sfx: person.name_sfx,
         address: build_address(household_member, is_primary)
       })
     end

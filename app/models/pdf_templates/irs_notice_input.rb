@@ -10,5 +10,10 @@ module PdfTemplates
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
     attribute :has_aptc, Boolean, :default => false
     attribute :yearly_premium, PdfTemplates::YearlyPremium
+
+
+    def premium_rec_for(month)
+      monthly_premiums.detect {|i| i.serial == month }
+    end
   end
 end

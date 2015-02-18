@@ -1,6 +1,7 @@
 module Clients
   class MemberDocumentClient
     def self.call(authority_member)
+      begin
       if authority_member.blank?
         return []
       end
@@ -19,6 +20,9 @@ module Clients
         dlr.document
       ensure
         conn.close
+      end
+      rescue
+        []
       end
     end
   end

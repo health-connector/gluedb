@@ -191,6 +191,13 @@ class Family
     end
   end
 
+  def has_aptc?
+    pols = self.households.first.hbx_enrollments.map{|x| x.policy}
+    pols.reject! {|pol| pol.rejected? || pol.has_no_enrollees? }
+    return false if pols.empty?
+    pols.detect{|x| x.applied_aptc > 0 }.blank? ? false : true
+  end
+
 private
 
   # This method will return true only if all the family_members in tax_household_members and coverage_household_members are present in self.family_members

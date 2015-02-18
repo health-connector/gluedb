@@ -3,7 +3,7 @@ require "rails_helper"
 describe RenewalDetermination do
   let(:person_finder) { double }
   let(:plan_finder) { double }
-  let(:listener) { double }
+  let(:listener) { instance_double("Listeners::NewEnrollmentListener") }
 
   let(:request) {
     {
@@ -52,6 +52,7 @@ describe RenewalDetermination do
       expect(subject.validate(request, listener)).to be_truthy
     end
   end
+  
 
   describe "with a subscriber who has a member" do
     let(:person) { double }
@@ -69,6 +70,32 @@ describe RenewalDetermination do
       it "should validate" do
         expect(subject.validate(request, listener)).to be_truthy
       end
+    end
+
+    describe "with a previous policy in the same market, with more enrollees" do
+      let(:previous_policy) { 
+        instance_double("Policy",
+                        :plan => existing_plan, :subscriber => existing_sub, :eg_id => nil, :id => nil, :canceled? => false, :coverage_type => coverage_type, :coverage_period => (Date.new(2014,12,1)..Date.new(2014,12,31)), :terminated? => false, :carrier_id => carrier_id, :enrollees => found_enrollees, :policy_start => Date.new(2014,12,1)) }
+      let(:found_policies) { [previous_policy] }
+      let(:policy_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id) }
+      let(:existing_plan) { double(:coverage_type => coverage_type, :carrier_id => carrier_id) }
+      let(:existing_sub) { double(:coverage_end => nil, :coverage_start => Date.new(2014,12,1), :m_id => 123) }
+      let(:existing_dep) { double(:coverage_end => nil, :coverage_start => Date.new(2014,12,1), :m_id => 654) }
+      let(:carrier_id) { double }
+      let(:found_enrollees) { [existing_sub, existing_dep] }
+
+      before :each do
+        allow(plan_finder).to receive(:find_by_hios_id_and_year).with(hios_id, plan_year).and_return(policy_plan)  
+        allow(previous_policy).to receive(:active_as_of?).with(Date.new(2014,12,31)).and_return(true)
+        allow(previous_policy).to receive(:active_on_date_for?).with(Date.new(2014,12,31), 123).and_return(true)
+        allow(previous_policy).to receive(:active_on_date_for?).with(Date.new(2014,12,31), 654).and_return(true)
+      end
+
+      it "should fail validation and notify the listener" do
+        expect(listener).to receive(:enrollees_changed_for_renewal).with({old_policy:2, new_policy:1})
+        expect(subject.validate(request, listener)).to be_falsey
+      end
+
     end
 
     describe "with policies in the interval, but with a different carrier" do

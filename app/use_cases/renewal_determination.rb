@@ -17,6 +17,7 @@ class RenewalDetermination
     end
     enrollee = Enrollee.new(s_enrollee)
     coverage_start = enrollee.coverage_start
+    renewal_threshold = coverage_start - 1.day
     member_id = s_enrollee[:m_id]
     s_person = people.detect do |perp|
       perp[:hbx_member_id] == member_id
@@ -54,6 +55,23 @@ class RenewalDetermination
       end
       if spot_carrier_switch(listener, coverage_start, eg_id, plan, policies, employer)
         return false
+      end
+      date_market_renewal = policies.select do |pol|
+        (pol.plan.coverage_type == plan.coverage_type) &&
+          pol.active_as_of?(renewal_threshold)
+      end
+      date_market_renewal.each do |r_pol|
+        candidate_enrollees = r_pol.enrollees.select do |en|
+          r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
+            (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
+        end
+        if (candidate_enrollees.length > policy[:enrollees].length)
+          listener.enrollees_changed_for_renewal({
+            :old_policy => candidate_enrollees.length,
+            :new_policy => policy[:enrollees].length
+          })
+          return false
+        end
       end
     end
     true

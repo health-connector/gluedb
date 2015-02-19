@@ -1,4 +1,6 @@
 require 'fileutils'
+require File.join(Rails.root, 'lib/name_matcher')
+require File.join(Rails.root, 'app', 'models', 'person_match_strategies', 'ambiguous_match_error')
 
 class ImportFamilies
 
@@ -136,16 +138,54 @@ class ImportFamilies
         #puts "Processing application group e_case_id :#{ag.to_hash[:e_case_id]}"
 
         ig_requests = ag.individual_requests(member_id_generator, p_tracker)
-        uc = CreateOrUpdatePerson.new
-        all_valid = ig_requests.all? do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          value = uc.validate(ig_request, listener)
-        end
 
-        ig_requests.each do |ig_request|
-          listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-          value = uc.commit(ig_request, listener)
-        end
+          uc = CreateOrUpdatePerson.new
+
+
+          all_valid = ig_requests.all? do |ig_request|
+            begin
+            listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+            value = uc.validate(ig_request, listener)
+            rescue Exception=>e
+              puts "#{e.message}"
+              puts "#{ig_request.inspect}"
+              #set_glue_name()
+            end
+          end
+
+          ig_requests.each do |ig_request|
+
+            tries = 0
+
+            begin
+              #puts "begin #{ig_request.inspect}"
+              listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
+              value = uc.commit(ig_request, listener)
+            rescue PersonMatchStrategies::AmbiguousMatchError => e
+
+              if e.message.include? 'SSN/Name mismatch'
+                $logger.warn "#{DateTime.now.to_s}" +
+                                 "WARNING: Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
+                                 "message:#{e.message}\n"
+
+                array = e.message.split('person has').last.split(',')
+                first_name = array[0].strip
+                last_name = array[1].strip
+
+                if NameMatcher.new(first_name, last_name).match(ig_request[:name_first], ig_request[:name_last])
+                  #puts "#{first_name}, #{last_name}"
+                  ig_request[:name_first]=first_name
+                  ig_request[:name_last]=last_name
+                  #puts "end #{ig_request.inspect}"
+                  retry
+                end
+
+              else
+                raise(e)
+              end
+              #set_glue_name()
+            end
+          end
 
         family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
@@ -157,12 +197,6 @@ class ImportFamilies
 
             subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
             object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
-
-            #puts "subject_person_id_uri #{subject_person_id_uri}"
-            #puts "object_person_id_uri #{object_person_id_uri}"
-            #puts "\np_tracker.people_map #{p_tracker.people_map.keys.inspect}"
-            #puts "\np_tracker.alias_map #{p_tracker.alias_map.keys.inspect}"
-            #puts "\np_tracker.applicant_map #{p_tracker.applicant_map.keys.inspect}"
 
             subject_person = p_tracker[subject_person_id_uri].first
 
@@ -205,8 +239,7 @@ class ImportFamilies
         #puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
         $logger.error "#{DateTime.now.to_s}" +
                            "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
-                           "message:#{e.message}\n" +
-                           "backtrace:#{e.backtrace.inspect}\n"
+                           "message:#{e.message}\n"
         write_error_file(ag, e.message)
       end
     end

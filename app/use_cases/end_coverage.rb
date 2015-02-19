@@ -98,14 +98,28 @@ class EndCoverage
       end_coverage_for_everyone
     else
       end_coverage_for_ids(affected_enrollee_ids)
+      enrollees = []
       rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
       @policy.enrollees.reject!{ |e| e.coverage_status == "inactive" }
       premium_calculator.apply_calculations(@policy)
-      @policy.enrollees << rejected
+      active_enrollees = @policy.enrollees.select{ |e| e.coverage_status == "active" }
+      enrollees << active_enrollees
+      enrollees << rejected
+      enrollees.flatten!
+      enrollees.each do |e|
+        e.policy = nil
+      end
+      @policy.enrollees.delete_all
+      @policy.save!
+      enrollees.each do |e|
+        @policy.enrollees.build(
+            Hash[e.attributes]
+          )
+      end
     end
 
     @policy.updated_by = @request[:current_user]
-    @policy.save
+    @policy.save!
   end
 
   def end_coverage_for_everyone

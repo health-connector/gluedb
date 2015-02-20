@@ -309,7 +309,7 @@ module Parsers
           end
         end
 
-        def self.add_for_import(bgn03, bgn04, bgn05, blk)
+        def self.add_for_import(bgn03, bgn04, bgn02, blk)
           @@run_records << [bgn03, bgn04, bgn02, blk]
         end
 

@@ -266,6 +266,7 @@ module Parsers
         return(nil) if @result["L834s"].first.blank?
         sorted_834s = @result["L834s"].sort_by { |l834| l834["BGN"][2] }
         sorted_834s.each do |l834|
+          puts l834["BGN"][2]
           if !l834["ST"][3].to_s.strip.blank?
             etf_l = Etf::EtfLoop.new(l834)
             carrier = @import_cache.lookup_carrier_fein(etf_l.carrier_fein)

@@ -113,8 +113,8 @@ module Generators::Reports
         xml.QHPPolicyNum policy.policy_id
         xml.QHPIssuerEIN "000000000"
         xml.PediatricDentalPlanPremiumInd "N"
-        xml.SLCSPAdjMonthlyPremiumAmt montly_disposition.premium_amount_slcsp
-        xml.HouseholdAPTCAmt montly_disposition.monthly_aptc
+        xml.SLCSPAdjMonthlyPremiumAmt montly_disposition.premium_amount_slcsp if montly_disposition.premium_amount_slcsp
+        xml.HouseholdAPTCAmt montly_disposition.monthly_aptc if montly_disposition.monthly_aptc
         xml.TotalHsldMonthlyPremiumAmt montly_disposition.premium_amount   
       end
     end
@@ -145,7 +145,7 @@ module Generators::Reports
           xml.PolicyCoverageStartDt date_formatter(policy.recipient.coverage_start_date)
           xml.PolicyCoverageEndDt date_formatter(policy.recipient.coverage_termination_date)
           xml.TotalQHPMonthlyPremiumAmt premium.premium_amount
-          xml.APTCPaymentAmt premium.monthly_aptc
+          xml.APTCPaymentAmt premium.monthly_aptc if premium.monthly_aptc
           serialize_covered_individuals(xml, policy)
         end
       end

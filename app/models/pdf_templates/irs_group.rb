@@ -11,7 +11,7 @@ module PdfTemplates
     end
 
     def policies_for_ids(policy_ids)
-      insurance_policies.select{|x| policy_ids.include?(x.policy_id.to_i)}
+      insurance_policies.select { |x| policy_ids.include?(x.policy_id.to_i) }
     end
   end
 end

@@ -5,7 +5,7 @@
     attribute :tax_household_coverages, Array[PdfTemplates::TaxHouseholdCoverage]
 
     def coverages
-      tax_household_coverages.select{|c| !c.policy_ids.empty? }
+      tax_household_coverages.select {|c| !c.policy_ids.empty? }
     end
 
     def policy_ids

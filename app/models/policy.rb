@@ -616,6 +616,10 @@ class Policy
     active_enrollees.empty? ? true : false
   end
 
+  def belong_to_year?(year)
+    self.subscriber.coverage_start > Date.new((year - 1), 12, 31) && self.subscriber.coverage_start < Date.new(year, 12, 31)
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s

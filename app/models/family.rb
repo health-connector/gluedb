@@ -191,11 +191,12 @@ class Family
     end
   end
 
-  def has_aptc?
+  def has_aptc?(year)
     pols = self.households.first.hbx_enrollments.map{|x| x.policy}
     pols.reject! {|pol| pol.rejected? || pol.has_no_enrollees? }
-    return false if pols.empty?
-    pols.detect{|x| x.applied_aptc > 0 }.blank? ? false : true
+    pols.reject! {|pol| !pol.belong_to_year?(year) }
+    return false if pols.empty? || pols.detect{|x| x.applied_aptc > 0 }.nil?
+    true
   end
 
 private

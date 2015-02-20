@@ -3,6 +3,8 @@ module Generators::Reports
 
     attr_accessor :irs_group
 
+    CALENDER_YEAR = 2014
+
     def initialize(family, months)
       @family = family
       @months = months
@@ -25,22 +27,27 @@ module Generators::Reports
         data << Generators::Reports::IrsInputBuilder.new(pol).notice
       end
     end
-
+    
     def build_taxhouseholds
-      tax_households = if @family.has_aptc?
-        @family.households.inject([]) { |data, household| data << household.tax_households }
-      else
-        @family.households.inject([]) { |data, household| data << household.coverage_households }
+      tax_households = []
+
+      @family.households.each do |household| 
+        if @family.has_aptc?(CALENDER_YEAR)
+          tax_households << household.tax_households
+        else
+          tax_households << household.coverage_households
+        end
       end
 
-      @irs_group.tax_households = tax_households.flatten.inject([]) do |data, tax_household|
+      tax_households.flatten!
+      @irs_group.tax_households = tax_households.inject([]) do |data, tax_household| 
         data << build_taxhousehold(tax_household)
       end
     end
 
     def build_taxhousehold(tax_household)
-      coverages = (1..@months).inject([]) do  |coverages, month| 
-        coverages << build_household_coverage(tax_household, month)
+      coverages = (1..@months).inject([]) do |data, month| 
+        data << build_household_coverage(tax_household, month)
       end
 
       PdfTemplates::TaxHousehold.new({

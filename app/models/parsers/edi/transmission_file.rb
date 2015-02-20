@@ -318,7 +318,7 @@ module Parsers
           edi_transmission = parse_edi_transmission(@result)
           return(nil) if @result["L834s"].first.blank?
           @result["L834s"].each do |l834|
-            self.add_for_import(l834["BGN"][2], Proc.new {
+            Parsers::Edi::TransmissionFile.add_for_import(l834["BGN"][2], Proc.new {
               run_import(l834, @inbound, edi_transmission)
             })
           end

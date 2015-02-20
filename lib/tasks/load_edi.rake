@@ -52,6 +52,7 @@ namespace :edi do
       Caches::HiosCache.allocate
       Caches::MongoidCache.allocate(Plan)
 #     RubyProf.start
+      Parsers::Edi::TransmissionFile.init_imports
       with_progress_bar(f, "ie 834s") do |row, pb|
         record = row.to_hash
         f_name = record['PROTOCOLMESSAGEID']
@@ -71,6 +72,7 @@ namespace :edi do
           p.persist!
         end
       end
+      Parsers::Edi::TransmissionFile.run_imports
 #      result = RubyProf.stop
 #      printer = RubyProf::GraphHtmlPrinter.new(result)
 #      r_file = File.open('profile.html', 'w')

@@ -259,13 +259,7 @@ module Parsers
         )
       end
 
-      def persist!
-        return(nil) if incomplete_isa?
-        return(nil) if transmission_already_exists?
-        edi_transmission = parse_edi_transmission(@result)
-        return(nil) if @result["L834s"].first.blank?
-        sorted_834s = @result["L834s"].sort_by { |l834| l834["BGN"][2] }
-        sorted_834s.each do |l834|
+      def run_import(l834, inbound, edi_transmission)
           puts l834["BGN"][2]
           if !l834["ST"][3].to_s.strip.blank?
             etf_l = Etf::EtfLoop.new(l834)
@@ -284,10 +278,10 @@ module Parsers
               next
             end
 
-            if @inbound
+            if inbound
               etf = Etf::EtfLoop.new(l834)
               incoming = IncomingTransaction.from_etf(etf, @import_cache)
-              incoming.import 
+              incoming.import
               persist_edi_transactions(
                 l834,
                 incoming.policy_id,
@@ -301,61 +295,88 @@ module Parsers
             end
           end
         end
-      end
 
-      private
+        def self.init_imports
+          @@run_hash = {}
+          @@run_keys = []
+        end
 
-      def map_employment_status_code(es_code, p_action)
-        return("terminated") if p_action == :stop
-        employment_status_codes = {
-          "AC" => "active",
-          "FT" => "full-time",
-          "RT" => "retired",
-          "PT" => "part-time",
-          "TE" => "terminated"
-        }
-        result = employment_status_codes[es_code]
-        result.nil? ? "active" : result
-      end
+        def self.run_imports
+          @@run_keys.sort.each do |k|
+            @@run_hash[k].call
+          end
+        end
 
-      def map_relationship_code(r_code)
-        relationship_codes = {
-          "18" => "self",
-          "01" => "spouse",
-          "19" => "child",
-          "15" => "ward"
-        }
-        result = relationship_codes[r_code]
-        result.nil? ? "child" : result
-      end
+        def self.add_for_import(bgn02, blk)
+          @@run_hash[bgn02] = blk
+          @@run_keys << bgn02
+        end
 
-      def map_benefit_status_code(b_code)
-        benefit_codes = {
-          "C" => "cobra",
-          "T" => "tefra",
-          "S" => "surviving insured",
-          "A" => "active"
-        }
-        result = benefit_codes[b_code]
-        result.nil? ? "active" : result
-      end
+        def persist!
+          return(nil) if incomplete_isa?
+          return(nil) if transmission_already_exists?
+          edi_transmission = parse_edi_transmission(@result)
+          return(nil) if @result["L834s"].first.blank?
+          @result["L834s"].each do |l834|
+            self.add_for_import(l834["BGN"][2], Proc.new {
+              run_import(l834, @inbound, edi_transmission)
+            })
+          end
+        end
 
-      def is_carrier_maintenance?(etf, edi_transmission)
-        val = ((edi_transmission.isa06.strip != ExchangeInformation.receiver_id)  &&
-               (transaction_set_kind(etf) == "maintenance"))
-        val
-      end
+        private
 
-      def incomplete_isa?
-        return(true) if @result["ISA"].blank?
-        @result["ISA"].length < 15
-      end
+        def map_employment_status_code(es_code, p_action)
+          return("terminated") if p_action == :stop
+          employment_status_codes = {
+            "AC" => "active",
+            "FT" => "full-time",
+            "RT" => "retired",
+            "PT" => "part-time",
+            "TE" => "terminated"
+          }
+          result = employment_status_codes[es_code]
+          result.nil? ? "active" : result
+        end
 
-      def transmission_already_exists?
-        Protocols::X12::Transmission.where({
-          :file_name => @file_name
-        }).any?
+        def map_relationship_code(r_code)
+          relationship_codes = {
+            "18" => "self",
+            "01" => "spouse",
+            "19" => "child",
+            "15" => "ward"
+          }
+          result = relationship_codes[r_code]
+          result.nil? ? "child" : result
+        end
+
+        def map_benefit_status_code(b_code)
+          benefit_codes = {
+            "C" => "cobra",
+            "T" => "tefra",
+            "S" => "surviving insured",
+            "A" => "active"
+          }
+          result = benefit_codes[b_code]
+          result.nil? ? "active" : result
+        end
+
+        def is_carrier_maintenance?(etf, edi_transmission)
+          val = ((edi_transmission.isa06.strip != ExchangeInformation.receiver_id)  &&
+                 (transaction_set_kind(etf) == "maintenance"))
+          val
+        end
+
+        def incomplete_isa?
+          return(true) if @result["ISA"].blank?
+          @result["ISA"].length < 15
+        end
+
+        def transmission_already_exists?
+          Protocols::X12::Transmission.where({
+            :file_name => @file_name
+          }).any?
+        end
       end
     end
   end
-end

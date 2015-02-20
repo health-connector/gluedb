@@ -264,7 +264,8 @@ module Parsers
         return(nil) if transmission_already_exists?
         edi_transmission = parse_edi_transmission(@result)
         return(nil) if @result["L834s"].first.blank?
-        @result["L834s"].each do |l834|
+        sorted_834s = @result["L834s"].sort_by { |l834| l834["BGN"][2] }
+        sorted_834s.each do |l834|
           if !l834["ST"][3].to_s.strip.blank?
             etf_l = Etf::EtfLoop.new(l834)
             carrier = @import_cache.lookup_carrier_fein(etf_l.carrier_fein)

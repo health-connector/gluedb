@@ -275,7 +275,7 @@ module Parsers
                 edi_transmission,
                 etf_checker.errors.full_messages
               )
-              next
+              return
             end
 
             if inbound

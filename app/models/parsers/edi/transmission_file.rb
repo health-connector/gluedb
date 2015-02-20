@@ -297,19 +297,20 @@ module Parsers
         end
 
         def self.init_imports
-          @@run_hash = {}
-          @@run_keys = []
+          @@run_records = []
         end
 
         def self.run_imports
-          @@run_keys.sort.each do |k|
-            @@run_hash[k].call
+          sorted_recs = @@run_records.sort_by do |rec|
+            [rec[0], rec[1], rec[2]]
+          end
+          sorted_recs.each do |rec|
+            rec.last.call
           end
         end
 
-        def self.add_for_import(bgn02, blk)
-          @@run_hash[bgn02] = blk
-          @@run_keys << bgn02
+        def self.add_for_import(bgn03, bgn04, bgn05, blk)
+          @@run_records << [bgn03, bgn04, bgn02, blk]
         end
 
         def persist!
@@ -318,7 +319,11 @@ module Parsers
           edi_transmission = parse_edi_transmission(@result)
           return(nil) if @result["L834s"].first.blank?
           @result["L834s"].each do |l834|
-            Parsers::Edi::TransmissionFile.add_for_import(l834["BGN"][2], Proc.new {
+            Parsers::Edi::TransmissionFile.add_for_import(
+              l834["BGN"][3], 
+              l834["BGN"][4], 
+              l834["BGN"][2], 
+              Proc.new {
               run_import(l834, @inbound, edi_transmission)
             })
           end

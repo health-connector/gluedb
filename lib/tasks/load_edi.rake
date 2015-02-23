@@ -47,12 +47,44 @@ namespace :edi do
     desc "Import it all from the JSONs"
     task :all => :environment do
       bgn_blacklist = import_bgn_blacklist
-      f = File.join(Rails.root, "db", "data", "all_json.csv")
+      f834 = File.join(Rails.root, "db", "data", "all_json.csv")
+      f820 = File.join(Rails.root, "db", "data", "all_json.csv")
+      frest = File.join(Rails.root, "db", "data", "all_json.csv")
       ic = Parsers::Edi::ImportCache.new
       Caches::HiosCache.allocate
       Caches::MongoidCache.allocate(Plan)
 #     RubyProf.start
-      with_progress_bar(f, "ie 834s") do |row, pb|
+      Parsers::Edi::TransmissionFile.init_imports
+      with_progress_bar(f834, "834s") do |row, pb|
+        record = row.to_hash
+        f_name = record['PROTOCOLMESSAGEID']
+        trans_kind = record['TRANSTYPE']
+        case trans_kind
+        when "999"
+        when "TA1"
+        when "820"
+        else
+          p = Parsers::Edi::TransmissionFile.new(f_name, trans_kind, record['WIREPAYLOADUNPACKED'], bgn_blacklist, ic, pb)
+          p.persist!
+        end
+      end
+      Parsers::Edi::TransmissionFile.run_imports
+      with_progress_bar(f820, "820s") do |row, pb|
+        record = row.to_hash
+        f_name = record['PROTOCOLMESSAGEID']
+        trans_kind = record['TRANSTYPE']
+        case trans_kind
+        when "999"
+        when "TA1"
+        when "820"
+          p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'], ic, pb)
+          p.persist!
+        else
+          p = Parsers::Edi::TransmissionFile.new(f_name, trans_kind, record['WIREPAYLOADUNPACKED'], bgn_blacklist, ic, pb)
+          p.persist!
+        end
+      end
+      with_progress_bar(frest, "TA1s and 999s") do |row, pb|
         record = row.to_hash
         f_name = record['PROTOCOLMESSAGEID']
         trans_kind = record['TRANSTYPE']
@@ -63,12 +95,7 @@ namespace :edi do
         when "TA1"
           p = Parsers::Edi::TransmissionResponse.new(f_name, record['WIREPAYLOADUNPACKED'])
           p.persist!
-        when "820"
-          p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'], ic, pb)
-          p.persist!
         else
-          p = Parsers::Edi::TransmissionFile.new(f_name, trans_kind, record['WIREPAYLOADUNPACKED'], bgn_blacklist, ic, pb)
-          p.persist!
         end
       end
 #      result = RubyProf.stop

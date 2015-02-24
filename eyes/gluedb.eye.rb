@@ -24,7 +24,7 @@ def define_multi_worker(worker_n, worker_path, directory, number)
       stop_on_delete true
       stop_signals [:TERM, 10.seconds, :KILL]
       start_timeout 15.seconds
-      pid_file = File.join(PID_DIRECTORY, "#{worker_name}.pid")
+      pid_file File.join(PID_DIRECTORY, "#{worker_name}.pid")
       daemonize true
       working_dir directory
       stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")

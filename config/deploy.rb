@@ -39,10 +39,11 @@ namespace :deploy do
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"
   task :finalize_update do
+    run "rm -f #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
     run "ln -s #{deploy_to}/shared/pids #{release_path}/pids"
-    run "rm -rf ${release_path}/log"
+    run "rm -rf #{release_path}/log"
     run "ln -s #{deploy_to}/shared/log #{release_path}/log"
     run "ln -s #{deploy_to}/shared/eye #{release_path}/eye"
   end

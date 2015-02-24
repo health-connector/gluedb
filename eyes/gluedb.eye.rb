@@ -56,13 +56,13 @@ Eye.application 'eye_gluedb' do
     # check :cpu, :every => 30, :below => 80, :times => 3
     # check :memory, :every => 30, :below => 150.megabytes, :times => [3,5]
     #
-    start_timeout 100.seconds
+    start_timeout 30.seconds
     restart_grace 30.seconds
     #
     monitor_children do
       stop_command "kill -QUIT {PID}"
       check :cpu, :every => 30, :below => 80, :times => 3
-      check :memory, :every => 30, :below => 400.megabytes, :times => [3,5]
+      check :memory, :every => 30, :below => 300.megabytes, :times => [3,5]
     end
   end
 end

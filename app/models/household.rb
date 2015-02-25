@@ -120,4 +120,18 @@ class Household
     true
   end
 
+  def policy_coverage_households
+    policies_by_subscriber = hbx_enrollments.inject({}) do |hash, enrollment|
+      person = enrollment.policy.subscriber.person
+      (hash[person] ||= []) << enrollment.policy_id
+      hash
+    end
+
+    policies_by_subscriber.inject([]) do |data, (person, policies)|
+      data << {
+        primary: person,
+        policy_ids: policies
+      }
+    end
+  end
 end

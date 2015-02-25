@@ -16,6 +16,7 @@ class TaxHousehold
   field :effective_start_date, type: Date
   field :effective_end_date, type: Date
   field :submitted_at, type: DateTime
+  field :primary_applicant_id, type: Moped::BSON::ObjectId
 
   index({hbx_assigned_id: 1})
 

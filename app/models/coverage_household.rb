@@ -64,15 +64,15 @@ class CoverageHousehold
   end
 
   def primary
-    self.coverage_household_members.detec{|m| m.family_member.is_primary_applicant }
+    self.coverage_household_members.detect{|m| m.family_member.is_primary_applicant }
   end
 
   def spouse
-    self.coverage_household_members.detect{|m| ['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+    nil
   end
 
   def dependents
-    self.coverage_household_members.select{|m| !['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+    self.coverage_household_members.select{|m| !m.family_member.is_primary_applicant }
   end
 
   def coverage_as_of(date)

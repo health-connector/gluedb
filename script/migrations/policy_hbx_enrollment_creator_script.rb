@@ -4,7 +4,7 @@ require File.join(Rails.root, "app", "models", "queries", "family_with_given_pol
 
 @@logger = Logger.new("#{Rails.root}/log/policy_hbx_enrollment_creator_#{Time.now.to_s.gsub(' ','')}.log")
 
-policies = Queries::PoliciesWithNoHbxEnrollments.new.execute
+policies = Queries::PoliciesWithNoFamilies.new.execute
 
 policies.each do |policy|
   begin

@@ -36,16 +36,17 @@ class Household
 
   validates :effective_start_date, presence: true
 
-  #validate :effective_end_date_gt_effective_start_date
+  validate :effective_end_date_gt_effective_start_date
 
   def effective_end_date_gt_effective_start_date
 
+    return if parent.households.length < 2
     return if effective_end_date.nil?
     return if effective_start_date.nil?
 
-      if effective_end_date < effective_start_date
-        self.errors.add(:base, "The effective end date should be earlier or equal to effective start date")
-      end
+    if effective_end_date < effective_start_date
+      self.errors.add(:base, "The effective end date should be earlier or equal to effective start date")
+    end
   end
 
   def parent

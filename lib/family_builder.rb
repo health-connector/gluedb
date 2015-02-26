@@ -28,7 +28,6 @@ class FamilyBuilder
 
     @family.submitted_at = filtered_param[:submitted_at]
     @family.updated_by = "curam_system_service"
-
     get_household
   end
 
@@ -43,9 +42,9 @@ class FamilyBuilder
 
 
   def build
+    add_hbx_enrollments
     add_tax_households(@params.to_hash[:tax_households])
     add_financial_statements(@params[:family_members])
-    add_hbx_enrollments
     add_coverage_household
     return_obj = save
     add_irsgroups
@@ -70,6 +69,9 @@ class FamilyBuilder
       member = family_member.person.members.select do |m|
         m.authority?
       end.first
+
+      member = family_member.person.authority_member if member.nil?
+
       set_person_demographics(member, family_member_params[:person_demographics]) if family_member_params[:person_demographics]
       set_alias_ids(member, family_member_params[:alias_ids]) if family_member_params[:alias_ids]
       @save_list << member
@@ -80,13 +82,17 @@ class FamilyBuilder
   end
 
   def set_alias_ids(member, alias_ids_params)
+
     alias_ids_params.each do |alias_id_params|
+      alias_id = alias_id_params.split('#').last
+      return if alias_id.nil?
+
       if alias_id_params.include? "aceds"
-        member.aceds_id = alias_id_params.split('#').last
+        member.aceds_id = alias_id
       elsif alias_id_params.include? "concern_role"
-        member.e_concern_role_id = alias_id_params.split('#').last
+        member.e_concern_role_id = alias_id
       elsif alias_id_params.include? "person"
-        member.e_person_id = alias_id_params.split('#').last
+        member.e_person_id = alias_id
       end
     end
   end
@@ -124,14 +130,15 @@ class FamilyBuilder
 
     return @household if @household
     if !@is_update
-      # puts "New Application Group Case"
+      #puts "New Application Group Case"
       @household = self.family.households.build #if new application group then create new household
       @save_list << @household
     elsif have_family_members_changed?
-      # puts "Update Application Group Case - Applicants have changed. Creating new household"
+      #puts "Update Application Group Case - Applicants have changed. Creating new household"
       @household = self.family.households.build #if applicants have changed then create new household
       @save_list << @household
     else
+      #puts "Update Application Group Case - @household = self.family.active_household"
       @household = self.family.active_household #if update and applicants haven't changed then use the active household
     end
 
@@ -148,6 +155,9 @@ class FamilyBuilder
     new_list = @family_members_params.map do |family_member_params|
       family_member_params[:person].id
     end.sort
+
+    #puts "current_list #{current_list.inspect}"
+    #puts "new_list #{new_list.inspect}"
 
     if current_list == new_list
       return false
@@ -169,8 +179,7 @@ class FamilyBuilder
           coverage_household_member = coverage_household.coverage_household_members.build
           coverage_household_member.applicant_id = family_member.id
         else
-          $logger.error "e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}\n" +
-                            "applicant.person.person_relationships #{@family.primary_applicant.person.person_relationships.inspect}\n"
+          $logger.warn "WARNING: Family e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
         end
       end
     end
@@ -207,7 +216,7 @@ class FamilyBuilder
     @family.primary_applicant.broker_id = Broker.find(policy.broker_id).id unless policy.broker_id.blank?
     hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
     hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
-    hbx_enrollement.submitted_at = Time.now
+    hbx_enrollement.submitted_at = @family.submitted_at
 
     hbx_enrollement.kind = "employer_sponsored" unless policy.employer_id.blank?
     hbx_enrollement.kind = "unassisted_qhp" if (hbx_enrollement.applied_aptc_in_cents == 0 && policy.employer.blank?)

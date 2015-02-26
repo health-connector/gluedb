@@ -177,9 +177,15 @@ class ImportFamilies
                   ig_request[:name_first]=first_name
                   ig_request[:name_last]=last_name
                   #puts "end #{ig_request.inspect}"
-                  retry
+                  tries = tries + 1
+                  if tries < 2
+                    retry
+                  else
+                    raise(e)
+                  end
+                else
+                  raise(e)
                 end
-
               else
                 raise(e)
               end
@@ -238,7 +244,7 @@ class ImportFamilies
         fail_counter += 1
         #puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
         $logger.error "#{DateTime.now.to_s}" +
-                           "Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
+                           "ERROR: Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
                            "message:#{e.message}\n"
         write_error_file(ag, e.message)
       end

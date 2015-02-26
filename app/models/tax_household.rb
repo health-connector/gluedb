@@ -25,38 +25,77 @@ class TaxHousehold
   embeds_many :eligibility_determinations
 
 
+  # *IMP* Check for tax members with financial information missing
+
   def members_with_financials
     tax_household_members.reject{|m| m.financial_statements.empty? }
   end
 
+  def build_tax_family
+    family = {}
+    family[:primary] = primary
+    family[:spouse] = spouse
+    family[:dependents] = dependents
+  end
+
   def primary
-    members_with_financials.detect{|m| ['tax_filer', 'single', 'joint', 'separate'].include?(m.financial_statements[0].tax_filing_status) }
+    members_with_financials.detect{|m| m.financial_statements[0].tax_filing_status == 'tax_filer' }
   end
 
   def spouse
-    members_with_financials.detect{|m| m.family_member.person.person_relationships[0] && ['spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+    non_filers = members_with_financials.select{|m| m.financial_statements[0].tax_filing_status == 'non_filer'}
+    return nil if non_filers.empty?
+
+    spouse = nil
+    non_filers.each do |non_filer|
+      pols = non_filer.family_member.person.policies
+      person = non_filer.family_member.person
+
+      pols.each do |pol|
+        member = pol.enrollees.detect{|enrollee| enrollee.person == person}
+        if member.rel_code == 'spouse'
+          spouse = non_filer
+          break
+        end
+      end
+    end
+
+    spouse
   end
 
   def dependents
-    members_with_financials.select{|m| m.family_member.person.person_relationships[0] && !['self', 'spouse', 'life partner'].include?(m.family_member.person.person_relationships[0].kind) && m != primary }
+    members_with_financials.select{|m| m.financial_statements[0].tax_filing_status == 'dependent' }
   end
 
-  def coverage_as_of(date)
-    pols = []
-    members_with_financials.select{|m|
-       pols += m.family_member.person.policies
-    }
-    
-    coverages = []
-    pols.uniq.select do |pol|
+  def associated_policies
+    policies = []
+
+    household.hbx_enrollments.each do |enrollment|
+
       if pol.subscriber.coverage_start > Date.new((date.year - 1),12,31) && pol.subscriber.coverage_start < Date.new(date.year,12,31)
         policy_disposition = PolicyDisposition.new(pol)
         coverages << pol if (policy_disposition.start_date.month..policy_disposition.end_date.month).include?(date.month)
       end
     end
-
-    coverages.map{|x| x.id}
+    policies
   end
+
+  # def coverage_as_of(date)
+  #   # pols = []
+  #   # members_with_financials.select{|m|
+  #   #    pols += m.family_member.person.policies
+  #   # }
+  #   pols = household.hbx_enrollments.select{|x| x.policy }
+  #   coverages = []
+  #   pols.uniq.select do |pol|
+  #     if pol.subscriber.coverage_start > Date.new((date.year - 1),12,31) && pol.subscriber.coverage_start < Date.new(date.year,12,31)
+  #       policy_disposition = PolicyDisposition.new(pol)
+  #       coverages << pol if (policy_disposition.start_date.month..policy_disposition.end_date.month).include?(date.month)
+  #     end
+  #   end
+
+  #   coverages.map{|x| x.id}
+  # end
 
   def allocated_aptc_in_dollars=(dollars)
     self.allocated_aptc_in_cents = (Rational(dollars) * Rational(100)).to_i

@@ -2,6 +2,7 @@ module Generators::Reports
   class IrsGroupXml
 
     include ActionView::Helpers::NumberHelper
+    DURATION = 12
 
     NS = { 
       "xmlns" => "urn:us:gov:treasury:irs:common",
@@ -14,8 +15,8 @@ module Generators::Reports
     end
     
     def serialize
-      File.open("#{Rails.root}/h36_sample.xml", 'w') do |file|
-        file.write builder.to_xml
+      File.open("#{Rails.root}/h36xmls/#{@irs_group.identification_num}.xml", 'w') do |file|
+        file.write builder.to_xml(:indent => 2)
       end
     end
 
@@ -42,34 +43,36 @@ module Generators::Reports
     end
 
     def serialize_taxhouseholds(xml)
-      @irs_group.tax_households.each do |tax_household|
+      @irs_group.irs_households_for_duration(DURATION).each do |tax_household|
         xml.TaxHousehold do |xml|
-          tax_household.coverages.each do |coverage|
-            serialize_taxhousehold_coverage(xml, coverage)
+          (1..DURATION).each do |calender_month|
+            next if @irs_group.irs_household_coverage_as_of(tax_household, calender_month).empty?
+            serialize_taxhousehold_coverage(xml, tax_household, calender_month)
           end
         end
       end
     end
 
-    def serialize_taxhousehold_coverage(xml, coverage)
+    def serialize_taxhousehold_coverage(xml, tax_household, calender_month)
       xml.TaxHouseholdCoverage do |xml|
-        xml.ApplicableCoverageMonthNum coverage.calender_month
+        xml.ApplicableCoverageMonthNum calender_month
         xml.Household do |xml|
-          serialize_household_members(xml, coverage)
 
-          @irs_group.policies_for_ids(coverage.policy_ids).each do |policy|
-             montly_disposition = policy.premium_rec_for(coverage.calender_month)
-             serialize_associated_policy(xml, montly_disposition, policy)
-           end
+          serialize_household_members(xml, tax_household)
+
+          @irs_group.irs_household_coverage_as_of(tax_household, calender_month).each do |policy|
+            montly_disposition = policy.premium_rec_for(calender_month)
+            serialize_associated_policy(xml, montly_disposition, policy)
+          end
         end
-      end  
+      end
     end
 
-    def serialize_household_members(xml, coverage)
-      serialize_tax_individual(xml, coverage.primary, 'Primary')
-      serialize_tax_individual(xml, coverage.spouse, 'Spouse')
-      coverage.dependents.each do |dependent|
-        serialize_tax_individual(xml, coverage.spouse, 'Dependent')
+    def serialize_household_members(xml, tax_household)
+      serialize_tax_individual(xml, tax_household.primary, 'Primary')
+      serialize_tax_individual(xml, tax_household.spouse, 'Spouse')
+      tax_household.dependents.each do |dependent|
+        serialize_tax_individual(xml, tax_household.spouse, 'Dependent')
       end
     end
 
@@ -109,12 +112,18 @@ module Generators::Reports
     end
 
     def serialize_associated_policy(xml, montly_disposition, policy)
+      slcsp = montly_disposition.premium_amount_slcsp
+      slcsp = 0 if slcsp.blank?
+
+      aptc = montly_disposition.monthly_aptc
+      aptc = 0 if aptc.blank?
+      
       xml.AssociatedPolicy do |xml|
         xml.QHPPolicyNum policy.policy_id
         xml.QHPIssuerEIN "000000000"
         xml.PediatricDentalPlanPremiumInd "N"
-        xml.SLCSPAdjMonthlyPremiumAmt montly_disposition.premium_amount_slcsp if montly_disposition.premium_amount_slcsp
-        xml.HouseholdAPTCAmt montly_disposition.monthly_aptc if montly_disposition.monthly_aptc
+        xml.SLCSPAdjMonthlyPremiumAmt slcsp
+        xml.HouseholdAPTCAmt aptc
         xml.TotalHsldMonthlyPremiumAmt montly_disposition.premium_amount   
       end
     end
@@ -126,8 +135,8 @@ module Generators::Reports
     # end
 
     def serialize_insurance_policies(xml)
-      xml.InsurancePolicy do |xml|
-        @irs_group.insurance_policies.each do |policy|
+      @irs_group.insurance_policies.each do |policy|
+        xml.InsurancePolicy do |xml|
           serialize_insurance_coverages(xml, policy)
         end
       end
@@ -135,6 +144,9 @@ module Generators::Reports
 
     def serialize_insurance_coverages(xml, policy)
       policy.monthly_premiums.each do |premium|
+        monthly_aptc = premium.monthly_aptc
+        monthly_aptc = 0 if monthly_aptc.blank?
+
         xml.InsuranceCoverage do |xml|
           xml.ApplicableCoverageMonthNum premium.serial
           xml.QHPPolicyNum policy.policy_id
@@ -145,7 +157,7 @@ module Generators::Reports
           xml.PolicyCoverageStartDt date_formatter(policy.recipient.coverage_start_date)
           xml.PolicyCoverageEndDt date_formatter(policy.recipient.coverage_termination_date)
           xml.TotalQHPMonthlyPremiumAmt premium.premium_amount
-          xml.APTCPaymentAmt premium.monthly_aptc if premium.monthly_aptc
+          xml.APTCPaymentAmt monthly_aptc 
           serialize_covered_individuals(xml, policy)
         end
       end

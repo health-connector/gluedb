@@ -7,7 +7,7 @@ module PersonMatchStrategies
       search_dob = cast_dob(options[:dob], options)
 
       found_people = Person.where("members.dob" => search_dob).and("members.ssn" => options[:ssn]).to_a.select do |person|
-        person.name_last.strip.downcase.eql? options[:name_last].strip.downcase
+        normalized(person.name_last).eql? normalized(options[:name_last])
       end
 
       return [nil, nil] unless found_people
@@ -22,5 +22,11 @@ module PersonMatchStrategies
         [nil, nil]
       end
     end
+
+    def normalized(text)
+      text.strip.downcase.gsub(/[^a-z ]/i, '').gsub(/ (|jr||sr||i||ii||iii||iv||v|)$/,'').gsub(' ','')
+    end
   end
+
+
 end

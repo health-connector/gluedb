@@ -48,7 +48,7 @@ class Family
   index({aasm_state:  1})
   index({submitted_at:  1})
 
-  index({'family_member.person_id'=> 1 }, { unique: true})
+  #index({'family_member.person_id'=> 1 }, { unique: true})
 
   validate :no_duplicate_family_members
 

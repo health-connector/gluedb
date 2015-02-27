@@ -13,7 +13,7 @@
                 <% m.policies.each do |policy|%>
                   <dl class="dl-horizontal">
                     <dt>Plan</dt>
-                    <dd><%= policy.plan.carrier.name %> | <%= truncate(policy.plan.name, length: 50) %></dd>
+		    <dd><%= Caches::MongoidCache.lookup(Carrier, policy.plan.carrier_id) { policy.plan.carrier }.name %> | <%= truncate(policy.plan.name, length: 50) %></dd>
                     <dt>Status</dt>
                     <dd><%= policy.aasm_state.capitalize %></dd>
                   </dl>

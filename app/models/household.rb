@@ -120,8 +120,8 @@ class Household
     true
   end
 
-  def policy_coverage_households
-    policies_by_subscriber = hbx_enrollments.inject({}) do |hash, enrollment|
+  def policy_coverage_households(year)
+    policies_by_subscriber = enrollments_for_year(year).inject({}) do |hash, enrollment|
       person = enrollment.policy.subscriber.person
       (hash[person] ||= []) << enrollment.policy_id
       hash
@@ -133,5 +133,19 @@ class Household
         policy_ids: policies
       }
     end
+  end
+
+  def enrollments_for_year(year)
+    hbx_enrollments.select{ |enrollment| valid_policy?(enrollment.policy) && enrollment.policy.belong_to_year?(year) }
+  end
+
+  def has_aptc?(year)
+    enrollments_for_year(year).map(&:policy).detect{|x| x.applied_aptc > 0 }.nil? ? false : true
+  end
+
+  def valid_policy?(pol)
+    return false if pol.rejected? || pol.has_no_enrollees? || pol.canceled?
+    return false if pol.plan.metal_level =~ /catastrophic/i
+    (pol.plan.coverage_type =~ /health/i).nil? ? false : true
   end
 end

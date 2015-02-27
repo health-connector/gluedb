@@ -503,7 +503,7 @@ class Policy
     return false if subscriber.nil?
     return false if (subscriber.coverage_start == subscriber.coverage_end)
     return false if (!subscriber.coverage_end.nil? && subscriber.coverage_end < date)
-    subscriber.coverage_start <= date
+    coverage_period.include?(date)
   end
 
   def future_active_for?(member_id)

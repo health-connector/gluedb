@@ -11,3 +11,6 @@
       = f.check_box :bypass_validation, label: 'Bypass Premium Validation?'
       = f.hidden_field :submitted_by
     = f.submit "Upload", :class => "btn btn-primary"
+  .col-md-4
+    = alert_box context: :info, dimissible: false do
+      Total Employer Responsibilty Amounts are not validated by uploads. Make sure they are calculated correctly by hand before uploading.

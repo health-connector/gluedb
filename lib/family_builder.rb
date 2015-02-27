@@ -7,6 +7,9 @@ class FamilyBuilder
   attr_reader :save_list
 
   def initialize(param, person_mapper)
+    $logger ||=  Logger.new("#{Rails.root}/log/family_#{Time.now.to_s.gsub(' ', '')}.log")
+    $error_dir ||=  File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
+
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
     @new_family_members = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
 
@@ -59,6 +62,7 @@ class FamilyBuilder
     else
       #puts "Added a new family_member"
       if family_member_params[:is_primary_applicant] == "true"
+        is_primary_applicant_unique?(family_member_params)
         reset_exisiting_primary_applicant
       end
 
@@ -79,6 +83,15 @@ class FamilyBuilder
     end
 
     family_member
+  end
+
+  def is_primary_applicant_unique?(family_member_params)
+
+    person = family_member_params[:person]
+
+    if Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person.id)}}}).length > 0
+      raise("Duplicate Primary Applicant person_id : #{person.id}")
+    end
   end
 
   def set_alias_ids(member, alias_ids_params)

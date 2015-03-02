@@ -15,5 +15,14 @@ module PdfTemplates
     attribute :name_sfx, String
     attribute :address, PdfTemplates::NoticeAddress
     attribute :employer, PdfTemplates::EmployerMec
+
+
+    def coverage_begin
+      Date.parse(coverage_start_date)
+    end
+
+    def coverage_end
+      Date.parse(coverage_termination_date)
+    end
   end
 end

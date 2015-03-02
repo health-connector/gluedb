@@ -67,7 +67,14 @@ module Generators::Reports
     end
 
     def append_monthly_premiums
-      @notice.monthly_premiums = (@policy_disposition.start_date.month..@policy_disposition.end_date.month).inject([]) do |data, i|
+      coverage_end_month = @policy_disposition.end_date.month
+      coverage_end_month = coverage_end_month - 1 if (@policy_disposition.end_date.day == 1)
+
+      if @policy_disposition.end_date.year != IRS_YEAR
+        coverage_end_month = 12
+      end
+
+      @notice.monthly_premiums = (@policy_disposition.start_date.month..coverage_end_month).inject([]) do |data, i|
         premium_amounts = {
           serial: i,
           premium_amount: @policy_disposition.as_of(Date.new(IRS_YEAR, i, 1)).ehb_premium

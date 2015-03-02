@@ -55,8 +55,14 @@ module PdfTemplates
       policies.each do |pol|
         if pol.subscriber.coverage_start < end_of_month          
           start_date = pol.policy_start
+
           end_date = pol.policy_end.blank? ? pol.coverage_period_end : pol.policy_end
-          pols << pol if (start_date.month..end_date.month).include?(month)
+          coverage_end_month = end_date.month
+          coverage_end_month = coverage_end_month - 1 if end_date.day == 1
+
+          coverage_end_month = 12 if calender_year != end_date.year
+
+          pols << pol if (start_date.month..coverage_end_month).include?(month)
         end
       end
 

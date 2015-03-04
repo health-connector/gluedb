@@ -14,7 +14,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
   CSV.open("stephen_expected_effectuated_20140930.csv", 'w') do |csv|
     csv << ["Subscriber ID", "Member ID" , "Person ID", "Policy ID",
-            "First Name", "Last Name", "DOB",
+            "First Name", "Last Name","SSN", "DOB",
             "Plan Name", "HIOS ID", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
             "Coverage Start", "Coverage End",
@@ -51,6 +51,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   subscriber_id, en.m_id, per.id, pol.id,
                   per.name_first,
                   per.name_last,
+                  en.member.ssn,
                   en.member.dob.strftime("%Y%m%d"),
                   plan.hios_plan_id, plan.name, carrier.name,
                   en.pre_amt, pol.pre_amt_tot,pol.applied_aptc, pol.tot_emp_res_amt,

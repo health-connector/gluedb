@@ -1,5 +1,5 @@
 module Generators::Reports  
-  class IrsPdfReport < PdfReport
+  class IrsYearlyPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
     def initialize(notice, multiple = false)
@@ -59,8 +59,17 @@ module Generators::Reports
       col4 = mm2pt(145.50)
       y_pos = 790.86 - mm2pt(37.15) - 45
 
+      x_pos_corrected = mm2pt(128.50)
+      y_pos_corrected = 790.86 - mm2pt(31.80)
+
+      # bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
+      #   font "/Library/Fonts/Arial Unicode.ttf"
+      #   text "\u2714"
+      # end
+
+      # font "Times-Roman"
+
       bounding_box([col1, y_pos], :width => 100) do
-        #stroke_bound
         text 'DC'
       end
 
@@ -129,6 +138,8 @@ module Generators::Reports
       bounding_box([col1, y_pos], :width => 240) do
         text enrollee.name
       end
+
+      puts enrollee.ssn.inspect
 
       if !enrollee.ssn.blank?
         bounding_box([col3, y_pos], :width => 100) do
@@ -218,12 +229,13 @@ module Generators::Reports
     end
 
     def number_to_ssn(number)
-      return unless number
+      number.gsub!('-','')
       delimiter = "-"
       number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
     end
 
     def mask_ssn(ssn)
+      return if ssn.blank?
       ssn = number_to_ssn(ssn)
       last_digits = ssn.match(/\d{4}$/)[0]
       "***-**-#{last_digits}"

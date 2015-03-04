@@ -1,8 +1,10 @@
 module Generators::Reports  
-  class IrsGroupXml
+  class IrsMonthlyXml
 
     include ActionView::Helpers::NumberHelper
+
     DURATION = 12
+    CALENDER_YEAR = 2014
 
     NS = { 
       "xmlns" => "urn:us:gov:treasury:irs:common",
@@ -10,12 +12,16 @@ module Generators::Reports
       "xmlns:n1" => "urn:us:gov:treasury:irs:msg:monthlyexchangeperiodicdata"
     }
 
-    def initialize(irs_group)
+    attr_accessor :folder_name
+
+    def initialize(irs_group, e_case_id)
       @irs_group = irs_group
+      @folder_name = folder_name
+      @e_case_id = e_case_id
     end
     
     def serialize
-      File.open("#{Rails.root}/h36xmls/#{@irs_group.identification_num}.xml", 'w') do |file|
+      File.open("#{Rails.root}/h36xmls/#{@folder_name}/#{@e_case_id}_#{@irs_group.identification_num}.xml", 'w') do |file|
         file.write builder.to_xml(:indent => 2)
       end
     end
@@ -23,11 +29,11 @@ module Generators::Reports
     def builder
       Nokogiri::XML::Builder.new do |xml|
         xml['n1'].HealthExchange(NS) do
-          xml.SubmissionYr 1000
-          xml.SubmissionMonthNum 1
-          xml.ApplicableCoverageYr 1000
+          xml.SubmissionYr CALENDER_YEAR
+          xml.SubmissionMonthNum 12
+          xml.ApplicableCoverageYr CALENDER_YEAR
           xml.IndividualExchange do |xml|
-            xml.HealthExchangeId "00.AA*.000.000.000"
+            xml.HealthExchangeId "02.DC*.SBE.001.001"
             serialize_irs_group(xml)
           end
         end
@@ -57,9 +63,7 @@ module Generators::Reports
       xml.TaxHouseholdCoverage do |xml|
         xml.ApplicableCoverageMonthNum calender_month
         xml.Household do |xml|
-
           serialize_household_members(xml, tax_household)
-
           @irs_group.irs_household_coverage_as_of(tax_household, calender_month).each do |policy|
             montly_disposition = policy.premium_rec_for(calender_month)
             serialize_associated_policy(xml, montly_disposition, policy)
@@ -81,7 +85,7 @@ module Generators::Reports
       xml.send("#{relation}Grp") do |xml|
         xml.send(relation) do |xml|
           serialize_names(xml, individual)
-          xml.SSN individual.ssn
+          xml.SSN individual.ssn unless individual.ssn.blank?
           xml.BirthDt date_formatter(individual.dob)
           serialize_address(xml, individual.address)
         end
@@ -120,7 +124,7 @@ module Generators::Reports
       
       xml.AssociatedPolicy do |xml|
         xml.QHPPolicyNum policy.policy_id
-        xml.QHPIssuerEIN "000000000"
+        xml.QHPIssuerEIN policy.issuer_fein
         xml.PediatricDentalPlanPremiumInd "N"
         xml.SLCSPAdjMonthlyPremiumAmt slcsp
         xml.HouseholdAPTCAmt aptc
@@ -152,28 +156,28 @@ module Generators::Reports
           xml.QHPPolicyNum policy.policy_id
           # xml.QHPId
           xml.PediatricDentalPlanPremiumInd "N"
-          xml.QHPIssuerEIN "000000000"
+          xml.QHPIssuerEIN policy.issuer_fein
           xml.IssuerNm policy.issuer_name
           xml.PolicyCoverageStartDt date_formatter(policy.recipient.coverage_start_date)
           xml.PolicyCoverageEndDt date_formatter(policy.recipient.coverage_termination_date)
           xml.TotalQHPMonthlyPremiumAmt premium.premium_amount
           xml.APTCPaymentAmt monthly_aptc 
-          serialize_covered_individuals(xml, policy)
+          policy.covered_household_as_of(premium.serial, CALENDER_YEAR).each do |individual|
+            serialize_covered_individual(xml, individual)
+          end
         end
       end
     end
 
-    def serialize_covered_individuals(xml, policy)
-      policy.covered_household.each do |individual|
-        xml.CoveredIndividual do |xml|
-          xml.InsuredPerson do |xml|
-            serialize_names(xml, individual)
-            xml.SSN individual.ssn
-            xml.BirthDt date_formatter(individual.dob)
-          end
-          xml.CoverageStartDt date_formatter(individual.coverage_start_date)
-          xml.CoverageEndDt date_formatter(individual.coverage_termination_date)
+    def serialize_covered_individual(xml, individual)
+      xml.CoveredIndividual do |xml|
+        xml.InsuredPerson do |xml|
+          serialize_names(xml, individual)
+          xml.SSN individual.ssn unless individual.ssn.blank?
+          xml.BirthDt date_formatter(individual.dob)
         end
+        xml.CoverageStartDt date_formatter(individual.coverage_start_date)
+        xml.CoverageEndDt date_formatter(individual.coverage_termination_date)
       end
     end
 
@@ -183,6 +187,5 @@ module Generators::Reports
       return if date.nil?
       Date.strptime(date,'%m/%d/%Y').strftime("%Y-%m-%d")
     end
-
   end
 end

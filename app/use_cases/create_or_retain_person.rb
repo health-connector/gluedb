@@ -36,13 +36,16 @@ class CreateOrRetainPerson
           else
             raise(e)
           end
+        else
+          raise(e)
         end
+      else
+        raise(e)
       end
     end
   end
 
   def create
-
     person = Person.new(filter_person_params(@person_params.clone))
     member = person.members.build(filter_member_params(@person_params))
     person.authority_member_id = @person_params[:hbx_member_id]

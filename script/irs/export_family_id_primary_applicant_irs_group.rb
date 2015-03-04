@@ -1,4 +1,6 @@
 #This script will export to csv e_case_id, primary_applicant.id, irs_group.hbx_assigned_id for every family in db
+#To run
+# rails r script/irs/export_family_id_primary_applicant_irs_group.rb
 require 'csv'
 
 def normalize_primary_applicant_id(family)

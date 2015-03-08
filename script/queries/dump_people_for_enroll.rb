@@ -33,10 +33,10 @@ def dump_person(person, rel_map, member_cache, dumped_people)
       end
       person.phones.each do |phone|
         if !phone.phone_number.blank?
-          if (phone.phone_number.length < 11) 
+          if (phone.phone_number.length == 10) 
             json_data[:phones] << {
               :kind => phone.phone_type,
-              :number => phone.phone_number
+              :full_phone_number => phone.phone_number
             }
           end
         end

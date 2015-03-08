@@ -88,4 +88,8 @@ class CoverageHousehold
 
     coverages.map{|x| x.id}
   end
+
+  def is_existing_member?(person)
+    self.coverage_household_members.flat_map(&:family_member).flat_map(&:person).flat_map(&:id).include? person.id
+  end
 end

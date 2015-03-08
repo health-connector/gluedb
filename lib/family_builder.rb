@@ -49,9 +49,39 @@ class FamilyBuilder
     add_tax_households(@params.to_hash[:tax_households])
     add_financial_statements(@params[:family_members])
     add_coverage_household
+    handle_empty_coverage_households
     return_obj = save
     add_irsgroups
     return_obj
+  end
+
+  def handle_empty_coverage_households
+    return if @household.nil?
+
+    coverage_household = @household.coverage_households.detect do |coverage_household|
+      coverage_household.coverage_household_members.blank?
+    end
+
+    return if coverage_household.nil?
+
+    policies = []
+    if @family.primary_applicant.nil?
+      policies = @family.family_members.flat_map(&:person).flat_map(&:policies)
+    else
+      policies = @family.primary_applicant.person.policies
+    end
+
+    policies.flat_map(&:enrollees).each do |enrollee|
+      person = Person.find_for_member_id(enrollee.m_id)
+
+      @family.family_members.build({person: person}) unless @family.person_is_family_member?(person)
+
+      family_member = @family.find_family_member_by_person(person)
+      unless coverage_household.is_existing_member?(person)
+        coverage_household_member = coverage_household.coverage_household_members.build({:applicant_id => family_member.id, :is_subscriber => true})
+        $logger.info "Family e_case_id: #{@family.e_case_id} Person #{person.id} Enrollee m_id #{enrollee.m_id}  added to coverage household #{coverage_household.id}"
+      end
+    end
   end
 
   def add_family_member(family_member_params)
@@ -89,8 +119,19 @@ class FamilyBuilder
 
     person = family_member_params[:person]
 
-    if Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person.id)}}}).length > 0
-      raise("Duplicate Primary Applicant person_id : #{person.id}")
+    families = Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person.id)}}})
+
+    return true if families.length == 0
+
+    family = families.find do |f|
+      next if f.primary_applicant.nil?
+      f.primary_applicant.person.id.eql? person.id
+    end
+
+    if family.present?
+      raise("Family e_case_id: #{@family.e_case_id} Duplicate Primary Applicant person_id : #{person.id}. existing family #{family.e_case_id}" )
+    else
+      return true
     end
   end
 
@@ -184,7 +225,7 @@ class FamilyBuilder
     return if @new_family_members.length == 0
 
     #TODO decide where to get submitted_at from
-    coverage_household = @household.coverage_households.build({submitted_at: Time.now})
+    coverage_household = @household.coverage_households.build({submitted_at: @family.submitted_at})
 
     @new_family_members.each do |family_member|
       if family_member.is_coverage_applicant
@@ -240,7 +281,7 @@ class FamilyBuilder
     policy.enrollees.each do |enrollee|
       begin
         person = Person.find_for_member_id(enrollee.m_id)
-        @family.family_members << FamilyMember.new(person: person) unless @family.person_is_family_member?(person)
+        @family.family_members.build({person: person}) unless @family.person_is_family_member?(person)
         family_member = @family.find_family_member_by_person(person)
         hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: family_member,
                                                                                premium_amount_in_cents: enrollee.pre_amt})

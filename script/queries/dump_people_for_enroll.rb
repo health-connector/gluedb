@@ -1,18 +1,38 @@
-def dump_person(person, rel_map, member_cache, dumped_people)
+def dump_person(person, rel_map, member_cache, dumped_people, person_file, family_file)
   p_id = person.id.to_s
   if !person.authority_member.blank?
     if !dumped_people.include?(p_id)
+      new_family = {
+        :application_type => "employer_sponsored",
+        :family_members => [
+          {
+            :person_id => person.id.to_s,
+            :is_primary_applicant => true
+          }
+        ],
+        :households => [
+          {
+            :coverage_households => [
+              {
+                :coverage_household_members => [
+                  {
+                    :applicant_id => person.id.to_s,
+                    :is_subscriber => true
+                  } 
+                ]
+              }
+            ]
+          }
+        ]
+      }
       dumped_people << p_id
       auth_member = person.authority_member
       mem_ids = person.members.map(&:hbx_member_id)
       json_data = {
         :id => person.id.to_s,
         :hbx_id => auth_member.hbx_member_id,
-        :name_pfx => person.name_pfx,
         :first_name => person.name_first,
-        :middle_name => person.name_middle,
         :last_name => person.name_last,
-        :name_sfx => person.name_sfx,
         :dob => auth_member.dob,
         :gender => auth_member.gender,
         :addresses => [],
@@ -20,6 +40,15 @@ def dump_person(person, rel_map, member_cache, dumped_people)
         :emails => [],
         :person_relationships => []
       }
+      if !person.name_pfx.blank?
+        json_data[:name_pfx] = person.name_pfx
+      end
+      if !person.name_sfx.blank?
+        json_data[:name_sfx] = person.name_sfx
+      end
+      if !person.name_middle.blank?
+        json_data[:middle_name] = person.name_middle
+      end
       if !(["999999999", "000000000"].include?(auth_member.ssn))
         if !auth_member.ssn.blank?
           json_data[:ssn] = auth_member.ssn
@@ -57,16 +86,26 @@ def dump_person(person, rel_map, member_cache, dumped_people)
       relationships = []
       mem_ids.each do |m_id|
         rel_map[m_id].each do |rel|
+          member_rel_id = member_cache.lookup(rel[:member_id]).id.to_s
           relationships << {
             :kind => rel[:kind],
-            :relative_id => member_cache.lookup(rel[:member_id]).id.to_s
+            :relative_id => member_rel_id
           }
         end
       end
       relationships.uniq.each do |rel|
         json_data[:person_relationships] << rel
+        new_family[:family_members] << {
+             :person_id => rel[:relative_id]
+        }
+        new_family[:households][0][:coverage_households][0][:coverage_household_members] << {
+             :applicant_id => rel[:relative_id]
+        }
       end
-      puts JSON.dump(json_data)
+      family_file.puts JSON.dump(new_family)
+      family_file.puts ","
+      person_file.puts JSON.dump(json_data)
+      person_file.puts ","
     end
   end
 end
@@ -75,7 +114,7 @@ pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
     :coverage_start => {"$gt" => Date.new(2014,12,31)}
-  }}})
+  }}, :employer_id => { "$ne" => nil }})
 
 member_ids = []
 relationship_map = Hash.new do |hash,key|
@@ -100,6 +139,8 @@ pols.each do |pol|
 end
 
 # raise relationship_map.inspect
+people_file = File.open("people.json", 'w')
+families_file = File.open("families.json", 'w')
 
 member_ids.uniq!
 
@@ -107,8 +148,11 @@ m_cache = Caches::MemberIdPerson.new(member_ids)
 people = Person.find_for_members(member_ids)
 dumped_peeps = []
 
-puts "["
+people_file.puts "["
+families_file.puts "["
 people.each do |person|
-  dump_person(person, relationship_map, m_cache, dumped_peeps)
-  puts ","
+  dump_person(person, relationship_map, m_cache, dumped_peeps, people_file, families_file)
 end
+
+people_file.close
+families_file.close

@@ -29,7 +29,8 @@ class EndCoverage
 
   def execute_csv(request, listener)
     @request = request
-    @policy = @policy_repo.where({"_id" => request[:policy_id]}).first
+
+    @policy = @policy_repo.find(request[:policy_id])
 
     if (@policy.nil?)
       listener.no_such_policy(policy_id: request[:policy_id])
@@ -50,7 +51,7 @@ class EndCoverage
       return
     end
 
-    if @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
+    if request[:reason]== 'terminate' && @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
       listener.end_date_invalid(end_date: request[:coverage_end])
       listener.fail(subscriber: request[:affected_enrollee_ids])
       return

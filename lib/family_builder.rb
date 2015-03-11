@@ -7,8 +7,8 @@ class FamilyBuilder
   attr_reader :save_list
 
   def initialize(param, person_mapper)
-    $logger ||=  Logger.new("#{Rails.root}/log/family_#{Time.now.to_s.gsub(' ', '')}.log")
-    $error_dir ||=  File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
+    $logger ||= Logger.new("#{Rails.root}/log/family_#{Time.now.to_s.gsub(' ', '')}.log")
+    $error_dir ||= File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
 
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
     @new_family_members = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
@@ -215,6 +215,8 @@ class FamilyBuilder
 
     return if @family.primary_applicant.nil?
 
+    @household.hbx_enrollments.delete_all #clear any existing
+
     @family.primary_applicant.person.policies.each do |policy|
       add_hbx_enrollment(policy)
     end
@@ -263,6 +265,8 @@ class FamilyBuilder
   end
 
   def add_tax_households(tax_households_params)
+
+    @household.tax_households.delete_all
 
     tax_households_params.map do |tax_household_params|
 
@@ -321,16 +325,19 @@ class FamilyBuilder
   def add_financial_statements(family_members_params)
     family_members_params.map do |family_member_params|
       family_member_params[:financial_statements].each do |financial_statement_params|
-        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_member_params[:person].id])
-        financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
-        financial_statement_params[:incomes].each do |income_params|
-          financial_statement.incomes.build(income_params)
-        end
-        financial_statement_params[:deductions].each do |deduction_params|
-          financial_statement.deductions.build(deduction_params)
-        end
-        financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
-          financial_statement.alternate_benefits.build(alternative_benefit_params)
+        tax_household_members = find_tax_household_members(@person_mapper.applicant_map[family_member_params[:person].id])
+
+        tax_household_members.each do |tax_household_member|
+          financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
+          financial_statement_params[:incomes].each do |income_params|
+            financial_statement.incomes.build(income_params)
+          end
+          financial_statement_params[:deductions].each do |deduction_params|
+            financial_statement.deductions.build(deduction_params)
+          end
+          financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
+            financial_statement.alternate_benefits.build(alternative_benefit_params)
+          end
         end
       end
     end
@@ -365,14 +372,14 @@ class FamilyBuilder
     end
   end
 
-  def find_tax_household_member(family_member)
+  def find_tax_household_members(family_member)
     tax_household_members = self.family.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
 
-    tax_household_member = tax_household_members.find do |tax_household_member|
+    tax_household_members= tax_household_members.select do |tax_household_member|
       tax_household_member.applicant_id == family_member.id
     end
 
-    tax_household_member
+    tax_household_members
   end
 
   def save

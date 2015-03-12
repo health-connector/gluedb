@@ -119,19 +119,21 @@ class ImportFamilies
   end
 
   def run
+
     member_id_generator = MemberIdGen.new(20000000)
-    p_tracker = PersonMapper.new
     xml = Nokogiri::XML(File.open(@file_path))
 
-    puts "Input file:#{@file_path}"
+    #puts "Input file:#{@file_path}"
 
     ags = Parsers::Xml::Cv::FamilyParser.parse(xml.root.canonicalize)
 
-    puts "Total number of families:#{ags.size}"
+    #puts "Total number of families:#{ags.size}"
 
     fail_counter = 0
 
     ags.each do |ag|
+
+      p_tracker = PersonMapper.new
 
       begin
 
@@ -139,119 +141,65 @@ class ImportFamilies
 
         ig_requests = ag.individual_requests(member_id_generator, p_tracker)
 
-          uc = CreateOrUpdatePerson.new
+        ig_requests.each do |ig_request|
+          create_or_retain_person = CreateOrRetainPerson.new(ig_request)
+          person, member = create_or_retain_person.match
 
-
-          all_valid = ig_requests.all? do |ig_request|
-            begin
-            listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-            value = uc.validate(ig_request, listener)
-            rescue Exception=>e
-              puts "#{e.message}"
-              puts "#{ig_request.inspect}"
-              #set_glue_name()
-            end
+          if person.nil? || member.nil?
+            person, member = create_or_retain_person.create
+            $logger.info "Created new person and member #{person.id} #{member.id} #{person.name_first} #{person.name_last}"
           end
 
-          ig_requests.each do |ig_request|
-
-            tries = 0
-
-            begin
-              #puts "begin #{ig_request.inspect}"
-              listener = PersonImportListener.new(ig_request[:applicant_id], p_tracker)
-              value = uc.commit(ig_request, listener)
-            rescue PersonMatchStrategies::AmbiguousMatchError => e
-
-              if e.message.include? 'SSN/Name mismatch'
-                $logger.warn "#{DateTime.now.to_s}" +
-                                 "WARNING: Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
-                                 "message:#{e.message}\n"
-
-                array = e.message.split('person has').last.split(',')
-                first_name = array[0].strip
-                last_name = array[1].strip
-
-                if NameMatcher.new(first_name, last_name).match(ig_request[:name_first], ig_request[:name_last])
-                  #puts "#{first_name}, #{last_name}"
-                  ig_request[:name_first]=first_name
-                  ig_request[:name_last]=last_name
-                  #puts "end #{ig_request.inspect}"
-                  tries = tries + 1
-                  if tries < 2
-                    retry
-                  else
-                    raise(e)
-                  end
-                else
-                  raise(e)
-                end
-              else
-                raise(e)
-              end
-              #set_glue_name()
-            end
-          end
+          p_tracker.register_person(ig_request[:hbx_member_id], person, member)
+        end
 
         family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
         #applying person objects in person relationships for each applicant.
         ag.family_members.each do |applicant|
-
-
           applicant.to_relationships.each do |relationship_hash|
-
-            subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
-            object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
-
-            subject_person = p_tracker[subject_person_id_uri].first
-
-            person_relationship = PersonRelationship.new
-            person_relationship.relative = p_tracker[object_person_id_uri].first
-            person_relationship.kind = relationship_hash[:relationship]
-
-            subject_person.merge_relationship(person_relationship)
+            set_person_relationship(relationship_hash, p_tracker, ag.to_hash[:e_case_id])
           end
 
           new_applicant = family_builder.add_family_member(applicant.to_hash(p_tracker))
-
           p_tracker.register_applicant(p_tracker[applicant.id].first, new_applicant)
 
         end
 
-
-        #application_group_builder.add_irsgroups(ag.irs_groups)
-=begin
-        family_builder.add_tax_households(ag.to_hash[:tax_households])
-
-        applicants_params = ag.family_members.map do |applicant|
-          applicant.to_hash(p_tracker)
-        end
-
-        family_builder.add_financial_statements(applicants_params)
-        family_builder.add_hbx_enrollment
-        family_builder.add_coverage_household
-
-        application_group_id = family_builder.save
-=end
-        #application_group_builder.add_irsgroups
-
-        family = family_builder.build
-
-        #puts "Saved e_case_id:#{ag.to_hash[:e_case_id]}"
+        family_builder.build
 
       rescue Exception => e
         fail_counter += 1
         #puts "FAILED e_case_id:#{ag.to_hash[:e_case_id]}"
-        $logger.error "#{DateTime.now.to_s}" +
-                           "ERROR: Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
-                           "message:#{e.message}\n"
-        write_error_file(ag, e.message)
+        $logger.error "ERROR: Family e_case_id:#{ag.to_hash[:e_case_id]}\n" +
+                          "message:#{e.message}\n"
+        #write_error_file(ag, e.message)
       end
     end
 
-    puts "Total fails: #{fail_counter}"
+    #puts "Total fails: #{fail_counter}"
 
+  end
+
+  def set_person_relationship(relationship_hash, p_tracker, e_case_id)
+
+    begin
+      subject_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:subject_person_id]}"
+      object_person_id_uri = "urn:openhbx:hbx:dc0:resources:v1:curam:concern_role##{relationship_hash[:object_person_id]}"
+
+      subject_person = p_tracker[subject_person_id_uri].first
+      object_person = p_tracker[object_person_id_uri].first
+
+      #This is a heuristic. If the person was created less than 2 seconds ago, we consider him/her as new person coming from curam
+      if (Time.now - subject_person.created_at) < 2.seconds
+        relationship = subject_person.person_relationships.build({relative: object_person, kind: relationship_hash[:relationship]})
+        relationship.save
+      end
+    rescue Exception => e
+      $logger.error "#{DateTime.now.to_s}" +
+                        "WARNING: Family e_case_id:#{e_case_id} could not set relationship\n  " +
+                        "message:#{e.message}\n"
+    end
   end
 
   #xml_obj is a happy mapper object

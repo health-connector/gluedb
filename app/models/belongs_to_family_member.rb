@@ -4,8 +4,8 @@ module BelongsToFamilyMember
     family.family_members.detect { |apl| applicant_id == apl._id }
   end
 
-  def family_member=(applicant_instance)
-    return unless applicant_instance.is_a? FamilyMember
-    self.applicant_id = applicant_instance._id
+  def family_member=(family_member)
+    return unless family_member.is_a? FamilyMember
+    self.applicant_id = family_member._id
   end
 end

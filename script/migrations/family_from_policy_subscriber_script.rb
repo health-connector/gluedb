@@ -1,6 +1,8 @@
 require File.join(Rails.root, "script", "migrations", "family_from_policy_subscriber")
 require File.join(Rails.root, "app", "models", "queries", "policies_with_no_families")
 
+$logger = Logger.new("#{Rails.root}/log/family_for_orphan_policies_#{Time.now.to_s.gsub(' ', '')}.log")
+
 def add_hbx_enrollment(family, policy)
 
   return if family.active_household.nil?
@@ -18,7 +20,7 @@ def add_hbx_enrollment(family, policy)
   policy.enrollees.each do |enrollee|
     begin
       person = Person.find_for_member_id(enrollee.m_id)
-      family.family_members << FamilyMember.new(person: person) unless family.person_is_family_member?(person)
+      family.family_members.build({person: person}) unless family.person_is_family_member?(person)
       family_member = family.find_family_member_by_person(person)
       hbx_enrollement_member = hbx_enrollement.hbx_enrollment_members.build({family_member: family_member,
                                                                              premium_amount_in_cents: enrollee.pre_amt})
@@ -30,10 +32,11 @@ def add_hbx_enrollment(family, policy)
   end
 end
 
-$logger = Logger.new("#{Rails.root}/log/family_for_orphan_policies_#{Time.now.to_s.gsub(' ', '')}.log")
 
-family_count = Family.count
-$logger.info "family_count_start: #{family_count}"
+$logger.info "Starting to attach non primary-applicants' policies to families"
+$logger.info "Family_count_start: #{Family.count}"
+$logger.info "Total policies count: #{Policy.count}"
+$logger.info "Persons count: #{Person.count}"
 
 policies_with_no_families = Queries::PoliciesWithNoFamilies.new.execute
 
@@ -74,10 +77,12 @@ policy_groups.each do |person_id, policies|
   end
 end
 
-family_count = Family.count
-$logger.info "family_count after attaching non primary applicant policies: #{family_count}"
+$logger.info "people_with_multiple_families #{people_with_multiple_families.inspect}"
+$logger.info "family_count after attaching non primary applicant policies: #{Family.count}"
 $logger.info "people_with_multiple_families: #{people_with_multiple_families.length}"
 
+
+$logger.info "Starting to create families for policies without families"
 
 policy_groups.each do |person_id, policies|
   next if people_with_multiple_families.include?(person_id)
@@ -91,5 +96,6 @@ policy_groups.each do |person_id, policies|
   end
 end
 
-family_count = Family.count
-$logger.info "family_count after creating families for families: #{family_count}"
+$logger.info "Family_count_start: #{Family.count}"
+$logger.info "Total policies count: #{Policy.count}"
+$logger.info "Persons count: #{Person.count}"

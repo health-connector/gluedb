@@ -123,7 +123,7 @@ class FamilyBuilder
 
     return true if families.length == 0
 
-    family = families.find do |f|
+    family = families.detect do |f|
       next if f.primary_applicant.nil?
       f.primary_applicant.person.id.eql? person.id
     end
@@ -233,7 +233,7 @@ class FamilyBuilder
           coverage_household_member = coverage_household.coverage_household_members.build
           coverage_household_member.applicant_id = family_member.id
         else
-          $logger.warn "WARNING: Family e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
+          #$logger.warn "WARNING: Family e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
         end
       end
     end

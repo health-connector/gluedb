@@ -11,7 +11,7 @@ class FamilyBuilder
     $error_dir ||= File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
 
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
-    @new_family_members = [] #this will include all the new applicants objects we create. In case of update application_group will have old applicants
+    @new_family_members = [] #this will include all the new family members objects we create. In case of update application_group will have old applicants
 
     if param.nil? || person_mapper.nil?
       initialize_with_nil_params
@@ -189,11 +189,11 @@ class FamilyBuilder
       @save_list << @household
     elsif have_family_members_changed?
       #puts "Update Application Group Case - Applicants have changed. Creating new household"
-      @household = self.family.households.build #if applicants have changed then create new household
+      @household = self.family.households.build #if family members have changed then create new household
       @save_list << @household
     else
       #puts "Update Application Group Case - @household = self.family.active_household"
-      @household = self.family.active_household #if update and applicants haven't changed then use the active household
+      @household = self.family.active_household #if update and family members haven't changed then use the active household
     end
 
     return @household
@@ -383,26 +383,6 @@ class FamilyBuilder
       end
     end
   end
-
-=begin
-  def add_financial_statements(family_members_params)
-    family_members_params.map do |family_members_params|
-      family_members_params[:financial_statements].each do |financial_statement_params|
-        tax_household_member = find_tax_household_member(@person_mapper.applicant_map[family_members_params[:person].id])
-        financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))
-        financial_statement_params[:incomes].each do |income_params|
-          financial_statement.incomes.build(income_params)
-        end
-        financial_statement_params[:deductions].each do |deduction_params|
-          financial_statement.deductions.build(deduction_params)
-        end
-        financial_statement_params[:alternative_benefits].each do |alternative_benefit_params|
-          financial_statement.alternate_benefits.build(alternative_benefit_params)
-        end
-      end
-    end
-  end
-=end
 
   def filter_financial_statement_params(financial_statement_params)
 

@@ -620,6 +620,14 @@ class Policy
     self.subscriber.coverage_start > Date.new((year - 1), 12, 31) && self.subscriber.coverage_start < Date.new(year, 12, 31)
   end
 
+  def authority_member
+    self.subscriber.person.authority_member
+  end
+
+  def belong_to_authority_member?
+    authority_member.hbx_member_id == self.subscriber.m_id
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s

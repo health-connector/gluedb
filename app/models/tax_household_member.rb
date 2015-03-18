@@ -55,4 +55,14 @@ class TaxHouseholdMember
     end
 
   end
+
+  def tax_filing_status
+    nil if self.financial_statements.empty?
+    self.financial_statements.last.tax_filing_status
+  end
+
+  def tax_filing_together?
+    false if self.financial_statements.empty?
+    self.financial_statements.last.is_tax_filing_together
+  end
 end

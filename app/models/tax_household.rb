@@ -39,35 +39,6 @@ class TaxHousehold
     family[:dependents] = dependents
   end
 
-  def primary
-    members_with_financials.detect{|m| m.financial_statements[0].tax_filing_status == 'tax_filer' }
-  end
-
-  def spouse
-    non_filers = members_with_financials.select{|m| m.financial_statements[0].tax_filing_status == 'non_filer'}
-    return nil if non_filers.empty?
-
-    spouse = nil
-    non_filers.each do |non_filer|
-      pols = non_filer.family_member.person.policies
-      person = non_filer.family_member.person
-
-      pols.each do |pol|
-        member = pol.enrollees.detect{|enrollee| enrollee.person == person}
-        if member.rel_code == 'spouse'
-          spouse = non_filer
-          break
-        end
-      end
-    end
-
-    spouse
-  end
-
-  def dependents
-    members_with_financials.select{|m| m.financial_statements[0].tax_filing_status == 'dependent' }
-  end
-
   def associated_policies
     policies = []
 
@@ -79,6 +50,10 @@ class TaxHousehold
       end
     end
     policies
+  end
+
+  def no_tax_filer?
+    members_with_financials.detect{|m| m.financial_statements[0].tax_filing_status == 'tax_filer' }.nil?
   end
 
   # def coverage_as_of(date)

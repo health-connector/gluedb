@@ -5,9 +5,9 @@ module Generators::Reports
 
     def initialize(tax_household, policies)
       @tax_household = tax_household
-      @policies = policies
-      @primary = nil
-      @spouse = nil
+      @policies = Policy.where({:id.in => policies.to_a}).to_a
+      @primary  = nil
+      @spouse   = nil
       @dependents = []
     end
 
@@ -57,16 +57,17 @@ module Generators::Reports
     def spouse_rel_code?(pol, tax_member)
       person = tax_member.family_member.person
       enrollee = pol.enrollees.detect{|enrollee| enrollee.person == person}
-      rel_code = enrollee.rel_code.downcase
-      if rel_code == 'spouse'
-        true
-      elsif rel_code == 'self'
-        spouse = pol.enrollees.detect{|enrollee| enrollee.rel_code == 'spouse'}
-        if spouse.nil? || @primary.nil?
-          false
-        else
+      if enrollee
+        rel_code = enrollee.rel_code.downcase
+        if rel_code == 'spouse'
+          true
+        elsif rel_code == 'self'
+          spouse = pol.enrollees.detect{|enrollee| enrollee.rel_code == 'spouse'}
+          return false if spouse.nil? || @primary.nil?
           spouse.person == @primary.family_member.person ? true : false
         end
+      else
+        false
       end
     end
 
@@ -92,6 +93,5 @@ module Generators::Reports
         hash
       end
     end
-
   end
 end

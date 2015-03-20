@@ -1,11 +1,11 @@
 class IrsGroupBuilder
 
-  def initialize(application_group)
+  def initialize(family)
 
-    if(application_group.is_a? Family)
-      @family = application_group
+    if(family.is_a? Family)
+      @family = family
     else
-      @family = Family.find(application_group)
+      @family = Family.find(family)
     end
   end
 

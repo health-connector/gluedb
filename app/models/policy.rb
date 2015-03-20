@@ -529,9 +529,15 @@ class Policy
 
   def coverage_period
     start_date = policy_start
+
     if !policy_end.nil?
-       return (start_date..policy_end)
+      if policy_end.year > policy_start.year
+        return (start_date..Date.new(start_date.year, 12, 31))
+      else
+        return (start_date..policy_end)
+      end
     end
+
     if employer_id.blank?
        return (start_date..Date.new(start_date.year, 12, 31))
     end

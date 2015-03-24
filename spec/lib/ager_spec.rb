@@ -4,6 +4,11 @@ describe Ager do
   subject(:ager) { Ager.new(birth_date) }
   let(:birth_date) { Date.new(1980,2,25) }
 
+  it 'properly calculates an age for an exception' do
+    ager = Ager.new(Date.new(1980,4,1))
+    expect(ager.age_as_of(Date.new(2015,4,1))).to eq 35
+  end
+
   it 'calculates the age as of a given date' do
     #same date as birth
     expect(ager.age_as_of(birth_date)).to eq 0

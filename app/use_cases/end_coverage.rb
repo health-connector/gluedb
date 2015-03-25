@@ -88,8 +88,12 @@ class EndCoverage
     subscriber = @policy.subscriber
 
     if @policy.is_shop?
-      strategy = @policy.employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
-      raise NoContributionStrategyError, "No contribution strategy found for #{@policy.employer.name} (fein: #{@policy.employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+      employer = @policy.employer
+      strategy = employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
+      raise NoContributionStrategyError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+      coverage_start_date = @policy.subscriber.coverage_start
+      plan_year = employer.plan_year_of(coverage_start_date)
+      raise NoContributionStrategyError, "policy start date #{coverage_start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
     end
 
     premium_calculator = Premiums::PolicyCalculator.new

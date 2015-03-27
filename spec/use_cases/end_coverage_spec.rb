@@ -9,7 +9,7 @@ describe EndCoverage do
       affected_enrollee_ids: affected_enrollee_ids,
       coverage_end: coverage_end,
       operation: operation,
-      reason: 'death',
+      reason: 'terminate',
       current_user: current_user,
       transmit: true
     }
@@ -299,7 +299,7 @@ describe EndCoverage do
       }
 
       it 'listener logs fail errors with error message' do
-        expect(bulk_cancel_term_listener).to receive(:no_contribution_strategy).with({:message=>"No contribution strategy found for Fakery (fein: 101010101) in plan year 2015"})
+        expect(bulk_cancel_term_listener).to receive(:no_contribution_strategy).with({:message=>"No contribution data found for Fakery (fein: 101010101) in plan year 2015"})
         expect(bulk_cancel_term_listener).to receive(:fail)
         end_coverage.execute_csv(request,bulk_cancel_term_listener)
       end

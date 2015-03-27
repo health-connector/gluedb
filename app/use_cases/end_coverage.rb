@@ -61,7 +61,7 @@ class EndCoverage
 
     begin
       update_policy(affected_enrollee_ids)
-    rescue NoContributionStrategyError => e
+    rescue PremiumCalcError => e
       listener.no_contribution_strategy(message: e.message)
       listener.fail(subscriber: request[:affected_enrollee_ids] )
     else
@@ -86,14 +86,17 @@ class EndCoverage
 
   def update_policy(affected_enrollee_ids)
     subscriber = @policy.subscriber
+    start_date  = @policy.subscriber.coverage_start
+    plan = @policy.plan
 
     if @policy.is_shop?
       employer = @policy.employer
-      strategy = employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
-      raise NoContributionStrategyError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
-      coverage_start_date = @policy.subscriber.coverage_start
-      plan_year = employer.plan_year_of(coverage_start_date)
-      raise NoContributionStrategyError, "policy start date #{coverage_start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
+      strategy = employer.plan_years.detect{|py| py.start_date.year == plan.year}.contribution_strategy
+      raise PremiumCalcError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+      plan_year = employer.plan_year_of(start_date)
+      raise PremiumCalcError, "policy start date #{coverage_start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
+    else
+      raise PremiumCalcError, "policy start date #{coverage_start_date} not in rate table for #{plan.year} plan #{plan.name} with hios #{plan.hios_plan_id} " unless plan.year == start_date.year
     end
 
     premium_calculator = Premiums::PolicyCalculator.new
@@ -171,7 +174,7 @@ class EndCoverage
     end
   end
 
-  class NoContributionStrategyError < StandardError
+  class PremiumCalcError < StandardError
 
   end
 end

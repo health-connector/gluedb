@@ -94,9 +94,9 @@ class EndCoverage
       strategy = employer.plan_years.detect{|py| py.start_date.year == plan.year}.contribution_strategy
       raise PremiumCalcError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
       plan_year = employer.plan_year_of(start_date)
-      raise PremiumCalcError, "policy start date #{coverage_start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
+      raise PremiumCalcError, "policy start date #{start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
     else
-      raise PremiumCalcError, "policy start date #{coverage_start_date} not in rate table for #{plan.year} plan #{plan.name} with hios #{plan.hios_plan_id} " unless plan.year == start_date.year
+      raise PremiumCalcError, "policy start date #{start_date} not in rate table for #{plan.year} plan #{plan.name} with hios #{plan.hios_plan_id} " unless plan.year == start_date.year
     end
 
     premium_calculator = Premiums::PolicyCalculator.new

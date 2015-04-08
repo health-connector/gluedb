@@ -20,8 +20,13 @@ carrier_hash = Carrier.all.inject({}) do |acc, c|
   acc
 end
 
+employer_hash = Employer.all.inject({}) do |acc, e|
+  acc[e.id] = e.name
+  acc
+end
+
 CSV.open("saadi_report.csv", 'w') do |csv|
-  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Start Date", "End Date", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "First", "Middle", "Last", "DOB", "SSN"]
+  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Sponsor" ,"Start Date", "End Date", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "First", "Middle", "Last", "DOB", "SSN"]
   policies.each_slice(25) do |pols|
     used_policies = pols.reject { |pl| bad_eg_id(pl) }
     member_ids = pols.map(&:enrollees).flatten.map(&:m_id)
@@ -37,10 +42,11 @@ CSV.open("saadi_report.csv", 'w') do |csv|
     used_policies.each do |pol|
       plan = plan_hash[pol.plan_id]
       carrier = carrier_hash[plan.carrier_id]
+      sponsor = pol.employer.blank? ? "Individual" : employer_hash[pol.employer_id]
       pol.enrollees.each do |en|
         member = members_map[en.m_id].first
         per = members_map[en.m_id].last
-        csv << [pol.eg_id, pol.aasm_state, member.authority?, pol._id, en.coverage_start, en.coverage_end, plan.coverage_type ,plan.hios_plan_id, plan.name, carrier.name, en.m_id, per.name_first, per.name_middle, per.name_last, member.dob.strftime("%Y%m%d"), member.ssn]
+        csv << [pol.eg_id, pol.aasm_state, member.authority?, pol._id, sponsor, en.coverage_start, en.coverage_end, plan.coverage_type ,plan.hios_plan_id, plan.name, carrier.name, en.m_id, per.name_first, per.name_middle, per.name_last, member.dob.strftime("%Y%m%d"), member.ssn]
       end
     end
   end

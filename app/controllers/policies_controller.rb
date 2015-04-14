@@ -18,7 +18,7 @@ class PoliciesController < ApplicationController
     raise request.inspect
 
     CreatePolicy.new.execute(request)
-    redirect_to application_groups_path
+    redirect_to families_path
   end
 
   def edit

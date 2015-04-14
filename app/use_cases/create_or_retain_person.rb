@@ -18,31 +18,20 @@ class CreateOrRetainPerson
                          "WARNING: SSN/Name mismatch\n" +
                          "message:#{e.message}\n"
 
-        array = e.message.split('person has').last.split(',')
-        first_name = array[0].strip
-        last_name = array[1].strip
-
-        matched_person, matched_member = PersonMatchStrategies::SsnDobLastName.new.match({:name_last => @person_params[:name_last],
+        person, member = PersonMatchStrategies::SsnDobName.new.match({:name_first => @person_params[:name_first],
+                                                                                          :name_last => @person_params[:name_last],
                                                                                           :ssn => @person_params[:ssn],
                                                                                           :dob => @person_params[:dob]})
-        if !matched_person.nil? && !matched_member.nil?
-          #puts "#{first_name}, #{last_name}"
-          @person_params[:name_first] = matched_person.name_first
-          @person_params[:name_last] = matched_person.name_last
-          #puts "end #{ig_request.inspect}"
-          tries = tries + 1
-          if tries < 2
-            retry
-          else
-            raise(e)
-          end
-        else
+
+        if person.nil? || member.nil?
           raise(e)
         end
       else
         raise(e)
       end
     end
+
+    [person, member]
   end
 
   def create

@@ -1,3 +1,14 @@
+# Rules for building a Family
+# 1) Add Family Members
+# 2) Add HbxEnrollments. Step 1 is a prerequisite as we need to know the primary applicant
+# 3) Add TaxHouseholds. Step 1 is a prerequisite as we have references to family member objects
+# 4) Add Financial Statements. Step 3 is a prerequisite as TaxHouseholds embeds many Financial Statements
+# 5) Add CoverageHouseholds. Step 1 is a prerequisite as we need to know the family members and their relationships w.r.t. primary applicant.
+#     Additionally  Step 2 may add more family member from Policy enrollees.
+# 6) Add IrsGroups. Step 1, 2, 3, 4 and 5 are prerequisites
+# All these steps but Step 1 happen in context of a Household. An empty household is build after Step 1 for a new Family.
+# While updating a Family, we build a new household if the composition of the family has changed.
+
 require "irs_groups/irs_group_builder"
 
 class FamilyBuilder

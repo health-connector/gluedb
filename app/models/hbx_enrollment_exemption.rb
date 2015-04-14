@@ -27,7 +27,7 @@ class HbxEnrollmentExemption
 
 
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
+    raise "undefined parent family" unless family
     self.family
   end
 

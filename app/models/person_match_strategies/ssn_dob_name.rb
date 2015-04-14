@@ -46,6 +46,4 @@ module PersonMatchStrategies
         glue_set.subset?(test_set) || test_set.subset?(glue_set)
     end
   end
-
-
 end

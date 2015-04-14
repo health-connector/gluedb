@@ -71,6 +71,14 @@ module Parsers
         @policy = policy
       end
 
+      def term_or_cancel_for_2014_individual(details)
+        @errors << "Cancel/Term issued on 2014 policy. Member #{details[:member_id]}, end date #{details[:date]}"
+      end
+
+      def effectuation_date_mismatch(details)
+        @errors << "Effectuation date mismatch: member #{details[:member_id]}, enrollee start: #{details[:policy]}, effectuation start: #{details[:effectuation]}"
+      end
+
       def policy_not_found(subkeys)
         @errors << "Policy not found. Details: #{subkeys}"
       end

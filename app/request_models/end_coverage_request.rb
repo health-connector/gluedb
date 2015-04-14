@@ -24,16 +24,28 @@ class EndCoverageRequest
   end
 
   def self.for_mass_silent_cancels(csv_request, current_user)
-    policy = Policy.find(csv_request[:policy_id])
-    {
-      policy_id: csv_request[:policy_id],
-      affected_enrollee_ids: [policy.subscriber.m_id], # subscriber triggers everyone
-      coverage_end: nil,
-      operation: 'cancel',
-      reason: 'termination_of_benefits',
-      transmit: false,
-      current_user: current_user
-    }
+    unless Policy.where({"_id" => csv_request[:policy_id]}).first.nil?
+      policy = Policy.find(csv_request[:policy_id])
+      {
+        policy_id: csv_request[:policy_id],
+        affected_enrollee_ids: [policy.subscriber.m_id], # subscriber triggers everyone
+        coverage_end: [policy.subscriber.coverage_start],
+        operation: 'cancel',
+        reason: 'termination_of_benefits',
+        transmit: true,
+        current_user: current_user
+      }
+    else
+      policy = {
+        policy_id: csv_request[:policy_id],
+        affected_enrollee_ids: nil, # subscriber triggers everyone
+        coverage_end: nil,
+        operation: 'cancel',
+        reason: 'termination_of_benefits',
+        transmit: true,
+        current_user: current_user
+      }
+    end
   end
 
   def self.for_bulk_terminates(csv_request, current_user)

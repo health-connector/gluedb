@@ -7,23 +7,22 @@ class MassSilentCancelsController < ApplicationController
   def create
     file = params[:mass_silent_cancels_file]
 
+    paramfile = file.original_filename
+    dl_name = File.basename(paramfile, File.extname(paramfile)) + "_status.csv"
+
     requests = CsvRequest.create_many(file.read.force_encoding('utf-8'), current_user.email)
-    change_address = ChangeMemberAddress.new(transmitter)
     end_coverage = EndCoverage.new(EndCoverageAction)
 
     out_stream = CSV.generate do |csv|
-      csv << ["policy_id"]
+      csv << ["Last Name", "First Name", "Middle Name", "Policy id", "End Date", "Subscriber id", "errors", "details"]
       requests.each do |csv_request|
+        error_logger = BulkCancelTerms::Csv.new(csv_request, csv)
         request = EndCoverageRequest.for_mass_silent_cancels(csv_request.to_hash, current_user.email)
-        end_coverage.execute(request)
+        end_coverage.execute_csv(request,error_logger)
       end
     end
 
-    flash_message(:success, "Upload successful.")
-    redirect_to new_vocab_upload_path
+    send_data out_stream, :filename => dl_name, :type => "text/csv", :disposition => "attachment"
   end
 
-  def transmitter
-    NullPolicyMaintenance.new
-  end
 end

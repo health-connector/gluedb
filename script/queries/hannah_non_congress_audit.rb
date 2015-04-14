@@ -3,13 +3,13 @@ require 'csv'
 congress_feins = %w{
 }
 
-emp_ids = Employer.where(:fein => { "$in" => congress_feins }).map(&:id)
+emp_ids = Employer.where(:fein => { "$nin" => congress_feins }).map(&:id)
 
 policies = Policy.where({
-      :enrollees => {"$elemMatch" => {
-        :rel_code => "self",
-        :coverage_start => {"$gt" => Date.new(2014,12,31)}
-      }}, :employer_id => { "$in" => emp_ids } }) 
+       :enrollees => {"$elemMatch" => {
+              :rel_code => "self", 
+                   :coverage_start => {"$gt" => Date.new(2014,4,30) }
+       }}, :employer_id => { "$in" => emp_ids } })
 
 plan_hash = Plan.all.inject({}) do |acc, p|
   acc[p.id] = p
@@ -23,13 +23,13 @@ end
 
 Caches::MongoidCache.allocate(Employer)
 
-CSV.open("hannah_congress_report.csv", 'w') do |csv|
+CSV.open("hannah_non_congress_report.csv", 'w') do |csv|
   csv << ["First Name", "Middle Name", "Last Name", "DOB", "SSN", "Employer", "FEIN", "HIOS ID", "Plan Name", "Dependents", "Premium Total", "Employer Responsible", "Employee Responsible", "Start", "End"]
   policies.each do |pol|
     subscriber = pol.subscriber
     begin
       if !pol.canceled?
-        if subscriber.coverage_start.blank? || (!(subscriber.coverage_start < Date.new(2014, 12, 31)))
+        if !(pol.coverage_period_end < Date.new(2015,4,1))
           sub_person = subscriber.person
           if (sub_person.authority_member.hbx_member_id == subscriber.m_id)
             deps = pol.enrollees.count - 1

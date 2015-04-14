@@ -18,7 +18,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
             "Plan Name", "HIOS ID", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
             "Coverage Start", "Coverage End",
-            "Employer Name","Address","Phone","Email"]
+            "Employer Name", "Address"]
     policies.each do |pol|
       if !bad_eg_id(pol.eg_id)
         if !pol.subscriber.nil?
@@ -59,8 +59,6 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   en.coverage_end.blank? ? nil : en.coverage_end.strftime("%Y%m%d"),
                   pol.employer_id.blank? ? nil : employer.name,
                   per.mailing_address.try(:full_address) || pol.subscriber.person.mailing_address.try(:full_address),
-                  per.home_phone.try(:phone_number) || pol.subscriber.person.home_phone.try(:phone_number),
-                  per.home_email.try(:email_address) || pol.subscriber.person.home_email.try(:email_address)
                 ]
               end
             end

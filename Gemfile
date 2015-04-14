@@ -43,7 +43,8 @@ end
 
 group :production do
   gem 'unicorn', '4.8.2'
-  gem 'bluepill', '0.0.68'
+#  gem 'bluepill', '0.0.68'
+  gem 'eye'
 end
 
 gem "haml"

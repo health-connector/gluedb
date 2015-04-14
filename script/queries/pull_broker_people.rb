@@ -36,9 +36,9 @@ Caches::MongoidCache.allocate(Broker)
 Caches::MongoidCache.allocate(Carrier)
 Caches::MongoidCache.allocate(Plan)
 
-CSV.open('brokers_with_glue_data_20150213.csv', 'w') do |csv|
+CSV.open('brokers_with_glue_data_20150318.csv', 'w') do |csv|
   csv << ["PROVIDERTYPE",  "PROVIDERPRACTICEBUSINESSAREA" , "PROVIDERREFERENCENUMBER", "NATIONALPRODUCERNUMBER", "PROVIDERNAME", "CLIENT_NAME", "SSN", "DOB", "USER_ACCOUNT", "PROVIDERSTATUS", "STARTDATE", "ENDDATE",
-          "CARRIERINGLUE", "BROKERINGLUE", "SHOP", "GLUE ENROLLMENT ID", "GLUE START DATE", "GLUE END DATE"]
+          "CARRIERINGLUE", "BROKERINGLUE", "SHOP", "GLUE ENROLLMENT ID", "GLUE START DATE", "GLUE END DATE","Plan Name","Plan Hios-id"]
 
   CSV.foreach("script/queries/brokers_from_curam.csv", :headers => true)do |inrow|
     row_a = inrow.fields
@@ -50,9 +50,9 @@ CSV.open('brokers_with_glue_data_20150213.csv', 'w') do |csv|
     else
 =begin
       per = Person.where({
-        "members" => { 
+        "members" => {
           "$elemMatch" => {
-            "ssn" => 
+            "ssn" =>
             row_h['SSN'].strip
           }
         }}).first
@@ -67,11 +67,13 @@ CSV.open('brokers_with_glue_data_20150213.csv', 'w') do |csv|
                 broker = Caches::MongoidCache.lookup(Broker, pol.broker_id) { pol.broker }
                 plan = Caches::MongoidCache.lookup(Plan, pol.plan_id) { pol.plan }
                 carrier = Caches::MongoidCache.lookup(Carrier, plan.carrier_id) { plan.carrier }
-                [carrier.name, broker.nil? ? "" : broker.name_full, 
+                [carrier.name, broker.nil? ? "" : broker.name_full,
                  pol.employer_id.blank? ? "N" : "Y",
                  pol.eg_id,
                  pol.subscriber.coverage_start,
-                 pol.subscriber.coverage_end
+                 pol.subscriber.coverage_end,
+                 pol.plan.name,
+                 pol.plan.hios_plan_id
                 ]
               end
               pol_vals.uniq.each do |pval|

@@ -14,7 +14,7 @@ module Clients
           :headers => {
             :hbx_member_id => authority_member.hbx_member_id
           }
-        }, "")
+        }, "", 2)
         dlr = Parsers::DocumentListResponse.parse(rbody)
         return [] if dlr.document.blank?
         dlr.document
@@ -22,6 +22,8 @@ module Clients
         conn.close
       end
       rescue Bunny::TCPConnectionFailed => e
+        []
+      rescue Timeout::Error => e
         []
       end
     end

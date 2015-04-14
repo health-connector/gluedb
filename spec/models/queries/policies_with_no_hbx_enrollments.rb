@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Queries::PoliciesWithNoHbxEnrollments do
+describe Queries::PoliciesWithNoFamilies do
 
   before(:all) do
 

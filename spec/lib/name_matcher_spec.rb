@@ -39,4 +39,16 @@ describe NameMatcher do
     expect(NameMatcher.new("luther","j. pullock-zen").match("luther","j pullock zen")).to be_true
   end
 
+  it "matches names which differ only by a '-' or '.' or ','" do
+    expect(NameMatcher.new("jeffrey","wieand").match("jeffrey","wieand, jr.")).to be_true
+  end
+
+  it "matches names kristopher, white; person has kristoper, white" do
+    expect(NameMatcher.new("kristopher","white").match("kristoper","white")).to be_falsey
+  end
+
+  it "matches names kevin jones" do
+    expect(NameMatcher.new("kevin","jones").match("kevin","jones jr")).to be_truthy
+  end
+
 end

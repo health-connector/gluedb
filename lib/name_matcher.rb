@@ -1,39 +1,44 @@
 class NameMatcher
 
-  SUFFIXES = %w(i ii iii iv v vi vii viii x jr sr)
+  SUFFIXES = %w(i ii iii iv v vi vii jr sr)
 
   def initialize(first_name, last_name)
 
     @first_name = first_name.strip.downcase
     @last_name = last_name.strip.downcase
-    @full_name = @first_name + " " + @last_name
+    @full_name = @first_name + @last_name
+    @normalized_full_name = normalize(@full_name)
   end
 
-
   def match(test_first_name, test_last_name)
-      test_first_name = test_first_name.downcase
-      test_last_name = test_last_name.downcase
 
-      test_full_name = test_first_name.strip + " " + test_last_name.strip
+    test_full_name = (test_first_name + test_last_name).downcase
+    normalized_test_full_name = normalize(test_full_name)
 
-      test_full_name = test_full_name.downcase
+    return true if @normalized_full_name.eql? normalized_test_full_name # names are same
 
-      return true if @full_name.eql?(test_full_name) # both names exactly same
+    diff = nil
 
-      return true if @full_name.gsub(/[-.]/,' ').gsub('  ', ' ').eql?(test_full_name.gsub(/[-.]/,' ').gsub('  ', ' ')) # both names same after removing '-'
 
-      return false unless @first_name.eql?(test_first_name)
+    # test if difference between two name is a SUFFIX
+    if(@normalized_full_name.length > normalized_test_full_name.length)
+      #diff = (@normalized_full_name.split('') - normalized_test_full_name.split('')).join('')
+      #puts "1 #{@normalized_full_name} #{normalized_test_full_name}"
+      diff = @normalized_full_name.gsub(normalized_test_full_name,'')
+    else
+      #diff = (normalized_test_full_name.split('') - @normalized_full_name.split('')).join('')
+      #puts "2 #{@normalized_full_name} #{normalized_test_full_name}"
+      diff = normalized_test_full_name.gsub(@normalized_full_name, '')
+    end
 
-      if(@last_name.length > test_last_name.length)
-        diff = @last_name.split('') - test_last_name.split('') # convert to array and subtract to get difference
-      else
-        diff = test_last_name.split('') - @last_name.split('') # convert to array and subtract to get difference
-      end
+    #puts "#{diff.to_s} diff is blank? #{diff.blank?}"
 
-      diff = diff.join('').strip.gsub('.','') # remove any '.'
+    SUFFIXES.include?(diff) || diff.blank?
+  end
 
-      diff = diff.split(' ') #array will include one or more suffixes e.g. iii jr
+  private
 
-      SUFFIXES.length > (SUFFIXES - diff).length
+  def normalize(name)
+    name.gsub(/[^a-z]/i, '')
   end
 end

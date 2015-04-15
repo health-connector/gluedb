@@ -72,17 +72,17 @@ class Household
     coverage_households.sort_by(&:submitted_at).last.submitted_at
   end
 
-  def applicant_ids
-    th_applicant_ids = tax_households.inject([]) do |acc, th|
-      acc + th.applicant_ids
+  def family_member_ids
+    th_family_member_ids = tax_households.inject([]) do |acc, th|
+      acc + th.family_member_ids
     end
-    ch_applicant_ids = coverage_households.inject([]) do |acc, ch|
-      acc + ch.applicant_ids
+    ch_family_member_ids = coverage_households.inject([]) do |acc, ch|
+      acc + ch.family_member_ids
     end
-    hbxe_applicant_ids = hbx_enrollments.inject([]) do |acc, he|
-      acc + he.applicant_ids
+    hbxe_family_member_ids = hbx_enrollments.inject([]) do |acc, he|
+      acc + he.family_member_ids
     end
-    (th_applicant_ids + ch_applicant_ids + hbxe_applicant_ids).distinct
+    (th_family_member_ids + ch_family_member_ids + hbxe_family_member_ids).distinct
   end
 
   # This will set the effective_end_date of previously active household to 1 day

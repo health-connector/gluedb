@@ -80,7 +80,7 @@ class HbxEnrollment
     household.family
   end
 
-  def applicant_ids
+  def family_member_ids
     hbx_enrollment_members.map(&:applicant_id)
   end
 

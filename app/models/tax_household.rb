@@ -3,7 +3,7 @@ class TaxHousehold
   include Mongoid::Timestamps
   include HasFamilyMembers
 
-  # A set of applicants, grouped according to IRS and ACA rules, who are considered a single unit
+  # A set of family_members, grouped according to IRS and ACA rules, who are considered a single unit
   # when determining eligibility for Insurance Assistance and Medicaid
 
   embedded_in :household
@@ -83,7 +83,7 @@ class TaxHousehold
 
   # Income sum of all tax filers in this Household for specified year
   def total_incomes_by_year
-    applicant_links.inject({}) do |acc, per|
+    family_member_links.inject({}) do |acc, per|
       p_incomes = per.financial_statements.inject({}) do |acc, ae|
         acc.merge(ae.total_incomes_by_year) { |k, ov, nv| ov + nv }
       end

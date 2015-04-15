@@ -3,7 +3,7 @@ class CoverageHousehold
   include Mongoid::Timestamps
   include HasFamilyMembers
 
-  # The pool of all applicants eligible for enrollment during a certain time period
+  # The pool of all family_members eligible for enrollment during a certain time period
 
   embedded_in :household
 
@@ -48,7 +48,7 @@ class CoverageHousehold
     same_people = people_in_coverage_household.map(&:id).uniq.sort == people_in_policies.map(&:id).uniq.sort
 
     unless same_people
-      self.errors.add(:base, "Applicants in coverage household are not the same as enrollees covered in policies")
+      self.errors.add(:base, "family_members in coverage household are not the same as enrollees covered in policies")
     end
   end
 

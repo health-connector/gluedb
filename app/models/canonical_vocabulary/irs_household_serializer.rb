@@ -94,14 +94,14 @@ module CanonicalVocabulary
     end
 
     def serialize_household_members(xml, household)
-      applicants_xml = @app_group.applicants_xml
-      primary_xml = applicants_xml[household.primary]
+      family_members_xml = @app_group.family_members_xml
+      primary_xml = family_members_xml[household.primary]
       individual = Parsers::Xml::Reports::Individual.new(primary_xml)
       serialize_individual(xml, individual)
 
       serialize_members = Proc.new do |xml, members|
         members.each do |key, val|
-          applicant_xml = applicants_xml[key]
+          applicant_xml = family_members_xml[key]
           individual = Parsers::Xml::Reports::Individual.new(applicant_xml)
           serialize_individual(xml, individual, val.camelcase)
         end

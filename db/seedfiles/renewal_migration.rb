@@ -40,9 +40,9 @@ def migrate_relationships(app_group)
 end
 
 def build_applicant_list(app_group)
-  applicants = []
+  family_members = []
 
-  # Distinct applicants may be found in both person_relationships and enrollments
+  # Distinct family_members may be found in both person_relationships and enrollments
   app_group.person_relationships.each do |rel|
     p0 = Person.find(rel["subject_person"])
     p1 = Person.find(rel["object_person"])
@@ -54,14 +54,14 @@ def build_applicant_list(app_group)
     else
       appl = FamilyMember.new(person: p1)
     end
-    applicants << appl
+    family_members << appl
   end
 
   # Find enrollees from all polocies associated with Primary Applicant
   # primary_appl.person.policies.collect do |policy|
   # end
 
-  applicants
+  family_members
 end
 
 def build_enrollments(app_group)

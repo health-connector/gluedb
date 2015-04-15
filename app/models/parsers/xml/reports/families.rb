@@ -10,7 +10,7 @@ module Parsers::Xml::Reports
       # parser = Nokogiri::XML(parser).root
       @root = parser
       @individual_policy_holders = {}
-      @quotes_for_applicants = {}
+      @quotes_for_family_members = {}
       @future_plans_by_coverage = {}
       @policy_details = {}
       populate_individual_policies
@@ -33,7 +33,7 @@ module Parsers::Xml::Reports
       @root.at_xpath("n1:primary_applicant_id").text
     end
 
-    # TODO: need to confirm applicants can't have duplicates
+    # TODO: need to confirm family_members can't have duplicates
     def size
       @root.xpath("n1:applicants/n1:applicant").count
     end
@@ -67,7 +67,7 @@ module Parsers::Xml::Reports
     end
     
     def quoted_insurance_premium(coverage)
-      @quotes_for_applicants.values.inject(0.0) do |premium, quote| 
+      @quotes_for_family_members.values.inject(0.0) do |premium, quote|
         premium + quote[coverage].to_f
       end
     end
@@ -104,7 +104,7 @@ module Parsers::Xml::Reports
         quotes[coverage] = quote_link.rate
         @future_plans_by_coverage[coverage] = quote_link.qhp_id
       end
-      @quotes_for_applicants[applicant_link.person_id] = quotes
+      @quotes_for_family_members[applicant_link.person_id] = quotes
     end
 
     def policies_details     

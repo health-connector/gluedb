@@ -22,7 +22,7 @@ class FamilyBuilder
     $error_dir ||= File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
 
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
-    @new_family_members = [] #this will include all the new family members objects we create. In case of update family will have old applicants
+    @new_family_members = [] #this will include all the new family members objects we create. In case of update family will have old family_members
 
     if param.nil? || person_mapper.nil?
       initialize_with_nil_params
@@ -199,7 +199,7 @@ class FamilyBuilder
       @household = self.family.households.build #if new application group then create new household
       @save_list << @household
     elsif have_family_members_changed?
-      #puts "Update Application Group Case - Applicants have changed. Creating new household"
+      #puts "Update Application Group Case - family_members have changed. Creating new household"
       @household = self.family.households.build #if family members have changed then create new household
       @save_list << @household
     else

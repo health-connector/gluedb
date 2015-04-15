@@ -7,7 +7,7 @@ describe Soap::V1::ApplicationGroupsController do
 
 
   before(:all) do
-    @client = Savon::Client.new(wsdl: "http://localhost:3000/soap/v1/application_groups/wsdl?user_token=zUzBsoTSKPbvXCQsB4Ky")
+    @client = Savon::Client.new(wsdl: "http://localhost:3000/soap/v1/familys/wsdl?user_token=zUzBsoTSKPbvXCQsB4Ky")
   end
 
   describe "index service" do

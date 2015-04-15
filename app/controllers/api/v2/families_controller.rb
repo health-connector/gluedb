@@ -1,4 +1,4 @@
-class Api::V2::ApplicationGroupsController < ApplicationController
+class Api::V2::FamiliesController < ApplicationController
 
   def index
     search = {}

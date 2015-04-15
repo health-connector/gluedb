@@ -23,10 +23,10 @@ class Person
   field :is_active, type: Boolean, default: true
 
   # We've moved to a many-to-many
-  # field :application_group, type: Moped::BSON::ObjectId
+  # field :family, type: Moped::BSON::ObjectId
 
   # TODO: reference authority member by Mongo ID
-  # field :application_group, type: Moped::BSON::ObjectId
+  # field :family, type: Moped::BSON::ObjectId
   field :authority_member_id, type: String, default: nil
   index({"authority_member_id" => 1})
 

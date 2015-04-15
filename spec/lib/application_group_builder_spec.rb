@@ -20,15 +20,15 @@ describe FamilyBuilder do
 
   before(:each){
     @params = { e_case_id:'12345', submitted_at:DateTime.now}
-    @application_group_builder = FamilyBuilder.new(@params, person_mapper)
-    @family = @application_group_builder.family
+    @family_builder = FamilyBuilder.new(@params, person_mapper)
+    @family = @family_builder.family
   }
 
 
 =begin
   it 'adds an applicant' do
-    @application_group_builder.add_applicant(applicant_params)
-    expect(@application_group.family_members.size).to eq(1)
+    @family_builder.add_applicant(applicant_params)
+    expect(@family.family_members.size).to eq(1)
   end
 =end
 

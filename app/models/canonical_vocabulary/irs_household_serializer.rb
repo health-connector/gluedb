@@ -25,7 +25,7 @@ module CanonicalVocabulary
             xml.HealthExchangeId "00.AA*.000.000.000"
             group_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}families/5431b03feb899a49e0000004?user_token=zUzBsoTSKPbvXCQsB4Ky"))
             app_group_xml = Nokogiri::XML(group_xml).root
-            @app_group = Parsers::Xml::Reports::ApplicationGroup.new(app_group_xml)
+            @app_group = Parsers::Xml::Reports::Family.new(app_group_xml)
             next if @app_group.individual_policies.empty?
             serialize_irs_household_grp(xml)
           end

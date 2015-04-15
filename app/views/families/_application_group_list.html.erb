@@ -12,7 +12,7 @@
       <% families.each do |ag| %>
       <tr>
         <% label_ref = ag.primary_applicant ? ag.primary_applicant.full_name : ag.id %>
-        <td><%= link_to prepend_glyph_to_name(label_ref), application_group_path(ag) %> </td>
+        <td><%= link_to prepend_glyph_to_name(label_ref), family_path(ag) %> </td>
         <td><%= ag.family_members.size %></td>
         <td><%= ag.hbx_enrollments.size %></td>
         <td><%= ag.submitted_date %></td>

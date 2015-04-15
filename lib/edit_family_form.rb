@@ -1,5 +1,5 @@
-class EditApplicationGroupForm  
-  include ActiveModel::Conversion
+class EditFamilyForm
+include ActiveModel::Conversion
   # include ActiveModel::Validations
   extend ActiveModel::Naming
 
@@ -14,7 +14,7 @@ class EditApplicationGroupForm
   end
 
   attr_accessor :people
-  attr_accessor :application_group
+  attr_accessor :family
 
   def initialize(params = {})
     @family = Family.find(params[:id])

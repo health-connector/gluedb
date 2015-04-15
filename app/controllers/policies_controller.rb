@@ -3,7 +3,7 @@ class PoliciesController < ApplicationController
   rescue_from EndCoverage::PremiumCalcError, with: :redirect_back_with_message
 
   def new
-    @form = PolicyForm.new(application_group_id: params[:application_group_id], household_id: params[:household_id])
+    @form = PolicyForm.new(family_id: params[:family_id], household_id: params[:household_id])
   end
 
   def show

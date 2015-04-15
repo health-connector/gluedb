@@ -15,7 +15,7 @@ class FamiliesController < ApplicationController
   end
 
   def edit
-    @edit_form = EditApplicationGroupForm.new(params)
+    @edit_form = EditFamilyForm.new(params)
   end
 
   def update
@@ -31,7 +31,7 @@ class FamiliesController < ApplicationController
 
   private
     def people_to_remove
-      ppl_hash = params[:edit_application_group_form].fetch(:people_attributes) { {} }
+      ppl_hash = params[:edit_family_form].fetch(:people_attributes) { {} }
 
       ids = []
       ppl_hash.each_pair do |index, person|

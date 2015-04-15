@@ -8,7 +8,7 @@ module Parsers::Xml::Cv
     namespace 'cv'
 
     element :id, String, tag: "id/cv:id"
-    element :application_group_id, String, tag: "application_group_id/cv:id"
+    element :family_id, String, tag: "application_group_id/cv:id"
     element :tax_household_id, String, tag: "tax_household_id/cv:id"
     has_one :person, Parsers::Xml::Cv::PersonParser, tag: 'person'
     has_one :benefit, Parsers::Xml::Cv::EnrolleeBenefitParser, tag: 'benefit'
@@ -17,7 +17,7 @@ module Parsers::Xml::Cv
       result = {
           id:id,
           hbx_member_id:id,
-          application_group_id:application_group_id,
+          family_id:family_id,
           tax_household_id:tax_household_id,
           person:person.to_hash,
       }

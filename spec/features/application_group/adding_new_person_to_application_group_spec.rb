@@ -9,7 +9,7 @@
 
 #     app_group = ApplicationGroup.create
 
-#     visit application_group_path(app_group.id)
+#     visit family_path(app_group.id)
 
 #     person = build :person
 
@@ -48,7 +48,7 @@
 #     expect(page).to have_content 'Person was successfully created.'
 
 #     expect(page).to have_content person.name_full
-#     expect(URI.parse(current_url).path).to eq application_group_path(app_group.id)
+#     expect(URI.parse(current_url).path).to eq family_path(app_group.id)
 
 #   end
 

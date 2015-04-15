@@ -23,11 +23,11 @@ module CanonicalVocabulary
         @row = 1
       end
       
-      def setup(application_group)
-        @family = application_group
+      def setup(family)
+        @family = family
 
-        # individuals = find_many_individuals_by_id(@application_group.applicant_person_ids)
-        # @primary = individuals.detect { |i| (i.id == @application_group.primary_applicant_id || individuals.count == 1) }
+        # individuals = find_many_individuals_by_id(@family.applicant_person_ids)
+        # @primary = individuals.detect { |i| (i.id == @family.primary_applicant_id || individuals.count == 1) }
         @primary = @family.primary_applicant
         raise "Primary Applicant Address Not Present" if @primary.person.addresses.empty?
 
@@ -41,12 +41,12 @@ module CanonicalVocabulary
         end
       end
 
-      def append_household(application_group)
+      def append_household(family)
         begin
-          setup(application_group)
+          setup(family)
           build_report
         rescue Exception  => e
-          @renewal_logger.info "#{application_group.id.match(/\w+$/)},#{e.inspect}"
+          @renewal_logger.info "#{family.id.match(/\w+$/)},#{e.inspect}"
         end
       end
 

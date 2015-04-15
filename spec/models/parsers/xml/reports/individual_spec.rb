@@ -7,7 +7,7 @@ module Parsers::Xml::Reports
     let(:namespace) { 'http://openhbx.org/api/terms/1.0' }
     let(:individual_xml) { "<n1:individual xmlns:n1=\"#{namespace}\">
       <n1:id>#{person_id}</n1:id>
-      <n1:application_group_id>#{application_group_id}</n1:application_group_id>
+      <n1:application_group_id>#{family_id}</n1:application_group_id>
       #{person}
       #{person_demographics}
       #{person_relationships}
@@ -17,7 +17,7 @@ module Parsers::Xml::Reports
     }
 
     let(:person_id) { '32231423121' }
-    let(:application_group_id) {'331134134113434353'}
+    let(:family_id) {'331134134113434353'}
 
     let(:person) { 
       "<n1:person>
@@ -98,7 +98,7 @@ module Parsers::Xml::Reports
       subject = Individual.new(individual.root)
       subject.root_level_elements
       expect(subject.root_elements.id).to eq person_id
-      expect(subject.root_elements.application_group_id).to eq application_group_id
+      expect(subject.root_elements.family_id).to eq family_id
     end
 
     it 'should parse person details' do

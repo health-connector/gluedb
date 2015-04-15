@@ -53,11 +53,11 @@
       </dl>
     <% end %>
     <% if family.family_members.size < 2 %>
-      <%= link_to(applicant_links_application_group_path) do %>
+      <%= link_to(applicant_links_family_path) do %>
         <p>There is 1 person in this <%= "group" %></p>
       <% end %>
     <% else %>
-      <p><%= "There are #{ family.family_members.size } people in this #{ link_to 'group', application_group_path(family) }" %></p>
+      <p><%= "There are #{ family.family_members.size } people in this #{ link_to 'group', family_path(family) }" %></p>
     <% end %>
   </div>
 </div>

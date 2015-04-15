@@ -33,7 +33,7 @@ class PeopleController < ApplicationController
   end
 
   def new
-    @person = Person.new(application_group_id: params[:application_group_id])
+    @person = Person.new(family_id: params[:family_id])
     build_nested_models
 
     @person.addresses.first.city = "Washington"

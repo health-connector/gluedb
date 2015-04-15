@@ -3,11 +3,11 @@ require 'spec_helper'
 
 describe AddPerson do
   subject(:add_person) { AddPerson.new() }
-  let(:application_group) { ApplicationGroup.new }
+  let(:family) { ApplicationGroup.new }
   let(:requested_relationship) { 'self' }
-  let(:person) { create(:person, application_group_id: application_group.id) }
+  let(:person) { create(:person, family_id: family.id) }
 
-  before { application_group.save }
+  before { family.save }
 
   it 'saves person to the database' do 
     expect { add_person.execute(person, requested_relationship) }.to change{ Person.count }.by(1)
@@ -15,7 +15,7 @@ describe AddPerson do
 
   it 'associates to an application group' do
     add_person.execute(person, requested_relationship)
-    expect(application_group.people).to include Person.last
+    expect(family.people).to include Person.last
   end
 
   describe 'relationship assignment' do
@@ -26,10 +26,10 @@ describe AddPerson do
       it 'creates a relationship with itself' do
         add_person.execute(person, requested_relationship)
 
-        application_group.reload
+        family.reload
 
         added_person = Person.last
-        relationship = application_group.person_relationships.first
+        relationship = family.person_relationships.first
         expect(relationship.subject_person).to eq added_person.id
         expect(relationship.relationship_kind).to eq assigned_relationship
         expect(relationship.object_person).to eq added_person.id
@@ -37,14 +37,14 @@ describe AddPerson do
 
       it 'associates to an application group' do
         add_person.execute(person, requested_relationship)
-        application_group.reload
+        family.reload
         added_person = Person.last
-        expect(application_group.people).to include added_person
+        expect(family.people).to include added_person
       end
     end
 
     context 'no representative(self) in group' do
-      let(:representative) { create(:person, application_group_id: application_group.id) }
+      let(:representative) { create(:person, family_id: family.id) }
       let(:requested_relationship) { 'spouse' }
 
       before { add_person.execute(representative, 'self' ) }
@@ -52,10 +52,10 @@ describe AddPerson do
       it 'creates a relationship to the person marked as self' do
         add_person.execute(person, requested_relationship)
 
-        application_group.reload
+        family.reload
         added_person = Person.last
 
-        relationship = application_group.person_relationships.last
+        relationship = family.person_relationships.last
         expect(relationship.subject_person).to eq Person.first.id
         expect(relationship.relationship_kind).to eq requested_relationship
         expect(relationship.object_person).to eq added_person.id

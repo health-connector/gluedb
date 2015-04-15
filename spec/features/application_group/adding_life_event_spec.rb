@@ -9,7 +9,7 @@ feature 'adding life event to application group' do
 
     app_group = ApplicationGroup.create
 
-    visit application_group_path(app_group.id)
+    visit family_path(app_group.id)
 
     event = SpecialEnrollmentPeriod.new(reason: 'birth', start_date: Date.new(2014, 1, 1), end_date: Date.new(2014, 2, 1))
 

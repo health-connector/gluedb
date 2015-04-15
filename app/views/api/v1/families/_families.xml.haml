@@ -1,4 +1,4 @@
-= render 'shared/identity', id: api_v1_application_group_url(group.id)
+= render 'shared/identity', id: api_v1_family_url(group.id)
 - if group.primary_applicant_id.present?
   %n1:primary_applicant_id= group.primary_applicant_id
 - if group.consent_applicant_id.present?
@@ -15,7 +15,7 @@
 - if group.households.empty? # fake household
   %n1:households
     %n1:household
-      = render "shared/application_group_as_household", application_group: group
+      = render "shared/family_as_household", family: group
 - unless group.households.empty?
   %n1:households
     - group.households.each do |household|

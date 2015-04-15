@@ -22,7 +22,7 @@ class FamilyBuilder
     $error_dir ||= File.join(Rails.root, "log", "error_xmls_from_curam_#{Time.now.to_s.gsub(' ', '')}")
 
     @save_list = [] # it is observed that some embedded objects are not saved. We add all embedded/associated objects to this list and save them explicitly
-    @new_family_members = [] #this will include all the new family members objects we create. In case of update application_group will have old applicants
+    @new_family_members = [] #this will include all the new family members objects we create. In case of update family will have old applicants
 
     if param.nil? || person_mapper.nil?
       initialize_with_nil_params
@@ -366,7 +366,7 @@ class FamilyBuilder
     end
   end
 
-  ## Fetches the family_member object either from application_group or person_mapper
+  ## Fetches the family_member object either from family or person_mapper
   def get_family_member(person_obj)
     new_family_member = self.family.family_members.find do |family_member|
       family_member.id == @person_mapper.applicant_map[person_obj.id].id

@@ -19,7 +19,7 @@ class IrsGroup
   index({hbx_assigned_id: 1})
 
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
+    raise "undefined parent ApplicationGroup" unless family?
     self.family
   end
 

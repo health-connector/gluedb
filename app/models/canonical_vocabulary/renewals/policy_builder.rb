@@ -2,8 +2,8 @@ module CanonicalVocabulary
   module Renewals
 
     class PolicyBuilder
-      def initialize(application_group)
-        @family = application_group
+      def initialize(family)
+        @family = family
         generate_policy_details
       end
 

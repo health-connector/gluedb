@@ -1,4 +1,4 @@
-= render 'shared/identity', id: api_v1_application_group_url(family.id)
+= render 'shared/identity', id: api_v1_family_url(family.id)
 -if family.e_case_id.present?
   %n1:e_pdc_id= family.e_case_id
 %n1:primary_applicant_id= family.primary_applicant_id

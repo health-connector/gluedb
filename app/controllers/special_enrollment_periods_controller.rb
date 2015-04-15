@@ -1,13 +1,13 @@
 class SpecialEnrollmentPeriodsController < ApplicationController
 
   def new
-    @sep = SpecialEnrollmentPeriod.new(application_group_id: params[:application_group_id])
-    @family = Family.find(params[:application_group_id])
+    @sep = SpecialEnrollmentPeriod.new(family_id: params[:family_id])
+    @family = Family.find(params[:family_id])
     
   end
 
   def create
-    @family = Family.find(params[:application_group_id])
+    @family = Family.find(params[:family_id])
     @sep = SpecialEnrollmentPeriod.new(params[:special_enrollment_period])
 
     if(@sep.valid?)

@@ -193,7 +193,7 @@ Gluedb::Application.routes.draw do
     end
     resources :families, :only => [] do
       collection do
-        post 'get_by_application_group_id'
+        post 'get_by_family_id'
         get 'wsdl'
       end
     end

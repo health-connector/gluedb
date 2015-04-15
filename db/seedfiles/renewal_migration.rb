@@ -1,6 +1,6 @@
-application_group = Family.limit(10)
-application_group = Family.first.to_a
-# application_group = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
+family = Family.limit(10)
+family = Family.first.to_a
+# family = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
 
 # Move person_relationships from ApplicationGroup to Person model
 def migrate_relationships(app_group)
@@ -112,7 +112,7 @@ def build_enrollments(app_group)
   enrollments
 end
 
-application_group.each do |ag|
+family.each do |ag|
 
   hh = Household.new(
       family: ag,

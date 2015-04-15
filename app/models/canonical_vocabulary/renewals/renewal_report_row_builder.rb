@@ -5,9 +5,9 @@ module CanonicalVocabulary
 
       attr_reader :data_set
 
-      def initialize(application_group, primary)
+      def initialize(family, primary)
         @data_set = []
-        @family = application_group
+        @family = family
         @primary = primary
       end
 

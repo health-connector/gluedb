@@ -1,7 +1,7 @@
 module Parsers
   module Edi
     module Etf
-      class ApplicationGroupParser
+      class FamilyParser
         attr_reader :member_ids
 
         def initialize(people_loops)

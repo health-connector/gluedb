@@ -1,5 +1,5 @@
 module Parsers::Xml::Reports
-  class ApplicationGroup
+  class Family
     
     attr_reader :individual_policy_holders
 

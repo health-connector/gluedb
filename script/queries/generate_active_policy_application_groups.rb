@@ -27,13 +27,13 @@ active_pols.each do |pol|
   )
   case ags.count
   when 0
-    application_group = create_me_a_group(sub, member_people)
-    pol.application_group = ags.first
+    family = create_me_a_group(sub, member_people)
+    pol.family = ags.first
     pol.save!
   when 1
     ag = ags.first
     add_people_to_group(ag, member_people)
-    pol.application_group = ag
+    pol.family = ag
     pol.save
   else
   end

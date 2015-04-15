@@ -13,7 +13,7 @@ class RenewalReports
   def generate_groupids
     scope = (@report_type == 'assisted' ? 'insurance_assisted' : 'unassisted')
     policies = Policy.individual_market.send(scope).select{|policy| policy.active_and_renewal_eligible?}
-    groups = policies.map{|policy| policy.application_group_id}.uniq.compact
+    groups = policies.map{|policy| policy.family_id}.uniq.compact
     valid_groups = groups.select{|group_id| valid_family?(group_id)}
     generate_spreadsheet(valid_groups, "#{@report_type}_groups.xls")
   end

@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe AddPerson do
   subject(:add_person) { AddPerson.new() }
-  let(:family) { ApplicationGroup.new }
+  let(:family) { Family.new }
   let(:requested_relationship) { 'self' }
   let(:person) { create(:person, family_id: family.id) }
 

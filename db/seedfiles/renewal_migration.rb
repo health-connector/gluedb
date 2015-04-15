@@ -1,8 +1,8 @@
 family = Family.limit(10)
 family = Family.first.to_a
-# family = ApplicationGroup.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
+# family = Family.where("updated_by" => {"$ne" => "renewal_migration_service"}).no_timeout
 
-# Move person_relationships from ApplicationGroup to Person model
+# Move person_relationships from Family to Person model
 def migrate_relationships(app_group)
   app_group.person_relationships.each do |rel|
 
@@ -123,7 +123,7 @@ family.each do |ag|
       submitted_at: Time.now
   )
 
-  # Move the ApplicationGroup relationships to repsective Person models
+  # Move the Family relationships to repsective Person models
   migrate_relationships(ag)
 
   ag.family_members = build_applicant_list(ag)

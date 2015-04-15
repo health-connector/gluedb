@@ -141,7 +141,7 @@ module Parsers
               edi_transmission.save!
 
               persist_people(etf_loop, employer_id)
-              #              Etf::ApplicationGroupParser.new(etf.people).persist!
+              #              Etf::FamilyParser.new(etf.people).persist!
             end
           end
         end

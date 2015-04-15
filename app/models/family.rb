@@ -16,7 +16,7 @@ class Family
   field :renewal_consent_through_year, type: Integer  # Authorize auto-renewal elibility check through this year (CCYY format)
 
   field :aasm_state, type: String
-  field :is_active, type: Boolean, default: true   # ApplicationGroup active on the Exchange?
+  field :is_active, type: Boolean, default: true   # Family active on the Exchange?
   field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
 

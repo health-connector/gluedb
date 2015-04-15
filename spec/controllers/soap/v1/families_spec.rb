@@ -3,7 +3,7 @@ require 'rails_helper'
 require 'savon'
 
 
-describe Soap::V1::ApplicationGroupsController do
+describe Soap::V1::FamilysController do
 
 
   before(:all) do

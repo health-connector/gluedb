@@ -7,7 +7,7 @@
 #     visit root_path
 #     sign_in_with(user.email, user.password)
 
-#     app_group = ApplicationGroup.create
+#     app_group = Family.create
 
 #     visit family_path(app_group.id)
 

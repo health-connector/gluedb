@@ -27,7 +27,7 @@ class Logger::SimpleJsonFormatter < Logger::Formatter
 
   def format_datetime(time)
     if @datetime_format.nil?
-      time.strftime("%s.%6N")
+      time.strftime("%Q")
     else
       time.strftime(@datetime_format)
     end

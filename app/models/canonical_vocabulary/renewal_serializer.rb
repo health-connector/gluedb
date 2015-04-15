@@ -23,7 +23,7 @@ module CanonicalVocabulary
 
     def serialize_groupids(group_ids)
       begin
-        groups_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}application_groups?ids[]=#{group_ids.join("&ids[]=")}&user_token=zUzBsoTSKPbvXCQsB4Ky"))
+        groups_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}families?ids[]=#{group_ids.join("&ids[]=")}&user_token=zUzBsoTSKPbvXCQsB4Ky"))
         root = Nokogiri::XML(groups_xml).root
         root.xpath("n1:application_group").each do |application_group_xml|
           process_application_group(application_group_xml)

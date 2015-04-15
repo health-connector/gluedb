@@ -21,17 +21,17 @@ module Parsers
              acc
           end
 
-          existing_application_groups = find_existing_application_groups(people.map(&:_id))
+          existing_families = find_existing_families(people.map(&:_id))
           final_group = nil
-          if existing_application_groups.count > 1
+          if existing_families.count > 1
             # Hooray! Merge tiems!
-            final_group = merge_multiple_existing(existing_application_groups, primary_loop.member_id, loop_lookup, people_lookup)
-          elsif existing_application_groups.count == 1
+            final_group = merge_multiple_existing(existing_families, primary_loop.member_id, loop_lookup, people_lookup)
+          elsif existing_families.count == 1
             # Add all the people to the existing group
-            final_group = merge_with_existing(existing_application_groups.first, primary_loop.member_id, loop_lookup, people_lookup)
+            final_group = merge_with_existing(existing_families.first, primary_loop.member_id, loop_lookup, people_lookup)
           else
             # Do a brand new application group
-            final_group = new_application_groups(primary_loop.member_id, loop_lookup, people_lookup)
+            final_group = new_families(primary_loop.member_id, loop_lookup, people_lookup)
           end
 
           people_ids = final_group.person_relationships.inject([]) do |acc, rel|
@@ -74,8 +74,8 @@ module Parsers
           end
         end
 
-        def merge_multiple_existing(application_groups, primary_member_key, loop_lookup, people_lookup)
-          prime, *rest = application_groups
+        def merge_multiple_existing(families, primary_member_key, loop_lookup, people_lookup)
+          prime, *rest = families
           existing = extract_triples(prime)
           new_relationships = create_relationship_triples(primary_member_key, loop_lookup, people_lookup)
           other_relationships = rest.inject([]) do |acc, eag|
@@ -128,7 +128,7 @@ module Parsers
           existing_group
         end
 
-        def new_application_groups(primary_member_key, loop_lookup, people_lookup)
+        def new_families(primary_member_key, loop_lookup, people_lookup)
           new_group = Family.new
           create_relationship_triples(primary_member_key, loop_lookup, people_lookup).each do |rt|
               new_group.person_relationships << PersonRelationship.new({
@@ -140,7 +140,7 @@ module Parsers
           new_group
         end
 
-        def find_existing_application_groups(person_ids)
+        def find_existing_families(person_ids)
           Family.where(
             "$or" => [
               {

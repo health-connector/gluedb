@@ -8,8 +8,8 @@
     </tr>
   </thead>
     <tbody>
-      <%= table_empty_to_human if application_groups.count < 1 %>
-      <% application_groups.each do |ag| %>
+      <%= table_empty_to_human if families.count < 1 %>
+      <% families.each do |ag| %>
       <tr>
         <% label_ref = ag.primary_applicant ? ag.primary_applicant.full_name : ag.id %>
         <td><%= link_to prepend_glyph_to_name(label_ref), application_group_path(ag) %> </td>

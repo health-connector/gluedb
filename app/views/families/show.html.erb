@@ -3,7 +3,7 @@
 <div class="page-header">
   <%- #pid = @application_group.person_relationships.first.subject_person -%>
   <%= render 'shared/breadcrumb', crumbs: [
-    link_to('Application Groups', application_groups_path),
+    link_to('Application Groups', families_path),
     @family.id
       # Person.find(pid).name_full
     ]
@@ -72,7 +72,7 @@
 
     <div class="well well-sm default">
       <div class="form-actions">
-       <%= link_to t('.back', :default => t("helpers.links.back")), application_groups_path, :class => 'btn btn-primary'  %>
+       <%= link_to t('.back', :default => t("helpers.links.back")), families_path, :class => 'btn btn-primary'  %>
       </div>
     </div>
 </div>

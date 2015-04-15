@@ -23,7 +23,7 @@ module CanonicalVocabulary
           xml.ApplicableCoverageYr 1000
           xml.IndividualExchange do |xml|
             xml.HealthExchangeId "00.AA*.000.000.000"
-            group_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}application_groups/5431b03feb899a49e0000004?user_token=zUzBsoTSKPbvXCQsB4Ky"))
+            group_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}families/5431b03feb899a49e0000004?user_token=zUzBsoTSKPbvXCQsB4Ky"))
             app_group_xml = Nokogiri::XML(group_xml).root
             @app_group = Parsers::Xml::Reports::ApplicationGroup.new(app_group_xml)
             next if @app_group.individual_policies.empty?

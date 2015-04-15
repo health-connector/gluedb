@@ -16,7 +16,7 @@ class Logger::SimpleJsonFormatter < Logger::Formatter
   end
 
   def call(severity, time, progname, msg)
-    JSON.dump({time: format_datetime(time), level: map_severity(severity), full_message: msg2str(msg)})
+    JSON.dump({time: format_datetime(time), level: map_severity(severity), full_message: msg2str(msg)}) + "\n"
   end
 
   protected

@@ -4,7 +4,7 @@ class HbxEnrollmentMember
 
   embedded_in :hbx_enrollment
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
   field :premium_amount_in_cents, type: Integer
   field :is_subscriber, type: Boolean, default: false
   field :eligibility_date, type: Date
@@ -17,7 +17,7 @@ class HbxEnrollmentMember
   #TODO uncomment
   #validates :start_date, presence: true
 
-  validates_presence_of :applicant_id
+  validates_presence_of :family_member_id
 
   #TODO uncomment
   #validate :end_date_gt_start_date

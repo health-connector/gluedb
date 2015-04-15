@@ -29,7 +29,7 @@ describe Parsers::Xml::Cv::FamilyParser do
 
   let(:relationship_uri) {"urn:openhbx:terms:v1:individual_relationship#spouse"}
 
-  let(:applicant_id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
+  let(:family_member_id) {"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}
 
   let(:is_primary_applicant) {"true"}
 
@@ -68,7 +68,7 @@ describe Parsers::Xml::Cv::FamilyParser do
 
   describe "the first applicant" do
     it 'should have the person object)' do
-      expect(subject.family_members.first.person.id).to eql(applicant_id)
+      expect(subject.family_members.first.person.id).to eql(family_member_id)
       expect(subject.family_members.first.person.name_first).to eql(individual1.name_first)
       expect(subject.family_members.first.person.name_last).to eql(individual1.name_last)
       expect(subject.family_members.first.person.name_full).to eql(individual1.name_full)

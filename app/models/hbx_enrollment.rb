@@ -81,7 +81,7 @@ class HbxEnrollment
   end
 
   def family_member_ids
-    hbx_enrollment_members.map(&:applicant_id)
+    hbx_enrollment_members.map(&:family_member_id)
   end
 
   def employer=(employer_instance)

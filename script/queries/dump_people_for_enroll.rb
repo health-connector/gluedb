@@ -16,7 +16,7 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
               {
                 :coverage_household_members => [
                   {
-                    :applicant_id => person.id.to_s,
+                    :family_member_id => person.id.to_s,
                     :is_subscriber => true
                   } 
                 ]
@@ -99,7 +99,7 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
              :person_id => rel[:relative_id]
         }
         new_family[:households][0][:coverage_households][0][:coverage_household_members] << {
-             :applicant_id => rel[:relative_id]
+             :family_member_id => rel[:relative_id]
         }
       end
       family_file.puts JSON.dump(new_family)

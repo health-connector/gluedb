@@ -89,7 +89,7 @@ class FamilyBuilder
 
       family_member = @family.find_family_member_by_person(person)
       unless coverage_household.is_existing_member?(person)
-        coverage_household_member = coverage_household.coverage_household_members.build({:applicant_id => family_member.id, :is_subscriber => true})
+        coverage_household_member = coverage_household.coverage_household_members.build({:family_member_id => family_member.id, :is_subscriber => true})
         $logger.info "Family e_case_id: #{@family.e_case_id} Person #{person.id} Enrollee m_id #{enrollee.m_id}  added to coverage household #{coverage_household.id}"
       end
     end
@@ -242,7 +242,7 @@ class FamilyBuilder
       if family_member.is_coverage_applicant
         if valid_relationship?(family_member)
           coverage_household_member = coverage_household.coverage_household_members.build
-          coverage_household_member.applicant_id = family_member.id
+          coverage_household_member.family_member_id = family_member.id
         else
           #$logger.warn "WARNING: Family e_case_id: #{@family.e_case_id} Relationship #{@family.primary_applicant.person.find_relationship_with(family_member.person)} not valid for a coverage household between primary applicant person #{@family.primary_applicant.person.id} and #{family_member.person.id}"
         end
@@ -336,7 +336,7 @@ class FamilyBuilder
         person_obj = @person_mapper.people_map[person_uri].first
         new_family_member = get_family_member(person_obj)
         new_family_member = verify_person_id(new_family_member)
-        tax_household_member.applicant_id = new_family_member.id
+        tax_household_member.family_member_id = new_family_member.id
         tax_household_member.family_member = new_family_member
       end
     end
@@ -408,7 +408,7 @@ class FamilyBuilder
     tax_household_members = self.family.households.flat_map(&:tax_households).flat_map(&:tax_household_members)
 
     tax_household_members= tax_household_members.select do |tax_household_member|
-      tax_household_member.applicant_id == family_member.id
+      tax_household_member.family_member_id == family_member.id
     end
 
     tax_household_members

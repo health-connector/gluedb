@@ -5,7 +5,7 @@ class TaxHouseholdMember
   embedded_in :tax_household
   embeds_many :financial_statements
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
 
   field :is_ia_eligible, type: Boolean, default: false
   field :is_medicaid_chip_eligible, type: Boolean, default: false

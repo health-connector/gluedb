@@ -28,7 +28,7 @@ class CoverageHousehold
   end
 
   def family_member_ids
-    coverage_household_members.map(&:applicant_id)
+    coverage_household_members.map(&:family_member_id)
   end
 
   def integrity_of_coverage_household_members

@@ -59,7 +59,7 @@ module Parsers::Xml::Cv
 
     def to_hash(p_tracker=nil)
      response = {
-         applicant_id: id,
+         family_member_id: id,
          is_primary_applicant: is_primary_applicant,
          is_coverage_applicant: is_coverage_applicant,
          person_demographics: person_demographics.to_hash,

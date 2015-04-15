@@ -18,7 +18,7 @@ module Generators::Reports
         # Remove duplicates by picking the second tax household
         tax_households_hash = @household.tax_households.inject({}) do |tax_households, tax_household|
           member_hash = tax_household.tax_household_members.inject({}) do |members_with_financials, member|
-            members_with_financials[member.applicant_id] = member.tax_filing_status
+            members_with_financials[member.family_member_id] = member.tax_filing_status
             members_with_financials
           end
           tax_households.delete_if{|key,val| val == member_hash}

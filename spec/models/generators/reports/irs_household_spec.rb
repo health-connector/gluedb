@@ -9,9 +9,9 @@ module Generators::Reports
     let(:tax_households) { [tax_household1] }
     let(:tax_household1) { double(tax_household_members: tax_household_members_1) }
     let(:tax_household_members_1) { [member1, member2] }
-    let(:member1) { double(applicant_id: 1, tax_filing_status: 'tax_filer') }
-    let(:member2) { double(applicant_id: 2, tax_filing_status: 'dependent') }
-    let(:member3) { double(applicant_id: 3, tax_filing_status: 'tax_filer') }
+    let(:member1) { double(family_member_id: 1, tax_filing_status: 'tax_filer') }
+    let(:member2) { double(family_member_id: 2, tax_filing_status: 'dependent') }
+    let(:member3) { double(family_member_id: 3, tax_filing_status: 'tax_filer') }
 
     before(:each) do
       subject.calender_year = '2014'

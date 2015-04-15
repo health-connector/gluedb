@@ -11,7 +11,7 @@ class HbxEnrollmentExemption
   field :start_date, type: Date
   field :end_date, type: Date
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
   field :irs_group_id, type: Moped::BSON::ObjectId
 
   embeds_many :comments

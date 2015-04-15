@@ -15,7 +15,7 @@ describe FamilyBuilder do
   }
 
   let(:applicant_params){
-    {is_primary_applicant:"true", applicant_id:"12333", person:person}
+    {is_primary_applicant:"true", family_member_id:"12333", person:person}
   }
 
   before(:each){

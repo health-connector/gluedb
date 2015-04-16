@@ -214,8 +214,8 @@ private
   end
 
   def max_one_primary_applicant
-    primary_applicants = self.family_members.select do |applicant|
-      applicant.is_primary_applicant == true
+    primary_applicants = self.family_members.select do |family_member|
+      family_member.is_primary_applicant == true
     end
 
     if primary_applicants.size > 1

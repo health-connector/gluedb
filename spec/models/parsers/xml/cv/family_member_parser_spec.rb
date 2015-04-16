@@ -1,10 +1,10 @@
 require 'rails_helper'
 
-describe Parsers::Xml::Cv::ApplicantParser do
+describe Parsers::Xml::Cv::FamilyMemberParser do
 
   before(:all) do
     xml_file = File.open(File.join(Rails.root, "spec", "data", "applicant.xml")).read
-    @subject = Parsers::Xml::Cv::ApplicantParser.parse(xml_file)
+    @subject = Parsers::Xml::Cv::FamilyMemberParser.parse(xml_file)
   end
 
   let(:id){"urn:openhbx:hbx:dc0:resources:v1:dcas:individual#2004542"}

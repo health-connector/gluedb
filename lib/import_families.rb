@@ -55,12 +55,12 @@ class ImportFamilies
 
     attr_reader :people_map
     attr_reader :alias_map
-    attr_reader :applicant_map
+    attr_reader :family_member_map
 
     def initialize
       @people_map = {}
       @alias_map = {}
-      @applicant_map = {}
+      @family_member_map = {}
     end
 
     def register_alias(alias_uri, p_uri)
@@ -93,13 +93,13 @@ class ImportFamilies
       @people_map[p_uri]
     end
 
-    def register_applicant(person, applicant)
-      @applicant_map[person.id] = applicant
+    def register_family_member(person, family_member)
+      @family_member_map[person.id] = family_member
     end
 
-    def get_applicant(uri)
+    def get_family_member(uri)
       person = self[uri].first
-      @applicant_map[person.id]
+      @family_member_map[person.id]
     end
   end
 
@@ -155,14 +155,14 @@ class ImportFamilies
 
         family_builder = FamilyBuilder.new(ag.to_hash(p_tracker), p_tracker)
 
-        #applying person objects in person relationships for each applicant.
-        ag.family_members.each do |applicant|
-          applicant.to_relationships.each do |relationship_hash|
+        #applying person objects in person relationships for each family_member.
+        ag.family_members.each do |family_member|
+          family_member.to_relationships.each do |relationship_hash|
             set_person_relationship(relationship_hash, p_tracker, ag.to_hash[:e_case_id])
           end
 
-          family_member = family_builder.add_family_member(applicant.to_hash(p_tracker))
-          p_tracker.register_applicant(p_tracker[applicant.id].first, family_member)
+          family_member = family_builder.add_family_member(family_member.to_hash(p_tracker))
+          p_tracker.register_family_member(p_tracker[family_member.id].first, family_member)
 
         end
 

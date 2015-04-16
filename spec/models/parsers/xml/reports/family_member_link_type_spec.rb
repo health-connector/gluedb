@@ -1,6 +1,6 @@
 require 'rails_helper'
 
 module Parsers::Xml::Reports
-  describe ApplicantLinkType do
+  describe FamilyMemberLinkType do
   end
 end

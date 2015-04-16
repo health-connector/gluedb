@@ -1,6 +1,6 @@
 module Parsers::Xml::Cv
 
-  class ApplicantParser
+  class FamilyMemberParser
     include HappyMapper
 
     register_namespace "cv", "http://openhbx.org/api/terms/1.0"
@@ -17,7 +17,7 @@ module Parsers::Xml::Cv
     element :is_coverage_applicant, String, tag: 'is_coverage_applicant'
     has_many :financial_statements, Parsers::Xml::Cv::FinancialStatementParser, xpath:'cv:financial_statements'
     element :is_active, String, tag: 'is_active'
-    has_many :employee_family_members, Parsers::Xml::Cv::EmployeeApplicantParser, xpath:'cv:employee_applicants'
+    has_many :employee_family_members, Parsers::Xml::Cv::EmployeeFamilyMemberParser, xpath:'cv:employee_applicants'
     element :is_consent_applicant, String, tag: 'is_consent_applicant'
 
     def to_individual_request(member_id_generator, p_tracker)

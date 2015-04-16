@@ -40,7 +40,7 @@ class FinancialStatement
     tax_household_member.family
   end
 
-  def applicant
+  def family_member
     return nil unless tax_household_member
     tax_household_member.family_member
   end

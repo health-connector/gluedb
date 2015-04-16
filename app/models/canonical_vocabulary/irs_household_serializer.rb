@@ -101,8 +101,8 @@ module CanonicalVocabulary
 
       serialize_members = Proc.new do |xml, members|
         members.each do |key, val|
-          applicant_xml = family_members_xml[key]
-          individual = Parsers::Xml::Reports::Individual.new(applicant_xml)
+          family_member_xml = family_members_xml[key]
+          individual = Parsers::Xml::Reports::Individual.new(family_member_xml)
           serialize_individual(xml, individual, val.camelcase)
         end
       end

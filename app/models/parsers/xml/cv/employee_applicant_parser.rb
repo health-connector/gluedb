@@ -1,6 +1,6 @@
 module Parsers::Xml::Cv
 
-  class EmployeeApplicantParser
+  class EmployeeFamilyMemberParser
 
     include HappyMapper
 

@@ -3,11 +3,11 @@ class AddIncomeRequest
     request_model = {}
 
     app_group = Family.new(doc.at_xpath('/n1:application_group/', namespaces))
-    app_group.family_members.each do |applicant|
-      request_model[:person_id] = applicant.person.id
+    app_group.family_members.each do |family_member|
+      request_model[:person_id] = family_member.person.id
       request_model[:incomes] = []
       
-      applicant.incomes.each do |income_parser|
+      family_member.incomes.each do |income_parser|
         request_model[:incomes] << {
           amount:         income_parser.dollar_amount,
           income_type:    income_parser.income_type,

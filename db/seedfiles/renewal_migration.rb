@@ -131,8 +131,8 @@ family.each do |ag|
   # Build hbx_enrollments
   hh.hbx_enrollments = build_enrollments(ag)
 
-  ag.family_members.each do |applicant|
-    ch.coverage_household_members << applicant if applicant.is_coverage_applicant
+  ag.family_members.each do |family_member|
+    ch.coverage_household_members << family_member if family_member.is_coverage_applicant
   end
 
   ag.renewal_consent_through_year = 2014

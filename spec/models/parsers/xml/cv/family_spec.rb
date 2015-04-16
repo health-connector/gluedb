@@ -119,7 +119,7 @@ describe Parsers::Xml::Cv::FamilyParser do
 
   end
 
-  describe "the second applicant" do
+  describe "the second family_member" do
 
   end
 

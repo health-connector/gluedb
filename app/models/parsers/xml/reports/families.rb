@@ -25,7 +25,7 @@ module Parsers::Xml::Reports
       @root.xpath("n1:applicants/n1:applicant")
     end
 
-    def applicant_person_ids
+    def family_member_person_ids
       family_members.map {|e| e.at_xpath("n1:person/n1:id").text.match(/\w+$/)[0]}.uniq
     end
 
@@ -77,34 +77,34 @@ module Parsers::Xml::Reports
     end
 
     def populate_individual_policies
-      @root.xpath("n1:applicants/n1:applicant").each do |applicant|
-        applicant_link = ApplicantLinkType.new(applicant)
-        calc_individual_policies(applicant_link)
-        calc_policy_quotes(applicant_link)
+      @root.xpath("n1:applicants/n1:applicant").each do |family_member|
+        family_member_link = FamilyMemberLinkType.new(family_member)
+        calc_individual_policies(family_member_link)
+        calc_policy_quotes(family_member_link)
       end
     end
 
-    def calc_individual_policies(applicant_link)
+    def calc_individual_policies(family_member_link)
       individual_policies = []
-      applicant_link.policies.each do |policy| 
+      family_member_link.policies.each do |policy|
         policy_link = PolicyLinkType.new(policy)
         if policy_link.individual_market? && policy_link.state == 'active'
           individual_policies << policy_link.id
         end
       end
-      @individual_policy_holders[applicant_link.person_id] = individual_policies.uniq
+      @individual_policy_holders[family_member_link.person_id] = individual_policies.uniq
     end
 
-    def calc_policy_quotes(applicant_link)
+    def calc_policy_quotes(family_member_link)
       quotes = {}
-      applicant_link.qhp_quotes.each do |quote|
+      family_member_link.qhp_quotes.each do |quote|
         quote_link = QuoteLinkType.new(quote)
         coverage = quote_link.coverage_type
         next if @future_plans_by_coverage[coverage]       
         quotes[coverage] = quote_link.rate
         @future_plans_by_coverage[coverage] = quote_link.qhp_id
       end
-      @quotes_for_family_members[applicant_link.person_id] = quotes
+      @quotes_for_family_members[family_member_link.person_id] = quotes
     end
 
     def policies_details     

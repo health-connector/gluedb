@@ -369,15 +369,15 @@ class FamilyBuilder
   ## Fetches the family_member object either from family or person_mapper
   def get_family_member(person_obj)
     new_family_member = self.family.family_members.find do |family_member|
-      family_member.id == @person_mapper.applicant_map[person_obj.id].id
+      family_member.id == @person_mapper.family_member_map[person_obj.id].id
     end
-    new_family_member = @person_mapper.applicant_map[person_obj.id] unless new_family_member
+    new_family_member = @person_mapper.family_member_map[person_obj.id] unless new_family_member
   end
 
   def add_financial_statements(family_members_params)
     family_members_params.map do |family_member_params|
       family_member_params[:financial_statements].each do |financial_statement_params|
-        tax_household_members = find_tax_household_members(@person_mapper.applicant_map[family_member_params[:person].id])
+        tax_household_members = find_tax_household_members(@person_mapper.family_member_map[family_member_params[:person].id])
 
         tax_household_members.each do |tax_household_member|
           financial_statement = tax_household_member.financial_statements.build(filter_financial_statement_params(financial_statement_params))

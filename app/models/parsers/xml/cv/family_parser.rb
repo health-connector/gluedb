@@ -20,7 +20,7 @@ module Parsers::Xml::Cv
 
     element :e_case_id, String, xpath: "cv:id/cv:id"
 
-    has_many :family_members, Parsers::Xml::Cv::ApplicantParser, xpath: "cv:applicants"
+    has_many :family_members, Parsers::Xml::Cv::FamilyMemberParser, xpath: "cv:applicants"
 
     has_many :tax_households, Parsers::Xml::Cv::TaxHouseholdParser, xpath:'cv:tax_households'
 
@@ -30,8 +30,8 @@ module Parsers::Xml::Cv
 
 
     def individual_requests(member_id_generator, p_tracker)
-      family_members.map do |applicant|
-        applicant.to_individual_request(member_id_generator, p_tracker)
+      family_members.map do |family_member|
+        family_member.to_individual_request(member_id_generator, p_tracker)
       end
     end
 
@@ -39,7 +39,7 @@ module Parsers::Xml::Cv
       if family_members.size == 1
         family_members.first
       else
-        family_members.detect{|applicant| applicant.id == primary_applicant_id }
+        family_members.detect{|family_member| family_member.id == primary_applicant_id }
       end
     end
 
@@ -58,8 +58,8 @@ module Parsers::Xml::Cv
           tax_households: tax_households.map do |tax_household|
             tax_household.to_hash
           end,
-          family_members: family_members.map do |applicant|
-            applicant.to_hash(p_tracker)
+          family_members: family_members.map do |family_member|
+            family_member.to_hash(p_tracker)
           end
       }
 

@@ -19,7 +19,7 @@ class BrokersController < ApplicationController
 
   def show
 		@broker = Broker.find(params[:id])
-		@employers = @broker.employers.by_name
+		@employers = [@broker.employers.by_name,  @broker.plan_years.map{|py| py.employer}].flatten.uniq!
 
 	  respond_to do |format|
 		  format.html # index.html.erb

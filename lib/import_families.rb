@@ -161,8 +161,8 @@ class ImportFamilies
             set_person_relationship(relationship_hash, p_tracker, ag.to_hash[:e_case_id])
           end
 
-          family_member = family_builder.add_family_member(family_member.to_hash(p_tracker))
-          p_tracker.register_family_member(p_tracker[family_member.id].first, family_member)
+          new_family_member = family_builder.add_family_member(family_member.to_hash(p_tracker))
+          p_tracker.register_family_member(p_tracker[family_member.id].first, new_family_member)
 
         end
 

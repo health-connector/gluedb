@@ -306,7 +306,9 @@ class FamilyBuilder
 
   #TODO currently only handling case we create new application case, where 1 irs group is built with 1 coverage household.
   def add_irsgroups
-    if @is_update
+    if @family.households.flat_map(&:hbx_enrollments).length == 0
+      return #we dont need to create irs group if no policies
+    elsif @is_update
       irs_group_builder = IrsGroupBuilder.new(self.family.id)
       irs_group_builder.update
     else

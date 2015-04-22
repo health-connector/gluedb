@@ -235,6 +235,8 @@ class FamilyBuilder
 
     return if @new_family_members.length == 0
 
+    @household.coverage_households.delete_all #clear any existing
+
     #TODO decide where to get submitted_at from
     coverage_household = @household.coverage_households.build({submitted_at: @family.submitted_at})
 
@@ -377,6 +379,8 @@ class FamilyBuilder
   end
 
   def add_financial_statements(family_members_params)
+    return if @household.tax_households.blank?
+
     family_members_params.map do |family_member_params|
       family_member_params[:financial_statements].each do |financial_statement_params|
         tax_household_members = find_tax_household_members(@person_mapper.family_member_map[family_member_params[:person].id])

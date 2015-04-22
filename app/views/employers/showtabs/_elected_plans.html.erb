@@ -1,4 +1,4 @@
-<div class="tab-pane" id="plan_year_<%=plan_year.start_date.year%>">
+<div class="tab-pane" id="plan_year_<%=plan_year.start_date.strftime("%B%Y")%>">
   <div id="info">
     <dl class="dl-horizontal">
       <dt><%= PlanYear.human_attribute_name(:open_enrollment_start) %></dt>

@@ -52,8 +52,9 @@ describe FamilyBuilder do
 
   context "family is built" do
     it "adds a coverage_household" do
+      @family_builder.add_family_member(@family_member_hash)
       @family_builder.build
-      expect(@family_builder.family.coverage_households.length).to eq(1)
+      expect(@family_builder.family.households.flat_map(&:coverage_households).length).to eq(1)
     end
   end
 

@@ -54,7 +54,6 @@ class FamilyBuilder
     get_household
   end
 
-
   def build
     add_hbx_enrollments
     add_tax_households(@params.to_hash[:tax_households])

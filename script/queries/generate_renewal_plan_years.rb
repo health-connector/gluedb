@@ -17,8 +17,8 @@ plan_years.each do |plan_year|
       :employer_id => plan_year.employer_id
     })
     contribution_strategy = EmployerContributions::DistrictOfColumbiaEmployer.create!({
-      :plan_year_id => new_plan_year.id,
-      :reference_plan_id => reference_plan.id,
+      :plan_year_id => next_years_plan,
+      :reference_plan_id => next_years_plan.id,
       :employee_max_percent => contribution_strategy.employee_max_percent,
       :dependent_max_percent => contribution_strategy.dependent_max_percent
     })

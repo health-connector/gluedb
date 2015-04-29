@@ -7,6 +7,7 @@ plan_years = PlanYear.where(:start_date => clone_start_date)
 
 plan_years.each do |plan_year|
   if plan_year.contribution_strategy.present?
+    puts plan_year.employer.name
     contribution_strategy = plan_year.contribution_strategy
     reference_plan = contribution_strategy.reference_plan
     next_years_plan = reference_plan.renewal_plan

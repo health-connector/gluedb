@@ -6,6 +6,9 @@ new_end_date = Date.new(2016, 5, 31)
 plan_years = PlanYear.where(:start_date => clone_start_date)
 
 plan_years.each do |plan_year|
+  conflicts = plan_year.employer.plan_years.detect{ |py| py.start_date == new_start_date}
+  puts "#{conflicts.employer.name} has conflicting plan year " if conflicts
+
   if plan_year.contribution_strategy.present?
     puts plan_year.employer.name
     contribution_strategy = plan_year.contribution_strategy

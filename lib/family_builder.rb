@@ -55,6 +55,7 @@ class FamilyBuilder
   end
 
   def build
+    is_primary_applicant_unique?
     add_hbx_enrollments
     add_tax_households(@params.to_hash[:tax_households])
     add_financial_statements(@params[:family_members])
@@ -102,7 +103,6 @@ class FamilyBuilder
     else
       #puts "Added a new family_member"
       if family_member_params[:is_primary_applicant] == "true"
-        is_primary_applicant_unique?(family_member_params)
         reset_exisiting_primary_applicant
       end
 
@@ -125,9 +125,11 @@ class FamilyBuilder
     family_member
   end
 
-  def is_primary_applicant_unique?(family_member_params)
+  def is_primary_applicant_unique?
 
-    person = family_member_params[:person]
+    return true if @family.primary_applicant.nil?
+
+    person = @family.primary_applicant.person
 
     families = Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person.id)}}})
 
@@ -139,7 +141,18 @@ class FamilyBuilder
     end
 
     if family.present?
-      raise("Family e_case_id: #{@family.e_case_id} Duplicate Primary Applicant person_id : #{person.id}. existing family #{family.e_case_id}" )
+      $logger.info ("Family e_case_id: #{@family.e_case_id} Duplicate Primary Applicant person_id : #{person.id}. existing family #{family.e_case_id}" )
+
+      family.family_members.each do |family_member|
+        unless @family.family_members.map(&:person_id).include? family_member.person_id
+          @family.family_members << family_member
+          $logger.info ("Family e_case_id: #{@family.e_case_id} Added : #{family_member.person.id} from existing family #{family.e_case_id}" )
+        end
+      end
+
+      family.delete
+
+      return false
     else
       return true
     end
@@ -271,6 +284,7 @@ class FamilyBuilder
     @household.hbx_enrollments.delete_all #clear any existing
 
     @family.primary_applicant.person.policies.each do |policy|
+      next unless @family.primary_applicant.person.members.map(&:hbx_member_id).include? policy.subscriber.m_id
       add_hbx_enrollment(policy)
     end
   end
@@ -281,7 +295,7 @@ class FamilyBuilder
 
     hbx_enrollement = @household.hbx_enrollments.build
     hbx_enrollement.policy = policy
-    @family.primary_applicant.broker_id = Broker.find(policy.broker_id).id unless policy.broker_id.blank?
+    #@family.primary_applicant.broker_id = Broker.find(policy.broker_id).id unless policy.broker_id.blank?
     hbx_enrollement.elected_aptc_in_dollars = policy.elected_aptc
     hbx_enrollement.applied_aptc_in_dollars = policy.applied_aptc
     hbx_enrollement.submitted_at = @family.submitted_at

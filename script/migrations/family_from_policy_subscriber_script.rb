@@ -56,6 +56,7 @@ $logger.info "policy_groups: #{policy_groups.length}"
 
 
 policy_groups.each do |person_id, policies|
+  policies.uniq!
   begin
     person = Person.find(person_id)
     families = Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person_id)}}})
@@ -70,8 +71,11 @@ policy_groups.each do |person_id, policies|
     policies.each do |policy|
       add_hbx_enrollment(family, policy)
       family.save!
+      policy_groups[person_id].delete(policy) #delete the policy as it is processed
       $logger.info "Saved family : #{family.e_case_id}"
     end
+
+    policy_groups.delete(person_id) #delete the subscriber as we have processed him/her
   rescue Exception=>e
     $logger.info "ERROR: #{e.message}"
   end
@@ -83,6 +87,7 @@ $logger.info "people_with_multiple_families: #{people_with_multiple_families.len
 
 
 $logger.info "Starting to create families for policies without families"
+
 
 policy_groups.each do |person_id, policies|
   next if people_with_multiple_families.include?(person_id)

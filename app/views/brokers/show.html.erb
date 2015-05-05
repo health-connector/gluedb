@@ -13,9 +13,11 @@
   <dt><%= model_class.human_attribute_name(:npn) %></dt>
   <dd><%= @broker.npn %></dd>
   <dt><%= model_class.human_attribute_name(:employers) %></dt>
-  <% @employers.each do |e| %>
-    <dd><%= link_to e.name, employer_path(e) %></dd>
-  <% end %>
+  <% unless @employers.nil?%>
+    <% @employers.each do |e| %>
+      <dd><%= link_to e.name, employer_path(e) %></dd>
+    <% end %>
+  <%end%>
 </dl>
 
 <%= render 'shared/contact', obj: @broker %>

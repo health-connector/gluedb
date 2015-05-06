@@ -23,6 +23,7 @@ class UpdateEmployer
     update_phone
     update_email
     update_plan_year
+    update_contact
 
     @employer.save!
   end
@@ -59,5 +60,10 @@ class UpdateEmployer
       fte_count: @request[:fte_count],
       pte_count: @request[:pte_count]})
     @employer.merge_plan_year(plan_year)
+  end
+
+  def update_contact
+    return unless @requested_contact[:name]
+    @employer.update_contact(@request[:contact][:name])
   end
 end

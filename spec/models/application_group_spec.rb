@@ -1,3 +1,7 @@
+#commented as this will be replaced by family_spec.rb once model_renamed branched is merged into dev
+
+
+=begin
 require 'rails_helper'
 
 describe ApplicationGroup do
@@ -178,3 +182,4 @@ describe ApplicationGroup do
     end
   end
 end
+=end

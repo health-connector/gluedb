@@ -3,6 +3,9 @@ class EligibilityDetermination
   include Mongoid::Timestamps
 
   embedded_in :tax_household
+  include HasFamilyMembers
+
+  PDC_STATUSES = %w{active approved submitted open }
 
   field :e_pdc_id, type: String
   field :benchmark_plan_id, type: Moped::BSON::ObjectId
@@ -14,12 +17,14 @@ class EligibilityDetermination
   # Cost-sharing reduction assistance eligibility for co-pays, etc.  
   # Available to households with income between 100-250% of FPL and enrolled in Silver plan.
   field :csr_percent_as_integer, type: Integer, default: 0  #values in DC: 0, 73, 87, 94
-
   field :determination_date, type: DateTime
+  field :household_state, type: String
+
 
   validates_presence_of :determination_date, :max_aptc_in_cents, :csr_percent_as_integer
+  validates :household_state, presence: true,
+            inclusion: { in: PDC_STATUSES, message: "%{value} is not a valid PDC Status" }
 
-  include HasFamilyMembers
 
   def family
     return nil unless tax_household

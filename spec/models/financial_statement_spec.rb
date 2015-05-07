@@ -3,7 +3,9 @@ require 'active_support/time'
 
 describe FinancialStatement do
 
-  TEN_DOLLARS = 1000
+  skip "is skipped" do
+
+    TEN_DOLLARS = 1000
 
   before(:all) do
 
@@ -133,5 +135,5 @@ describe FinancialStatement do
 
     expect(@financial_statement.is_receiving_benefit?).to be_true
   end
-
+end
 end

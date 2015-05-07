@@ -3,19 +3,27 @@ require 'rails_helper'
 module Generators::Reports
   describe IrsTaxHousehold do
 
-    subject { IrsTaxHousehold.new(tax_household, policies) }
+    subject { IrsTaxHousehold.new(tax_household, policy_ids) }
 
     let(:tax_household) { double(tax_household_members: tax_household_members, household: household) }
     let(:household) { double(family: family)}
     let(:family) { double }
+
     let(:tax_household_members) { [ member1 ] }
     let(:member1) { double(tax_filing_status: 'non_filer', family_member: family_member1) }
+
     let(:family_member1) { double(person: double) }
     let(:family_member2) { double(person: double) }
     let(:family_member3) { double(person: double) }
 
+    let(:policy_ids) { [1234] }
+
     let(:policies) { [ double(subscriber: family_member2, id: 1234, enrollees: enrollees) ] }
     let(:enrollees) { [family_member1, family_member2, family_member3] }
+
+    before(:each) do
+      allow(subject).to receive(:find_policies).with(policy_ids).and_return(policies)
+    end
 
     context 'when there is no tax_filer' do
       it 'should return primary as nil' do 

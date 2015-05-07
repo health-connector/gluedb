@@ -5,14 +5,21 @@ module Generators::Reports
 
     def initialize(tax_household, policies)
       @tax_household = tax_household
-      @policies = Policy.where({:id.in => policies.to_a}).to_a
       @primary  = nil
       @spouse   = nil
       @dependents = []
+      @policy_ids = policies
+    end
+
+    def find_policies(policies)
+      Policy.where({:id.in => policies.to_a}).to_a
     end
 
     def build
+      @policies = find_policies(@policy_ids)
+
       people = @tax_household.tax_household_members.flat_map(&:family_member).flat_map(&:person).uniq
+
       if @tax_household.tax_household_members.count != people.count
         raise 'duplicate tax household members'
       end

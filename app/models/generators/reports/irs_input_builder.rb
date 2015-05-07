@@ -1,7 +1,7 @@
 module Generators::Reports  
   class IrsInputBuilder
 
-    attr_reader :notice
+    attr_accessor :notice, :carrier_hash
  
     IRS_YEAR = 2014
 
@@ -15,23 +15,32 @@ module Generators::Reports
       19846 => 216.47
     }
 
-    def initialize(policy, multi_version=false)
+    def initialize(policy, options = {})
+      multi_version = options[:multi_version] || false
+      @void = options[:void] || false
+      @carrier_hash = {}
       @policy = policy
       @policy_disposition = PolicyDisposition.new(policy)
       @subscriber = @policy.subscriber.person
+
       if multi_version
         @multi_version_pol = Generators::Reports::MultiVersionAptcLookup.new(policy)
       end
+    end
 
+    def process
       @notice = PdfTemplates::IrsNoticeInput.new
-
-      @notice.issuer_name = @policy.plan.carrier.name
+      @notice.issuer_name = @carrier_hash[@policy.carrier_id]
+      # @policy.plan.carrier.name
+      @notice.qhp_id = @policy.plan.hios_plan_id.gsub('-','')
       @notice.policy_id = prepend_zeros(@policy.id.to_s, 6)
       # @notice.has_aptc = true if @policy.applied_aptc > 0
+      
       @notice.recipient_address = PdfTemplates::NoticeAddress.new(address_to_hash(@subscriber.addresses[0]))
- 
+
       append_policy_enrollees
-      append_monthly_premiums
+      @void ? append_void_monthly_premiums : append_monthly_premiums
+
       append_yearly_premiums
       reset_variables
     end
@@ -45,7 +54,7 @@ module Generators::Reports
     def append_policy_enrollees
       @notice.recipient = build_enrollee_ele(@policy.subscriber)
       @notice.spouse = build_enrollee_ele(@policy.spouse)
-      @notice.covered_household = @policy_disposition.enrollees.map{ |enrollee| build_enrollee_ele(enrollee) }.compact
+      @notice.covered_household = @policy_disposition.enrollees.map{ |enrollee| build_enrollee_ele(enrollee) }.compact unless @void
     end
 
     def build_enrollee_ele(enrollee)
@@ -66,6 +75,17 @@ module Generators::Reports
       })
     end
 
+    def append_void_monthly_premiums
+      @notice.monthly_premiums = 12.times.inject([]) do |monthly_premiums, index|
+        monthly_premiums << {
+          serial: (index + 1),
+          premium_amount: 0.0,
+          premium_amount_slcsp: 0.0,
+          monthly_aptc: 0.0          
+        }
+      end
+    end
+
     def append_monthly_premiums
       coverage_end_month = @policy_disposition.end_date.month
       coverage_end_month = coverage_end_month - 1 if (@policy_disposition.end_date.day == 1)
@@ -81,8 +101,8 @@ module Generators::Reports
         }
 
         @notice.has_aptc = if @multi_version_pol
-          @multi_version_pol.assisted?
-        else 
+          true # @multi_version_pol.assisted?
+        else
           @policy.applied_aptc > 0
         end
 
@@ -105,11 +125,7 @@ module Generators::Reports
           })
         end
 
-        if @notice.has_aptc && premium_amounts[:monthly_aptc].nil?
-          data << nil
-        else
-          data << premium_amounts
-        end
+        data << ((@notice.has_aptc && premium_amounts[:monthly_aptc].nil?) ? nil : premium_amounts)
       end
 
       @notice.monthly_premiums.compact!

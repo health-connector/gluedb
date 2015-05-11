@@ -188,6 +188,10 @@ class Employer
     end
   end
 
+  def update_broker(existing, incoming)
+    existing.broker = incoming.broker
+  end
+
   def plan_year_of(coverage_start_date)
     # The #to_a is a caching thing.
     plan_years.to_a.detect do |py|
@@ -210,7 +214,7 @@ class Employer
                                       :fte_count,
                                       :pte_count
                                      )
-      merge_broker(existing,incoming)
+      update_broker(existing,incoming)
       EmployerElectedPlansMerger.merge(existing, incoming)
       update_carriers(existing)
     else
@@ -249,6 +253,14 @@ class Employer
     employer.sic_code = data[:sic_code]
     employer.notes = data[:notes]
     employer
+  end
+
+  def update_contact(contact_name)
+    self.name_pfx = contact_name[:prefix]
+    self.name_first = contact_name[:first]
+    self.name_middle = contact_name[:middle]
+    self.name_last = contact_name[:last]
+    self.name_sfx = contact_name[:suffix]
   end
 
   class << self

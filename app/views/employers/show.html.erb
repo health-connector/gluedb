@@ -25,7 +25,7 @@
         <ul class="nav nav-tabs nav-append-content">
           <li class="active"><a href="#employees">Employees</a></li>
           <% @plan_years.each do |py| %>
-            <li class=""><a href="#plan_year_<%=py.start_date.year%>">Plan Year <%= py.start_date.year %></a></li>
+            <li class=""><a href="#plan_year_<%=py.start_date.strftime("%B%Y")%>">Plan Year <%= py.start_date.year %></a></li>
           <% end %>
           <% if can? :read, current_user %>
             <li class=""><a href="#payments">Payments</a></li>

@@ -147,6 +147,8 @@ Gluedb::Application.routes.draw do
       resources :families, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
+      resources :application_groups, :controller => :families, :only => [:show, :index]
+
     end
     namespace :v2 do
       resources :events, :only => [:create]
@@ -160,6 +162,7 @@ Gluedb::Application.routes.draw do
       resources :renewal_policies, :only => [:show, :index]
       #resources :premium_calculator
       post 'calculate_premium', to: 'premium_calculator#calculate'
+      resources :application_groups, :controller => :families, :only => [:show, :index]
     end
   end
 
@@ -200,6 +203,14 @@ Gluedb::Application.routes.draw do
     resources :employers, :only => [] do
       collection do
         post 'get_by_employer_id'
+        get 'wsdl'
+      end
+    end
+
+    #duplicate route with old resource name
+    resources :application_groups, :controller => :families,:only => [] do
+      collection do
+        post 'get_by_family_id'
         get 'wsdl'
       end
     end

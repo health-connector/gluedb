@@ -11,10 +11,6 @@ describe NameMatcher do
     expect(NameMatcher.new("luther","pullock iii").match("luther","pullock")).to be_truthy
   end
 
-  it "matches names with roman numerals and jr/sr" do
-    expect(NameMatcher.new("luther","pullock iii jr.").match("luther","pullock jr")).to be_truthy
-  end
-
   it "matches identical names" do
     expect(NameMatcher.new("luther","pullock").match("luther","pullock")).to be_truthy
   end

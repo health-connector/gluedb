@@ -12,6 +12,9 @@
       <dd><%= @employer.sic_code %></dd>
       <dt><%= model_class.human_attribute_name(:msp_count) %></dt>
       <dd><%= @employer.msp_count %></dd>
+      <dt><%= model_class.human_attribute_name(:contact_name) %></dt>
+      <dd><%= @employer.name_full %></dd>
+
 
       <dt><%= "Carrier(s)" %></dt>
       <% if @employer.carriers.count == 0 %>

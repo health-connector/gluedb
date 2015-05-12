@@ -9,6 +9,7 @@ module Features
   end
 
   def sign_in_with(email, password)
+    allow(Protocols::X12::TransactionSetEnrollment).to receive(:last).and_return(double(updated_at: Time.now))
     fill_in 'Email', with: email
     fill_in 'Password', with: password
     click_button 'Sign In'

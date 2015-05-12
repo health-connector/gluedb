@@ -4,8 +4,8 @@ carrier_ids = Carrier.where({
 
 puts carrier_ids
 
-active_start = Date.new(2014,2,28)
-active_end = Date.new(2015,2,28)
+active_start = Date.new(2014,4,30)
+active_end = Date.new(2015,4,30)
 
 plan_ids = Plan.where(:carrier_id => {"$in" => carrier_ids}).map(&:id)
 

@@ -5,13 +5,13 @@ class EmployerRequest
   def self.many_from_xml(xml)
     requests = []
     elements = Nokogiri::XML(xml).xpath('//cv:employers/cv:employer', {
-      :cv => "http://dchealthlink.com/vocabulary/20131030/employer"                                  
+      :cv => "http://dchealthlink.com/vocabulary/20131030/employer"
     })
     elements.map { |e| EmployerRequest.from_xml(ExposesEmployerXml.new(e)) }
   end
 
   def self.from_xml(xml)
-    request = { 
+    request = {
       name: xml.name,
       fein: xml.fein,
       hbx_id: xml.employer_exchange_id,
@@ -64,7 +64,7 @@ class EmployerRequest
     xml.plans.each do |plan_data|
       plan = Plan.find_by_hios_id_and_year(plan_data.qhp_id, Date.parse(request[:plan_year_start]).year)
       if plan.nil?
-        raise plan_data.qhp_id.inspect 
+        raise plan_data.qhp_id.inspect
       else
         request[:plans] << {
           :carrier_id => plan.carrier_id,
@@ -84,4 +84,4 @@ class EmployerRequest
 end
 
 
-        
+

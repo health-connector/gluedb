@@ -76,13 +76,12 @@ describe Parsers::Xml::Cv::FamilyParser do
       expect(subject.family_members.first.person.addresses.first.location_city_name).to eql(location_city_name)
       expect(subject.family_members.first.person.addresses.first.location_state).to eql(location_state)
       expect(subject.family_members.first.person.addresses.first.location_state_code).to eql(location_state_code)
-      expect(subject.family_members.first.person.addresses.first.location_postal_code).to eql(location_postal_code)
       expect(subject.family_members.first.person.addresses.first.type).to eql(type)
       #expect(subject.family_members.first.person.emails).to eql(emails)
       #expect(subject.family_members.first.person.phones).to eql(phones)
     end
 
-    it 'should have person name first' do
+    it 'should have person name_first' do
       expect(subject.family_members.first.person.name_first).to eql(individual1.name_first)
     end
 
@@ -103,7 +102,6 @@ describe Parsers::Xml::Cv::FamilyParser do
       expect(subject.family_members.first.person_demographics.birth_date).to eq(birth_date)
     end
 
-
     it 'should have 1 financial statement with tax_filing_status, is_tax_filing_together, incomes, deductions, alternative_benefits' do
       expect(subject.family_members.first.financial_statements.size).to eq(1)
       expect(subject.family_members.first.financial_statements.first.tax_filing_status).to eq(tax_filing_status)
@@ -116,7 +114,6 @@ describe Parsers::Xml::Cv::FamilyParser do
     it "should return the primary_applicant_id" do
       expect(subject.family_members.first.is_primary_applicant).to eq(is_primary_applicant)
     end
-
   end
 
   describe "the second family_member" do
@@ -126,8 +123,6 @@ describe Parsers::Xml::Cv::FamilyParser do
   it "should return the primary_applicant_id" do
     expect(subject.primary_applicant_id).to eq(primary_applicant_id)
   end
-
-
 
   it "should return the submitted_at" do
     expect(subject.submitted_at.to_s).to eq(submitted_at.to_s)

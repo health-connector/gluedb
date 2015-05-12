@@ -19,7 +19,6 @@ class NameMatcher
 
     diff = nil
 
-
     # test if difference between two name is a SUFFIX
     if(@normalized_full_name.length > normalized_test_full_name.length)
       #diff = (@normalized_full_name.split('') - normalized_test_full_name.split('')).join('')

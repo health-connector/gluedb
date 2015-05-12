@@ -21,8 +21,7 @@ describe Household do
 
     it 'should group policies by subscriber' do
       allow(subject).to receive(:hbx_enrollments).and_return(hbx_enrollments)
-      puts subject.policy_coverage_households.inspect
-      expect(subject.policy_coverage_households.size).to eq(1)
+        expect(subject.policy_coverage_households.size).to eq(1)
       expect(subject.policy_coverage_households[0][:policy_ids]).to eq([1,2])
       expect(subject.policy_coverage_households[0][:primary]).to eq(person)
     end 

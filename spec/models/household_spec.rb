@@ -15,15 +15,22 @@ describe Household do
   let(:dependent1) { double(person: person) }
 
   let(:person) { double(full_name: 'Ann B Mcc') }
+  let(:year) { 2014 }
 
+  before(:each) do
+    allow(subject).to receive(:valid_policy?).and_return(true)
+    allow(policy1).to receive(:belong_to_year?).and_return(true)
+    allow(policy2).to receive(:belong_to_year?).and_return(true)
+  end
 
   context 'policy coverage households' do
 
     it 'should group policies by subscriber' do
       allow(subject).to receive(:hbx_enrollments).and_return(hbx_enrollments)
-        expect(subject.policy_coverage_households.size).to eq(1)
-      expect(subject.policy_coverage_households[0][:policy_ids]).to eq([1,2])
-      expect(subject.policy_coverage_households[0][:primary]).to eq(person)
+      coverage_households = subject.policy_coverage_households(year)
+      expect(coverage_households.size).to eq(1)
+      expect(coverage_households[0][:policy_ids]).to eq([1,2])
+      expect(coverage_households[0][:primary]).to eq(person)
     end 
 
     context 'when we have two policies with different subscribers' do 
@@ -33,11 +40,13 @@ describe Household do
 
       it 'should have coverage household for each policy' do 
         allow(subject).to receive(:hbx_enrollments).and_return(hbx_enrollments)
-        expect(subject.policy_coverage_households.size).to eq(2)
-        expect(subject.policy_coverage_households[0][:primary]).to eq(person)
-        expect(subject.policy_coverage_households[0][:policy_ids]).to eq([1])
-        expect(subject.policy_coverage_households[1][:primary]).to eq(person1)
-        expect(subject.policy_coverage_households[1][:policy_ids]).to eq([2])
+        coverage_households = subject.policy_coverage_households(year)
+
+        expect(coverage_households.size).to eq(2)
+        expect(coverage_households[0][:primary]).to eq(person)
+        expect(coverage_households[0][:policy_ids]).to eq([1])
+        expect(coverage_households[1][:primary]).to eq(person1)
+        expect(coverage_households[1][:policy_ids]).to eq([2])
       end
     end
 
@@ -52,13 +61,16 @@ describe Household do
       let(:policy3) { double(id: 2, subscriber: subscriber) }
 
 
-      it 'should add policies with same subcriber under same coverage household' do 
+      it 'should add policies with same subcriber under same coverage household' do
+        allow(policy3).to receive(:belong_to_year?).and_return(true)
         allow(subject).to receive(:hbx_enrollments).and_return(hbx_enrollments)
-        expect(subject.policy_coverage_households.size).to eq(2)
-        expect(subject.policy_coverage_households[0][:primary]).to eq(person)
-        expect(subject.policy_coverage_households[0][:policy_ids]).to eq([1, 3])
-        expect(subject.policy_coverage_households[1][:primary]).to eq(person1)
-        expect(subject.policy_coverage_households[1][:policy_ids]).to eq([2])
+        coverage_households = subject.policy_coverage_households(year)
+
+        expect(coverage_households.size).to eq(2)
+        expect(coverage_households[0][:primary]).to eq(person)
+        expect(coverage_households[0][:policy_ids]).to eq([1, 3])
+        expect(coverage_households[1][:primary]).to eq(person1)
+        expect(coverage_households[1][:policy_ids]).to eq([2])
       end
     end
   end

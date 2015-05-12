@@ -12,9 +12,11 @@ module Generators::Reports
     let(:member1) { double(family_member_id: 1, tax_filing_status: 'tax_filer') }
     let(:member2) { double(family_member_id: 2, tax_filing_status: 'dependent') }
     let(:member3) { double(family_member_id: 3, tax_filing_status: 'tax_filer') }
+    let(:enrollments) { [] }
 
     before(:each) do
       subject.calender_year = '2014'
+      allow(household).to receive(:enrollments_for_year).and_return(enrollments)
     end
 
     context 'when single tax household present' do 

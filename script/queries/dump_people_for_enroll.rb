@@ -2,6 +2,7 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
   p_id = person.id.to_s
   if !person.authority_member.blank?
     if !dumped_people.include?(p_id)
+=begin
       new_family = {
         :application_type => "employer_sponsored",
         :family_members => [
@@ -25,6 +26,7 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
           }
         ]
       }
+=end
       dumped_people << p_id
       auth_member = person.authority_member
       mem_ids = person.members.map(&:hbx_member_id)
@@ -95,15 +97,7 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
       end
       relationships.uniq.each do |rel|
         json_data[:person_relationships] << rel
-        new_family[:family_members] << {
-             :person_id => rel[:relative_id]
-        }
-        new_family[:households][0][:coverage_households][0][:coverage_household_members] << {
-             :applicant_id => rel[:relative_id]
-        }
       end
-      family_file.puts JSON.dump(new_family)
-      family_file.puts ","
       person_file.puts JSON.dump(json_data)
       person_file.puts ","
     end
@@ -121,9 +115,13 @@ relationship_map = Hash.new do |hash,key|
   hash[key] = Array.new
 end
 
+subscriber_list = []
+
 pols.each do |pol|
   if !pol.canceled?
     sub_id = pol.subscriber.m_id
+    active_enrollees = pol.enrollees.reject(&:canceled?)
+    subscriber_list << sub_id
     pol.enrollees.each do |en|
       if !en.canceled?
         member_ids << en.m_id
@@ -140,7 +138,7 @@ end
 
 # raise relationship_map.inspect
 people_file = File.open("people.json", 'w')
-families_file = File.open("families.json", 'w')
+families_file = File.open("heads_of_families.json", 'w')
 
 member_ids.uniq!
 
@@ -148,8 +146,13 @@ m_cache = Caches::MemberIdPerson.new(member_ids)
 people = Person.find_for_members(member_ids)
 dumped_peeps = []
 
+subscriber_person_ids = subscriber_list.map do |sub_member_id|
+  m_cache.lookup(sub_member_id).id.to_s
+end
+
+families_file.puts JSON.dump(subscriber_person_ids.uniq)
+
 people_file.puts "["
-families_file.puts "["
 people.each do |person|
   dump_person(person, relationship_map, m_cache, dumped_peeps, people_file, families_file)
 end

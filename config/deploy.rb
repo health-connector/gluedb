@@ -55,7 +55,8 @@ namespace :deploy do
 
   desc "Start nginx and unicorn"
   task :start, :except => { :no_release => true } do
-    run "#{try_sudo} service eye_gluedb restart"
+    run "#{try_sudo} service eye_gluedb quit"
+    run "#{try_sudo} service eye_gluedb load"
   end
 
   desc "Stop nginx and unicorn"

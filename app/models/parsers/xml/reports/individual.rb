@@ -33,8 +33,14 @@ module Parsers::Xml::Reports
         data
       end
 
-      @person.merge!(@person.delete(:id))
-      @person.merge!(@person.delete(:person_name)[0])
+      # puts @person.inspect
+      if @person[:id].class.to_s == 'Hash'
+        @person.merge!(@person.delete(:id))
+      end
+
+      if @person[:person_name].class.to_s == 'Hash'
+        @person.merge!(@person.delete(:person_name))
+      end
   
       @demographics = extract_elements(@root.at_xpath("n1:person_demographics", @namespaces))
       @relationships = extract_elements(@root.at_xpath("n1:person_relationships", @namespaces))

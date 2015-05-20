@@ -3,6 +3,7 @@ module PdfTemplates
     include Virtus.model
     attribute :policy_id, String
     attribute :issuer_name, String
+    attribute :qhp_id, String
     attribute :recipient_address, PdfTemplates::NoticeAddress
     attribute :recipient, PdfTemplates::Enrollee
     attribute :spouse, PdfTemplates::Enrollee
@@ -10,7 +11,9 @@ module PdfTemplates
     attribute :monthly_premiums, Array[PdfTemplates::MonthlyPremium]
     attribute :has_aptc, Boolean, :default => false
     attribute :yearly_premium, PdfTemplates::YearlyPremium
-
+    attribute :active_policies, String
+    attribute :canceled_policies, String
+    attribute :corrected_record_seq_num, String
     
     def covered_household_as_of(month, year)
       month_begin = Date.new(year, month, 1)

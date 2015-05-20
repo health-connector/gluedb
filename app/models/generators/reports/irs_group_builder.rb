@@ -1,11 +1,12 @@
-module Generators::Reports  
+module Generators::Reports 
   class IrsGroupBuilder
 
-    attr_accessor :irs_group, :calender_year
+    attr_accessor :irs_group, :calender_year, :carrier_hash
 
     def initialize(family)
       @family = family
       @irs_group = PdfTemplates::IrsGroup.new
+      @carrier_hash = {}
     end
 
     def process
@@ -24,8 +25,15 @@ module Generators::Reports
 
       @irs_group.policies = pols
       @irs_group.insurance_policies = pols.inject([]) do |data, pol| 
-        data << Generators::Reports::IrsInputBuilder.new(pol).notice
+        data << build_policy(pol)
       end
+    end
+
+    def build_policy(pol)
+      builder = Generators::Reports::IrsInputBuilder.new(pol)
+      builder.carrier_hash = @carrier_hash
+      builder.process
+      builder.notice
     end
 
     # Lets assume we have only one household
@@ -43,9 +51,8 @@ module Generators::Reports
       @irs_group.households = households
     end
 
-    def build_household_for_aptc(household)      
-      tax_households = []
-      household.tax_households.each do |tax_household|
+    def build_household_for_aptc(household)
+      tax_households = household.tax_households.inject([]) do |tax_households, tax_household|        
         tax_households << build_tax_household(tax_household)
       end
 
@@ -57,6 +64,7 @@ module Generators::Reports
 
     def build_household_for_nonaptc(household)
       coverage_households = []
+
       household.policy_coverage_households(@calender_year).each do |coverage_household|
         coverage_households << PdfTemplates::CoverageHousehold.new({
           primary: build_enrollee(coverage_household[:primary], true),
@@ -72,7 +80,7 @@ module Generators::Reports
     def build_tax_household(tax_household)
       PdfTemplates::TaxHousehold.new({
         primary: build_tax_member(tax_household.primary, true),
-        spouse: build_tax_member(tax_household.spouse), 
+        spouse:  build_tax_member(tax_household.spouse), 
         dependents: tax_household.dependents.map{ |dependent| build_tax_member(dependent) },
         policy_ids: tax_household.coverage_as_of(Date.new(2014, month, 1))
         })

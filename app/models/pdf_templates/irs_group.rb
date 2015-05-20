@@ -11,7 +11,7 @@ module PdfTemplates
     def coverage_ids
       pol_ids = []
       households.each do |h|
-        h.tax_households.each { |i| pol_ids += i.policy_ids }
+        h.irs_households.each { |i| pol_ids += i.policy_ids }
       end
       pol_ids.flatten.uniq
     end
@@ -22,7 +22,7 @@ module PdfTemplates
     end
 
     def irs_households_for_duration(months)
-      active_household.tax_households.select do |irs_household| 
+      active_household.irs_households.select do |irs_household| 
         had_coverage(irs_household, months)
       end
     end

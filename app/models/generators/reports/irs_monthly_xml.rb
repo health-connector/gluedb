@@ -10,6 +10,7 @@ module Generators::Reports
       "xmlns" => "urn:us:gov:treasury:irs:common",
       "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
       "xmlns:n1" => "urn:us:gov:treasury:irs:msg:monthlyexchangeperiodicdata"
+      # "xmlns:n1" => "urn:us:gov:treasury:irs:msg:sbmpolicylevelenrollment"  # CMS
     }
 
     attr_accessor :folder_name
@@ -21,7 +22,7 @@ module Generators::Reports
     end
     
     def serialize
-      File.open("#{Rails.root}/h36xmls/#{@folder_name}/#{@e_case_id}_#{@irs_group.identification_num}.xml", 'w') do |file|
+      File.open("#{Rails.root}/h36xmls/may18/#{@folder_name}/#{@e_case_id}_#{@irs_group.identification_num}.xml", 'w') do |file|
         file.write builder.to_xml(:indent => 2)
       end
     end
@@ -29,8 +30,8 @@ module Generators::Reports
     def builder
       Nokogiri::XML::Builder.new do |xml|
         xml['n1'].HealthExchange(NS) do
-          xml.SubmissionYr CALENDER_YEAR
-          xml.SubmissionMonthNum 12
+          xml.SubmissionYr 2015
+          xml.SubmissionMonthNum "04"
           xml.ApplicableCoverageYr CALENDER_YEAR
           xml.IndividualExchange do |xml|
             xml.HealthExchangeId "02.DC*.SBE.001.001"
@@ -61,7 +62,7 @@ module Generators::Reports
 
     def serialize_taxhousehold_coverage(xml, tax_household, calender_month)
       xml.TaxHouseholdCoverage do |xml|
-        xml.ApplicableCoverageMonthNum calender_month
+        xml.ApplicableCoverageMonthNum prepend_zeros(calender_month.to_s, 2)
         xml.Household do |xml|
           serialize_household_members(xml, tax_household)
           @irs_group.irs_household_coverage_as_of(tax_household, calender_month).each do |policy|
@@ -152,9 +153,9 @@ module Generators::Reports
         monthly_aptc = 0 if monthly_aptc.blank?
 
         xml.InsuranceCoverage do |xml|
-          xml.ApplicableCoverageMonthNum premium.serial
+          xml.ApplicableCoverageMonthNum prepend_zeros(premium.serial.to_s, 2)
           xml.QHPPolicyNum policy.policy_id
-          # xml.QHPId
+          # xml.QHPId policy.qhp_id # CMS
           xml.PediatricDentalPlanPremiumInd "N"
           xml.QHPIssuerEIN policy.issuer_fein
           xml.IssuerNm policy.issuer_name
@@ -182,6 +183,11 @@ module Generators::Reports
     end
 
     private
+
+    def prepend_zeros(number, n)
+      (n - number.size).times { number.prepend('0') }
+      number
+    end
 
     def date_formatter(date)
       return if date.nil?

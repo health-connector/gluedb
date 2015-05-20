@@ -136,11 +136,13 @@ class Household
   end
 
   def enrollments_for_year(year)
-    hbx_enrollments.select{ |enrollment| valid_policy?(enrollment.policy) && enrollment.policy.belong_to_year?(year) }
+    hbx_enrollments.select do  |enrollment| 
+      valid_policy?(enrollment.policy) && enrollment.policy.belong_to_year?(year) && enrollment.policy.belong_to_authority_member?
+    end
   end
 
   def has_aptc?(year)
-    enrollments_for_year(year).map(&:policy).detect{|x| x.applied_aptc > 0 }.nil? ? false : true
+    enrollments_for_year(year).map(&:policy).detect{|x| x.applied_aptc.to_f > 0 }.nil? ? false : true
   end
 
   def valid_policy?(pol)

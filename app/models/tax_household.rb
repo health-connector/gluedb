@@ -25,9 +25,7 @@ class TaxHousehold
 
   embeds_many :eligibility_determinations
 
-
   # *IMP* Check for tax members with financial information missing
-
   def members_with_financials
     tax_household_members.reject{|m| m.financial_statements.empty? }
   end
@@ -43,7 +41,6 @@ class TaxHousehold
     policies = []
 
     household.hbx_enrollments.each do |enrollment|
-
       if pol.subscriber.coverage_start > Date.new((date.year - 1),12,31) && pol.subscriber.coverage_start < Date.new(date.year,12,31)
         policy_disposition = PolicyDisposition.new(pol)
         coverages << pol if (policy_disposition.start_date.month..policy_disposition.end_date.month).include?(date.month)
@@ -97,21 +94,17 @@ class TaxHousehold
   end
 
   def family
-    return nil unless household
+    return if household.blank?
     household.family
   end
 
   def is_eligibility_determined?
-    if self.elegibility_determinizations.size > 0
-      true
-    else
-      false
-    end
+    elegibility_determinizations.size > 0 ? true : false
   end
 
   #primary applicant is the tax household member who is the subscriber
   def primary_applicant
-    tax_household_members.detect do |tax_household_member|
+    tax_household_members.detect do |tax_household_member| 
       tax_household_member.is_subscriber == true
     end
   end

@@ -17,7 +17,7 @@ CSV.foreach('/Users/CitadelFirm/Downloads/projects/hbx/gluedb/irs_groups.csv') d
 
   family = nil
   if row[0].present?
-    family = Family.where(e_case_id:row[0]).first
+    family = Family.where(e_case_id: row[0]).first
   elsif row[1].present?
     families = Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(row[1])}}})
     families.each do |f|
@@ -25,22 +25,29 @@ CSV.foreach('/Users/CitadelFirm/Downloads/projects/hbx/gluedb/irs_groups.csv') d
     end
   end
 
- if family.nil?
-   @logger.info "Record does not match e_case_id or primary_applicant #{row[0]} #{row[1]} #{row[2]}"
-   next
- end
-
-  if family.active_household.nil?
-    @logger.info "No household #{row[0]} #{row[1]} #{row[2]}"
+  if family.nil?
+    @logger.info "Record does not match e_case_id or primary_applicant #{row[0]} #{row[1]} #{row[2]}"
     next
   end
 
-  if family.active_household.irs_group.nil?
-    @logger.info "No irs_group object in glue #{row[0]} #{row[1]} #{row[2]}"
+  begin
+    if family.active_household.nil?
+      @logger.info "No household #{row[0]} #{row[1]} #{row[2]}"
+      next
+    end
+
+    if family.active_household.irs_group.nil?
+      @logger.info "No irs_group object in glue #{row[0]} #{row[1]} #{row[2]}"
+      next
+    end
+  rescue Exception => e
+    @logger.error "#{family.e_case_id} #{e.message}"
     next
   end
 
-  @logger.info "#{family.e_case_id} family.active_household.irs_group.hbx_assigned_id: #{family.active_household.irs_group.hbx_assigned_id} csv:#{row[2]}"
+
   family.active_household.irs_group.hbx_assigned_id = row[2]
-  #family.save
+  family.save
+  @logger.info "#{family.e_case_id} family.active_household.irs_group.hbx_assigned_id: #{family.active_household.irs_group.hbx_assigned_id} csv:#{row[2]}"
+
 end

@@ -53,6 +53,62 @@ class TaxHousehold
     members_with_financials.detect{|m| m.financial_statements[0].tax_filing_status == 'tax_filer' }.nil?
   end
 
+  def tax_filers
+    members_with_financials.select{ |m| m.financial_statements[0].tax_filing_status == 'tax_filer' }
+  end
+
+  def primary
+    if tax_filers.count > 1
+      if tax_filers.detect{|filer| filer.financial_statements[0].is_tax_filing_together == false }
+        raise 'multiple tax filers filing seperate in a single tax household!!'
+      end
+
+      tax_filer = tax_filers.detect{|filer| filer.is_primary_applicant? }
+      raise "multiple tax_filers but primary applicant is not one of them??" if tax_filer.blank?
+      tax_filer
+    else
+      tax_filers.first
+    end
+  end
+
+  def spouse
+    if tax_filers.count > 1
+      return tax_filers.detect{|filer| !filer.is_primary_applicant? }
+    else
+      non_filers = members_with_financials.select{|m| m.financial_statements[0].tax_filing_status == 'non_filer'}
+      if non_filers.any?
+        non_filers.each do |non_filer|
+          if has_spouse_relation?(non_filer)
+            return non_filer
+          end
+        end
+      end
+    end
+
+    nil
+  end
+
+  def has_spouse_relation?(non_filer)
+    pols = non_filer.family_member.person.policies
+    person = non_filer.family_member.person
+
+    pols.each do |pol|
+      member = pol.enrollees.detect{|enrollee| enrollee.person == person}
+      if member.rel_code == 'spouse'
+        return true
+      end
+    end
+    false
+  end
+
+  def dependents
+    members_with_financials.select {|m| 
+      m.financial_statements[0].tax_filing_status == 'dependent'
+    } + members_with_financials.select {|m| 
+      m.financial_statements[0].tax_filing_status == 'non_filer'
+    }.reject{|m| m == spouse }
+  end
+
   # def coverage_as_of(date)
   #   # pols = []
   #   # members_with_financials.select{|m|

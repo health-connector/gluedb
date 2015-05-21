@@ -7,7 +7,7 @@ def normalize_primary_applicant_id(family)
   if family.primary_applicant.nil?
     ""
   else
-    family.primary_applicant.id
+    family.primary_applicant.person.authority_member.hbx_member_id
   end
 end
 

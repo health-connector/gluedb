@@ -1,119 +1,97 @@
 require 'rails_helper'
 
 describe TaxHousehold do
-=begin
-  describe "validate associations" do
-#	  it { should have_and_belong_to_many  :people }
-#	  it { should embed_many :special_enrollment_periods }
-	  it { should embed_many :eligibilities }
-=end
 
-  it "should have no people" do
-    expect(subject.people).to be_empty
-  end
-=begin
+  subject { TaxHousehold.new }
 
-  it "max_aptc and csr values returned are from the most recent eligibility record" do
-  	hh = Household.new(
-  			eligibilities: [
-  				Eligibility.new({date_determined: Date.today - 100, max_aptc: 101.05, csr_percent: 1.0}),
-  				Eligibility.new({date_determined: Date.today - 80, max_aptc: 181.05, csr_percent: 0.80}),
-  				Eligibility.new({date_determined: Date.today, max_aptc: 287.95, csr_percent: 0.73}),
-  				Eligibility.new({date_determined: Date.today - 50, max_aptc: 101.05, csr_percent: 0.50})
-  			]
-  		)
 
-  	expect(hh.max_aptc).to eq(287.95)
-  	expect(hh.csr_percent).to eq(0.73)
-  end
-  it "returns list of SEPs for specified day and single 'current_sep'" do
-  	hh = Household.new(
-  			special_enrollment_periods: [
-  				SpecialEnrollmentPeriod.new({reason: "marriage", start_date: Date.today - 120, end_date: Date.today - 90}),
-  				SpecialEnrollmentPeriod.new({reason: "retirement", start_date: Date.today - 10, end_date: Date.today + 20}),
-  				SpecialEnrollmentPeriod.new({reason: "birth", start_date: Date.today - 90, end_date: Date.today - 60}),
-  				SpecialEnrollmentPeriod.new({reason: "location_change", start_date: Date.today - 260, end_date: Date.today - 230}),
-  				SpecialEnrollmentPeriod.new({reason: "employment_termination", start_date: Date.today - 180, end_date: Date.today - 150})
-  			]
-  		)
+  let(:tax_household_members) { [member1, member2, member3]}
+  let(:member1) { double(financial_statements: [tax_filer]) }
+  let(:member2) { double(financial_statements: [non_filer1]) }
+  let(:member3) { double(financial_statements: [dependent]) }
+  let(:tax_filer) { double(tax_filing_status: 'tax_filer', is_tax_filing_together: false) }
+  let(:non_filer1) { double(tax_filing_status: 'non_filer', is_tax_filing_together: false) }
+  let(:non_filer2) { double(tax_filing_status: 'non_filer', is_tax_filing_together: false) }
+  let(:dependent) { double(tax_filing_status: 'dependent', is_tax_filing_together: false) }
+  let(:joint_filer1) { double(tax_filing_status: 'tax_filer', is_tax_filing_together: true) }
+  let(:joint_filer2) { double(tax_filing_status: 'tax_filer', is_tax_filing_together: true) }
 
-		past_day = hh.active_seps(Date.today - 500)
-  	expect(past_day.count).to eq(0)
-
-		wedding_day = hh.active_seps(Date.today - 120)
-  	expect(wedding_day.count).to eq(1)
-  	expect(wedding_day.first.reason).to eq("marriage")
-  	expect(wedding_day.first.start_date).to eq(Date.today - 120)
-
-  	expect(hh.current_sep.reason).to eq("retirement")
-  	expect(hh.current_sep.start_date).to eq(Date.today - 10)
+  before(:each) do 
+    allow(subject).to receive(:tax_household_members).and_return(tax_household_members) 
+    allow(subject).to receive(:has_spouse_relation?).with(member2).and_return(true) 
   end
 
-  describe "new SEP effects on enrollment state:" do
+  context '#primary' do
 
-		it "should initialize to closed_enrollment state" do
-			hh = Household.new
-			expect(hh.closed_enrollment?).to eq(true)
-		end
+    context 'when single filer present' do 
+      it 'should return tax filer' do
+        expect(subject.primary).to eq(member1)
+      end
+    end
 
-		it "should transition to open_enrollment_period from any other enrollment state (including open_enrollment_period)" do
-			hh = Household.new
-			expect(hh.closed_enrollment?).to eq(true)
-			hh.open_enrollment
-			expect(hh.open_enrollment_period?).to eq(true)
-			hh.open_enrollment
-			expect(hh.open_enrollment_period?).to eq(true)
-			hh.special_enrollment
-			expect(hh.special_enrollment_period?).to eq(true)
-			hh.open_enrollment
-			expect(hh.open_enrollment_period?).to eq(true)
-		end
+    context 'when multiple filers filing together' do 
+      let(:member1) { double(financial_statements: [joint_filer1]) }
+      let(:member2) { double(financial_statements: [joint_filer2]) }
 
-		it "not affect state when system date is outside new SEP date range" do
-			hh = Household.new
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "marriage", start_date: Date.today - 120, end_date: Date.today - 90})
-			expect(hh.closed_enrollment?).to eq(true)
-
-			hh.special_enrollment
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "location_change", start_date: Date.today - 90, end_date: Date.today - 60})
-			expect(hh.special_enrollment_period?).to eq(true)
-  	end
-
-  	it "set state to special_enrollment_period when system date is within SEP date range" do
-			hh = Household.new(rel: "subscriber")
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "birth", start_date: Date.today - 5, end_date: Date.today + 25})
-			hh.save!
-
-			expect(hh.special_enrollment_period?).to eq(true)
-			expect(hh.current_sep.reason).to eq("birth")
-  	end
-
-  	it "change state from open_enrollment_period to special_enrollment_period when end_date is later" do
-			hh = Household.new(rel: "spouse")
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "open_enrollment_start", start_date: Date.today - 30, end_date: Date.today + 5})
-			hh.save!
-			expect(hh.open_enrollment_period?).to eq(true)
-
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "adoption", start_date: Date.today - 15, end_date: Date.today + 15})
-			expect(hh.special_enrollment_period?).to eq(true)
-  	end
-
-  	it "do not change state from open_enrollment_period to special_enrollment_period when end_date is prior" do
-			hh = Household.new(rel: "spouse")
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "open_enrollment_start", start_date: Date.today - 30, end_date: Date.today + 5})
-			hh.save!
-			expect(hh.open_enrollment_period?).to eq(true)
-
-			hh.special_enrollment_periods << SpecialEnrollmentPeriod.new({reason: "adoption", start_date: Date.today - 29, end_date: Date.today + 1})
-			expect(hh.open_enrollment_period?).to eq(true)
-  	end
-
-		it "manually force active enrollment periods to close" do
-		end
-
-		it "change Household state when System date enters or exits current_sep range" do
-		end
+      it 'should return primary_applicant' do 
+        allow(member1).to receive(:is_primary_applicant?).and_return(false)
+        allow(member2).to receive(:is_primary_applicant?).and_return(true)
+        expect(subject.primary).to eq(member2)
+      end
+    end
   end
-=end
 
+  context '#spouse' do
+    context 'when single filer present' do 
+      let(:member2) { double(financial_statements: [non_filer1]) }
+      let(:member3) { double(financial_statements: [non_filer2]) }
+
+      it 'should return non_filer with spouse relation on policy' do
+        expect(subject.spouse).to eq(member2)
+      end
+    end
+
+    context 'when multiple filers filing together' do 
+      let(:member1) { double(financial_statements: [joint_filer1]) }
+      let(:member2) { double(financial_statements: [non_filer1]) }
+      let(:member3) { double(financial_statements: [joint_filer2]) }
+
+      it 'should return non primary_applicant' do
+        allow(member1).to receive(:is_primary_applicant?).and_return(true)
+        allow(member3).to receive(:is_primary_applicant?).and_return(false)
+
+        expect(subject.spouse).to eq(member3)
+      end
+    end
+  end
+
+  context '#dependents' do
+    context 'when member with filing status dependent present' do
+      it 'should return' do
+        expect(subject.dependents).to eq([member3])
+      end
+    end
+
+    context 'when non_filer without spouse relation present' do
+      let(:member2) { double(financial_statements: [non_filer1]) }
+      let(:member3) { double(financial_statements: [non_filer2]) }
+
+      it 'should return as dependent' do
+        expect(subject.dependents).to eq([member3])
+      end
+    end
+
+    context 'when both non filers and dependents present' do
+      let(:member2) { double(financial_statements: [non_filer1]) }
+      let(:member3) { double(financial_statements: [non_filer2]) } 
+      let(:member4) { double(financial_statements: [dependent]) }
+      let(:tax_household_members) { [member1, member2, member3, member4]}
+
+      it 'should return non_filers without spouse relation and dependents' do
+        expect(subject.primary).to eq(member1)
+        expect(subject.spouse).to eq(member2) 
+        expect(subject.dependents).to eq([member4, member3])
+      end
+    end
+  end
 end

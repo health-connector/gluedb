@@ -140,7 +140,7 @@ class FamilyBuilder
       f.primary_applicant.person.id.eql? person.id
     end
 
-    if family.present?
+    if family.present? && (family.e_case_id != @family.e_case_id)
       $logger.info ("Family e_case_id: #{@family.e_case_id} Duplicate Primary Applicant person_id : #{person.id}. existing family #{family.e_case_id}" )
 
       family.family_members.each do |family_member|

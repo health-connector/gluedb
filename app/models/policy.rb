@@ -77,7 +77,7 @@ class Policy
 
   scope :individual_market, where(:employer_id => nil)
   scope :unassisted, where(:applied_aptc.in => ["0", "0.0", "0.00"])
-  scope :insurance_assisted, where(:applied_aptc.nin => ["0", "0.0", "0.00"])
+    scope :insurance_assisted, where(:applied_aptc.nin => ["0", "0.0", "0.00"])
 
   # scopes of renewal reports
   scope :active_renewal_policies, where({:employer_id => nil, :enrollees => {"$elemMatch" => { :rel_code => "self", :coverage_start => {"$gt" => Date.new(2014,12,31)}, :coverage_end.in => [nil]}}})

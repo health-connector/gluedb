@@ -1,6 +1,16 @@
 # command to run this script
 # rails r script/queries/import_families.rb
 
+
+record_counter = 0
+Dir.glob("/Users/CitadelFirm/Downloads/clean-xmls-19may"+'/*.xml').each do |file_path|
+  iag = ImportFamilies.new(file_path)
+  iag.run
+  record_counter = record_counter + 1
+  puts "#{file_path} record_counter #{record_counter}"
+end
+
+=begin
 record_counter = 0
 Dir.glob("/Users/CitadelFirm/Downloads/projects/hbx/xmls-individuals-feb-27/input-feb-17 copy/app_groups_jan14"+'/*.xml').each do |file_path|
   iag = ImportFamilies.new(file_path)

@@ -1,12 +1,12 @@
 dups = {
-
 }
 
 dups.each do |k,v|
   auth = Person.find_for_member_id(k)
   nauth = Person.find_for_member_id(v)
   unless auth.members.count == 1 || nauth.members.count == 1
-    puts [auth.members.inspect, nauth.members.inspect]
+    puts "pass1"
+    puts [auth.members.map(&:hbx_member_id), nauth.members.map(&:hbx_member_id)]
   else
     cloned = nauth.members.first.clone
     nauth.members.first.destroy

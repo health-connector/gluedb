@@ -21,6 +21,8 @@ describe Household do
     allow(subject).to receive(:valid_policy?).and_return(true)
     allow(policy1).to receive(:belong_to_year?).and_return(true)
     allow(policy2).to receive(:belong_to_year?).and_return(true)
+    allow(policy1).to receive(:belong_to_authority_member?).and_return(true)
+    allow(policy2).to receive(:belong_to_authority_member?).and_return(true)    
   end
 
   context 'policy coverage households' do
@@ -63,6 +65,7 @@ describe Household do
 
       it 'should add policies with same subcriber under same coverage household' do
         allow(policy3).to receive(:belong_to_year?).and_return(true)
+        allow(policy3).to receive(:belong_to_authority_member?).and_return(true)
         allow(subject).to receive(:hbx_enrollments).and_return(hbx_enrollments)
         coverage_households = subject.policy_coverage_households(year)
 

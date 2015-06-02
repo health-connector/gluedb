@@ -2,8 +2,6 @@ class Person
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Versioning
-  include Mongoid::EmbeddedErrors
-
   # include Mongoid::Paranoia
 
   extend Mongorder

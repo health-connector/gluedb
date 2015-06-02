@@ -4,7 +4,6 @@ class Family
   include Mongoid::Versioning
   # include Mongoid::Paranoia
   include AASM
-  include Mongoid::EmbeddedErrors
 
   KINDS = %W[unassisted_qhp insurance_assisted_qhp employer_sponsored streamlined_medicaid emergency_medicaid hcr_chip]
 

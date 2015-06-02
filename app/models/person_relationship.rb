@@ -1,7 +1,6 @@
 class PersonRelationship
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::EmbeddedErrors
 
   embedded_in :person
 

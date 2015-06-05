@@ -52,7 +52,7 @@ module Parsers::Xml::Cv
         :name_pfx => name_pfx,
         :name_sfx => name_sfx,
         :hbx_member_id => get_or_generate_member_id(member_id_generator),
-        :applicant_id => id
+        :family_member_id => id
       }
     end
 

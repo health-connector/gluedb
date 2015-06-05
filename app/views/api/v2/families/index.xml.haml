@@ -1,0 +1,4 @@
+%n1:application_groups{"xmlns:n1" => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation" => "http://openhbx.org/api/terms/1.0 individual.xsd"}
+  - @groups.each do |group|
+    %n1:application_group
+      = render 'family', group: group

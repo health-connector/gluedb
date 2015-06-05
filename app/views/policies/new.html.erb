@@ -4,14 +4,14 @@
 
 <div class="page-header">
   <%= render 'shared/breadcrumb', crumbs: [
-      link_to('Application Group', application_group_path(@form.application_group.id)),
+      link_to('Application Group', family_path(@form.family.id)),
       'New Policy'
     ]
   %>
 </div>
 
 <%= form_for(@form) do |f| %>
-  <%= f.hidden_field :application_group_id %>
+  <%= f.hidden_field :family_id %>
   <%= f.hidden_field :household_id %>
   <div class="form-group">
     <div class="row">

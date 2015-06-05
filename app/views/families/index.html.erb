@@ -1,0 +1,23 @@
+<%- model_class = Family -%>
+<%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
+<div class="page-header">
+  <%= render 'shared/breadcrumb', crumbs: ['Application Groups'] %>
+</div>
+
+  <div class="row">
+    <div class="col-md-offset-8 col-md-4">
+      <%= render 'shared/search', url: people_path, q: @q, placeholder: "Name, HBX ID, SSN" %>
+    </div>
+  </div>
+</div>
+
+<%= render "family_list", families: @families %>
+
+<div class="row">
+  <div class="col-md-8">
+    <%= paginate @families, theme: "twitter-bootstrap", pagination_class: "pagination-plain" %>
+  </div>
+  <div class="rol-md-4">
+    <p><%= "#{number_with_delimiter(@families.count)} / #{number_with_delimiter(Family.count)} " %><small>(Application Groups selected / total)</small></p>
+  </div>
+</div>

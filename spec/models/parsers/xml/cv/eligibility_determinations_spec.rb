@@ -7,15 +7,15 @@ describe Parsers::Xml::Cv::EligibilityDeterminationParser do
     @subject = Parsers::Xml::Cv::EligibilityDeterminationParser.parse(xml_file)
   end
 
-  let(:id) { "2063333" }
+  let(:id) {"2063333"}
 
-  let(:household_state) { "urn:openhbx:terms:v1:household_state#cs7" }
+  let(:household_state) {"urn:openhbx:terms:v1:household_state#cs7"}
 
-  let(:maximum_aptc) { "0" }
+  let(:maximum_aptc) {"0"}
 
-  let(:csr_percent) { "0.0" }
+  let(:csr_percent) {"0.0"}
 
-  let(:determination_date) { "20131204" }
+  let(:determination_date) {"20131204"}
 
   it 'should have an id' do
     expect(@subject.id).to eq(id)
@@ -29,11 +29,8 @@ describe Parsers::Xml::Cv::EligibilityDeterminationParser do
     expect(@subject.maximum_aptc).to eq(maximum_aptc)
   end
 
-  skip "is skipped" do
-
-    it 'should have an csr_percent' do
-      expect(@subject.csr_percent).to eq(csr_percent)
-    end
+  it 'should have an csr_percent' do
+    expect(@subject.csr_percent).to eq(csr_percent.to_f)
   end
 
   it 'should have an determination_date' do

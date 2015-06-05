@@ -23,9 +23,9 @@ module CanonicalVocabulary
           xml.ApplicableCoverageYr 1000
           xml.IndividualExchange do |xml|
             xml.HealthExchangeId "00.AA*.000.000.000"
-            group_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}application_groups/5431b03feb899a49e0000004?user_token=zUzBsoTSKPbvXCQsB4Ky"))
+            group_xml = Net::HTTP.get(URI.parse("#{CV_API_URL}families/5431b03feb899a49e0000004?user_token=zUzBsoTSKPbvXCQsB4Ky"))
             app_group_xml = Nokogiri::XML(group_xml).root
-            @app_group = Parsers::Xml::Reports::ApplicationGroup.new(app_group_xml)
+            @app_group = Parsers::Xml::Reports::Family.new(app_group_xml)
             next if @app_group.individual_policies.empty?
             serialize_irs_household_grp(xml)
           end
@@ -94,15 +94,15 @@ module CanonicalVocabulary
     end
 
     def serialize_household_members(xml, household)
-      applicants_xml = @app_group.applicants_xml
-      primary_xml = applicants_xml[household.primary]
+      family_members_xml = @app_group.family_members_xml
+      primary_xml = family_members_xml[household.primary]
       individual = Parsers::Xml::Reports::Individual.new(primary_xml)
       serialize_individual(xml, individual)
 
       serialize_members = Proc.new do |xml, members|
         members.each do |key, val|
-          applicant_xml = applicants_xml[key]
-          individual = Parsers::Xml::Reports::Individual.new(applicant_xml)
+          family_member_xml = family_members_xml[key]
+          individual = Parsers::Xml::Reports::Individual.new(family_member_xml)
           serialize_individual(xml, individual, val.camelcase)
         end
       end

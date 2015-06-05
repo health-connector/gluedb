@@ -5,7 +5,7 @@ module Generators::Reports
     subject { IrsInputBuilder.new(policy) }
 
     let(:policy) { double(id: 24, subscriber: subscriber, enrollees: [subscriber, dependent1, dependent2], policy_start: policy_start, policy_end: policy_end, plan: plan, eg_id: 212131212, applied_aptc: 0) }
-    let(:plan) { double(carrier: carrier) }
+    let(:plan) { double(carrier: carrier, hios_plan_id: '123121') }
     let(:carrier) { double(name: 'Care First')}
     let(:policy_start) { Date.new(2014, 1, 1) }
     let(:policy_end) { Date.new(2014, 12, 31)} 
@@ -30,18 +30,26 @@ module Generators::Reports
     let(:mock_disposition) { double(enrollees: policy.enrollees, start_date: policy_start, end_date: policy_end ) }
     let(:mock_policy) { double(pre_amt_tot: 0.0, ehb_premium: 100.17, applied_aptc: 55.45)}
 
+    let(:carrier_hash) { {'221212312' => 'Carefirst'} }
+
     before(:each) do
       allow(PolicyDisposition).to receive(:new).with(policy).and_return(mock_disposition)
       allow(policy).to receive(:changes_over_time?).and_return(false)
       allow(policy).to receive(:spouse).and_return(dependent1)
+      allow(policy).to receive(:carrier_id).and_return('221212312')
+
       allow(subscriber).to receive(:canceled?).and_return(false)
       allow(dependent1).to receive(:canceled?).and_return(false)
       allow(dependent2).to receive(:canceled?).and_return(false)
       allow(address).to receive(:to_hash).and_return(address_hash)
       allow(mock_disposition).to receive(:as_of).and_return(mock_policy)
+
+      subject.carrier_hash = carrier_hash
     end
 
     it 'should append recipient address' do
+      subject.process
+
       expect(subject.notice.recipient_address).to be_kind_of(PdfTemplates::NoticeAddress)
       expect(subject.notice.recipient_address.street_1).to eq(address.address_1)
       expect(subject.notice.recipient_address.street_2).to eq(address.address_2)
@@ -51,11 +59,15 @@ module Generators::Reports
     end
 
     it 'should append household' do
-      expect(subject.notice.recipient).to be_kind_of(PdfTemplates::Enrolee)
-      expect(subject.notice.spouse).to be_kind_of(PdfTemplates::Enrolee)
+      subject.process
+
+      expect(subject.notice.recipient).to be_kind_of(PdfTemplates::Enrollee)
+      expect(subject.notice.spouse).to be_kind_of(PdfTemplates::Enrollee)
     end
 
     it 'should append monthly premiums' do
+      subject.process
+
       expect(subject.notice.monthly_premiums.count).to eq(12)
       expect(subject.notice.monthly_premiums.first).to be_kind_of(PdfTemplates::MonthlyPremium)
     end
@@ -64,6 +76,8 @@ module Generators::Reports
       let(:policy_end) { Date.new(2014, 7, 31) }
 
       it 'should calculate premiums only for the covered months' do
+        subject.process
+
         expect(subject.notice.monthly_premiums.count).to eq(7)
         expect(subject.notice.monthly_premiums.map(&:serial).sort).to eq([1,2,3,4,5,6,7])
       end
@@ -74,6 +88,8 @@ module Generators::Reports
       let(:policy_end) { Date.new(2014, 9, 30) }
 
       it 'should append premiums only for covered period' do
+        subject.process
+
         expect(subject.notice.monthly_premiums.count).to eq(5)
         expect(subject.notice.monthly_premiums.map(&:serial).sort).to eq([5,6,7,8,9])
       end

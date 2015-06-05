@@ -4,7 +4,7 @@ class FinancialStatement
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  TAX_FILING_STATUS_TYPES = %W(tax_filer tax_dependent non_filer)
+  TAX_FILING_STATUS_TYPES = %W(tax_filer single joint separate dependent non_filer)
 
   field :tax_filing_status, type: String
   field :is_tax_filing_together, type: Boolean
@@ -35,14 +35,14 @@ class FinancialStatement
     inclusion: { in: TAX_FILING_STATUS_TYPES, message: "%{value} is not a valid tax filing status" },
     allow_blank: true
 
-  def application_group
+  def family
     return nil unless tax_household_member
-    tax_household_member.application_group
+    tax_household_member.family
   end
 
-  def applicant
+  def family_member
     return nil unless tax_household_member
-    tax_household_member.applicant
+    tax_household_member.family_member
   end
 
   def eligibility_determination=(ed_instance)

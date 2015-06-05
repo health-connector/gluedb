@@ -43,7 +43,7 @@ class SpecialEnrollmentPeriod
   					inclusion: {in: REASONS}
 
 
-  embedded_in :application_group
+  embedded_in :family
   # before_create :activate_household_sep
   # before_save :activate_household_sep
 

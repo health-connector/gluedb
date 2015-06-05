@@ -1,0 +1,78 @@
+<%- model_class = Family -%>
+<%t '.title', :default => model_class.model_name.human.pluralize.titleize %>
+<div class="page-header">
+  <%- #pid = @family.person_relationships.first.subject_person -%>
+  <%= render 'shared/breadcrumb', crumbs: [
+    link_to('Application Groups', families_path),
+    @family.id
+      # Person.find(pid).name_full
+    ]
+    %>
+  </div>
+  <div class='col-md-12'>
+
+    <div class="alert alert-success alert-dismissible" role="alert">
+      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <p>Individual market enrollment is open|closed. Enrollment will open|close on <b>Date</b>></p>
+        <p>Application Group is in Special Enrollment Period (SEP). SEP will close on <b>Date</b>></p>
+        <p><b>Employer name</b> enrollment is open|closed. Enrollment will open|close on <b>Date</b>></p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-5">
+        <%= render 'group_panel', person: @primary_applicant, family: @family   %>
+      </div>
+
+      <div class="col-md-5">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Life Events</h3>
+          </div>
+          <div class="panel-body">
+            <ul>
+              <li>Kind</li>
+              <li>Event Date</li>
+              <li>Status</li>
+              <li>Special Enrollment Period Start Date</li>
+              <li>Special Enrollment Period End Date</li>
+            </ul>
+          </div>
+          <div class="panel-footer"><p><small>New Life Event | Access Life Event History</small></p></div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-5">
+        <%= render 'enrolled_plans_panel', person: @primary_applicant, family: @family   %>
+      </div>
+
+      <div class="col-md-5">
+        <%= render 'insurance_assistance_panel', person: @primary_applicant, family: @family   %>
+      </div>
+    </div>
+
+    <h6>General</h6>
+    <ul>
+      <li>Access my IRS 1095A forms</li>
+      <li>Access my Notice history</li>
+      <li>renewal_consent_through_year</li>
+      <li>consent_applicant</li>
+      <li>irs_groups</li>
+      <li>is_active</li>
+    </ul>
+
+    <h6>Admin</h6>
+    <ul>
+      <li>irs_groups</li>
+      <li>is_active?</li>
+    </ul>
+
+
+    <div class="well well-sm default">
+      <div class="form-actions">
+       <%= link_to t('.back', :default => t("helpers.links.back")), families_path, :class => 'btn btn-primary'  %>
+      </div>
+    </div>
+</div>

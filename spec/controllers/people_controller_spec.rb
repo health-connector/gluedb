@@ -30,7 +30,7 @@ describe PeopleController do
 
       it 'redirects to person show' do
         post :create, person: attributes
-        expect(response).to redirect_to person.application_group
+        expect(response).to redirect_to person.family
       end
 
     end

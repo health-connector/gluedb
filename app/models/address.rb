@@ -1,7 +1,6 @@
 class Address
   include Mongoid::Document
   include Mongoid::Timestamps
-
   include MergingModel
 
   TYPES = %W(home work mailing)

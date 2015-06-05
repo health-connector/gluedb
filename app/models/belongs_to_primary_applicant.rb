@@ -4,7 +4,7 @@ module BelongsToPrimaryApplicant
   end
 
   def primary_applicant
-    return nil unless application_group
-    application_group.applicants.detect { |apl| primary_applicant_id == apl._id }
+    return nil unless family
+    family.family_members.detect { |apl| primary_applicant_id == apl._id }
   end
 end

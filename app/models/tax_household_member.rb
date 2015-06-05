@@ -5,13 +5,13 @@ class TaxHouseholdMember
   embedded_in :tax_household
   embeds_many :financial_statements
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
 
   field :is_ia_eligible, type: Boolean, default: false
   field :is_medicaid_chip_eligible, type: Boolean, default: false
   field :is_subscriber, type: Boolean, default: false
 
-  include BelongsToApplicant
+  include BelongsToFamilyMember
 
   validate :strictly_boolean
 
@@ -20,9 +20,9 @@ class TaxHouseholdMember
     tax_household.eligibility_determinations
   end
 
-  def application_group
+  def family
     return nil unless tax_household
-    tax_household.application_group
+    tax_household.family
   end
 
   def is_ia_eligible?
@@ -38,7 +38,7 @@ class TaxHouseholdMember
   end
 
   def is_primary_applicant?
-    self.applicant.is_primary_applicant
+    self.family_member.is_primary_applicant
   end
 
   def strictly_boolean
@@ -54,5 +54,15 @@ class TaxHouseholdMember
       self.errors.add(:base, "is_subscriber should be a boolean")
     end
 
+  end
+
+  def tax_filing_status
+    nil if self.financial_statements.empty?
+    self.financial_statements.last.tax_filing_status
+  end
+
+  def tax_filing_together?
+    false if self.financial_statements.empty?
+    self.financial_statements.last.is_tax_filing_together
   end
 end

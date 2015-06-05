@@ -7,7 +7,7 @@ class Api::V1::IrsReportsController < ApplicationController
     # doc = Nokogiri::XML(f)
 
     # individual = Parsers::Xml::IrsReports::Individual.new(doc)
-    # @irs_household_groups = [] # ApplicationGroup.page(page_number).per(10)
+    # @irs_household_groups = [] # Family.page(page_number).per(10)
      xml_data = CanonicalVocabulary::IrsHouseholdSerializer.new.serialize
      send_data xml_data, :disposition => 'inline', :type => 'text/xml'
     end

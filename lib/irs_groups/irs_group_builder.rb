@@ -1,46 +1,41 @@
 class IrsGroupBuilder
 
-  def initialize(application_group)
+  def initialize(family)
 
-    if(application_group.is_a? ApplicationGroup)
-      @application_group = application_group
+    if(family.is_a? Family)
+      @family = family
     else
-      @application_group = ApplicationGroup.find(application_group)
+      @family = Family.find(family)
     end
   end
 
   def build
-    @irs_group = @application_group.irs_groups.build
+    @irs_group = @family.irs_groups.build
   end
 
   def save
     @irs_group.save!
-    @application_group.active_household.irs_group_id = @irs_group._id
-    @application_group.save!
+    @family.active_household.irs_group_id = @irs_group._id
+    @family.save!
   end
 
   def update
-    if retain_irs_group?
-      assign_exisiting_irs_group_to_new_household
-    end
+    return if  @family.households.length < 2
+    assign_exisiting_irs_group_to_new_household
+    @irs_group = @family.active_household.irs_group
   end
 
 
-  # returns true if we take the irsgroup from previous household and apply it to new household.
-  # this happens when the number of coverage households has remained the same.
-  # returns false otherswise. i.e. when we have to split/merge irsgroups
-  def retain_irs_group?
-    all_households = @application_group.households.sort_by(&:submitted_at)
-    return false if all_households.length == 1
-
-    previous_household, current_household = all_households[all_households.length-2, all_households.length]
-    current_household.coverage_households.length == previous_household.coverage_households.length
-  end
-
+  # if by updating the family we have created a new household,
+  # then we should take the Irs Group from previously active household and assign it to the newly active household
   def assign_exisiting_irs_group_to_new_household
-    all_households = @application_group.households.sort_by(&:submitted_at)
+    all_households = @family.households.sort_by(&:submitted_at)
     previous_household, current_household = all_households[all_households.length-2, all_households.length]
+
+    return unless current_household.irs_group_id.blank? # irs group already present, so do nothing
+
     current_household.irs_group_id =  previous_household.irs_group_id
     current_household.save!
   end
+
 end

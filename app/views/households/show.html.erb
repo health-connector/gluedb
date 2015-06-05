@@ -5,7 +5,7 @@
     <br/>
   <% end %>
   <h4>Policies</h4>
-    <%= link_to 'New Policy', new_policy_path(application_group_id: @household.application_group_id, household_id: @household.id) %>
+    <%= link_to 'New Policy', new_policy_path(family_id: @household.family_id, household_id: @household.id) %>
     <ul>
       <% @household.policies.each do |policy| %>
         <li>

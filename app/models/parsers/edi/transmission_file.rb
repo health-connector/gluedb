@@ -260,7 +260,7 @@ module Parsers
       end
 
       def run_import(l834, inbound, edi_transmission)
-          puts l834["BGN"][2]
+          #puts l834["BGN"][2]
           if !l834["ST"][3].to_s.strip.blank?
             etf_l = Etf::EtfLoop.new(l834)
             carrier = @import_cache.lookup_carrier_fein(etf_l.carrier_fein)

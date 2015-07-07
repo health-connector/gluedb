@@ -2,7 +2,7 @@ require 'csv'
 
 file = CSV.open("employer_export.csv", "w")
 file << %w{ employer.name employer.name_first employer.name_middle employer.name_last employer.fein
-            employer.addresses.address_1, employer.addresses.address_2, employer.addresses.city, employer.addresses.state, employer.addresses.zip
+            employer.addresses.address_1 employer.addresses.address_2 employer.addresses.city, employer.addresses.state employer.addresses.zip
             plan_year.start_date
             broker.name_first broker.name_last employer.broker.npn}
 

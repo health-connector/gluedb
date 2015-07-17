@@ -313,12 +313,27 @@ module Parsers
           @@run_records << [bgn03, bgn04, bgn02, blk]
         end
 
+        def is_missing_transmission_headers?
+          if l834["BGN"].blank?
+            puts "Transaction Missing BGN segment:"
+            puts l834.inspect
+            return true
+          end
+          if l834["ST"].blank?
+            puts "Transaction Missing ST segment:"
+            puts l834.inspect
+            return true
+          end
+          false
+        end
+
         def persist!
           return(nil) if incomplete_isa?
           return(nil) if transmission_already_exists?
           edi_transmission = parse_edi_transmission(@result)
           return(nil) if @result["L834s"].first.blank?
           @result["L834s"].each do |l834|
+            if !is_missing_transmission_headers?(l834)
             Parsers::Edi::TransmissionFile.add_for_import(
               l834["BGN"][3], 
               l834["BGN"][4], 
@@ -326,6 +341,7 @@ module Parsers
               Proc.new {
               run_import(l834, @inbound, edi_transmission)
             })
+            end
           end
         end
 

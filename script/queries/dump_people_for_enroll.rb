@@ -1,30 +1,7 @@
-def dump_person(person, rel_map, member_cache, dumped_people, person_file, family_file)
+def dump_person(person, rel_map, member_cache, dumped_people, person_file)
   p_id = person.id.to_s
   if !person.authority_member.blank?
     if !dumped_people.include?(p_id)
-      new_family = {
-        :application_type => "employer_sponsored",
-        :family_members => [
-          {
-            :person_id => person.id.to_s,
-            :is_primary_applicant => true
-          }
-        ],
-        :households => [
-          {
-            :coverage_households => [
-              {
-                :coverage_household_members => [
-                  {
-                    :family_member_id => person.id.to_s,
-                    :is_subscriber => true
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
       dumped_people << p_id
       auth_member = person.authority_member
       mem_ids = person.members.map(&:hbx_member_id)
@@ -95,43 +72,54 @@ def dump_person(person, rel_map, member_cache, dumped_people, person_file, famil
       end
       relationships.uniq.each do |rel|
         json_data[:person_relationships] << rel
-        new_family[:family_members] << {
-             :person_id => rel[:relative_id]
-        }
-        new_family[:households][0][:coverage_households][0][:coverage_household_members] << {
-             :family_member_id => rel[:relative_id]
-        }
       end
-      family_file.puts JSON.dump(new_family)
-      family_file.puts ","
       person_file.puts JSON.dump(json_data)
       person_file.puts ","
     end
   end
 end
 
-pols = Policy.where({
+policy_blacklist = [
+"200247",
+"65835",
+"44481",
+"49278"
+]
+
+pols = Policy.where("$or" => [{
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
     :coverage_start => {"$gt" => Date.new(2014,12,31)}
-  }}, :employer_id => { "$ne" => nil }})
+  }}, :employer_id => nil},
+  {:enrollees => {"$elemMatch" => {
+    :rel_code => "self",
+    :coverage_start => {"$gt" => Date.new(2014,6,30)}
+  }}, :employer_id => {"$ne" => nil}}
+])
 
 member_ids = []
 relationship_map = Hash.new do |hash,key|
   hash[key] = Array.new
 end
 
+all_subscribers = []
+
 pols.each do |pol|
-  if !pol.canceled?
-    sub_id = pol.subscriber.m_id
-    pol.enrollees.each do |en|
-      if !en.canceled?
-        member_ids << en.m_id
-        if (en.m_id != sub_id)
-          relationship_map[sub_id] << {
-            :kind => en.rel_code,
-            :member_id => en.m_id
-          }
+  if !policy_blacklist.include?(pol.eg_id)
+    if !pol.canceled?
+      sub_id = pol.subscriber.m_id
+      all_subscribers << sub_id
+      pol.enrollees.each do |en|
+        if !en.canceled?
+          member_ids << en.m_id
+          if (en.m_id != sub_id)
+            if !en.canceled?
+              relationship_map[sub_id] << {
+                :kind => en.rel_code,
+                :member_id => en.m_id
+              }
+            end
+          end
         end
       end
     end
@@ -140,7 +128,7 @@ end
 
 # raise relationship_map.inspect
 people_file = File.open("people.json", 'w')
-families_file = File.open("families.json", 'w')
+families_file = File.open("heads_of_families.json", 'w')
 
 member_ids.uniq!
 
@@ -149,10 +137,15 @@ people = Person.find_for_members(member_ids)
 dumped_peeps = []
 
 people_file.puts "["
-families_file.puts "["
 people.each do |person|
-  dump_person(person, relationship_map, m_cache, dumped_peeps, people_file, families_file)
+  dump_person(person, relationship_map, m_cache, dumped_peeps, people_file)
 end
 
-people_file.close
+families_file.puts(
+  JSON.dump(all_subscribers.map do |sub_id|
+    m_cache.lookup(sub_id).id.to_s
+  end)
+)
+
 families_file.close
+people_file.close

@@ -313,7 +313,7 @@ module Parsers
           @@run_records << [bgn03, bgn04, bgn02, blk]
         end
 
-        def is_missing_transmission_headers?
+        def is_missing_transmission_headers?(l834)
           if l834["BGN"].blank?
             puts "Transaction Missing BGN segment:"
             puts l834.inspect

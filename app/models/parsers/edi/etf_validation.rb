@@ -15,6 +15,7 @@ module Parsers
       validate :plan_exists
       validate :no_bogus_broker
       validate :on_blacklist
+      validate :has_st_segment
 
       def initialize(f_name, mt, el, carrier, blist, i_cache)
         @file_name = f_name
@@ -23,6 +24,12 @@ module Parsers
         @carrier = carrier
         @blacklisted_bgns = blist
         @import_cache = i_cache
+      end
+
+      def has_st_segment
+        if @etf_loop["ST"].blank?
+          log_error(:etf_loop, "has no ST segment")
+        end
       end
 
       def on_blacklist

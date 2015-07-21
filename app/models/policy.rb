@@ -647,16 +647,19 @@ class Policy
 
   def reported_tot_res_amt_on(date)
     return self.tot_res_amt unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
     self.aptc_record_on(date).tot_res_amt
   end
 
   def reported_pre_amt_tot_on(date)
     return self.pre_amt_tot unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
     self.aptc_record_on(date).pre_amt_tot
   end
 
   def reported_aptc_on(date)
     return self.applied_aptc unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
     self.aptc_record_on(date).aptc
   end
 
@@ -669,7 +672,7 @@ class Policy
   end
 
   def aptc_record_on(date)
-    self.aptc_records.detect { |aptc_rec| aptc_rec.start_on >= date && aptc_rec.end_on <= date }
+    self.aptc_credits.detect { |aptc_rec| aptc_rec.start_on <= date && aptc_rec.end_on >= date }
   end
 
   protected

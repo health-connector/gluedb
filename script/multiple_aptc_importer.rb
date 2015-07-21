@@ -17,7 +17,6 @@ class MultipleAptcImporter
 
     CSV.foreach(@file_path, :headers => :first_row) do |row|
       policy = Policy.find(row[0])
-      policy.aptc_credits.delete_all
       policy.aptc_credits.build({start_on: Date.strptime(row[2],"%m/%d/%Y"),
                                  end_on: Date.strptime(row[3],"%m/%d/%Y"),
                                  aptc: row[1] })

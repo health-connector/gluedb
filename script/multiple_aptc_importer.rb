@@ -16,22 +16,16 @@ class MultipleAptcImporter
     @logger = Logger.new("#{Rails.root}/log/multiple_aptc_importer_#{Time.now.to_s.gsub(' ', '')}.log")
 
     CSV.foreach(@file_path, :headers => :first_row) do |row|
-      policy = Policy.find(row[0])
-
-      if policy.nil?
-        @logger.error "Could not find Policy #{row[0]} "
-        next
-      end
-
-      policy.aptc_credits.build({start_on: Date.strptime(row[2],"%m/%d/%Y"),
-                                 end_on: Date.strptime(row[3],"%m/%d/%Y"),
-                                 aptc: row[1] })
       begin
+        policy = Policy.find(row[0])
+        policy.aptc_credits.build({start_on: Date.strptime(row[2], "%m/%d/%Y"),
+                                   end_on: Date.strptime(row[3], "%m/%d/%Y"),
+                                   aptc: row[1]})
         policy.save!
         @policies << policy
         @logger.info "Processed Policy:#{policy.id} with APTC: " + policy.aptc_credits.inspect
       rescue Exception => e
-        @logger.error "Could not process #{policy.id} " + e.message
+        @logger.error "Could not process #{row[0]} " + e.message
       end
     end
   end

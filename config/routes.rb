@@ -72,7 +72,11 @@ Gluedb::Application.routes.draw do
   resources(:vocabulary_requests, :only => [:new, :create])
 
   resources :edi_transaction_set_payments
-  resources :edi_transaction_sets
+  resources :edi_transaction_sets do
+    collection do
+      get :errors
+    end
+  end
   resources :edi_transmissions
 
   resources :csv_transactions, :only => :show

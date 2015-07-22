@@ -1,5 +1,7 @@
 class Protocols::X12::TransactionSetEnrollment < Protocols::X12::TransactionSetHeader
 
+  extend Mongorder
+
 	# ASC X12 834 Benefit Enrollment Transaction
   field :bgn01, as: :ts_purpose_code, type: String
   field :bgn02, as: :ts_reference_number, type: String
@@ -60,6 +62,20 @@ class Protocols::X12::TransactionSetEnrollment < Protocols::X12::TransactionSetH
   class << self
     def submitted_on_count(date)
       where(submitted_at: date.to_time).count
+    end
+
+    def default_search_order
+      ["submitted_at", -1]
+    end
+
+    def search_hash(s_rex)
+      search_rex = Regexp.compile(Regexp.escape(s_rex), true)
+      {
+        "$or" => ([
+          {"error_list" => search_rex},
+          {"receiver_id" => search_rex}
+        ])
+      }
     end
 
   end

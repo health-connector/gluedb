@@ -18,6 +18,8 @@ class IrsGroup
 
   index({hbx_assigned_id: 1})
 
+  validates :hbx_assigned_id, :uniqueness => true
+
   def parent
     raise "undefined parent Family" unless family?
     self.family

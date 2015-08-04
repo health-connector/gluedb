@@ -15,7 +15,8 @@ class Api::V2::QuoteGeneratorController < ApplicationController
       plan_hash = Parsers::Xml::Cv::PlanParser.parse(xml_node).first.to_hash
       quote_cv_proxy = QuoteCvProxy.new(quote_request_xml)
 
-      enrollees = quote_cv_proxy.enrollees
+      enrollees, member_cache_hash = quote_cv_proxy.enrollees
+      member_cache = Caches::CustomCache.new(member_cache_hash)
 
       plan = quote_cv_proxy.plan
 
@@ -27,8 +28,7 @@ class Api::V2::QuoteGeneratorController < ApplicationController
 
       policy = Policy.new(plan: plan, enrollees: enrollees)
 
-      premium_calculator = Premiums::PolicyCalculator.new
-
+      premium_calculator = Premiums::PolicyCalculator.new(member_cache)
       premium_calculator.apply_calculations(policy)
 
       quote_cv_proxy.enrollees_pre_amt=policy.enrollees

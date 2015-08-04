@@ -6,11 +6,11 @@
     <enrollee>
       <member>
         <id>
-          <id>117198</id>
+          <id>198</id>
         </id>
         <person>
           <id>
-            <id>117198</id>
+            <id>198</id>
           </id>
           <person_name>
             <person_surname>D</person_surname>
@@ -20,11 +20,11 @@
         <person_relationships>
           <person_relationship>
             <subject_individual>
-              <id>117155</id>
+              <id>155</id>
             </subject_individual>
             <relationship_uri>urn:openhbx:terms:v1:individual_relationship#child</relationship_uri>
             <object_individual>
-              <id>117198</id>
+              <id>198</id>
             </object_individual>
           </person_relationship>
         </person_relationships>
@@ -37,17 +37,17 @@
       <is_subscriber>true</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
-        <premium_amount>308.59</premium_amount>
+        <premium_amount>186.4</premium_amount>
       </benefit>
     </enrollee>
     <enrollee>
       <member>
         <id>
-          <id>117155</id>
+          <id>155</id>
         </id>
         <person>
           <id>
-            <id>117155</id>
+            <id>155</id>
           </id>
           <person_name>
             <person_surname>ca</person_surname>
@@ -55,15 +55,15 @@
           </person_name>
         </person>
         <person_relationships>
-          <relationship>
+          <person_relationship>
             <subject_individual>
-              <id>117155</id>
+              <id>155</id>
             </subject_individual>
             <relationship_uri>urn:openhbx:terms:v1:individual_relationship#self</relationship_uri>
             <object_individual>
-              <id>117155</id>
+              <id>155</id>
             </object_individual>
-          </relationship>
+          </person_relationship>
         </person_relationships>
         <person_demographics>
           <ssn>999999997</ssn>
@@ -74,17 +74,17 @@
       <is_subscriber>true</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
-        <premium_amount>418.78</premium_amount>
+        <premium_amount>166.34</premium_amount>
       </benefit>
     </enrollee>
     <enrollee>
       <member>
         <id>
-          <id>117913</id>
+          <id>913</id>
         </id>
         <person>
           <id>
-            <id>117913</id>
+            <id>913</id>
           </id>
           <person_name>
             <person_surname>ca</person_surname>
@@ -93,18 +93,18 @@
           </person_name>
         </person>
         <person_relationships>
-          <relationship>
+          <person_relationship>
             <subject_individual>
-              <id>117913</id>
+              <id>913</id>
             </subject_individual>
             <relationship_uri>urn:openhbx:terms:v1:individual_relationship#spouse</relationship_uri>
             <object_individual>
-              <id>117155</id>
+              <id>155</id>
             </object_individual>
-          </relationship>
+          </person_relationship>
         </person_relationships>
         <person_demographics>
-          <ssn>304924026</ssn>
+          <ssn>999999991</ssn>
           <sex>urn:openhbx:terms:v1:gender#female</sex>
           <birth_date>19800610</birth_date>
         </person_demographics>
@@ -112,7 +112,7 @@
       <is_subscriber>false</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
-        <premium_amount>452.07</premium_amount>
+        <premium_amount>173.99</premium_amount>
       </benefit>
     </enrollee>
   </enrollees>
@@ -130,6 +130,6 @@
         <display_name>CareFirst BlueCross BlueShield</display_name>
       </carrier>
     </plan>
-    <premium_total_amount>1179.44</premium_total_amount>
+    <premium_total_amount>526.73</premium_total_amount>
   </enrollment>
 </coverage_quote_request>

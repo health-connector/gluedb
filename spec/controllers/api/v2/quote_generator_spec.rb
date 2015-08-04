@@ -31,8 +31,10 @@ describe Api::V2::QuoteGeneratorController do
 
         post :generate, {:format => "xml"}
         expect(response.body).to eq(response_xml)
-        expect(response.body).to include("<premium_amount>308.59</premium_amount>")
-        expect(response.body).to include("<premium_total_amount>1179.44</premium_total_amount>")
+        expect(response.body).to include("<premium_amount>173.99</premium_amount>")
+        expect(response.body).to include("<premium_amount>186.4</premium_amount>")
+        expect(response.body).to include("<premium_amount>166.34</premium_amount>")
+        expect(response.body).to include("<premium_total_amount>526.73</premium_total_amount>")
       end
     end
 

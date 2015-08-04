@@ -16,7 +16,6 @@ module Parsers::Xml::Cv
     def to_hash
 
       response = {
-
           coverage_type: coverage_type,
           name: name,
           plan_year: plan_year,
@@ -26,7 +25,6 @@ module Parsers::Xml::Cv
 
       response[:id] = id.split('#').last
       response[:id] = response[:id].split('/').last
-
       response
     end
   end

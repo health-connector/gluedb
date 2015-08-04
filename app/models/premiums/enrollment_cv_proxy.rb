@@ -10,7 +10,7 @@ class EnrollmentCvProxy
     enrollees_list = []
     enrollee_nodes = @xml_doc.xpath('//ns1:enrollee', NAMESPACES)
     enrollee_nodes.each do |enrollee_node|
-      enrolle_parser = Parsers::Cv::Enrollee.new(enrollee_nodes)
+      enrolle_parser = Parsers::Cv::Enrollee.new(enrollee_node)
       enrolle_parser_hash = enrolle_parser.to_hash
       enrolle_parser_hash[:m_id] = enrolle_parser.to_hash[:m_id].split("hbx_id=").last if enrolle_parser.to_hash[:m_id].include?('hbx_id=')
       enrollee = Enrollee.new(enrolle_parser_hash)
@@ -31,7 +31,7 @@ class EnrollmentCvProxy
 
   def plan
     plan_hash = Parsers::Xml::Cv::PlanParser.parse(@xml_doc).first.to_hash
-    Plan.find(plan_hash[:id])
+    Plan.where(hios_plan_id: /^#{plan_hash[:id]}/).first
   end
 
   def policy_pre_amt_tot=(value)

@@ -167,6 +167,7 @@ Gluedb::Application.routes.draw do
       #resources :premium_calculator
       post 'calculate_premium', to: 'premium_calculator#calculate'
       resources :application_groups, :controller => :families, :only => [:show, :index]
+      post 'generate_quote', to: 'quote_generator#generate'
     end
   end
 

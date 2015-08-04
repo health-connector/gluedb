@@ -19,10 +19,10 @@ module Parsers::Xml::Cv
           coverage_type: coverage_type,
           name: name,
           plan_year: plan_year,
-          is_dental_only: is_dental_only,
-          carrier: carrier.to_hash
+          is_dental_only: is_dental_only
       }
 
+      response[:carrier] = carrier.to_hash if carrier
       response[:id] = id.split('#').last
       response[:id] = response[:id].split('/').last
       response

@@ -12,10 +12,6 @@
           <id>
             <id>198</id>
           </id>
-          <person_name>
-            <person_surname>D</person_surname>
-            <person_given_name>Boo</person_given_name>
-          </person_name>
         </person>
         <person_relationships>
           <person_relationship>
@@ -29,12 +25,9 @@
           </person_relationship>
         </person_relationships>
         <person_demographics>
-          <ssn>999999999</ssn>
-          <sex>urn:openhbx:terms:v1:gender#female</sex>
           <birth_date>19771019</birth_date>
         </person_demographics>
       </member>
-      <is_subscriber>true</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
         <premium_amount>186.4</premium_amount>
@@ -49,10 +42,6 @@
           <id>
             <id>155</id>
           </id>
-          <person_name>
-            <person_surname>ca</person_surname>
-            <person_given_name>br</person_given_name>
-          </person_name>
         </person>
         <person_relationships>
           <person_relationship>
@@ -66,12 +55,9 @@
           </person_relationship>
         </person_relationships>
         <person_demographics>
-          <ssn>999999997</ssn>
-          <sex>urn:openhbx:terms:v1:gender#male</sex>
           <birth_date>19820614</birth_date>
         </person_demographics>
       </member>
-      <is_subscriber>true</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
         <premium_amount>166.34</premium_amount>
@@ -86,11 +72,6 @@
           <id>
             <id>913</id>
           </id>
-          <person_name>
-            <person_surname>ca</person_surname>
-            <person_given_name>Ca</person_given_name>
-            <person_middle_name>tz</person_middle_name>
-          </person_name>
         </person>
         <person_relationships>
           <person_relationship>
@@ -104,12 +85,9 @@
           </person_relationship>
         </person_relationships>
         <person_demographics>
-          <ssn>999999991</ssn>
-          <sex>urn:openhbx:terms:v1:gender#female</sex>
           <birth_date>19800610</birth_date>
         </person_demographics>
       </member>
-      <is_subscriber>false</is_subscriber>
       <benefit>
         <begin_date>20140101</begin_date>
         <premium_amount>173.99</premium_amount>
@@ -121,14 +99,6 @@
       <id>
         <id>94506DC0390010</id>
       </id>
-      <coverage_type>urn:openhbx:terms:v1:qhp_benefit_coverage#health</coverage_type>
-      <plan_year>2014</plan_year>
-      <is_dental_only>false</is_dental_only>
-      <carrier>
-        <id>53e67210eb899a460300000d</id>
-        <name>CareFirst BlueCross BlueShield</name>
-        <display_name>CareFirst BlueCross BlueShield</display_name>
-      </carrier>
     </plan>
     <premium_total_amount>526.73</premium_total_amount>
   </enrollment>

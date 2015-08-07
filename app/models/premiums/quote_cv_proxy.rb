@@ -40,12 +40,7 @@ class QuoteCvProxy < EnrollmentCvProxy
     enrollees_and_nodes = enrollees_node.zip enrollees
 
     enrollees_and_nodes.each do |enrollee_node, enrollee|
-      #@xml_doc.xpath('//ns1:enrollee/ns1:benefit/ns1:premium_amount', NAMESPACES).first.content = enrollee.premium_amount
-      premium_amount_node = Nokogiri::XML::Node.new "premium_amount", @xml_doc
-      premium_amount_node.content = enrollee.premium_amount
-
-      benefits_node = enrollee_node.xpath('ns1:benefit', NAMESPACES).first
-      benefits_node.add_child(premium_amount_node)
+      enrollee_node.xpath('ns1:benefit/ns1:premium_amount', NAMESPACES).first.content = enrollee.premium_amount
     end
   end
 

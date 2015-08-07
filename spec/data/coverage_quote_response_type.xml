@@ -39,9 +39,8 @@
       </member>
       <is_subscriber>true</is_subscriber>
       <benefit>
-        <premium_amount>0</premium_amount>
-        <begin_date>20150101</begin_date>
         <premium_amount>26.62</premium_amount>
+        <begin_date>20150101</begin_date>
       </benefit>
     </enrollee>
   </enrollees>

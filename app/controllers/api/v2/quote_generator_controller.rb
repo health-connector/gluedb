@@ -10,6 +10,13 @@ class Api::V2::QuoteGeneratorController < ApplicationController
     begin
       quote_request_xml = request.body.read
 
+      quote_validator = QuoteValidator.new(quote_request_xml)
+      quote_validator.check_against_schema
+
+      if !quote_validator.valid?
+        raise quote_validator.errors.to_xml
+      end
+
       xml_node = Nokogiri::XML(quote_request_xml)
 
       plan_hash = Parsers::Xml::Cv::PlanParser.parse(xml_node).first.to_hash
@@ -34,7 +41,7 @@ class Api::V2::QuoteGeneratorController < ApplicationController
       quote_cv_proxy.enrollees_pre_amt=policy.enrollees
       quote_cv_proxy.policy_pre_amt_tot=policy.pre_amt_tot
 
-      render :xml => quote_cv_proxy.to_xml
+      render :xml => quote_cv_proxy.response_xml
     rescue Exception => e
       render :xml => "<errors>#{e.message}</errors>"
     end

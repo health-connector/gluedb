@@ -22,19 +22,20 @@ describe Api::V2::QuoteGeneratorController do
     context "successful response" do
 
       it 'should respond with premiums' do
-        allow(Nokogiri).to receive(:XML).with("").and_return(xml_doc)
+        allow(Nokogiri).to receive(:XML).with(anything()).and_return(xml_doc)
+        allow_any_instance_of(QuoteValidator).to receive(:initialize).with(anything()).and_return(double())
+        allow_any_instance_of(QuoteValidator).to receive(:check_against_schema)
+        allow_any_instance_of(QuoteValidator).to receive(:valid?).and_return(true)
         allow_any_instance_of(Premiums::PolicyCalculator).to receive(:apply_calculations).with(policy).and_return(response_xml)
-        allow_any_instance_of(QuoteCvProxy).to receive(:to_xml).and_return(response_xml)
+        allow_any_instance_of(QuoteCvProxy).to receive(:response_xml).and_return(response_xml)
         allow_any_instance_of(QuoteCvProxy).to receive(:invalid?).and_return(false)
         allow_any_instance_of(QuoteCvProxy).to receive(:enrollees_pre_amt=)
         allow_any_instance_of(QuoteCvProxy).to receive(:policy_pre_amt_tot=)
 
         post :generate, {:format => "xml"}
         expect(response.body).to eq(response_xml)
-        expect(response.body).to include("<premium_amount>173.99</premium_amount>")
-        expect(response.body).to include("<premium_amount>186.4</premium_amount>")
-        expect(response.body).to include("<premium_amount>166.34</premium_amount>")
-        expect(response.body).to include("<premium_total_amount>526.73</premium_total_amount>")
+        expect(response.body).to include("<premium_amount>26.62</premium_amount>")
+        expect(response.body).to include("<premium_total_amount>26.62</premium_total_amount>")
       end
     end
 

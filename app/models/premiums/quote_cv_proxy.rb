@@ -57,7 +57,7 @@ class QuoteCvProxy < EnrollmentCvProxy
       enrollees.first.each do |enrollee|
         member = enrollees.last[enrollee.m_id]
         errors.add('enrollee', 'id does not exist or could not be parsed successfully') if enrollee.m_id.nil?
-        errors.add('enrollee', 'does have person_demographics birth_date or could not be parsed successfully') if member.try(:dob).nil?
+        errors.add('enrollee', 'does not have person_demographics birth_date or could not be parsed successfully') if member.try(:dob).nil?
         errors.add('enrollee', 'person_relationship relationship_uri does not exist or could not be parsed successfully') if enrollee.rel_code.nil?
         errors.add('enrollee', 'benefit begin_date does not exist or could not be parsed successfully') if enrollee.coverage_start.nil?
       end
@@ -68,5 +68,13 @@ class QuoteCvProxy < EnrollmentCvProxy
     else
       errors.add('plan', 'id does not exist or could not be parsed successfully') if plan.id.nil?
     end
+  end
+
+  def response_xml
+    @xml_doc.xpath('//ns1:coverage_quote_request', NAMESPACES).each do |node|
+      node.name = 'coverage_quote'
+    end
+
+    @xml_doc.to_xml
   end
 end

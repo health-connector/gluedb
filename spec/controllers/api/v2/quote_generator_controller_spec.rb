@@ -36,6 +36,7 @@ describe Api::V2::QuoteGeneratorController do
         expect(response.body).to eq(response_xml)
         expect(response.body).to include("<premium_amount>26.62</premium_amount>")
         expect(response.body).to include("<premium_total_amount>26.62</premium_total_amount>")
+        expect(response).to have_http_status(:ok)
       end
     end
 
@@ -49,6 +50,7 @@ describe Api::V2::QuoteGeneratorController do
 
         post :generate, {:format => "xml"}
         expect(response.body).to include("<errors>")
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
 

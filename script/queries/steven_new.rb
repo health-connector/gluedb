@@ -10,11 +10,13 @@ def bad_eg_id(eg_id)
   (eg_id =~ /\A000/) || (eg_id =~ /\+/)
 end
 
+timestamp = Time.now.strftime('%Y%m%d%H%M')
+
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
-  CSV.open("stephen_expected_effectuated_20140930.csv", 'w') do |csv|
+  CSV.open("stephen_expected_effectuated_20140930_#{timestamp}.csv", 'w') do |csv|
     csv << ["Subscriber ID", "Member ID" , "Person ID", "Policy ID",
-            "First Name", "Last Name","SSN", "DOB",
+            "First Name", "Last Name","SSN", "DOB", "Gender",
             "Plan Name", "HIOS ID", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
             "Coverage Start", "Coverage End",
@@ -53,6 +55,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   per.name_last,
                   en.member.ssn,
                   en.member.dob.strftime("%Y%m%d"),
+                  en.member.gender,
                   plan.hios_plan_id, plan.name, carrier.name,
                   en.pre_amt, pol.pre_amt_tot,pol.applied_aptc, pol.tot_emp_res_amt,
                   en.coverage_start.blank? ? nil : en.coverage_start.strftime("%Y%m%d"),

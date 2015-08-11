@@ -22,7 +22,8 @@ headers = [
   "Employer Name"
 ]
 
-congress_feins = []
+congress_feins = %w(
+)
 
 emp_ids = Employer.where(:fein => {"$nin" => congress_feins }).map(&:id)
 

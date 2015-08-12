@@ -10,6 +10,7 @@ gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'virtus'
+gem 'ruby-ole', '1.2.11.7'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -29,6 +30,7 @@ group :development, :assets do
 end
 
 group :test do
+  gem 'test-unit'
 	gem 'mongoid-rspec'
   gem 'rspec-rails' #, '~> 3.0.0.beta'
   gem 'rspec-collection_matchers'

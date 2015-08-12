@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'ruby-debug'
 
 describe Api::V2::QuoteGeneratorController do
 

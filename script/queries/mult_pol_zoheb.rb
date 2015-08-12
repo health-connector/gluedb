@@ -1,12 +1,12 @@
 require 'pry'
 require 'csv'
 
-pol = Policy.all.to_a
+policies = Policy.all.to_a
 puts pol.length
 
 CSV.open("multiple_policies_zoheb.csv", "w") do |csv|
 	csv << ["Policy ID", "Enrollment Group ID", "AASM State", "HBX ID", "First Name", "Last Name", "SSN", "DOB", "Plan HIOS", "Plan Name"]
-	pol.each do |policy|
+	policies.each do |policy|
 		policy.enrollees.each do |enrollee|
 			if enrollee.coverage_status == "active"
 				plan = Plan.find(policy.plan_id)

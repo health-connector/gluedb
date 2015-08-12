@@ -57,7 +57,7 @@ gem 'carrierwave-mongoid', '0.7.1', :require => 'carrierwave/mongoid'
 gem 'devise', '3.3.0'
 gem "rsec"
 gem "mongoid_auto_increment"
-gem 'american_date'
+gem 'american_date', '1.1.0'
 gem 'cancancan', '~> 1.9'
 gem 'oj'
 gem 'roo'

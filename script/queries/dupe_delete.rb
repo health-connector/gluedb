@@ -1,5 +1,5 @@
-p = Plan.find("5453a477791e4bd8c1000001")
-dupe = Plan.find("5453a543791e4bcd33000001")
+p = Plan.find("")
+dupe = Plan.find("")
 
 bad_pols = Policy.where(plan: dupe)
 

@@ -21,7 +21,7 @@ wrong_year = []
 
 count = 0
 
-policies.each do |pol|
+policies.each do |policy|
 	count += 1
 	pys2015 = pol.employer.plan_year_start + 1.year
 	if pol.enrollees.first.coverage_start < pys2015 and pol.plan.year == 2015
@@ -37,16 +37,16 @@ end
 
 CSV.open("wrong_plan_year.csv", "w") do |csv|
 	csv << ["Enrollment Group ID", "AASM state", "Employer", "Effective Date", "Plan", "Plan Year", "Subscriber", "Subscriber Member ID", "Policy ID"]
-	wrong_year.each do |pol|
-		eg_id = pol.eg_id
-		aasm = pol.aasm_state
-		employer = pol.employer.name
-		eff_dt = pol.enrollees.first.coverage_start
-		plan = pol.plan.name
-		plan_year = pol.plan.year
-		subscriber = pol.enrollees.first.person.name_full
-		sub_m_id = pol.enrollees.first.m_id
-		p_id = pol._id
-		csv << [eg_id, aasm, employer, eff_dt, plan, plan_year, subscriber, sub_m_id, p_id]
+	wrong_year.each do |policy|
+		eg_id = policy.eg_id
+		aasm = policy.aasm_state
+		employer = policy.employer.name
+		effective_date = policy.enrollees.first.coverage_start
+		plan = policy.plan.name
+		plan_year = policy.plan.year
+		subscriber = policy.enrollees.first.person.name_full
+		subscriber_member_id = policy.enrollees.first.m_id
+		policy_id = policy._id
+		csv << [eg_id, aasm, employer, effective_date, plan, plan_year, subscriber, subscriber_member_id, policy_id]
 	end
 end

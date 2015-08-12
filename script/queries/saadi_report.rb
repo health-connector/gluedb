@@ -26,7 +26,7 @@ employer_hash = Employer.all.inject({}) do |acc, e|
 end
 
 CSV.open("saadi_report.csv", 'w') do |csv|
-  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Numer of Transactions", "Sponsor", "Premium Total", "Contribution/APTC", "Total Responsible", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "Subscriber", "First", "Middle", "Last", "DOB", "SSN", "Start", "End"]
+  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Number of Transactions", "Sponsor", "Premium Total", "Contribution/APTC", "Total Responsible", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "Subscriber", "First", "Middle", "Last", "DOB", "SSN", "Start", "End"]
   policies.each_slice(25) do |pols|
     used_policies = pols.reject { |pl| bad_eg_id(pl) }
     member_ids = pols.map(&:enrollees).flatten.map(&:m_id)

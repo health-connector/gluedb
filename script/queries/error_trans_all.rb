@@ -31,9 +31,9 @@ CSV.open("error_trans_all.csv", "w") do |csv|
 			errors = trans.error_list
 			submitted_at = trans.submitted_at
 			updated_at = trans.updated_at
-			transkind = trans.transaction_kind
+			transaction_kind = trans.transaction_kind
 			raw_edi = trans.body.read
-			csv << [id, aasm_state, bgn01, bgn02, bgn03, bgn04, bgn05, bgn06, bgn08, file_name, employer_id, errors, submitted_at, updated_at, transkind]
+			csv << [id, aasm_state, bgn01, bgn02, bgn03, bgn04, bgn05, bgn06, bgn08, file_name, employer_id, errors, submitted_at, updated_at, transaction_kind]
 		end
 	end
 end

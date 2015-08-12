@@ -8,23 +8,23 @@ Employer.each do |emp|
 	employer_ids.push(emp._id)
 end
 
-cf_pol = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
-kp_pol = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
-aetna_pol = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
+cf_policies = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
+kp_policies = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
+aetna_policies = Policy.where(:employer_id.nin => employer_ids).where(:carrier_id => "")
 
-cf_count = cf_pol.count
-kp_count = kp_pol.count
-aetna_count = aetna_pol.count
+cf_count = cf_policies.count
+kp_count = kp_policies.count
+aetna_count = aetna_policies.count
 
 aetna_2014 = []
 aetna_2015 = []
 
-aetna_pol.each do |pol|
-	year = pol.plan.year
+aetna_policies.each do |policy|
+	year = policy.plan.year
 	if year == 2014
-		aetna_2014.push(pol)
+		aetna_2014.push(policy)
 	elsif year==2015
-		aetna_2015.push(pol)
+		aetna_2015.push(policy)
 	end
 end
 

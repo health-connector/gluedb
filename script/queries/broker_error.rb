@@ -6,9 +6,9 @@ transactions = Protocols::X12::TransactionSetEnrollment
 
 err_pol = []
 
-transactions.each do |tran|
+transactions.each do |transmission|
 	if tran.error_list.length != 0
-		err_pol.push(tran)
+		err_pol.push(transmission)
 	end
 end
 
@@ -19,13 +19,13 @@ end
 
 broker_error = []
 
-err_pol.each do |tran|
-	err_list = tran.error_list
+err_pol.each do |transmission|
+	err_list = transmission.error_list
 	err_list.each do |err|
 		err_each = err.split
 		err_each.map!(&:downcase)
 		if err_each.include?("broker")
-			broker_error.push(tran)
+			broker_error.push(transmission)
 		end
 	end
 end

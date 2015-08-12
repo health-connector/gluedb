@@ -1,4 +1,3 @@
-require 'pry'
 ct_cache = Caches::Mongoid::SinglePropertyLookup.new(Plan, "coverage_type")
 
 p_repo = {}
@@ -23,15 +22,13 @@ puts pols_2015.length
 untransmitted_pols = []
 
 timestamp = Time.now.strftime('%Y%m%d%H%M')
-untrans = File.new("policies_without_transmissions_#{timestamp}.txt", "w")
-
-binding.pry
+untransmitted = File.new("policies_without_transmissions_#{timestamp}.txt", "w")
 
 pols_2015.each do |pol|
   if !all_pol_ids.include?(pol.id)
     if !pol.canceled?
       unless ragus.include? pol.id
-        untrans.puts("#{pol.created_at} - #{pol.eg_id} - #{pol.subscriber.person.full_name}")
+        untransmitted.puts("#{pol.created_at} - #{pol.eg_id} - #{pol.subscriber.person.full_name}")
         untransmitted_pols << pol.id
       end
     end
@@ -40,4 +37,4 @@ end
 
 
 untrans_length = untransmitted_pols.length
-untrans.puts("#{untrans_length}")
+untransmitted.puts("#{untrans_length}")

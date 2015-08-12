@@ -13,8 +13,8 @@ CSV.open("premium_amounts.csv", "w") do |csv|
 		hios_id = plan.hios_plan_id
 		year = plan.year
 		plan.premium_tables.each do |premium|
-			prem_amount = premium.amount
-			csv << [name, hios_id, year, prem_amount]
+			premium_amount = premium.amount
+			csv << [name, hios_id, year, premium_amount]
 		end
 	end
 end

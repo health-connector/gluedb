@@ -10,6 +10,8 @@ gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'virtus'
+gem 'spreadsheet'
+gem 'ruby-ole', '1.2.11.7'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -29,6 +31,7 @@ group :development, :assets do
 end
 
 group :test do
+  gem 'test-unit'
 	gem 'mongoid-rspec'
   gem 'rspec-rails' #, '~> 3.0.0.beta'
   gem 'rspec-collection_matchers'
@@ -55,7 +58,7 @@ gem 'carrierwave-mongoid', '0.7.1', :require => 'carrierwave/mongoid'
 gem 'devise', '3.3.0'
 gem "rsec"
 gem "mongoid_auto_increment"
-gem 'american_date'
+gem 'american_date', '1.1.0'
 gem 'cancancan', '~> 1.9'
 gem 'oj'
 gem 'roo'

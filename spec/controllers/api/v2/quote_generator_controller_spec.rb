@@ -1,19 +1,21 @@
 require 'rails_helper'
-require 'ruby-debug'
+require 'debugger'
 
 describe Api::V2::QuoteGeneratorController do
 
   describe "POST generate_quote" do
 
-    let(:request_xml) {
-      File.read(Rails.root.join("spec", "data", "coverage_quote_request_type.xml"))
-    }
-
     let(:response_xml) {
       File.read(Rails.root.join("spec", "data", "coverage_quote_response_type.xml"))
     }
 
-    let(:policy) { Policy.new }
+    let(:request_xml) {
+      File.read(Rails.root.join("spec", "data", "coverage_quote_request_type.xml"))
+    }
+
+    let(:plan) {Plan.new}
+
+    let(:policy) { Policy.new(plan: plan) }
 
     let(:xml_doc) {
       Nokogiri::XML(request_xml)
@@ -31,11 +33,14 @@ describe Api::V2::QuoteGeneratorController do
         allow_any_instance_of(QuoteCvProxy).to receive(:invalid?).and_return(false)
         allow_any_instance_of(QuoteCvProxy).to receive(:enrollees_pre_amt=)
         allow_any_instance_of(QuoteCvProxy).to receive(:policy_pre_amt_tot=)
+        allow_any_instance_of(QuoteCvProxy).to receive(:ehb=)
+        allow_any_instance_of(QuoteCvProxy).to receive(:plan).and_return(Plan.new)
 
         post :generate, {:format => "xml"}
         expect(response.body).to eq(response_xml)
-        expect(response.body).to include("<premium_amount>26.62</premium_amount>")
-        expect(response.body).to include("<premium_total_amount>26.62</premium_total_amount>")
+        expect(response.body).to include("<premium_amount>337.81</premium_amount>")
+        expect(response.body).to include("<premium_total_amount>337.81</premium_total_amount>")
+        expect(response.body).to include("<ehb_percent>91.0</ehb_percent>")
         expect(response).to have_http_status(:ok)
       end
     end

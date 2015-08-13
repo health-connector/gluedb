@@ -65,6 +65,14 @@ class QuoteCvProxy < EnrollmentCvProxy
     end
   end
 
+  def ehb=(value)
+    ebh_percent_node = Nokogiri::XML::Node.new "ehb_percent", @xml_doc
+    ebh_percent_node.content = value.to_s
+
+    plan_node = @xml_doc.xpath('//ns1:plan', NAMESPACES).first
+    plan_node.add_child(ebh_percent_node)
+  end
+
   def response_xml
     @xml_doc.xpath('//ns1:coverage_quote_request', NAMESPACES).each do |node|
       node.name = 'coverage_quote'

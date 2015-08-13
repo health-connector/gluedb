@@ -40,6 +40,7 @@ class Api::V2::QuoteGeneratorController < ApplicationController
 
       quote_cv_proxy.enrollees_pre_amt=policy.enrollees
       quote_cv_proxy.policy_pre_amt_tot=policy.pre_amt_tot
+      quote_cv_proxy.ehb=policy.plan.ehb*100
 
       render :xml => quote_cv_proxy.response_xml, :status => :ok
     rescue Exception => e

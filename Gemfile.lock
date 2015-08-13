@@ -299,6 +299,8 @@ GEM
       json (~> 1.8)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.0)
+    spreadsheet (1.0.4)
+      ruby-ole (>= 1.0)
     sprockets (2.2.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -389,6 +391,7 @@ DEPENDENCIES
   sass-rails (~> 3.2.3)
   savon (= 2.7)
   simplecov
+  spreadsheet
   test-unit
   therubyracer
   uglifier (>= 1.0.3)

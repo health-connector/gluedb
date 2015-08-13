@@ -10,6 +10,7 @@ gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'virtus'
+gem 'spreadsheet'
 gem 'ruby-ole', '1.2.11.7'
 
 group :development do

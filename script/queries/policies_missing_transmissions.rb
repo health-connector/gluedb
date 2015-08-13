@@ -21,13 +21,20 @@ puts pols_2015.length
 
 untransmitted_pols = []
 
+timestamp = Time.now.strftime('%Y%m%d%H%M')
+untransmitted = File.new("policies_without_transmissions_#{timestamp}.txt", "w")
+
 pols_2015.each do |pol|
   if !all_pol_ids.include?(pol.id)
     if !pol.canceled?
-      puts "#{pol.created_at} - #{pol.eg_id} - #{pol.subscriber.person.full_name}"
-      untransmitted_pols << pol.id
+      unless ragus.include? pol.id
+        untransmitted.puts("#{pol.created_at} - #{pol.eg_id} - #{pol.subscriber.person.full_name}")
+        untransmitted_pols << pol.id
+      end
     end
   end
 end
 
-puts untransmitted_pols.length
+
+untrans_length = untransmitted_pols.length
+untransmitted.puts("#{untrans_length}")

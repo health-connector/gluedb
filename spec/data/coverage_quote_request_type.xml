@@ -10,8 +10,8 @@
             <id>urn:openhbx:terms:v1:hbx_member_id#18762247</id>
           </id>
           <person_name>
-            <person_surname>De</person_surname>
-            <person_given_name>Nie</person_given_name>
+            <person_surname>D</person_surname>
+            <person_given_name>Nei</person_given_name>
           </person_name>
         </person>
         <person_relationships>
@@ -27,7 +27,7 @@
         </person_relationships>
         <person_demographics>
           <sex>urn:openhbx:terms:v1:gender#female</sex>
-          <birth_date>19771019</birth_date>
+          <birth_date>19971119</birth_date>
           <marital_status>urn:openhbx:terms:v1:marital_status#single</marital_status>
           <citizen_status>urn:openhbx:terms:v1:citizen_status#us_citizen</citizen_status>
           <is_state_resident>true</is_state_resident>
@@ -44,7 +44,7 @@
   <enrollment>
     <plan>
       <id>
-        <id>78079DC0320001</id>
+        <id>77422DC0070026</id>
       </id>
       <coverage_type>urn:openhbx:terms:v1:qhp_benefit_coverage#health</coverage_type>
       <carrier>

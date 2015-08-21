@@ -97,7 +97,8 @@ CSV.open("active_policies.csv", "wb") do |csv|
     "subscriber_lastname",
     "subscriber_ssn",
     "subscriber_dob",
-    "subscriber_gender"
+    "subscriber_gender",
+    "metal_level"
   ]
   active_policies.each do |ap|
     if !ap.subscriber.nil?
@@ -123,7 +124,8 @@ CSV.open("active_policies.csv", "wb") do |csv|
           sub_person.name_last,
           sub_person.authority_member.ssn,
           csv_date_format(sub_person.authority_member.dob),
-          sub_person.authority_member.gender
+          sub_person.authority_member.gender,
+          plan.metal_level
         ]
       end
     end

@@ -21,9 +21,10 @@
 		  <dt>Status</dt>
 		  <dd><%= p.aasm_state.capitalize %></dd>
 		  <%if can? :edit, @people %>
-		  	<% if p.enrollees.first.ben_stat != "active" %>
+		  	<% if p.enrollees.any? {|ben_stat| ben_stat != "active" } %>
+		  		<% enrollee_not_active = p.enrollees.where(:ben_stat => {"$ne" => "active"}) %>
 		  		<dt>Benefit Status</dt>
-		  		<dd><%= p.enrollees.first.ben_stat.upcase %></dd>
+		  		<dd><%= enrollee_not_active.first.ben_stat.upcase %></dd>
 		  	<% end %>
 		  <% end %>
 			<% if (policy_market(p) == "Individual") %>

@@ -20,6 +20,12 @@
 		  <dd><%= policy_sponsor(p) %></dd>
 		  <dt>Status</dt>
 		  <dd><%= p.aasm_state.capitalize %></dd>
+		  <%if can? :edit, @people %>
+		  	<% if p.enrollees.first.ben_stat != "active" %>
+		  		<dt>Benefit Status</dt>
+		  		<dd><%= p.enrollees.first.ben_stat.upcase %></dd>
+		  	<% end %>
+		  <% end %>
 			<% if (policy_market(p) == "Individual") %>
 			  <dt>Carrier to Bill?</dt>
 			  <dd><%= boolean_to_human(p.carrier_to_bill) %></dd>

@@ -21,6 +21,7 @@ puts pols_2015.length
 
 untransmitted_pols = []
 
+
 timestamp = Time.now.strftime('%Y%m%d%H%M')
 untransmitted = File.new("policies_without_transmissions_#{timestamp}.txt", "w")
 

@@ -21,10 +21,14 @@
 		  <dt>Status</dt>
 		  <dd><%= p.aasm_state.capitalize %></dd>
 		  <%if can? :edit, @people %>
-		  	<% if p.enrollees.any? {|ben_stat| ben_stat != "active" } %>
-		  		<% enrollee_not_active = p.enrollees.where(:ben_stat => {"$ne" => "active"}) %>
+		  		<% if p.enrollees.any? {|ben_stat| ben_stat != "active" } %>
+		  			<% ben_statuses = [] %>
+		  			<% p.enrollees.each do |enrollee| %>
+		  				<% ben_statuses.push(enrollee.ben_stat.upcase) %>
+		  			<% end %>
+		  			<% ben_statuses.uniq! %>
 		  		<dt>Benefit Status</dt>
-		  		<dd><%= enrollee_not_active.first.ben_stat.upcase %></dd>
+		  		<dd><%= ben_statuses.join(",") %></dd>
 		  	<% end %>
 		  <% end %>
 			<% if (policy_market(p) == "Individual") %>

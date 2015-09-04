@@ -14,7 +14,11 @@
 
 	<xs:complexType name="verificationQuestionResponseOptionType">
 		<xs:sequence>
-		   <xs:element name="response_id" type="xs:string" minOccurs="0"/>
+			<xs:element name="response_id" type="nonEmptyString">
+				<xs:annotation>
+					<xs:documentation>ID of the response from RIDP - if this does not exist, use the question number.</xs:documentation>
+			    </xs:annotation>
+			</xs:element>
                    <xs:element name="response_text" type="xs:string"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -68,6 +72,12 @@
 			<xs:enumeration value="urn:openhbx:terms:v1:interactive_identity_verification#MORE_INFORMATION_REQUIRED"/>
 		</xs:restriction>
 	</xs:simpleType>
+
+	<xs:complexType name="interactiveVerificationOverrideRequestType">
+		<xs:sequence>
+		   <xs:element name="transaction_id" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
 
 	<xs:complexType name="interactiveVerificationResponseType">
 		<xs:sequence>
@@ -128,6 +138,9 @@
 			<xs:element name="session" type="verificationSessionResponseRequiredResponseType"/>
 		</xs:choice>
 	</xs:complexType>
+
+        <xs:element name="interactive_verification_override_request" type="interactiveVerificationOverrideRequestType"/>
+        <xs:element name="interactive_verification_override_result" type="interactiveVerificationCompletedResponseType"/>
 
 	<xs:element name="interactive_verification_start" type="interactiveVerificationSessionStartRequestBodyType"/>
 
@@ -217,6 +230,55 @@
 		</xs:sequence>
 	</xs:complexType>
 
+	<xs:complexType name="ReceiptDocumentType">
+		<xs:sequence>
+			<xs:element name="receipt_number" type="xs:string"/>
+			<xs:element name="expiration_date" type="SimpleDateType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+        <xs:complexType name="DocumentResultType">
+		<xs:sequence>
+			<xs:element name="case_number" type="xs:string"/>
+			<xs:element name="response_code" type="xs:string"/>
+			<xs:element name="response_description_text" type="xs:string"/>
+			<xs:element name="tds_response_description_text" type="xs:string" minOccurs="0"/>
+			<xs:element name="entry_date" minOccurs="0" type="SimpleDateType"/>
+			<xs:element name="admitted_to_date" minOccurs="0" type="SimpleDateType"/>
+			<xs:element name="admitted_to_text" minOccurs="0" type="xs:string"/>
+			<xs:element name="country_birth_code" minOccurs="0" type="xs:string"/>
+			<xs:element name="country_citizen_code" minOccurs="0" type="xs:string"/>
+			<xs:element name="coa_code" minOccurs="0" type="xs:string"/>
+			<xs:element name="eads_expire_date" minOccurs="0" type="SimpleDateType"/>
+			<xs:element name="elig_statement_code" type="xs:string"/>
+			<xs:element name="elig_statement_txt" type="xs:string"/>
+			<xs:element name="iav_type_code" minOccurs="0" type="xs:string"/>
+			<xs:element name="iav_type_text" minOccurs="0" type="xs:string"/>
+			<xs:element name="grant_date" minOccurs="0" type="SimpleDateType"/>
+			<xs:element name="grant_date_reason_code" minOccurs="0" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="LawfulPresenceDocumentResultsType">
+		<xs:sequence>
+			<xs:element name="document_I327" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_I571" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_cert_of_citizenship" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_cert_of_naturalization" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_temp_I551" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_I94" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_I20" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_DS2019" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_I551" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_I766" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_mac_read_I551" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_foreign_passport_I94" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_foreign_passport" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_other_case_1" type="DocumentResultType" minOccurs="0"/>
+			<xs:element name="document_other_case_2" type="DocumentResultType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:complexType name="ImmigrationDocumentsType">
 		<xs:sequence>
 			<xs:element name="has_document_I327" type="xs:boolean"/>
@@ -227,8 +289,8 @@
 			<xs:element name="has_document_I94" type="xs:boolean"/>
 			<xs:element name="has_document_I20" type="xs:boolean"/>
 			<xs:element name="has_document_DS2019" type="xs:boolean"/>
-			<xs:element name="document_I551_card_number" type="xs:string" minOccurs="0"/>
-			<xs:element name="document_I766_expiration_date" type="SimpleDateType" minOccurs="0"/>
+			<xs:element name="document_I551_receipt_number" type="xs:string" minOccurs="0"/>
+			<xs:element name="document_I766" type="ReceiptDocumentType" minOccurs="0"/>
 			<xs:element name="document_mac_read_I551" type="PassportInformationType" minOccurs="0"/>
 			<xs:element name="document_foreign_passport_I94" type="PassportInformationType" minOccurs="0"/>
 			<xs:element name="document_foreign_passport" type="PassportInformationType" minOccurs="0"/>
@@ -318,6 +380,7 @@
 			                                <xs:element name="response_text" type="xs:string" minOccurs="0"/>
 							<xs:element name="legal_status" type="LawfulPresencePresenceCodeType"/>
 							<xs:element name="employment_authorized" type="LawfulPresenceEmploymentAuthorizedCodeType"/>
+							<xs:element name="document_results" type="LawfulPresenceDocumentResultsType"/>
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
@@ -336,15 +399,24 @@
 	<xs:complexType name="SSAVerificationResultType">
 		<xs:sequence>
 			<xs:element name="individual" type="verificationIndividualType"/>
-			<xs:element name="ssn_verified" type="xs:boolean"/>
-			<xs:element name="death_confirmation" type="DeathConfirmationCodeType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Death confirmation code.  Do not include this element if applicant is alive.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="citizenship_verified" type="xs:boolean"/>
-			<xs:element name="incarcerated" type="xs:boolean"/>
-			<xs:element name="response_text" type="xs:string" minOccurs="0"/>
+		        <xs:element name="response_code" type="xs:string"/>
+		        <xs:element name="response_text" type="xs:string" minOccurs="0"/>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element name="ssn_verification_failed" fixed="true"/>
+				</xs:sequence>
+				<xs:sequence>
+					<xs:element name="ssn_verified" fixed="true"/>
+					<xs:element name="death_confirmation" type="DeathConfirmationCodeType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Death confirmation code.  Do not include this element if applicant is alive.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="citizenship_verified" type="xs:boolean"/>
+					<xs:element name="incarcerated" type="xs:boolean"/>
+					<xs:element name="response_text" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:choice>
 		</xs:sequence>
 	</xs:complexType>
 

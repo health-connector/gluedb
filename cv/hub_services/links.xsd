@@ -122,6 +122,11 @@
 			<xs:element name="carrier" type="CarrierLinkType"/>
 			<xs:element name="metal_level" type="PlanMetalLevelNameType"/>
 			<xs:element name="coverage_type" type="QhpBenefitCoverageNameType"/>
+			<xs:element name="ehb_percent" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Essential Health Benefit factor</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="PolicyLinkType">
@@ -183,25 +188,25 @@
 		</xs:restriction>
 	</xs:simpleType>
 
-<xs:complexType name="BrokerAgencyLinkType">
-                <xs:annotation>
-                        <xs:documentation>An organization specializing in advice about and sale of insurance products to businesses and consumers</xs:documentation>
-                </xs:annotation>
-                                <xs:sequence>
-                                        <xs:element name="id" type="IdentifierType"/>
-                                        <xs:element name="name" type="nonEmptyString">
-                                                <xs:annotation>
-                                                        <xs:documentation>Organization formal name in free-form text</xs:documentation>
-                                                </xs:annotation>
-                                        </xs:element>
-                                        <xs:element name="display_name" type="xs:string" minOccurs="0">
-                                                <xs:annotation>
-                                                        <xs:documentation>Organization name as presesnted in UI</xs:documentation>
-                                                </xs:annotation>
-                                        </xs:element>
-                                        <xs:element name="fein" type="FederalTaxIdType" minOccurs="0"/>
-                                        <xs:element name="npn" type="NpnIdType"/>
-                                        <xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
-                                </xs:sequence>
-        </xs:complexType>
+	<xs:complexType name="BrokerAgencyLinkType">
+		<xs:annotation>
+			<xs:documentation>An organization specializing in advice about and sale of insurance products to businesses and consumers</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="id" type="IdentifierType"/>
+			<xs:element name="name" type="nonEmptyString">
+				<xs:annotation>
+					<xs:documentation>Organization formal name in free-form text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="display_name" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Organization name as presesnted in UI</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fein" type="FederalTaxIdType" minOccurs="0"/>
+			<xs:element name="npn" type="NpnIdType"/>
+			<xs:group ref="ResourceTimestampGroup" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
 </xs:schema>

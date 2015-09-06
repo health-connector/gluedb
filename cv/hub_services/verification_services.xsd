@@ -443,4 +443,88 @@
 			<xs:documentation>This element is the response body provided to a request for lawful presence information.</xs:documentation>
 		</xs:annotation>
 	</xs:element>
+
+        <xs:complexType name="ExternalLawfulPresenceResultType">
+           <xs:sequence>
+              <xs:element name="is_lawfully_present" type="xs:boolean"/>
+              <xs:element name="citizen_status" type="UsCitizenStatusNameType"/>
+           </xs:sequence>
+        </xs:complexType>
+
+	<xs:complexType name="VerificationSet">
+		<xs:sequence>
+                   <xs:element name="interactive_verification_results" type="xs:boolean" minOccurs="0"/>
+                   <xs:element name="lawful_presence_verification_results" type="ExternalLawfulPresenceResultType"/>
+                   <xs:element name="residency_verification_results" type="residencyVerificationResultCodeType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="VerifiedFamilyMemberType">
+		<xs:annotation>
+			<xs:documentation>Family member with verification results.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:restriction base="IndividualType">
+				<xs:sequence>
+					<xs:element name="id" type="IdentifierType">
+						<xs:annotation>
+							<xs:documentation>Include URIs for system components when known, e.g. person_id, concern_role_id, aceds_id, gdb_id</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="primary_family_id" type="IdentifierType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Primary family of this person.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="tax_household_id" type="IdentifierType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Tax household  to which this person belongs</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="person" type="PersonType"/>
+					<xs:element ref="person_relationships"/>
+					<xs:element name="person_demographics" type="PersonDemographicsType"/>
+					<xs:element name="is_primary_applicant" type="xs:boolean"/>
+					<xs:element name="is_consent_applicant" type="xs:boolean" minOccurs="0"/>
+					<xs:element name="is_coverage_applicant" type="xs:boolean" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Individual is applying for health coverage</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="employee_roles" type="EmployeeRolesListType" minOccurs="0"/>
+					<xs:element name="broker_roles" type="BrokerRolesListType" minOccurs="0"/>
+					<xs:element name="person_health" type="IndividualHealthType" minOccurs="0"/>
+					<xs:element name="brokers" type="BrokerAccountListType" minOccurs="0"/>
+					<xs:element ref="hbx_enrollment_exemptions" minOccurs="0"/>
+					<xs:element ref="financial_statements" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Income, expenses and tax filing status for this Individual</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="verifications" type="VerificationSet"/>
+					<xs:group ref="CommentedActiveResourceGroup"/>
+					<xs:group ref="ResourceTimestampGroup"/>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="VerifiedFamilyMembersListType">
+		<xs:sequence>
+			<xs:element name="family_member" type="VerifiedFamilyMemberType" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="VerifiedFamilyType">
+		<xs:annotation>
+			<xs:documentation>Describes a family unit.</xs:documentation>                               
+		</xs:annotation>                    
+		<xs:sequence>                                                                                       
+			<xs:element name="id" type="IdentifierType"/>               
+			<xs:element name="family_members" type="VerifiedFamilyMembersListType"/>
+			<xs:group ref="FamilySharedElementsGroup"/>
+		</xs:sequence>
+	</xs:complexType>
+
+        <xs:element name="external_verified_family" type="VerifiedFamilyType"/>
 </xs:schema>

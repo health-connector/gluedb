@@ -37,7 +37,7 @@ class PolicyDisposition
       :carrier_to_bill => @policy.carrier_to_bill,
       :carrier_id => @policy.carrier_id,
       :responsible_party_id => @policy.responsible_party_id,
-      :applied_aptc => @policy.applied_aptc
+      :applied_aptc => @policy.reported_aptc_on(date)
     })
     pol.plan = plan
     copied_enrollees = @enrollees.select do |en|

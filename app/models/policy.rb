@@ -36,6 +36,8 @@ class Policy
   validates_presence_of :tot_res_amt
   validates_presence_of :plan_id
 
+  embeds_many :aptc_credits
+
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
 
@@ -71,6 +73,7 @@ class Policy
   before_create :generate_enrollment_group_id
   before_save :invalidate_find_cache
   before_save :check_for_cancel_or_term
+  before_save :check_multi_aptc
 
   scope :all_active_states,   where(:aasm_state.in => %w[submitted resubmitted effectuated])
   scope :all_inactive_states, where(:aasm_state.in => %w[canceled carrier_canceled terminated])
@@ -632,6 +635,44 @@ class Policy
 
   def belong_to_authority_member?
     authority_member.hbx_member_id == self.subscriber.m_id
+  end
+
+  def check_multi_aptc
+    return true unless self.multi_aptc?
+    latest_record = self.latest_aptc_record
+    self.applied_aptc = latest_record.aptc
+    self.pre_amt_tot = latest_record.pre_amt_tot
+    self.tot_res_amt = latest_record.tot_res_amt
+  end
+
+  def reported_tot_res_amt_on(date)
+    return self.tot_res_amt unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).tot_res_amt
+  end
+
+  def reported_pre_amt_tot_on(date)
+    return self.pre_amt_tot unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).pre_amt_tot
+  end
+
+  def reported_aptc_on(date)
+    return self.applied_aptc unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).aptc
+  end
+
+  def multi_aptc?
+    self.aptc_credits.any?
+  end
+
+  def latest_aptc_record
+    aptc_credits.sort_by { |aptc_rec| aptc_rec.start_on }.last
+  end
+
+  def aptc_record_on(date)
+    self.aptc_credits.detect { |aptc_rec| aptc_rec.start_on <= date && aptc_rec.end_on >= date }
   end
 
   protected

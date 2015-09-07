@@ -38,7 +38,7 @@ Eye.application 'eye_gluedb' do
 
   define_multi_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY, 4)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 4)
-  define_multi_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY, 20)
+  define_multi_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY, 10)
 
   process("unicorn") do
     working_dir BUS_DIRECTORY

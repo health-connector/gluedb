@@ -1,1 +1,1 @@
-Listeners::EnrollmentCreator.run
+Forkr.new(Listeners::EnrollmentCreator, 4).run

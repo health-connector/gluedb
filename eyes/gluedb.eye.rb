@@ -16,6 +16,25 @@ def start_command_for(worker_command)
   "bundle exec rails r -e production #{worker_command}"
 end
 
+def define_forked_worker(worker_n, worker_path, directory)
+    worker_name = worker_n
+    process(worker_name) do
+      start_command start_command_for(worker_path)
+      stop_on_delete true
+      stop_signals [:TERM, 10.seconds, :KILL]
+      start_timeout 15.seconds
+      pid_file File.join(PID_DIRECTORY, "#{worker_name}.pid")
+      daemonize true
+      working_dir directory
+      stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")
+      monitor_children do
+        stop_command "kill -QUIT {PID}"
+        check :cpu, :every => 30, :below => 80, :times => 3
+        check :memory, :every => 30, :below => 400.megabytes, :times => [4,7]
+      end
+    end
+end
+
 def define_multi_worker(worker_n, worker_path, directory, number)
   (1..number).each do |num|
     worker_name = worker_n + "_" + num.to_s
@@ -36,7 +55,7 @@ Eye.application 'eye_gluedb' do
   notify :tevans, :info
   notify :dthomas, :info
 
-  define_multi_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY, 4)
+  define_forked_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 4)
   define_multi_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY, 10)
 

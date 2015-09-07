@@ -9,7 +9,7 @@ module Parsers::Xml::Cv
     element :id, String, tag: "id/cv:id"
     element :coverage_type, String, tag: "coverage_type"
     element :name, String, tag: "name"
-    element :plan_year, String, tag: "plan_year"
+    element :active_year, String, tag: "active_year"
     element :is_dental_only, String, tag: "is_dental_only"
     element :carrier, CarrierParser, tag: 'carrier'
 
@@ -18,7 +18,7 @@ module Parsers::Xml::Cv
       response = {
           coverage_type: coverage_type,
           name: name,
-          plan_year: plan_year,
+          active_year: active_year,
           is_dental_only: is_dental_only
       }
 

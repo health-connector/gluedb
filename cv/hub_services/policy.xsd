@@ -61,7 +61,7 @@
 		<xs:complexContent>
 			<xs:restriction base="IndividualType">
 				<xs:sequence>
-					<xs:element name="id" type="IdentifierType" minOccurs="0"/>
+					<xs:element name="id" type="IdentifierType"/>
 					<xs:element name="primary_family_id" type="IdentifierType" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>Primary family of this person.</xs:documentation>

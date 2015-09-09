@@ -46,6 +46,7 @@ class Family
   index({is_active:  1})
   index({aasm_state:  1})
   index({submitted_at:  1})
+  index({"irs_groups.hbx_assigned_id" => 1}, { unique: true })
 
   #index({'family_member.person_id'=> 1 }, { unique: true})
 

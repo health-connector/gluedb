@@ -19,6 +19,7 @@ class Family
   field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
   field :app_ref, type: String #application reference number from curam
+  field :application_case_type, type: String
 
   has_and_belongs_to_many :qualifying_life_events
 

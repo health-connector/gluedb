@@ -33,7 +33,7 @@ def process_person_row(row)
   authority_member.save
   family_member.save
   @family.save
-  $logger.info "Family Member person: #{family_member.person.id} set #{family_member.mes} #{authority_member.citizen_status} #{authority_member.is_incarcerated}"
+  $logger.info "Family Member person: #{family_member.person.id} set #{family_member.mec} #{authority_member.citizen_status} #{authority_member.is_incarcerated}"
 
 end
 
@@ -49,9 +49,10 @@ CSV.foreach(File.path(csv_file)) do |row|
     else
       family = families.first
       family.app_ref = row[11]
+      family.application_case_type = "Insurance Affordability"
       family.save
       @family = family
-      $logger.info "Family: #{family.e_case_id} saved with app_ref #{family.app_ref}"
+      $logger.info "Family: #{family.e_case_id} saved with app_ref #{family.app_ref} application_case_type #{family.application_case_type}"
     end
   end
 end

@@ -24,7 +24,7 @@ def process_person_row(row)
     family_member.person.ssn.eql?(row[7])
   end
   return unless family_member
-  family_member.mes = compute_mes(row)
+  family_member.mec = compute_mec(row)
   citizen_status = get_citizen_status(row[10])
   authority_member = family_member.person.authority_member
   authority_member.citizen_status = citizen_status if citizen_status
@@ -32,11 +32,11 @@ def process_person_row(row)
   authority_member.save
   family_member.save
   @family.save
-  $logger.info "Family Member person: #{family_member.person.id} set #{family_member.mes} #{authority_member.citizen_status} #{authority_member.is_incarcerated}"
+  $logger.info "Family Member person: #{family_member.person.id} set #{family_member.mec} #{authority_member.citizen_status} #{authority_member.is_incarcerated}"
 
 end
 
-def compute_mes(row)
+def compute_mec(row)
   dates = []
   dates << Date.strptime(row[17], "%Y-%m-%d") rescue nil
   dates << Date.strptime(row[19], "%Y-%m-%d") rescue nil
@@ -47,8 +47,9 @@ end
 
 def process_family_row
   @family.app_ref = @family_row[10]
+  @family.application_case_type = "Insurance Affordability"
   @family.save
-  $logger.info "Family: #{@family.e_case_id} saved with app_ref #{@family.app_ref}"
+  $logger.info "Family: #{@family.e_case_id} saved with app_ref #{@family.app_ref} application_case_type #{@family.application_case_type}"
 end
 
 CSV.foreach(File.path(csv_file)) do |row|

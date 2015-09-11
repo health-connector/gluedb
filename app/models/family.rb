@@ -18,6 +18,7 @@ class Family
   field :is_active, type: Boolean, default: true   # Family active on the Exchange?
   field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
+  field :app_ref, type: String #application reference number from curam
 
   has_and_belongs_to_many :qualifying_life_events
 

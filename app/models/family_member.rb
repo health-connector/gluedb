@@ -17,6 +17,7 @@ class FamilyMember
 
   field :person_id, type: Moped::BSON::ObjectId
   field :broker_id, type: Moped::BSON::ObjectId
+  field :mes, type: Boolean, default: false #minimum essential coverage, should be renamed to mec
 
   embeds_many :hbx_enrollment_exemptions
   accepts_nested_attributes_for :hbx_enrollment_exemptions

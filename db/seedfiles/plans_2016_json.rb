@@ -3,9 +3,15 @@ plan_file = File.open("db/seedfiles/2016_plans.json", "r")
 data = plan_file.read
 plan_file.close
 plan_data = JSON.load(data)
+puts "Before total #{Plan.count} plans"
+puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
   plan = Plan.new(pd)
   plan.id = pd["id"]
+  if !(["00", "", "null"].include? pd["csr_variant_id"])
+    plan.hios_plan_id = plan.hios_plan_id + "-" + pd["csr_variant_id"]
+  end
   plan.save
 end
+puts "After total #{Plan.count} plans"
 puts "Finished importing 2016 plans"

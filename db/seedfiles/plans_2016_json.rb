@@ -8,9 +8,6 @@ puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
   plan = Plan.new(pd)
   plan.id = pd["id"]
-  if !(["00", "", "null"].include? pd["csr_variant_id"])
-    plan.hios_plan_id = plan.hios_plan_id + "-" + pd["csr_variant_id"]
-  end
   plan.save
 end
 puts "After total #{Plan.count} plans"

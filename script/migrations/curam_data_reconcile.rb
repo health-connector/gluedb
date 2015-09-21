@@ -66,7 +66,11 @@ end
 
 def process_family_row(family)
   family.app_ref = @family_row[11]
-  family.application_case_type = @family_row[17]
+  if @family_row[17].present? && (@family_row[17].downcase.eql? "streamlinemedicaid")
+    family.application_case_type = ""
+  else
+    family.application_case_type = @family_row[17]
+  end
   family.motivation_type = @family_row[16]
   family.save
   $logger.info "Family: #{family.e_case_id} saved with app_ref #{family.app_ref} application_case_type #{family.application_case_type}"

@@ -5,7 +5,7 @@ module Clients
       if authority_member.blank?
         return []
       end
-      conn = Bunny.new(ExchangeInformation.amqp_uri)
+      conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
       begin
         conn.start
         req = Amqp::Requestor.new(conn)

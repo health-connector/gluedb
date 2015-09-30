@@ -45,7 +45,7 @@ module Services
     end
 
     def self.with_channel
-      session = Bunny.new(ExchangeInformation.amqp_uri)
+      session = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
       session.start
       chan = session.create_channel
       chan.prefetch(1)

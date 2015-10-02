@@ -69,6 +69,7 @@ class Employer
   before_save :invalidate_find_caches
 
   scope :by_name, order_by(name: 1)
+  scope :by_hbx_id, lambda { |employer_hbx_id| where(:hbx_id => employer_hbx_id) }
 
   def payment_transactions
     PremiumPayment.payment_transactions_for(self)

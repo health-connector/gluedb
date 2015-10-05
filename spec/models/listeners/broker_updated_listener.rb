@@ -34,7 +34,7 @@ describe Listeners::BrokerUpdatedListener do
     allow(Amqp::Requestor).to receive(:new).with(connection).and_return(mock_requestor)
     allow(Broker).to receive(:by_npn).with(broker_hbx_id).and_return(matching_brokers)
     allow(mock_requestor).to receive(:request).with(
-      {:headers => { :broker_id => broker_hbx_id }}, "", 10
+      {:headers => { :broker_id => broker_hbx_id }, :routing_key => "resource.broker"}, "", 10
     ).and_return([r_di, r_props, resource_body])
     allow(channel).to receive(:acknowledge).with("a message tag", false)
   end

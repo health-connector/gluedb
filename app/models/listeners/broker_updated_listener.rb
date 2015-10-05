@@ -64,7 +64,8 @@ module Listeners
       di, rprops, rbody = request({
         :headers => {
           :broker_id => broker_id
-        }
+        },
+        :routing_key => "resource.broker"
       },"",10)
       if rprops.nil?
         throw :fail, FailAction.new(false, true, "resource_lookup_timeout", "")

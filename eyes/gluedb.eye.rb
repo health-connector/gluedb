@@ -30,7 +30,7 @@ def define_forked_worker(worker_n, worker_path, directory)
       monitor_children do
         stop_command "kill -QUIT {PID}"
         check :cpu, :every => 30, :below => 80, :times => 3
-        check :memory, :every => 30, :below => 400.megabytes, :times => [4,7]
+        check :memory, :every => 30, :below => 500.megabytes, :times => [4,7]
       end
     end
 end
@@ -48,7 +48,7 @@ def define_multi_worker(worker_n, worker_path, directory, number)
       working_dir directory
       stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")
       check :cpu, :every => 30, :below => 80, :times => 3
-      check :memory, :every => 30, :below => 400.megabytes, :times => [4,7]
+      check :memory, :every => 30, :below => 500.megabytes, :times => [4,7]
     end
   end
 end

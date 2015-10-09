@@ -534,11 +534,11 @@ class Policy
     start_date = policy_start
 
     if !policy_end.nil?
-      if policy_end.year > policy_start.year
-        return (start_date..Date.new(start_date.year, 12, 31))
-      else
+#      if policy_end.year > policy_start.year
+#        return (start_date..Date.new(start_date.year, 12, 31))
+#      else
         return (start_date..policy_end)
-      end
+#      end
     end
 
     if employer_id.blank?

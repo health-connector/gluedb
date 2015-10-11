@@ -106,9 +106,11 @@ CSV.open("active_policies#{Time.now.to_s.gsub(' ', '')}.csv", "wb") do |csv|
       "relationship"
   ]
   active_policies.each do |ap|
+
     if !ap.subscriber.nil?
       subscriber = ap.subscriber
-      if !subscriber.cancelled?
+      next if ap.market == "shop  "
+      if !subscriber.canceled?
         ap.enrollees.each do |enrollee|
           sub_person = member_cache.lookup(enrollee.m_id)
           plan = plan_hash[ap.plan_id]
@@ -117,8 +119,8 @@ CSV.open("active_policies#{Time.now.to_s.gsub(' ', '')}.csv", "wb") do |csv|
               ap.id,
               ap.enrollment_group_id,
               ap.market,
-              csv_date_format(pol.policy_start),
-              csv_date_format(pol.coverage_period_end),
+              csv_date_format(ap.policy_start),
+              (csv_date_format(ap.coverage_period_end) rescue ""),
               plan.hios_plan_id,
               plan.year.to_s,
               plan.name,
@@ -128,7 +130,7 @@ CSV.open("active_policies#{Time.now.to_s.gsub(' ', '')}.csv", "wb") do |csv|
               ap.tot_emp_res_amt,
               ap.tot_res_amt,
               csv_date_format(enrollee.coverage_start),
-              csv_date_format(enrollee.coverage_end),
+              (csv_date_format(enrollee.coverage_end) rescue ""),
               sub_person.authority_member_id,
               sub_person.name_first,
               sub_person.name_last,

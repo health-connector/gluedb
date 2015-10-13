@@ -116,7 +116,7 @@ CSV.open("active_policies#{Time.now.to_s.gsub(' ', '')}.csv", "wb") do |csv|
             csv << [
               ap.id,
               ap.enrollment_group_id,
-              ap.market,
+              (pol.employer_id.blank? ? "individual" : "shop"),
               csv_date_format(pol.policy_start),
               csv_date_format(pol.coverage_period_end),
               plan.hios_plan_id,

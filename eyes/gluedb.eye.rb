@@ -85,7 +85,7 @@ Eye.application 'eye_gluedb' do
     monitor_children do
       stop_command "kill -QUIT {PID}"
       check :cpu, :every => 30, :below => 80, :times => 3
-      check :memory, :every => 30, :below => 450.megabytes, :times => [4,7]
+      check :memory, :every => 30, :below => 500.megabytes, :times => [4,7]
     end
   end
 end

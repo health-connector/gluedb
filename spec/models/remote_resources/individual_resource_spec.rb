@@ -99,10 +99,29 @@ describe RemoteResources::IndividualResource do
       expect(subject.gender).to eq "female"
     end
 
-    it "should have the correct addresses"
+    it "should have the correct addresses" do
+       address = subject.addresses.first
+       expect(address.address_kind).to eq "home"
+       expect(address.address_line_1).to eq "2515 I Bath Street NW"
+       expect(address.address_line_2).to eq "Apt. Whatever"
+       expect(address.location_city_name).to eq "Washington"
+       expect(address.location_state_code).to eq "DC"
+       expect(address.postal_code).to eq "20037"
+    end
 
-    it "should have the correct emails"
+    it "should have the correct emails" do
+      email = subject.emails.first
+      expect(email.email_kind).to eq "home"
+      expect(email.email_address).to eq "sminerva@gmail.com"
+    end
 
-    it "should have the correct phones"
+    it "should have the correct phones" do
+      first_phone = subject.phones.first
+      second_phone = subject.phones.last
+      expect(first_phone.phone_kind).to eq "home"
+      expect(first_phone.full_phone_number).to eq "5882300123"
+      expect(first_phone.ignored?).to eq false
+      expect(second_phone.ignored?).to eq true
+    end
   end
 end

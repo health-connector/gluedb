@@ -11,9 +11,9 @@ module RemoteResources
     has_one :person, ::RemoteResources::Person, :tag => "person"
     has_one :person_demographics, ::RemoteResources::PersonDemographics, :tag => "person_demographics"
 
-    delegate :name_first, :name_last, :name_middle, :name_sfx, :name_pfx, :to => :person, :allow_nil => true
+    delegate :name_first, :name_last, :name_middle, :name_sfx, :name_pfx, :addresses, :emails, :phones, :to => :person, :allow_nil => true
 
-    delegate :ssn, :dob, :gender, :to => :person_demographics
+    delegate :ssn, :dob, :gender, :to => :person_demographics, :allow_nil => true
 
     def hbx_member_id
       Maybe.new(id).split("#").last.value

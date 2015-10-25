@@ -17,5 +17,9 @@ module RemoteResources
     element :name_pfx, String, tag: "person_name/cv:person_name_prefix_text"
 
     element :name_sfx, String, tag: "person_name/cv:person_name_suffix_text"
+
+    has_many :addresses, ::RemoteResources::Address, xpath: "cv:addresses"
+    has_many :emails, ::RemoteResources::Email, xpath: "cv:emails"
+    has_many :phones, ::RemoteResources::Phone, xpath: "cv:phones"
   end
 end

@@ -19,6 +19,14 @@ module RemoteResources
       Maybe.new(id).split("#").last.value
     end
 
+    def exists?
+      !!record
+    end
+
+    def record
+      @record ||= ::Queries::PersonByHbxIdQuery.new(hbx_member_id).execute
+    end
+
     def self.retrieve(requestable, individual_id)
       di, rprops, resp_body = [nil, nil, nil]
       begin

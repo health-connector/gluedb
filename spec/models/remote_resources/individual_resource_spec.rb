@@ -124,4 +124,24 @@ describe RemoteResources::IndividualResource do
       expect(second_phone.ignored?).to eq true
     end
   end
+
+  describe "when that record does not exist in the db" do
+    let(:member_query) { double(:execute => nil) }
+    subject { RemoteResources::IndividualResource.parse(example_data, :single => true) }
+
+    it "should not exist" do
+      allow(::Queries::PersonByHbxIdQuery).to receive(:new).with("18941339").and_return(member_query)
+      expect(subject.exists?).to be false
+    end
+  end
+
+  describe "when that record does exists in the db" do
+    let(:member_query) { double(:execute => double) }
+    subject { RemoteResources::IndividualResource.parse(example_data, :single => true) }
+
+    it "should not exist" do
+      allow(::Queries::PersonByHbxIdQuery).to receive(:new).with("18941339").and_return(member_query)
+      expect(subject.exists?).to be true
+    end
+  end
 end

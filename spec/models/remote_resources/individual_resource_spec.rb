@@ -135,11 +135,11 @@ describe RemoteResources::IndividualResource do
     end
   end
 
-  describe "when that record does exists in the db" do
+  describe "when that record does exist in the db" do
     let(:member_query) { double(:execute => double) }
     subject { RemoteResources::IndividualResource.parse(example_data, :single => true) }
 
-    it "should not exist" do
+    it "should exist" do
       allow(::Queries::PersonByHbxIdQuery).to receive(:new).with("18941339").and_return(member_query)
       expect(subject.exists?).to be true
     end

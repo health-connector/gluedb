@@ -44,6 +44,7 @@ class Broker
   before_save :initialize_name_full
 
   scope :by_name, order_by(name_last: 1, name_first: 1)
+  scope :by_npn, lambda { |broker_npn| where(npn: broker_npn) }
 
   def self.default_search_order
     [

@@ -16,7 +16,7 @@ module Protocols
         end
         transform_exchange = Protocols::Amqp::Settings.transformation_exchange
         transform_key = Protocols::Amqp::Settings.transformation_key
-        conn = Bunny.new
+        conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
         conn.start
         ch = conn.create_channel
         ex = ch.send(*transform_exchange)

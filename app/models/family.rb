@@ -18,6 +18,9 @@ class Family
   field :is_active, type: Boolean, default: true   # Family active on the Exchange?
   field :submitted_at, type: DateTime            # Date application was created on authority system
   field :updated_by, type: String
+  field :app_ref, type: String #application reference number from curam
+  field :application_case_type, type: String
+  field :motivation_type, type: String
 
   has_and_belongs_to_many :qualifying_life_events
 
@@ -46,6 +49,7 @@ class Family
   index({is_active:  1})
   index({aasm_state:  1})
   index({submitted_at:  1})
+  index({"irs_groups.hbx_assigned_id" => 1}, { unique: true })
 
   #index({'family_member.person_id'=> 1 }, { unique: true})
 

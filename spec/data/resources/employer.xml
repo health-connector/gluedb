@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<organization xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://openhbx.org/api/terms/1.0' xsi:type='EmployerOrganizationType'>
+	<id>
+		<id>212344333</id>
+	</id>
+	<name>Acme Inc.</name>
+	<dba>Acme Inc. but almost an LLC</dba>
+	<fein>764141112</fein>
+	<office_locations>
+		<office_location>
+			<id>
+				<id>55fc838254726568cd018d01</id>
+			</id>
+			<primary>true</primary>
+			<address>
+				<type>urn:openhbx:terms:v1:address_type#work</type>
+				<address_line_1>830 I St NE</address_line_1>
+				<location_city_name>Washington</location_city_name>
+				<location_state_code>DC</location_state_code>
+				<postal_code>20002</postal_code>
+			</address>
+			<phone>
+				<type>urn:openhbx:terms:v1:phone_type#work</type>
+				<full_phone_number>2025551212</full_phone_number>
+				<is_preferred>false</is_preferred>
+			</phone>
+		</office_location>
+	</office_locations>
+	<is_active>true</is_active>
+	<employer_profile>
+		<business_entity_kind>urn:openhbx:terms:v1:employers#c_corporation</business_entity_kind>
+		<brokers>
+
+		</brokers>
+		<plan_years>
+			<plan_year>
+				<plan_year_start>20150201</plan_year_start>
+				<plan_year_end>20160131</plan_year_end>
+				<fte_count>11</fte_count>
+				<pte_count>0</pte_count>
+				<open_enrollment_start>20141205</open_enrollment_start>
+				<open_enrollment_end>20141210</open_enrollment_end>
+				<elected_plans></elected_plans>
+				<benefit_groups>
+					<benefit_group>
+						<name>DC Location</name>
+						<reference_plan>
+							<id>
+								<id>86052DC0490001-01</id>
+							</id>
+							<name>BlueChoice HMO Referral HSA/HRA $4,000</name>
+							<active_year>2015</active_year>
+							<is_dental_only>false</is_dental_only>
+							<carrier>
+								<id>
+									<id>070000000</id>
+								</id>
+								<name>CareFirst</name>
+							</carrier>
+							<metal_level>urn:openhbx:terms:v1:plan_metal_level#bronze</metal_level>
+							<coverage_type>urn:openhbx:terms:v1:qhp_benefit_coverage#health</coverage_type>
+						</reference_plan>
+						<relationship_benefits>
+							<relationship_benefit>
+								<relationship>urn:openhbx:terms:v1:employee_census_relationship#employee</relationship>
+								<offered>true</offered>
+								<contribution_percent>50.0</contribution_percent>
+							</relationship_benefit>
+							<relationship_benefit>
+								<relationship>urn:openhbx:terms:v1:employee_census_relationship#spouse</relationship>
+								<offered>true</offered>
+								<contribution_percent>0.0</contribution_percent>
+							</relationship_benefit>
+							<relationship_benefit>
+								<relationship>urn:openhbx:terms:v1:employee_census_relationship#domestic_partner</relationship>
+								<offered>true</offered>
+								<contribution_percent>0.0</contribution_percent>
+							</relationship_benefit>
+							<relationship_benefit>
+								<relationship>urn:openhbx:terms:v1:employee_census_relationship#child_under_26</relationship>
+								<offered>true</offered>
+								<contribution_percent>0.0</contribution_percent>
+							</relationship_benefit>
+							<relationship_benefit>
+								<relationship>urn:openhbx:terms:v1:employee_census_relationship#child_26_and_over</relationship>
+								<offered>false</offered>
+								<contribution_percent>50.0</contribution_percent>
+							</relationship_benefit>
+						</relationship_benefits>
+					</benefit_group>
+				</benefit_groups>
+				<created_at>2015-09-18T21:34:58Z</created_at>
+				<modified_at>2015-09-18T21:34:58Z</modified_at>
+			</plan_year>
+		</plan_years>
+		<employer_census_families></employer_census_families>
+	</employer_profile>
+	<created_at>2015-09-18T21:34:58Z</created_at>
+	<modified_at>2015-09-18T21:34:58Z</modified_at>
+</organization>

@@ -3,7 +3,7 @@ require File.join(Rails.root, "app", "models", "premiums", "quote_cv_proxy.rb")
 class Api::V2::QuoteGeneratorController < ApplicationController
   skip_before_filter :authenticate_user_from_token!
   skip_before_filter :authenticate_me!
-  protect_from_forgery
+  skip_before_filter :verify_authenticity_token
 
   def generate
 
@@ -40,6 +40,7 @@ class Api::V2::QuoteGeneratorController < ApplicationController
 
       quote_cv_proxy.enrollees_pre_amt=policy.enrollees
       quote_cv_proxy.policy_pre_amt_tot=policy.pre_amt_tot
+      quote_cv_proxy.ehb=policy.plan.ehb*100
 
       render :xml => quote_cv_proxy.response_xml, :status => :ok
     rescue Exception => e

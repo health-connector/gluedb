@@ -5,7 +5,8 @@ class EligibilityDetermination
   embedded_in :tax_household
   include HasFamilyMembers
 
-  PDC_STATUSES = %w{active approved submitted open }
+  PDC_STATUSES = %w{active approved submitted open suspended pending_closure planned canceled_planned
+                 delayed_processing_pending canceled appeal_submitted rejected in_progress  completed plan_submitted}
 
   field :e_pdc_id, type: String
   field :benchmark_plan_id, type: Moped::BSON::ObjectId

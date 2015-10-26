@@ -31,7 +31,7 @@ class EnrollmentCvProxy
 
   def plan
     plan_hash = Parsers::Xml::Cv::PlanParser.parse(@xml_doc).first.to_hash
-    Plan.where(hios_plan_id: /^#{plan_hash[:id]}/).first
+    Plan.find_by_hios_id_and_year(plan_hash[:id], plan_hash[:active_year])
   end
 
   def policy_pre_amt_tot=(value)

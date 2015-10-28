@@ -5,15 +5,19 @@ module Listeners
       "#{ec.hbx_id}.#{ec.environment}.q.glue.individual_updated_listener"
     end
 
-    def resource_error_broadcast(event_key, ind_id, r_code, body = "")
+    def resource_event_broadcast(level, event_key, ind_id, r_code, body = "")
         event_body = (body.respond_to?(:to_s) ? body.to_s : body.inspect)
         broadcast_event({
-          :routing_key => "error.application.gluedb.individual_update_event_listener.#{event_key}",
+          :routing_key => "#{level}.application.gluedb.individual_update_event_listener.#{event_key}",
           :headers => {
             :individual_id => ind_id,
             :return_status => r_code.to_s
           }
         },event_body)
+    end
+
+    def resource_error_broadcast(event_key, ind_id, r_code, body = "")
+      resource_event_broadcast("error", event_key, ind_id, r_code, body)
     end
 
     def on_message(delivery_info, properties, body)
@@ -22,6 +26,8 @@ module Listeners
       r_code, resource_or_body = ::RemoteResources::IndividualResource.retrieve(self, individual_id)
       case r_code.to_s
       when "200"
+        resource_event_broadcast("info", "individual_created", individual_id, r_code, resource_or_body)
+        channel.ack(delivery_info.delivery_tag, false)
       when "404"
         resource_error_broadcast("resource_not_found", individual_id, r_code)
         channel.ack(delivery_info.delivery_tag, false)

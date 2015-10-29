@@ -4,10 +4,11 @@ data = plan_file.read
 plan_file.close
 plan_data = JSON.load(data)
 counter = 0
+puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
   next if pd["renewal_plan_id"].blank?
   plan = Plan.find(pd["id"])
-  plan.renewal_plan_id = pd["renewal_plan_id"]
+    plan.renewal_plan_id = pd["renewal_plan_id"]
   plan.save!
   counter += 1
 end

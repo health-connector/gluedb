@@ -8,7 +8,7 @@ puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
   plan = Plan.new(pd)
   plan.id = pd["id"]
-  plan.save
+  plan.save!
 end
 puts "After total #{Plan.count} plans"
 puts "Finished importing 2016 plans"

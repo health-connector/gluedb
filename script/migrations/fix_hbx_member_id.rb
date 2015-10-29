@@ -1,12 +1,13 @@
-count = 18775316
+count = 18942874
+count_end = 19742873
+
 $logger = Logger.new("#{Rails.root}/log/fix_hbx_member_id_#{Time.now.to_s.gsub(' ', '')}.log")
 person_counter = 0
 
 puts "Total persons #{Person.count}"
 
 Person.all.each do |person|
-  person_counter = person_counter + 1
-  puts "person_counter #{person_counter}"
+  exit if count >= count_end
 
   if person.authority_member_id.present?
     if person.authority_member_id.include? 'concern_role'

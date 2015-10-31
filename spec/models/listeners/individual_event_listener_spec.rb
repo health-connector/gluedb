@@ -58,7 +58,28 @@ describe Listeners::IndividualEventListener do
   end
 
   describe "given a new individual" do
-    it "should create that individual"
+    let(:new_individual) {
+      double(:exists? => false, :to_s => "a body value for the resource")
+    }
+
+    let(:individual_created_properties) { {
+      :routing_key => "info.application.gluedb.individual_update_event_listener.individual_created",
+      :headers => {
+        :return_status => "200",
+        :individual_id => individual_id 
+      }
+    } }
+
+
+    before :each do
+      allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["200", new_individual])
+    end
+
+    it "should create that individual" do
+      expect(channel).to receive(:ack).with(delivery_tag, false)
+      expect(subject).to receive(:broadcast_event).with(individual_created_properties, "a body value for the resource")
+      subject.on_message(di, props, body)
+    end
   end
 
   describe "given an individual which already exists" do

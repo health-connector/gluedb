@@ -14,7 +14,7 @@ end
 def normalize_irs_group_hbx_assigned_id(family)
   if family.active_household.nil?
     ""
-  elsif family.active_household.irs_group.nil?
+  elsif family.active_household.irs_group_id.nil?
     ""
   else
     family.active_household.irs_group.hbx_assigned_id

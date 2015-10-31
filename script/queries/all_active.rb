@@ -106,38 +106,47 @@ CSV.open("active_policies#{Time.now.to_s.gsub(' ', '')}.csv", "wb") do |csv|
       "relationship"
   ]
   active_policies.each do |ap|
+
+    begin
+      if ap.coverage_period_end.present? && ap.coverage_period_end.past?
+        next
+      end
+    rescue Exception => e
+
+    end
+
     if !ap.subscriber.nil?
       subscriber = ap.subscriber
-      if !subscriber.cancelled?
+      if !subscriber.canceled?
         ap.enrollees.each do |enrollee|
           sub_person = member_cache.lookup(enrollee.m_id)
           plan = plan_hash[ap.plan_id]
           if !sub_person.authority_member.nil? && !enrollee.canceled?
             csv << [
-              ap.id,
-              ap.enrollment_group_id,
-              (pol.employer_id.blank? ? "individual" : "shop"),
-              csv_date_format(pol.policy_start),
-              csv_date_format(pol.coverage_period_end),
-              plan.hios_plan_id,
-              plan.year.to_s,
-              plan.name,
-              plan.ehb,
-              ap.pre_amt_tot,
-              ap.applied_aptc,
-              ap.tot_emp_res_amt,
-              ap.tot_res_amt,
-              csv_date_format(enrollee.coverage_start),
-              csv_date_format(enrollee.coverage_end),
-              sub_person.authority_member_id,
-              sub_person.name_first,
-              sub_person.name_last,
-              sub_person.authority_member.ssn,
-              enrollee.pre_amt,
-              csv_date_format(sub_person.authority_member.dob),
-              sub_person.authority_member.gender,
-              plan.metal_level,
-              enrollee.rel_code
+                ap.id,
+                ap.enrollment_group_id,
+                ap.market,
+                csv_date_format(ap.policy_start),
+                (csv_date_format(ap.coverage_period_end) rescue ""),
+                plan.hios_plan_id,
+                plan.year.to_s,
+                plan.name,
+                plan.ehb,
+                ap.pre_amt_tot,
+                ap.applied_aptc,
+                ap.tot_emp_res_amt,
+                ap.tot_res_amt,
+                csv_date_format(enrollee.coverage_start),
+                (csv_date_format(enrollee.coverage_end) rescue ""),
+                sub_person.authority_member_id,
+                sub_person.name_first,
+                sub_person.name_last,
+                sub_person.authority_member.ssn,
+                enrollee.pre_amt,
+                csv_date_format(sub_person.authority_member.dob),
+                sub_person.authority_member.gender,
+                plan.metal_level,
+                enrollee.rel_code
             ]
           end
         end

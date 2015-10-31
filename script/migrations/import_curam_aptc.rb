@@ -1,5 +1,6 @@
 file = "/Users/CitadelFirm/Downloads/policies-for-aptc/matched_policies.csv"
 @logger = Logger.new("#{Rails.root}/log/curam_aptc_import#{Time.now.to_s.gsub(' ', '')}.log")
+@logger.info "FN,LN,SSN,DOB,aptc_maximum_2016.max_aptc,aptc_maximum_2016.aptc_percent,aptc_maximum_2015.max_aptc,aptc_maximum_2015.aptc_percent,aptc_credit.aptc,aptc_credit.pre_amt_tot"
 
 def person_match(first_name, ssn, dob)
   dob = Date.strptime(dob, "%m/%d/%Y")
@@ -44,12 +45,18 @@ def update_policy(policy, row)
                                          pre_amt_tot: premium
                                         })
 
+
   tot_res_amt = premium - aptc_credit.aptc
-  aptc_credit.tot_res_amt = tot_res_amt < 0 ? 0 : tot_res_amt
+
+  if tot_res_amt < 0
+    aptc_credit.tot_res_amt = 0
+  end
 
   policy.aptc_credits << aptc_credit
 
-  @logger.info "#{row[0]},#{row[1]},#{row[2]},#{row[4]},#{aptc_maximum_2016.max_aptc},#{aptc_maximum_2016.aptc_percent},#{aptc_maximum_2015.max_aptc},#{aptc_maximum_2015.aptc_percent}"
+  @logger.info "#{row[0]},#{row[1]},#{row[2]},#{row[4]},#{aptc_maximum_2016.max_aptc}," +
+                   "#{aptc_maximum_2016.aptc_percent},#{aptc_maximum_2015.max_aptc},#{aptc_maximum_2015.aptc_percent}," +
+                    "#{aptc_credit.aptc},#{aptc_credit.pre_amt_tot}"
 
   policy.save
 end

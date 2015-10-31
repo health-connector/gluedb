@@ -44,6 +44,8 @@ def update_policy(policy, row)
 
   policy.aptc_credits << aptc_credit
 
+  policy.save
+
 end
 
 CSV.foreach(File.path(file), :headers=>true) do |row|

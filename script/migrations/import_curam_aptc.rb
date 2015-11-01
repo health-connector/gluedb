@@ -1,6 +1,6 @@
 file = "/Users/CitadelFirm/Downloads/policies-for-aptc/matched_policies.csv"
 @logger = Logger.new("#{Rails.root}/log/curam_aptc_import#{Time.now.to_s.gsub(' ', '')}.log")
-@logger.info "FN,LN,SSN,DOB,aptc_maximum_2016.max_aptc,aptc_maximum_2016.aptc_percent,aptc_maximum_2015.max_aptc,aptc_maximum_2015.aptc_percent,aptc_credit.aptc,aptc_credit.pre_amt_tot"
+@logger.info "FN,LN,DOB,aptc_maximum_2016.max_aptc,aptc_maximum_2016.aptc_percent,aptc_maximum_2015.max_aptc,aptc_maximum_2015.aptc_percent,aptc_credit.aptc,aptc_credit.pre_amt_tot"
 
 def person_match(first_name, ssn, dob)
   dob = Date.strptime(dob, "%m/%d/%Y")
@@ -29,12 +29,14 @@ def update_policy(policy, row)
                                        max_aptc:max_aptc,
                                        aptc_percent:percent})
   policy.aptc_maximums << aptc_maximum_2016
+  aptc_maximum_2016.save!
 
   aptc_maximum_2015 =  AptcMaximum.new({start_on: policy.policy_start,
                                         end_on: Date.new(2015, 12, 31),
                                         max_aptc:max_aptc_2015,
                                         aptc_percent:percent})
   policy.aptc_maximums << aptc_maximum_2015
+  aptc_maximum_2015.save!
 
   cost_sharing_variant = CostSharingVariant.new(start_on: Date.new(2016, 01, 01),
                                                 percent: csr)
@@ -42,7 +44,8 @@ def update_policy(policy, row)
 
   aptc_credit =  AptcCredit.new({start_on: Date.new(2016, 01, 01),
                                          aptc: compute_aptc( premium, policy.plan, max_aptc, percent),
-                                         pre_amt_tot: premium
+                                         pre_amt_tot: premium,
+                                         end_on: Date.new(2016, 12, 31)
                                         })
 
 
@@ -53,12 +56,13 @@ def update_policy(policy, row)
   end
 
   policy.aptc_credits << aptc_credit
+  aptc_credit.save!
 
   @logger.info "#{row[0]},#{row[1]},#{row[2]},#{row[4]},#{aptc_maximum_2016.max_aptc}," +
                    "#{aptc_maximum_2016.aptc_percent},#{aptc_maximum_2015.max_aptc},#{aptc_maximum_2015.aptc_percent}," +
                     "#{aptc_credit.aptc},#{aptc_credit.pre_amt_tot}"
 
-  policy.save
+  policy.save!
 end
 
 CSV.foreach(File.path(file)) do |row|

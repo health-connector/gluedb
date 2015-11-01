@@ -1,11 +1,11 @@
   require File.join(Rails.root, "script/queries/policy_id_generator")
 require 'pry'
 
-policy_ids = [29796,29809]
+policy_ids = []
 
-   # File.readlines('renewal_ids_phase1_assisted_health_kaiser.txt').map do |line|
-   #   policy_ids.push(line.to_i)
-   # end
+   File.readlines('renewal_ids_phase1_assisted_health_kaiser.txt').map do |line|
+     policy_ids.push(line.to_i)
+   end
 
 puts "#{policy_ids.count} CVs to generate."
 
@@ -87,9 +87,9 @@ end
     end
   end
 
-  def get_aptc_credits(policy)
+  def get_aptc_credits(policy, year)
     policy.aptc_credits.detect do |aptc_credit|
-      aptc_credit.start_on.year == 2016
+      aptc_credit.start_on.year == year
     end
   end
 
@@ -113,7 +113,7 @@ pols.each do |pol|
             r_pol.elected_aptc = 0
           end
 
-          aptc_credit = get_aptc_credits(pol)
+          aptc_credit = get_aptc_credits(pol, 2016)
           if aptc_credit.present?
             r_pol.applied_aptc = aptc_credit.aptc
           else
@@ -127,15 +127,30 @@ pols.each do |pol|
             r_pol.csr_amt = 0
           end
 
-          r_pol.plan = change_variant(r_pol)
-          calc.apply_calculations(r_pol)
-          p_id = polgen.get_id
-          out_file = File.open("renewals/#{old_p_id}_#{p_id}.xml",'w')
-          member_ids = r_pol.enrollees.map(&:m_id)
-          r_pol.eg_id = p_id.to_s
-          ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
-          out_file.print(ms.serialize)
-          out_file.close
+          if maximum_aptc.nil? && aptc_credit.nil? && csr_variant.nil?
+            r_pol.allocated_aptc= pol.allocated_aptc
+            r_pol.applied_aptc = pol.applied_aptc
+            r_pol.elected_aptc= pol.elected_aptc
+            r_pol.csr_amt = pol.csr_amt
+            calc.apply_calculations(r_pol)
+            p_id = polgen.get_id
+            out_file = File.open("renewals/#{old_p_id}_#{p_id}.xml",'w')
+            member_ids = r_pol.enrollees.map(&:m_id)
+            r_pol.eg_id = p_id.to_s
+            ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
+            out_file.print(ms.serialize)
+            out_file.close
+          else
+            r_pol.plan = change_variant(r_pol)
+            calc.apply_calculations(r_pol)
+            p_id = polgen.get_id
+            out_file = File.open("renewals/#{old_p_id}_#{p_id}.xml",'w')
+            member_ids = r_pol.enrollees.map(&:m_id)
+            r_pol.eg_id = p_id.to_s
+            ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
+            out_file.print(ms.serialize)
+            out_file.close
+          end
         rescue Exception=>e
           puts "#{pol._id} did not generate - #{pol.hios_plan_id} - #{pol.plan.metal_level} " + e.message
           # puts pol.plan.hios_plan_id

@@ -5,6 +5,8 @@ plan_file.close
 plan_data = JSON.load(data)
 puts "Before total #{Plan.count} plans"
 puts "#{plan_data.size} plans in json file"
+puts "Deleting existing 2016 plans"
+Plan.where(year:2016).delete
 plan_data.each do |pd|
   plan = Plan.new(pd)
   plan.id = pd["id"]

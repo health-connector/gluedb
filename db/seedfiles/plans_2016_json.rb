@@ -6,7 +6,7 @@ plan_data = JSON.load(data)
 puts "Before total #{Plan.count} plans"
 puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
-  plan = Plan.where(hios_plan_id:pd["hios_plan_id"]).first
+  plan = Plan.where(year:2016).and(hios_plan_id:pd["hios_plan_id"]).first
   plan.update_attributes(pd)
   plan.id = pd['id'] #use the id from json
   plan.save

@@ -21,12 +21,12 @@
 		  <dt>Status</dt>
 		  <dd><%= p.aasm_state.capitalize %></dd>
 		  <%if can? :edit, @people %>
-		  		<% if p.enrollees.any? {|ben_stat| ben_stat != "active" } %>
-		  			<% ben_statuses = [] %>
-		  			<% p.enrollees.each do |enrollee| %>
+		  		<% ben_statuses = [] %>
+		  		<% p.enrollees.each do |enrollee| %>
 		  				<% ben_statuses.push(enrollee.ben_stat.upcase) %>
-		  			<% end %>
-		  			<% ben_statuses.uniq! %>
+		  		<% end %> 
+		  		<% ben_statuses.uniq! %>
+		  		<% if ben_statuses.any? {|ben_stat| ben_stat != "ACTIVE" } %>
 		  		<dt>Benefit Status</dt>
 		  		<dd><%= ben_statuses.join(",") %></dd>
 		  	<% end %>
@@ -74,5 +74,3 @@
   <h6>Premium Payments</h6>
   <%= render 'payments_table', premium_payments: p.premium_payments %>
 <% end %>
-
-

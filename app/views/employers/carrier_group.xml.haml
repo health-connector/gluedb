@@ -1,0 +1,64 @@
+!!! XML
+%emp:employers{ "xmlns:emp" => "http://dchealthlink.com/vocabulary/20131030/employer", "xmlns:vcard" => "urn:ietf:params:xml:ns:vcard-4.0" }
+  %emp:employer
+    %emp:name= @employer.name
+    %emp:fein= @employer.fein
+    %emp:employer_exchange_id= @employer.hbx_id
+    %emp:fte_count= @employer.fte_count
+    %emp:pte_count= @employer.pte_count
+    - unless @employer.open_enrollment_start.blank?
+      %emp:plan_year_end= @employer.open_enrollment_start.strftime("%Y%m%d")
+    - unless @employer.open_enrollment_end.blank?
+      %emp:plan_year_end= @employer.open_enrollment_end.strftime("%Y%m%d")
+    - unless @employer.plan_year_start.blank?
+      %emp:plan_year_start= @employer.plan_year_start.strftime("%Y%m%d")
+    - unless @employer.plan_year_end.blank?
+      %emp:plan_year_end= @employer.plan_year_end.strftime("%Y%m%d")
+    %emp:plans
+      - @employer.elected_plans.select do |plan| plan.carrier.id == @carrier.id end.each do |plan|
+        %emp:plan
+          %emp:qhp_id= plan.qhp_id
+          %emp:plan_exchange_id= plan.hbx_plan_id
+          - unless plan.carrier_policy_number.blank?
+            %emp:policy_number= plan.carrier_policy_number
+          - unless plan.carrier_employer_group_id.blank?
+            %emp:group_id= plan.carrier_employer_group_id
+          %emp:carrier_id= plan.carrier.hbx_carrier_id
+          %emp:carrier_name= plan.carrier.name
+          %emp:coverage_type= plan.coverage_type
+          %emp:original_effective_date= plan.original_effective_date.strftime("%Y%m%d")
+          - unless plan.renewal_effective_date.blank?
+            %emp:renewal_effective_date= plan.renewal_effective_date.strftime("%Y%m%d")
+          - unless plan.metal_level.blank?
+            %emp:metal_level_code= plan.metal_level
+    %vcard:vcard
+      %xc:fn= @employer.name_first + " " + @employer.name_last
+      %xc:n
+        %xc:surname= @employer.name_last
+        %xc:given= @employer.name_first
+      %xc:org= @employer.name
+      - @employer.addresses.each do |addy|
+        %vcard:adr
+          %vcard:parameters
+            %vcard:type= addy.address_type
+          %vcard:street= addy.address_1
+          - unless addy.address_2.blank?
+            %vcard:street= addy.address_2
+          %vcard:region= addy.state
+          %vcard:locality= addy.city
+          %vcard:code= addy.zip
+      - @employer.phones.each do |phone|
+        %xc:tel
+          %xc:parameters
+            %xc:type
+              %xc:text= phone.phone_type
+          %xc:uri= phone.phone_number
+      - @employer.emails.each do |email|
+        %xc:email
+          %xc:parameters
+            %xc:type
+              %xc:text= email.email_type
+          %xc:text= email.email_address
+    %emp:exchange_id= @employer.hbx_id
+    %emp:exchange_version= @employer.version
+    %emp:exchange_status= "active"

@@ -124,4 +124,13 @@ class EmployersController < ApplicationController
     end
   end
 
+  def carrier_group
+    @employer = Employer.find(params[:id])
+    @carrier = Carrier.where(name:params[:carrier_name]).first
+
+    respond_to do |format|
+      format.xml
+    end
+  end
+
 end

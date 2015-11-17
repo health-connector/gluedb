@@ -2,9 +2,9 @@
 ## You will need to generate a list of policies with the command RenewalPoliciesFile.new.process inside the rails console. 
 
 require 'csv'
-require 'pry'
+#require 'pry'
 
-unassisted_policies_filename = "renewal_ids_201511161825.txt"
+unassisted_policies_filename = "renewal_ids_201511162126.txt"
 
 unassisted_policy_ids = []
 
@@ -17,6 +17,7 @@ CSV.open("unassisted_renewal_policies.csv","w") do |csv|
 	unassisted_policy_ids.each do |id|
 		policy_2015 = Policy.where(_id: id).to_a.first
 		created_at = policy_2015.created_at
+		coverage_type_2015 = policy_2015.coverage_type
 		subscribers = []
 		policy_2015.enrollees.each do |enrollee|
 			if enrollee.rel_code == "self"
@@ -34,6 +35,7 @@ CSV.open("unassisted_renewal_policies.csv","w") do |csv|
 			policies_2016 = []
 			subscriber_policies.each do |policy|
 				next if policy.enrollees.first.coverage_start.year != 2016
+				next if policy.coverage_type != coverage_type_2015
 				policies_2016.push(policy)
 			end
 			if policies_2016.count == 1

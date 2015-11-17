@@ -1,9 +1,9 @@
 require File.join(Rails.root, "script/queries/policy_id_generator")
-require 'pry'
+#require 'pry'
 
 policy_ids = []
 
-  File.readlines('renewal_ids_phase3_unassisted_dental.txt').map do |line|
+  File.readlines('renewal_ids_unassisted_11-17.txt').map do |line|
     policy_ids.push(line.to_i)
   end
 
@@ -62,8 +62,8 @@ pols.each do |pol|
           ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
           out_file.print(ms.serialize)
           out_file.close
-        rescue
-          puts pol._id
+        rescue Exception=>e
+          puts "#{pol._id} - #{e.message}"
         end
       #end
     end

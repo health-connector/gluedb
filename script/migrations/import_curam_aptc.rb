@@ -1,4 +1,4 @@
-file = "/Users/CitadelFirm/Downloads/policies-for-aptc/matched_policies.csv"
+file = "matched_policies.csv"
 @logger = Logger.new("#{Rails.root}/log/curam_aptc_import#{Time.now.to_s.gsub(' ', '')}.log")
 @logger.info "FN,LN,DOB,aptc_maximum_2016.max_aptc,aptc_maximum_2016.aptc_percent,aptc_maximum_2015.max_aptc,aptc_maximum_2015.aptc_percent,aptc_credit.aptc,aptc_credit.pre_amt_tot"
 

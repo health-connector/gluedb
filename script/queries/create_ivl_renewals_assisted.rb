@@ -111,6 +111,8 @@ pols.each do |pol|
       #if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
         begin
           r_pol = pol.clone_for_renewal(Date.new(2016,1,1))
+
+          # Gets the maximum aptc. If not present, it defaults to zero.
           maximum_aptc = get_maximum_aptc(pol,2016)
           if maximum_aptc.present?
           r_pol.allocated_aptc = maximum_aptc.max_aptc
@@ -120,6 +122,7 @@ pols.each do |pol|
             r_pol.elected_aptc = 0
           end
 
+          # Gets the applied aptc. If not present, it defaults to zero. 
           aptc_credit = get_aptc_credits(pol, 2016)
           if aptc_credit.present?
             r_pol.applied_aptc = aptc_credit.aptc
@@ -127,6 +130,7 @@ pols.each do |pol|
             r_pol.applied_aptc = 0
           end
 
+          # Gets the csr variant. If not precent, it defaults to zero perent.
           csr_variant = get_csr_variant(pol,2016)
           if csr_variant.present?
             r_pol.csr_amt = csr_variant.percent
@@ -134,6 +138,9 @@ pols.each do |pol|
             r_pol.csr_amt = 0
           end
 
+          ## If Curam data was present, it should return maximum aptc, applied aptc, and a csr variant.
+          ## If none of these exist, then it defaults to the values from 2015. 
+          ## If any of these exist, then it uses what it has available. This is to avoid mixing between 2015 and 2016 values. 
           if maximum_aptc.nil? && aptc_credit.nil? && csr_variant.nil?
             r_pol.plan = change_variant(r_pol,pol)
             r_pol.allocated_aptc= pol.allocated_aptc

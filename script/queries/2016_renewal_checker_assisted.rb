@@ -17,6 +17,7 @@ CSV.open("assisted_renewal_policies.csv","w") do |csv|
 	assisted_policy_ids.each do |id|
 		policy_2015 = Policy.where(_id: id).to_a.first
 		created_at = policy_2015.created_at
+		coverage_type_2015 = policy_2015.coverage_type
 		subscribers = []
 		policy_2015.enrollees.each do |enrollee|
 			if enrollee.rel_code == "self"
@@ -36,6 +37,7 @@ CSV.open("assisted_renewal_policies.csv","w") do |csv|
 			policies_2016 = []
 			subscriber_policies.each do |policy|
 				next if policy.enrollees.first.coverage_start.year != 2016
+				next if policy.coverage_type != coverage_type_2015
 				policies_2016.push(policy)
 			end
 			if policies_2016.count == 1

@@ -37,6 +37,8 @@ class Policy
   validates_presence_of :plan_id
 
   embeds_many :aptc_credits
+  embeds_many :aptc_maximums
+  embeds_many :cost_sharing_variants
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true

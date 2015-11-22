@@ -3,6 +3,15 @@ module Parsers
     class Enrollee
       include Namespaces
 
+      REL_CODE_MAP = {
+        "child" => "child",
+        "spouse" => "spouse",
+        "ward" => "ward",
+        "life_partner" => "spouse",
+        "domestic_partner" => "spouse",
+        "adopted_child" => "child"
+      }
+
       def initialize(doc)
         @xml = doc
       end
@@ -17,7 +26,7 @@ module Parsers
 
       def rel_code
         return "self" if subscriber?
-        @rel_code ||= Maybe.new(@xml.at_xpath("cv:member/cv:person_relationships/cv:person_relationship/cv:relationship_uri",namespaces)).content.split("#").last.value
+        @rel_code ||= REL_CODE_MAP[Maybe.new(@xml.at_xpath("cv:member/cv:person_relationships/cv:person_relationship/cv:relationship_uri",namespaces)).content.split("#").last.downcase.value]
       end
 
       def pre_amt

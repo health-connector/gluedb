@@ -116,8 +116,8 @@ module Policies
         :broker => broker,
         :employer => employer
       }))
-      p_calc = Premiums::PolicyCalculator.new
-      p_calc.apply_calculations(policy)
+#      p_calc = Premiums::PolicyCalculator.new
+#      p_calc.apply_calculations(policy)
       policy.save! 
       listener.policy_created(policy.id)
       cancel_others(policy, listener)

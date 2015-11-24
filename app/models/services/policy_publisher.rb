@@ -7,7 +7,7 @@ module Services
     def self.publish(q_reason_uri, p_id)
       policy = Policy.where(:id => p_id).first
       p_action = policy_action(policy)
-      reason = (p_action.downcase == "initial_enrollment") ? "initial_enrollment" : p_action.downcase
+      reason = (p_action.downcase == "initial_enrollment") ? "sep_initial_enrollment" : p_action.downcase
       operation = (p_action.downcase == "initial_enrollment") ? "add" : "change"
       v_destination = (p_action.downcase == "initial_enrollment") ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
       routing_key = case reason

@@ -4,7 +4,7 @@ require 'csv'
 
 transactions = Protocols::X12::TransactionSetEnrollment
 
-err_transmission = []
+error_transmission = []
 
 transactions.each do |transmission|
 	if tranmission.error_list.length != 0
@@ -19,12 +19,12 @@ end
 
 broker_error = []
 
-err_transmission.each do |transmission|
-	err_list = transmission.error_list
-	err_list.each do |err|
-		err_each = err.split
-		err_each.map!(&:downcase)
-		if err_each.include?("broker")
+error_transmission.each do |transmission|
+	error_list = transmission.error_list
+	error_list.each do |error|
+		error_each = error.split
+		error_each.map!(&:downcase)
+		if error_each.include?("broker")
 			broker_error.push(transmission)
 		end
 	end

@@ -1,5 +1,5 @@
 carrier_ids = Carrier.where({
- :abbrev => {"$ne" => "GHMSI"}
+ :abbrev => {"$eq" => "GHMSI"}
 }).map(&:id)
 
 puts carrier_ids
@@ -33,7 +33,7 @@ m_cache = Caches::MemberCache.new(m_ids)
 Caches::MongoidCache.allocate(Plan)
 Caches::MongoidCache.allocate(Carrier)
 
-active_end = Date.new(2015,7,31)
+active_end = Date.new(2015,8,1)
 
 eligible_pols.each do |pol|
   if !pol.canceled?

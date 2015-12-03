@@ -17,15 +17,15 @@ policies = Policy.where(:employer_id.in => employer_ids)
 
 puts policies.count
 
-wrong_year = []
+policies_with_wrong_year = []
 
 count = 0
 
 policies.each do |policy|
 	count += 1
-	pys2015 = pol.employer.plan_year_start + 1.year
-	if pol.enrollees.first.coverage_start < pys2015 and pol.plan.year == 2015
-		wrong_year.push(pol)
+	plan_year_start_2015 = pol.employer.plan_year_start + 1.year
+	if policy.enrollees.first.coverage_start < plan_year_start_2015 and policy.plan.year == 2015
+		policies_with_wrong_year.push(policy)
 	end
 	if count % 1000 == 0
 		puts Time.now

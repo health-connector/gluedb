@@ -3,7 +3,7 @@ class Phone
 
   include MergingModel
 
-  TYPES = %W(home work mobile)
+  TYPES = %W(home work mobile fax)
 
   field :phone_type, type: String
   field :phone_number, type: String

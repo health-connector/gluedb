@@ -21,11 +21,12 @@ Caches::MongoidCache.allocate(Employer)
 Caches::MongoidCache.allocate(Plan)
 Caches::MongoidCache.allocate(Carrier)
 
-#polgen = PolicyIdGenerator.new(10)
+polgen = PolicyIdGenerator.new(10)
 
 FileUtils.rm_rf(Dir.glob('renewals/*'))
 
 pols.each do |pol|
+  next if pol.subscriber.coverage_start.year == 2014
   if pol.subscriber.coverage_end.blank?
     sub_member = member_repo.lookup(pol.subscriber.m_id)
     authority_member = sub_member.person.authority_member
@@ -37,7 +38,8 @@ pols.each do |pol|
           r_pol = pol.clone_for_renewal(Date.new(2016,1,1))
           calc.apply_calculations(r_pol)
           p_id = polgen.get_id
-          out_file = File.open("renewals/#{p_id}.xml",'w')
+          old_p_id = pol._id
+          out_file = File.open("renewals/#{old_p_id}_#{p_id}.xml",'w')
           member_ids = r_pol.enrollees.map(&:m_id)
           r_pol.eg_id = p_id.to_s
           ms = CanonicalVocabulary::MaintenanceSerializer.new(r_pol,"change", "renewal", member_ids, member_ids, {:member_repo => member_repo})
@@ -50,8 +52,6 @@ pols.each do |pol|
     end
   end
 end
-
-puts name_array.sort
 
 Caches::MongoidCache.release(Plan)
 Caches::MongoidCache.release(Carrier)

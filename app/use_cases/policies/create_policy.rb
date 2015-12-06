@@ -44,6 +44,7 @@ module Policies
           fail = true
         end
       end
+=begin
       if !employer.blank?
         py = employer.plan_year_of(coverage_start)
         if py.blank?
@@ -56,6 +57,7 @@ module Policies
           end
         end
       end
+=end
       if !broker_npn.blank?
         broker = Broker.find_by_npn(broker_npn)
         if broker.blank?
@@ -116,8 +118,8 @@ module Policies
         :broker => broker,
         :employer => employer
       }))
-      p_calc = Premiums::PolicyCalculator.new
-      p_calc.apply_calculations(policy)
+#      p_calc = Premiums::PolicyCalculator.new
+#      p_calc.apply_calculations(policy)
       policy.save! 
       listener.policy_created(policy.id)
       cancel_others(policy, listener)

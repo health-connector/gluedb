@@ -58,9 +58,17 @@ describe Listeners::IndividualEventListener do
   end
 
   describe "given a new individual" do
-    let(:new_individual) {
-      double(:exists? => false, :to_s => "a body value for the resource")
+    let(:new_individual_resource) {
+      double(:to_s => "a body value for the resource")
     }
+
+    let(:individual_creation_error_properties) { {
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_created",
+      :headers => {
+        :return_status => "422",
+        :individual_id => individual_id 
+      }
+    } }
 
     let(:individual_created_properties) { {
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_created",
@@ -70,15 +78,35 @@ describe Listeners::IndividualEventListener do
       }
     } }
 
+    let(:individual_change_set) {
+      double(:individual_exists? => false, :create_individual_resource => creation_result, :full_error_messages => full_error_messages)
+    }
+
+    let(:full_error_messages) { ["a", "list of", "error messages"] }
 
     before :each do
-      allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["200", new_individual])
+      allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["200", new_individual_resource])
+      allow(ChangeSets::IndividualChangeSet).to receive(:new).with(new_individual_resource).and_return(individual_change_set)
     end
 
-    it "should create that individual" do
-      expect(channel).to receive(:ack).with(delivery_tag, false)
-      expect(subject).to receive(:broadcast_event).with(individual_created_properties, "a body value for the resource")
-      subject.on_message(di, props, body)
+    context "given a valid individual" do
+      let(:creation_result) { true }
+
+      it "should create that individual" do
+        expect(channel).to receive(:ack).with(delivery_tag, false)
+        expect(subject).to receive(:broadcast_event).with(individual_created_properties, "a body value for the resource")
+        subject.on_message(di, props, body)
+      end
+    end
+
+    context "given an invalid individual" do
+      let(:creation_result) { false }
+
+      it "should create that individual" do
+        expect(channel).to receive(:ack).with(delivery_tag, false)
+        expect(subject).to receive(:broadcast_event).with(individual_creation_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
+        subject.on_message(di, props, body)
+      end
     end
   end
 

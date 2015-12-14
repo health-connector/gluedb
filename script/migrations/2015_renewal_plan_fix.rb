@@ -1,4 +1,4 @@
-FILE_PATH="/Users/CitadelFirm/Downloads/projects/hbx/enroll/plan_hios_export.csv"
+FILE_PATH="plan_hios_export.csv"
 
 CSV.foreach(FILE_PATH) do |row|
   begin

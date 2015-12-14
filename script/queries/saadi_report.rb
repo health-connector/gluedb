@@ -28,7 +28,7 @@ end
 timestamp = Time.now.strftime('%Y%m%d%H%M')
 
 CSV.open("saadi_report_#{timestamp}.csv", 'w') do |csv|
-  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Number of Transactions", "Sponsor", "Premium Total", "Contribution/APTC", "Total Responsible", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "Subscriber", "First", "Middle", "Last", "DOB", "SSN", "Start", "End", "Updated At"]
+  csv << ["Enrollment Group ID", "Status", "Authority", "Policy ID", "Number of Transactions", "Sponsor", "Employer FEIN", "Premium Total", "Contribution/APTC", "Total Responsible", "Coverage Type", "Plan HIOS ID", "Plan Name", "Carrier Name", "HBX Id", "Subscriber", "First", "Middle", "Last", "DOB", "SSN", "Start", "End", "Updated At"]
   policies.each_slice(25) do |pols|
     used_policies = pols.reject { |pl| bad_eg_id(pl) }
     member_ids = pols.map(&:enrollees).flatten.map(&:m_id)
@@ -45,6 +45,7 @@ CSV.open("saadi_report_#{timestamp}.csv", 'w') do |csv|
       plan = plan_hash[pol.plan_id]
       carrier = carrier_hash[plan.carrier_id]
       sponsor = pol.employer.blank? ? "Individual" : employer_hash[pol.employer_id]
+      fein = pol.try(:employer).try(:fein)
       csv_transactions = pol.csv_transactions.count
       other_transactions = pol.transaction_set_enrollments.count
       all_transactions = csv_transactions + other_transactions
@@ -53,7 +54,7 @@ CSV.open("saadi_report_#{timestamp}.csv", 'w') do |csv|
         per = members_map[en.m_id].last
         pol.is_shop? ? contribution = pol.employer_contribution : contribution = pol.applied_aptc
         pol.is_shop? ? sponsor = pol.employer.name : sponsor = "IVL"
-        csv << [pol.eg_id, pol.aasm_state, member.authority?, pol._id, sponsor, all_transactions, pol.total_premium_amount,contribution,pol.total_responsible_amount,plan.coverage_type ,plan.hios_plan_id, plan.name, carrier.name, en.m_id, en.subscriber?, per.name_first, per.name_middle, per.name_last, member.dob.strftime("%Y%m%d"), member.ssn, en.coverage_start.strftime("%m-%d-%Y"), (en.coverage_end.strftime("%m-%d-%Y") unless en.coverage_end.blank?),pol.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z")]
+        csv << [pol.eg_id, pol.aasm_state, member.authority?, pol._id, sponsor, fein, all_transactions, pol.total_premium_amount,contribution,pol.total_responsible_amount,plan.coverage_type ,plan.hios_plan_id, plan.name, carrier.name, en.m_id, en.subscriber?, per.name_first, per.name_middle, per.name_last, member.dob.strftime("%Y%m%d"), member.ssn, en.coverage_start.strftime("%m-%d-%Y"), (en.coverage_end.strftime("%m-%d-%Y") unless en.coverage_end.blank?),pol.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z")]
       end
     end
   end

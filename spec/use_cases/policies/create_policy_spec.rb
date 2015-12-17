@@ -125,7 +125,7 @@ describe Policies::CreatePolicy do
     end
 
     describe "with an existing policy that qualifies for cancellation" do
-      let(:to_be_cancelled_policy) { double(:policy_start => coverage_start, :coverage_type => coverage_type, :id => "1234", :active_as_of? => true, :is_shop? => false) } 
+      let(:to_be_cancelled_policy) { double(:policy_start => coverage_start, :coverage_type => coverage_type, :id => "1234", :active_as_of? => true) } 
       let(:existing_policies) { [to_be_cancelled_policy] }
 
       it "should tell the listener to cancel that policy" do

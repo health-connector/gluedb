@@ -133,8 +133,7 @@ module Policies
         (pol.coverage_type == policy.coverage_type) &&
           (pol.policy_start == coverage_start) &&
           pol.active_as_of?(coverage_start) &&
-          (pol.id != policy.id) &&
-          (pol.is_shop? == policy.is_shop?)
+          (pol.id != policy.id)
       end
       cancel_policies.each do |cpol|
         cpol.cancel_via_hbx!

@@ -39,7 +39,7 @@
 				<full_phone_number>5882300123</full_phone_number>
 			</phone>
 			<phone>
-				<type>urn:openhbx:terms:v1:phone_type#fax</type>
+				<type>urn:openhbx:terms:v1:phone_type#beeper</type>
 				<full_phone_number>5882300123</full_phone_number>
 		        </phone>
 		</phones>

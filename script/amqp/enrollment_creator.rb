@@ -1,2 +1,2 @@
 Rails.application.eager_load!
-Forkr.new(Listeners::EnrollmentCreator, 4).run
+Forkr.new(Listeners::EnrollmentCreator, 2).run

@@ -88,8 +88,9 @@ class EndCoverage
     subscriber = @policy.subscriber
     start_date  = @policy.subscriber.coverage_start
     plan = @policy.plan
+    skip_recalc = affected_enrollee_ids.include?(subscriber.m_id) && (plan.year == 2016)
 
-    if @policy.is_shop?
+    if @policy.is_shop? && !skip_recalc
       employer = @policy.employer
       strategy = employer.plan_years.detect{|py| py.start_date.year == plan.year}.contribution_strategy
       raise PremiumCalcError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
@@ -102,7 +103,7 @@ class EndCoverage
     premium_calculator = Premiums::PolicyCalculator.new
 
     if(affected_enrollee_ids.include?(subscriber.m_id))
-      premium_calculator.apply_calculations(@policy)
+      premium_calculator.apply_calculations(@policy) unless skip_recalc
       end_coverage_for_everyone
     else
       end_coverage_for_ids(affected_enrollee_ids)

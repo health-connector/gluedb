@@ -59,7 +59,7 @@ module Services
       sub_person = subscriber.person
       policies_to_check = sub_person.policies.reject do |pol|
         pol.canceled? || (pol.id == policy.id) || (pol.coverage_type.downcase != policy.coverage_type.downcase) ||
-          (pol.employer_id.blank? == policy.employer_id.blank?)
+          (pol.employer_id.blank? != policy.employer_id.blank?)
       end
       initial_enrollment =  ::PolicyInteractions::InitialEnrollment.new
       renewal = ::PolicyInteractions::Renewal.new

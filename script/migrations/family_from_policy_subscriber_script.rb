@@ -44,12 +44,15 @@ $logger.info "policies_with_no_families: #{policies_with_no_families.length}"
 
 policies_2014_with_no_families = policies_with_no_families.select do |policy|
   next if policy.subscriber.nil?
-  policy.subscriber.coverage_start > Date.new(2013, 12, 31) && policy.subscriber.coverage_start < Date.new(2014, 12, 31)
+  policy.subscriber.coverage_start > Date.new(2014, 12, 31) && policy.subscriber.coverage_start < Date.new(2016, 12, 31)
 end
 
 $logger.info "policies_2014_with_no_families: #{policies_2014_with_no_families.length}"
 
-policy_groups = policies_2014_with_no_families.group_by do |policy| policy.subscriber.person.id end
+policy_groups = policies_2014_with_no_families.group_by do |policy|
+  next if policy.subscriber.person.nil?
+  policy.subscriber.person.id
+end
 
 people_with_multiple_families = []
 $logger.info "policy_groups: #{policy_groups.length}"

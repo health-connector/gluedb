@@ -5,9 +5,8 @@ module Clients
       if authority_member.blank?
         return []
       end
-      conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
       begin
-        conn.start
+        conn = AmqpConnectionProvider.start_connection
         req = Amqp::Requestor.new(conn)
         di, rprops, rbody = req.request({
           :routing_key => "member_documents.find_by_hbx_member_id",

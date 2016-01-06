@@ -30,8 +30,7 @@ module Amqp
     end
 
     def self.default
-      conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
-      conn.start
+      conn = AmqpConnectionProvider.start_connection
       self.new(conn)
     end
   end

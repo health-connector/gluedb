@@ -59,8 +59,7 @@ module Listeners
     end
 
     def self.run
-      conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
-      conn.start
+      conn = AmqpConnectionProvider.start_connection
       chan = conn.create_channel
       chan.prefetch(1)
       q = chan.queue(self.queue_name, :durable => true)

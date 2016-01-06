@@ -16,8 +16,7 @@ module Protocols
         end
         transform_exchange = Protocols::Amqp::Settings.transformation_exchange
         transform_key = Protocols::Amqp::Settings.transformation_key
-        conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
-        conn.start
+        conn = AmqpConnectionProvider.start_connection
         ch = conn.create_channel
         ex = ch.send(*transform_exchange)
         # TODO: send to the right place, with the transformation XSL

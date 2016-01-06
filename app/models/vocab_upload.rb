@@ -51,8 +51,7 @@ class VocabUpload
   def submit_cv(cv_kind, name, data)
     return if Rails.env.test?
     tag = (cv_kind.to_s.downcase == "maintenance") ? "hbx.maintenance_messages" : "hbx.enrollment_messages"
-    conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
-    conn.start
+    conn = AmqpConnectionProvider.start_connection
     ch = conn.create_channel
     x = ch.default_exchange
 

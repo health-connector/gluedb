@@ -20,7 +20,40 @@ module RemoteResources
     end
 
     def exists?
-      !!record
+      !record.nil?
+    end
+
+    def to_hash
+      props_hash = {
+        :name_first => name_first,
+        :name_last => name_last
+      }
+      if !name_middle.blank?
+        props_hash[:name_middle] = name_middle 
+      end
+      if !name_pfx.blank?
+        props_hash[:name_pfx] = name_pfx
+      end
+      if !name_sfx.blank?
+        props_hash[:name_sfx] = name_sfx
+      end
+      props_hash
+    end
+
+    def member_hash
+      props_hash = {
+        :hbx_member_id => hbx_member_id
+      }
+      if !dob.blank?
+        props_hash[:dob] = dob
+      end
+      if !gender.blank?
+        props_hash[:gender] = gender
+      end
+      if !ssn.blank?
+        props_hash[:ssn] = ssn
+      end
+      props_hash
     end
 
     def record

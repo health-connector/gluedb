@@ -40,5 +40,19 @@ module RemoteResources
     def address_kind
       Maybe.new(type).split("#").last.downcase.value
     end
+
+    def to_hash
+      props_hash = {
+        :address_type => address_type,
+        :address_1 => address_1,
+        :city => city,
+        :state => state,
+        :zip => zip
+      }
+      if !address_2.blank?
+        props_hash[:address_2] = address_2
+      end
+      props_hash
+    end
   end
 end

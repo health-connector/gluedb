@@ -19,6 +19,9 @@ module ChangeSets
     end
 
     def create_individual_resource
+      new_person = create_new_person
+      @record = new_person
+      new_person.save
     end
 
     def full_error_messages
@@ -158,6 +161,15 @@ module ChangeSets
       resource_address = resource.addresses.detect { |adr| adr.address_kind == addy_kind }
       record_address = record.addresses.detect { |adr| adr.address_type == addy_kind }
       items_changed?(resource_address, record_address)
+    end
+
+    def build_new_person
+      person_properties = resource.to_hash
+      person_properties[:members] = [Member.new(resource.member_hash)]
+      person_properties[:addresses] = resource.addresses.map { |addy| Address.new(addy.to_hash) }
+      person_properties[:emails] = resource.emails.map { |addy| Email.new(addy.to_hash) }
+      person_properties[:phones] = resource.phones.map { |addy| Phone.new(addy.to_hash) }
+      Person.new(person_properties)
     end
   end
 end

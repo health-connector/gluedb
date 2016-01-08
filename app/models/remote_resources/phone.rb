@@ -24,5 +24,12 @@ module RemoteResources
     def ignored?
       !::Phone::TYPES.include?(phone_kind)
     end
+
+    def to_hash
+      {
+        :phone_type => phone_type,
+        :phone_number => phone_number
+      }
+    end
   end
 end

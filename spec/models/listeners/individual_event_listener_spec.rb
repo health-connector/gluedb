@@ -135,6 +135,14 @@ describe Listeners::IndividualEventListener do
       }
     } }
 
+    let(:individual_dob_changed_properties) { {
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_dob_changed",
+      :headers => {
+        :return_status => "501",
+        :individual_id => individual_id 
+      }
+    } }
+
     let(:individual_unchanged_properties) { {
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
@@ -205,11 +213,32 @@ describe Listeners::IndividualEventListener do
 
         describe "and that change is to dob" do
           let(:dob_change_result) { true }
-          it "should send the message to the error queue and consume the message"
+          it "should send the message to the error queue and consume the message" do
+            expect(channel).to receive(:ack).with(delivery_tag, false)
+            expect(subject).to receive(:broadcast_event).with(individual_dob_changed_properties, "a body value for the resource")
+            subject.on_message(di, props, body)
+          end
         end
+
         describe "and that change is not to dob" do
           let(:dob_change_result) { false }
-          it "should process the change and consume the message"
+          describe "with an invalid update" do
+            it "should log an error and consume the message" do
+              expect(channel).to receive(:ack).with(delivery_tag, false)
+              expect(individual_change_set).to receive(:process_first_edi_change).and_return(false)
+              expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
+              subject.on_message(di, props, body)
+            end
+          end
+
+          describe "with a valid update" do
+            it "should process the first change and transmit edi" do
+              expect(channel).to receive(:ack).with(delivery_tag, false)
+              expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
+              expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
+              subject.on_message(di, props, body)
+            end
+          end
         end
       end
 

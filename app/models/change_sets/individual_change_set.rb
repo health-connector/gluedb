@@ -25,7 +25,25 @@ module ChangeSets
       record.errors.full_messages
     end
 
+    def member_active_policies
+      all_policies = member.policies
+      non_canceled_policies = all_policies.reject(&:canceled?)
+      non_canceled_policies.select do |pol|
+        pol.currently_active_for?(member.hbx_member_id) ||
+          pol.future_active_for?(member.hbx_member_id)
+      end
+    end
+
+    def now_or_future_active_policies
+      @now_or_future_active_polices ||= member_active_policies
+    end
+
+    def transmission_policies
+      @transmission_policies = determine_policies_to_transmit
+    end
+
     def has_active_policies?
+      now_or_future_active_policies.any?
     end
 
     def update_individual_record
@@ -101,6 +119,22 @@ module ChangeSets
     end
 
     protected
+
+    def determine_policies_to_transmit
+      now_or_future_active_policies.inject({}) do |acc, pol|
+        carrier_id = pol.plan.carrier_id
+        individual_market = pol.employer_id.blank? 
+        lookup_key = [carrier_id, individual_market]
+        if acc.has_key?(lookup_key)
+          if acc[lookup_key].policy_start <= pol.policy_start
+            acc[lookup_key] = pol
+          end
+        else
+          acc[lookup_key] = pol
+        end
+        acc
+      end
+    end
 
     def items_changed?(resource_item, record_item)
       return false if (resource_address.nil? && record_address.nil?)

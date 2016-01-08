@@ -9,6 +9,10 @@ module RemoteResources
     element :type, String, tag: "type"
     element :email_address, String, tag: "email_address"
 
+    def email_type
+      email_kind
+    end
+
     def email_kind
       Maybe.new(type).split("#").last.downcase.value
     end

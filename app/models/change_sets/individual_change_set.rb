@@ -45,10 +45,38 @@ module ChangeSets
       @transmission_policies = determine_policies_to_transmit
     end
 
-    def update_individual_record
+    def process_first_edi_change
+      if home_address_changed?
+        process_home_address_change
+      elsif mailing_address_changed?
+        process_mailing_address_change
+      elsif names_changed?
+        process_name_change
+      elsif ssn_changed?
+        process_ssn_change
+      elsif gender_changed?
+        process_gender_change
+      elsif contact_info_changed?
+        process_contact_info_change
+      end
     end
 
-    def process_first_edi_change
+    def process_home_address_change
+    end
+
+    def process_mailing_address_change
+    end
+
+    def process_name_change
+    end
+
+    def process_ssn_change
+    end
+
+    def process_gender_change
+    end
+
+    def process_contact_info_change
     end
 
     def any_changes?
@@ -65,12 +93,12 @@ module ChangeSets
 
     def change_collection
       [
-        contact_info_changed?,
         home_address_changed?,
         mailing_address_changed?,
         names_changed?,
         ssn_changed?,
         gender_changed?,
+        contact_info_changed?,
         dob_changed?
       ]
     end

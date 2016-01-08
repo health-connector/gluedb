@@ -30,11 +30,12 @@ module Listeners
               resource_event_broadcast("info", "individual_updated", individual_id, r_code, remote_resource)
               channel.ack(delivery_info.delivery_tag, false)
             else
-              resource_event_broadcast("error", "individual_update_error", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+              resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
               channel.ack(delivery_info.delivery_tag, false)
             end
           end
         else
+          resource_event_broadcast("info", "individual_updated", individual_id, "304", remote_resource)
           channel.ack(delivery_info.delivery_tag, false)
         end
       else
@@ -42,7 +43,7 @@ module Listeners
           resource_event_broadcast("info", "individual_created", individual_id, r_code, remote_resource)
           channel.ack(delivery_info.delivery_tag, false)
         else
-          resource_event_broadcast("error", "individual_create_error", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+          resource_event_broadcast("error", "individual_created", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
           channel.ack(delivery_info.delivery_tag, false)
         end
       end

@@ -63,7 +63,7 @@ describe Listeners::IndividualEventListener do
     }
 
     let(:individual_creation_error_properties) { {
-      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_create_error",
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_created",
       :headers => {
         :return_status => "422",
         :individual_id => individual_id 
@@ -128,9 +128,17 @@ describe Listeners::IndividualEventListener do
     } }
 
     let(:individual_update_error_properties) { {
-      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_update_error",
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
         :return_status => "422",
+        :individual_id => individual_id 
+      }
+    } }
+
+    let(:individual_unchanged_properties) { {
+      :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
+      :headers => {
+        :return_status => "304",
         :individual_id => individual_id 
       }
     } }
@@ -173,6 +181,7 @@ describe Listeners::IndividualEventListener do
         let(:changed_value) { false }
         it "should just consume the message" do
           expect(channel).to receive(:ack).with(delivery_tag, false)
+          expect(subject).to receive(:broadcast_event).with(individual_unchanged_properties, "a body value for the resource")
           subject.on_message(di, props, body)
         end
       end
@@ -185,6 +194,7 @@ describe Listeners::IndividualEventListener do
         let(:changed_value) { false }
         it "should just consume the message" do
           expect(channel).to receive(:ack).with(delivery_tag, false)
+          expect(subject).to receive(:broadcast_event).with(individual_unchanged_properties, "a body value for the resource")
           subject.on_message(di, props, body)
         end
       end

@@ -23,12 +23,26 @@ module Listeners
     def process_retrieved_resource(delivery_info, individual_id, r_code, remote_resource)
       change_set = ::ChangeSets::IndividualChangeSet.new(remote_resource)
       if change_set.individual_exists?
+        if change_set.any_changes?
+          if change_set.has_active_policies?
+          else
+            if change_set.update_individual_record
+              resource_event_broadcast("info", "individual_updated", individual_id, r_code, remote_resource)
+              channel.ack(delivery_info.delivery_tag, false)
+            else
+              resource_event_broadcast("error", "individual_update_error", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+              channel.ack(delivery_info.delivery_tag, false)
+            end
+          end
+        else
+          channel.ack(delivery_info.delivery_tag, false)
+        end
       else
         if change_set.create_individual_resource
           resource_event_broadcast("info", "individual_created", individual_id, r_code, remote_resource)
           channel.ack(delivery_info.delivery_tag, false)
         else
-          resource_event_broadcast("error", "individual_created", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+          resource_event_broadcast("error", "individual_create_error", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
           channel.ack(delivery_info.delivery_tag, false)
         end
       end

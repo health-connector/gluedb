@@ -63,7 +63,7 @@ describe Listeners::IndividualEventListener do
     }
 
     let(:individual_creation_error_properties) { {
-      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_created",
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_create_error",
       :headers => {
         :return_status => "422",
         :individual_id => individual_id 
@@ -111,21 +111,110 @@ describe Listeners::IndividualEventListener do
   end
 
   describe "given an individual which already exists" do
+    let(:new_individual_resource) {
+      double(:to_s => "a body value for the resource")
+    }
+
+    let(:individual_change_set) {
+      double(:individual_exists? => true, :any_changes? => changed_value, :multiple_changes? => multiple_changes_result, :has_active_policies? => active_policies_result, :dob_changed? => dob_change_result, :full_error_messages => full_error_messages)
+    }
+
+    let(:individual_updated_properties) { {
+      :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
+      :headers => {
+        :return_status => "200",
+        :individual_id => individual_id 
+      }
+    } }
+
+    let(:individual_update_error_properties) { {
+      :routing_key => "error.application.gluedb.individual_update_event_listener.individual_update_error",
+      :headers => {
+        :return_status => "422",
+        :individual_id => individual_id 
+      }
+    } }
+
+    let(:active_policies_result) { false }
+    let(:multiple_changes_result) { false}
+    let(:dob_change_result) { false}
+    let(:full_error_messages) { ["a", "list of", "error messages"] }
+
+    before :each do
+      allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["200", new_individual_resource])
+      allow(ChangeSets::IndividualChangeSet).to receive(:new).with(new_individual_resource).and_return(individual_change_set)
+    end
+
     describe "and the individual has no active policies" do
-      it "should simply update that individual's record"
+
+      describe "and there are changes" do
+        let(:changed_value) { true }
+
+        describe "with a valid update" do
+          it "should simply update that individual's record" do
+            expect(channel).to receive(:ack).with(delivery_tag, false)
+            expect(individual_change_set).to receive(:update_individual_record).and_return(true)
+            expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
+            subject.on_message(di, props, body)
+          end
+        end
+
+        describe "with an invalid update" do
+          it "should log an error and consume the message" do
+            expect(channel).to receive(:ack).with(delivery_tag, false)
+            expect(individual_change_set).to receive(:update_individual_record).and_return(false)
+            expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
+            subject.on_message(di, props, body)
+          end
+        end
+      end
+
+      describe "and there are no changes" do
+        let(:changed_value) { false }
+        it "should just consume the message" do
+          expect(channel).to receive(:ack).with(delivery_tag, false)
+          subject.on_message(di, props, body)
+        end
+      end
     end
 
     describe "and the individual has active policies" do
-      describe "and there is a change to name" do
-        describe "and there is also a change of address" do
-          it "should update only the name portion of the individual's record"
-          it "should send out policy updates via EDI with reason 'change of identifying information'"
-          it "should nack the message for re-delivery"
+      let(:active_policies_result) { true }
+
+      describe "with no changes" do
+        let(:changed_value) { false }
+        it "should just consume the message" do
+          expect(channel).to receive(:ack).with(delivery_tag, false)
+          subject.on_message(di, props, body)
+        end
+      end
+
+      describe "with a single change" do
+        let(:multiple_changes_result) { false}
+        let(:changed_value) { true }
+
+        describe "and that change is to dob" do
+          let(:dob_change_result) { true }
+          it "should send the message to the error queue and consume the message"
+        end
+        describe "and that change is not to dob" do
+          let(:dob_change_result) { false }
+          it "should process the change and consume the message"
+        end
+      end
+
+      describe "with multiple changes" do
+        let(:multiple_changes_result) { true }
+        let(:changed_value) { true }
+
+        describe "including a dob change" do
+          let(:dob_change_result) { true }
+          it "should process the first NON-dob change and re-queue"
         end
 
-        describe "and there are no other changes to the person's information" do
-          it "should update the individual's record"
-          it "should send out policy updates via EDI with reason 'change of identifying information'"
+        describe "and none of the changes are to dob" do
+          let(:dob_change_result) { false }
+          it "should process the first change and requeue"
         end
       end
     end

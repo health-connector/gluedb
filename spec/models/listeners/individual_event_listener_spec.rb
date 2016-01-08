@@ -79,7 +79,7 @@ describe Listeners::IndividualEventListener do
     } }
 
     let(:individual_change_set) {
-      double(:individual_exists? => false, :create_individual_resource => creation_result, :full_error_messages => full_error_messages)
+      instance_double("::ChangeSets::IndividualChangeSet", :individual_exists? => false, :create_individual_resource => creation_result, :full_error_messages => full_error_messages)
     }
 
     let(:full_error_messages) { ["a", "list of", "error messages"] }
@@ -116,7 +116,7 @@ describe Listeners::IndividualEventListener do
     }
 
     let(:individual_change_set) {
-      double(:individual_exists? => true, :any_changes? => changed_value, :multiple_changes? => multiple_changes_result, :has_active_policies? => active_policies_result, :dob_changed? => dob_change_result, :full_error_messages => full_error_messages)
+      instance_double("::ChangeSets::IndividualChangeSet", :individual_exists? => true, :any_changes? => changed_value, :multiple_changes? => multiple_changes_result, :has_active_policies? => active_policies_result, :dob_changed? => dob_change_result, :full_error_messages => full_error_messages)
     }
 
     let(:individual_updated_properties) { {

@@ -246,14 +246,22 @@ describe Listeners::IndividualEventListener do
         let(:multiple_changes_result) { true }
         let(:changed_value) { true }
 
-        describe "including a dob change" do
-          let(:dob_change_result) { true }
-          it "should process the first NON-dob change and re-queue"
+        describe "with an invalid update" do
+          it "should log an error and consume the message" do
+            expect(channel).to receive(:ack).with(delivery_tag, false)
+            expect(individual_change_set).to receive(:process_first_edi_change).and_return(false)
+            expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
+            subject.on_message(di, props, body)
+          end
         end
 
-        describe "and none of the changes are to dob" do
-          let(:dob_change_result) { false }
-          it "should process the first change and requeue"
+        describe "with a valid update" do
+          it "should process the first change and requeue" do
+            expect(channel).to receive(:nack).with(delivery_tag, false, true)
+            expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
+            expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
+            subject.on_message(di, props, body)
+          end
         end
       end
     end

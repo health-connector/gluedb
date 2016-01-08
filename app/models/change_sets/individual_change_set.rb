@@ -45,10 +45,6 @@ module ChangeSets
       @transmission_policies = determine_policies_to_transmit
     end
 
-    def has_active_policies?
-      now_or_future_active_policies.any?
-    end
-
     def update_individual_record
     end
 

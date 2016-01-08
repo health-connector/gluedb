@@ -116,7 +116,7 @@ describe Listeners::IndividualEventListener do
     }
 
     let(:individual_change_set) {
-      instance_double("::ChangeSets::IndividualChangeSet", :individual_exists? => true, :any_changes? => changed_value, :multiple_changes? => multiple_changes_result, :has_active_policies? => active_policies_result, :dob_changed? => dob_change_result, :full_error_messages => full_error_messages)
+      instance_double("::ChangeSets::IndividualChangeSet", :individual_exists? => true, :any_changes? => changed_value, :multiple_changes? => multiple_changes_result, :dob_changed? => dob_change_result, :full_error_messages => full_error_messages)
     }
 
     let(:individual_updated_properties) { {
@@ -151,7 +151,6 @@ describe Listeners::IndividualEventListener do
       }
     } }
 
-    let(:active_policies_result) { false }
     let(:multiple_changes_result) { false}
     let(:dob_change_result) { false}
     let(:full_error_messages) { ["a", "list of", "error messages"] }
@@ -161,91 +160,30 @@ describe Listeners::IndividualEventListener do
       allow(ChangeSets::IndividualChangeSet).to receive(:new).with(new_individual_resource).and_return(individual_change_set)
     end
 
-    describe "and the individual has no active policies" do
-
-      describe "and there are changes" do
-        let(:changed_value) { true }
-
-        describe "with a valid update" do
-          it "should simply update that individual's record" do
-            expect(channel).to receive(:ack).with(delivery_tag, false)
-            expect(individual_change_set).to receive(:update_individual_record).and_return(true)
-            expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
-            subject.on_message(di, props, body)
-          end
-        end
-
-        describe "with an invalid update" do
-          it "should log an error and consume the message" do
-            expect(channel).to receive(:ack).with(delivery_tag, false)
-            expect(individual_change_set).to receive(:update_individual_record).and_return(false)
-            expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
-            subject.on_message(di, props, body)
-          end
-        end
-      end
-
-      describe "and there are no changes" do
-        let(:changed_value) { false }
-        it "should just consume the message" do
-          expect(channel).to receive(:ack).with(delivery_tag, false)
-          expect(subject).to receive(:broadcast_event).with(individual_unchanged_properties, "a body value for the resource")
-          subject.on_message(di, props, body)
-        end
+    describe "with no changes" do
+      let(:changed_value) { false }
+      it "should just consume the message" do
+        expect(channel).to receive(:ack).with(delivery_tag, false)
+        expect(subject).to receive(:broadcast_event).with(individual_unchanged_properties, "a body value for the resource")
+        subject.on_message(di, props, body)
       end
     end
 
-    describe "and the individual has active policies" do
-      let(:active_policies_result) { true }
+    describe "with a single change" do
+      let(:multiple_changes_result) { false}
+      let(:changed_value) { true }
 
-      describe "with no changes" do
-        let(:changed_value) { false }
-        it "should just consume the message" do
+      describe "and that change is to dob" do
+        let(:dob_change_result) { true }
+        it "should send the message to the error queue and consume the message" do
           expect(channel).to receive(:ack).with(delivery_tag, false)
-          expect(subject).to receive(:broadcast_event).with(individual_unchanged_properties, "a body value for the resource")
+          expect(subject).to receive(:broadcast_event).with(individual_dob_changed_properties, "a body value for the resource")
           subject.on_message(di, props, body)
         end
       end
 
-      describe "with a single change" do
-        let(:multiple_changes_result) { false}
-        let(:changed_value) { true }
-
-        describe "and that change is to dob" do
-          let(:dob_change_result) { true }
-          it "should send the message to the error queue and consume the message" do
-            expect(channel).to receive(:ack).with(delivery_tag, false)
-            expect(subject).to receive(:broadcast_event).with(individual_dob_changed_properties, "a body value for the resource")
-            subject.on_message(di, props, body)
-          end
-        end
-
-        describe "and that change is not to dob" do
-          let(:dob_change_result) { false }
-          describe "with an invalid update" do
-            it "should log an error and consume the message" do
-              expect(channel).to receive(:ack).with(delivery_tag, false)
-              expect(individual_change_set).to receive(:process_first_edi_change).and_return(false)
-              expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
-              subject.on_message(di, props, body)
-            end
-          end
-
-          describe "with a valid update" do
-            it "should process the first change and transmit edi" do
-              expect(channel).to receive(:ack).with(delivery_tag, false)
-              expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
-              expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
-              subject.on_message(di, props, body)
-            end
-          end
-        end
-      end
-
-      describe "with multiple changes" do
-        let(:multiple_changes_result) { true }
-        let(:changed_value) { true }
-
+      describe "and that change is not to dob" do
+        let(:dob_change_result) { false }
         describe "with an invalid update" do
           it "should log an error and consume the message" do
             expect(channel).to receive(:ack).with(delivery_tag, false)
@@ -256,12 +194,35 @@ describe Listeners::IndividualEventListener do
         end
 
         describe "with a valid update" do
-          it "should process the first change and requeue" do
-            expect(channel).to receive(:nack).with(delivery_tag, false, true)
+          it "should process the first change and transmit edi" do
+            expect(channel).to receive(:ack).with(delivery_tag, false)
             expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
             expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
             subject.on_message(di, props, body)
           end
+        end
+      end
+    end
+
+    describe "with multiple changes" do
+      let(:multiple_changes_result) { true }
+      let(:changed_value) { true }
+
+      describe "with an invalid update" do
+        it "should log an error and consume the message" do
+          expect(channel).to receive(:ack).with(delivery_tag, false)
+          expect(individual_change_set).to receive(:process_first_edi_change).and_return(false)
+          expect(subject).to receive(:broadcast_event).with(individual_update_error_properties, JSON.dump({:resource => "a body value for the resource", :errors => full_error_messages}))
+          subject.on_message(di, props, body)
+        end
+      end
+
+      describe "with a valid update" do
+        it "should process the first change and requeue" do
+          expect(channel).to receive(:nack).with(delivery_tag, false, true)
+          expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
+          expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
+          subject.on_message(di, props, body)
         end
       end
     end

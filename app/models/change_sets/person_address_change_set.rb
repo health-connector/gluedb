@@ -8,8 +8,14 @@ module ChangeSets
 
     def perform_update(person, person_update, policies_to_notify)
       new_address = person_update.addresses.detect { |au| au.address_type == address_kind }
-      person.set_address(Address.new(new_address.to_hash))
-      update_result = person.save
+      update_result = false
+      if new_address.nil?
+        person.remove_address_of(address_kind)
+        update_result = true
+      else
+        person.set_address(Address.new(new_address.to_hash))
+        update_result = person.save
+      end
       return false unless update_result
       policies_to_notify.each do |pol|
         serializer = ::CanonicalVocabulary::MaintenanceSerializer.new(

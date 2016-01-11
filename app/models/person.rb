@@ -389,7 +389,7 @@ class Person
 
   def set_address(new_address)
     address_collection = self.addresses.reject { |p| p.address_type == new_address.address_type }
-    full_addresses = address_collection + [new_address]
+    full_addresses = address_collection + (new_address.nil? ? [] : [new_address])
     self.addresses = full_addresses
   end
 

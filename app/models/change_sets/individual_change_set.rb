@@ -97,12 +97,13 @@ module ChangeSets
     end
 
     def process_home_phone_change
+      cs = ::ChangeSets::PersonPhoneChangeSet.new("home")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_work_phone_change
-    end
-
-    def process_contact_info_change
+      cs = ::ChangeSets::PersonPhoneChangeSet.new("work")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def any_changes?
@@ -130,10 +131,6 @@ module ChangeSets
         work_phone_changed?,
         dob_changed?
       ]
-    end
-
-    def contact_info_changed?
-      emails_changed? || phones_changed?
     end
 
     def dob_changed?

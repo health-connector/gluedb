@@ -83,6 +83,8 @@ module ChangeSets
     end
 
     def process_ssn_change
+      cs = ::ChangeSets::PersonSsnChangeSet.new
+      cs.perform_update(member, resource, determine_policies_to_transmit)
     end
 
     def process_gender_change

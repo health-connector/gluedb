@@ -456,6 +456,10 @@ class Policy
     }
   end
 
+  def active_member_ids
+    enrollees.reject { |e| e.canceled? || e.terminated? }.map(&:m_id)
+  end
+
   def active_enrollees
     enrollees.select { |e| e.coverage_status == 'active' }
   end

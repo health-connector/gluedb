@@ -2,7 +2,7 @@ module Services
   class CvPublisher
     attr_reader :submitted_by
      
-    def initialize(submitter)
+    def initialize(submitter = "trey.evans@dc.gov")
       @submitted_by = submitter
     end
 

@@ -387,6 +387,20 @@ class Person
     Person.find_for_members([member_id]).first
   end
 
+  def set_address(new_address)
+    address_collection = self.addresses.reject { |p| p.address_type == new_address.address_type }
+    full_addresses = address_collection + [new_address]
+    self.addresses = full_addresses
+    self.save
+  end
+
+  def set_phone(new_phone)
+    phone_collection = self.phones.reject { |p| p.phone_type == new_phone.phone_type}
+    full_phones = phone_collection + [new_phone]
+    self.phones = full_phones
+    self.save
+  end
+
   def merge_relationship(new_rel)
     old_relationships = self.person_relationships.select do |rel|
       rel.relative_id == new_rel.relative_id

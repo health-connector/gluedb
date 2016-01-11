@@ -1,0 +1,87 @@
+require "rails_helper"
+
+describe ChangeSets::PersonAddressChangeSet do
+  let(:person) { instance_double("::Person") }
+  let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => [updated_address], :hbx_member_id => hbx_member_id) }
+  let(:updated_address) { double(:address_type => address_kind) }
+  let(:policies_to_notify) { [policy_to_notify] }
+  let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids) }
+  let(:hbx_member_ids) { [hbx_member_id, hbx_member_id_2] }
+  let(:policy_hbx_id) { "some randome_policy id whatevers" }
+  let(:hbx_member_id) { "some random member id wahtever" }
+  let(:hbx_member_id_2) { "some other, differently random member id wahtever" }
+  let(:policy_cv) { "some policy cv data" }
+  let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
+  let(:cv_publisher) { instance_double("::Services::CvPublisher") }
+  subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
+
+  before :each do
+    allow(person).to receive(:set_address).with(updated_address).and_return(address_update_result)
+  end
+
+  describe "updating a home address" do
+    let(:address_kind) { "home" }
+
+    describe "with an invalid new address" do
+      let(:address_update_result) { false }
+      it "should fail to process the update" do
+        expect(subject.perform_update(person, person_resource, policies_to_notify)).to eq false
+      end
+    end
+
+    describe "with a valid new address" do
+      let(:address_update_result) { true }
+
+      before :each do
+        allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
+           policy_to_notify, "change", "change_of_location", [hbx_member_id], hbx_member_ids
+        ).and_return(policy_serializer)
+        allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
+        allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+      end
+
+      it "should update the person" do
+        allow(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
+        expect(subject.perform_update(person, person_resource, policies_to_notify)).to eq true
+      end
+
+      it "should send out policy notifications" do
+        expect(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
+        subject.perform_update(person, person_resource, policies_to_notify)
+      end
+    end
+  end
+
+  describe "updating a mailing address" do
+    let(:address_kind) { "mailing" }
+
+    describe "with an invalid new address" do
+      let(:address_update_result) { false }
+      it "should fail to process the update" do
+        expect(subject.perform_update(person, person_resource, policies_to_notify)).to eq false
+      end
+    end
+
+    describe "with a valid new address" do
+      let(:address_update_result) { true }
+
+      before :each do
+        allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
+           policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
+        ).and_return(policy_serializer)
+        allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
+        allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+      end
+
+      it "should update the person" do
+        allow(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
+        expect(subject.perform_update(person, person_resource, policies_to_notify)).to eq true
+      end
+
+      it "should send out policy notifications" do
+        expect(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
+        subject.perform_update(person, person_resource, policies_to_notify)
+      end
+    end
+  end
+end

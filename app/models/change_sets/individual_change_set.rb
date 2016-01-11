@@ -42,7 +42,7 @@ module ChangeSets
     end
 
     def transmission_policies
-      @transmission_policies = determine_policies_to_transmit
+      @transmission_policies ||= determine_policies_to_transmit
     end
 
     def process_first_edi_change
@@ -62,9 +62,13 @@ module ChangeSets
     end
 
     def process_home_address_change
+      cs = ::ChangeSets::PersonAddressChangeSet.new("home")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_mailing_address_change
+      cs = ::ChangeSets::PersonAddressChangeSet.new("mailing")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_name_change
@@ -148,7 +152,7 @@ module ChangeSets
     protected
 
     def determine_policies_to_transmit
-      now_or_future_active_policies.inject({}) do |acc, pol|
+      selected_policies = now_or_future_active_policies.inject({}) do |acc, pol|
         carrier_id = pol.plan.carrier_id
         individual_market = pol.employer_id.blank? 
         lookup_key = [carrier_id, individual_market]
@@ -161,6 +165,7 @@ module ChangeSets
         end
         acc
       end
+      selected_policies.values
     end
 
     def items_changed?(resource_item, record_item)

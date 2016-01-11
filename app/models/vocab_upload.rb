@@ -50,21 +50,9 @@ class VocabUpload
 
   def submit_cv(cv_kind, name, data)
     return if Rails.env.test?
-    tag = (cv_kind.to_s.downcase == "maintenance") ? "hbx.maintenance_messages" : "hbx.enrollment_messages"
-    conn = AmqpConnectionProvider.start_connection
-    ch = conn.create_channel
-    x = ch.default_exchange
-
-    x.publish(
-      data,
-      :routing_key => "hbx.vocab_validator",
-      :reply_to => tag,
-      :headers => {
-        :file_name => name,
-        :submitted_by => submitted_by
-      }
-    )
-    conn.close
+    tag = (cv_kind.to_s.downcase == "maintenance")
+    pubber = ::Services::CvPublisher.new(submitted_by)
+    pubber.publish(tag, name, data)
   end
 
   def persisted?

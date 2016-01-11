@@ -1,5 +1,5 @@
 module ChangeSets
-  class PersonAddressChangeSet
+  class PersonEmailChangeSet
     attr_reader :address_kind
 
     include ::ChangeSets::SimpleMaintenanceTransmitter
@@ -9,22 +9,18 @@ module ChangeSets
     end
 
     def perform_update(person, person_update, policies_to_notify)
-      new_address = person_update.addresses.detect { |au| au.address_type == address_kind }
+      new_address = person_update.emails.detect { |au| au.email_type == address_kind }
       update_result = false
       if new_address.nil?
-        person.remove_address_of(address_kind)
+        person.remove_email_of(address_kind)
         update_result = true
       else
-        person.set_address(Address.new(new_address.to_hash))
+        person.set_email(Email.new(new_address.to_hash))
         update_result = person.save
       end
       return false unless update_result
-      notify_policies("change", edi_change_reason, person_update.hbx_member_id, policies_to_notify)
+      notify_policies("change", "personnel_data", person_update.hbx_member_id, policies_to_notify)
       true
-    end
-
-    def edi_change_reason
-      (address_kind == "home") ? "change_of_location" : "personnel_data"
     end
   end
 end

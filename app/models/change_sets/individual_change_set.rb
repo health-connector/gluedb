@@ -56,8 +56,14 @@ module ChangeSets
         process_ssn_change
       elsif gender_changed?
         process_gender_change
-      elsif contact_info_changed?
-        process_contact_info_change
+      elsif home_email_changed?
+        process_home_email_change
+      elsif work_email_changed?
+        process_work_email_change
+      elsif home_phone_changed?
+        process_home_phone_change
+      elsif work_phone_changed?
+        process_work_phone_change
       end
     end
 
@@ -78,6 +84,22 @@ module ChangeSets
     end
 
     def process_gender_change
+    end
+
+    def process_home_email_change
+      cs = ::ChangeSets::PersonEmailChangeSet.new("home")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
+    end
+
+    def process_work_email_change
+      cs = ::ChangeSets::PersonEmailChangeSet.new("work")
+      cs.perform_update(record, resource, determine_policies_to_transmit)
+    end
+
+    def process_home_phone_change
+    end
+
+    def process_work_phone_change
     end
 
     def process_contact_info_change
@@ -102,7 +124,10 @@ module ChangeSets
         names_changed?,
         ssn_changed?,
         gender_changed?,
-        contact_info_changed?,
+        home_email_changed?,
+        work_email_changed?,
+        home_phone_changed?,
+        work_phone_changed?,
         dob_changed?
       ]
     end
@@ -115,14 +140,20 @@ module ChangeSets
       resource.dob != member.dob
     end
 
-    def phones_changed?
-      phone_has_changed?("home") ||
-        phone_has_changed("work")
+    def home_phone_changed?
+      phone_has_changed?("home")
     end
 
-    def emails_changed?
-      email_has_changed?("home") ||
-        email_has_changed?("work")
+    def work_phone_changed?
+      phone_has_changed("work")
+    end
+
+    def home_email_changed?
+      email_has_changed?("home")
+    end
+
+    def work_email_changed?
+      email_has_changed?("work")
     end
 
     def home_address_changed?

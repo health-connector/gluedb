@@ -238,10 +238,26 @@ class Person
     self.touch
   end
 
+  def remove_phone_of(phone_type)
+    existing_phone = self.phones.select { |p| p.phone_type == phone_type }
+    existing_phone.each do |em|
+      self.phones.delete(em)
+    end
+    self.touch
+  end
+
+  def remove_email_of(email_type)
+    existing_email = self.emails.select { |p| p.email_type == email_type }
+    existing_email.each do |em|
+      self.emails.delete(em)
+    end
+    self.touch
+  end
+
   def remove_address_of(address_type)
-    existing_address = self.addresses.detect { |p| p.address_type == address_type }
-    if existing_address
-      existing_address.destroy
+    existing_address = self.addresses.select { |p| p.address_type == address_type }
+    existing_address.each do |em|
+      self.addresses.delete(em)
     end
     self.touch
   end
@@ -397,6 +413,12 @@ class Person
     phone_collection = self.phones.reject { |p| p.phone_type == new_phone.phone_type}
     full_phones = phone_collection + [new_phone]
     self.phones = full_phones
+  end
+
+  def set_email(new_email)
+    email_collection = self.emails.reject { |p| p.email_type == new_email.email_type }
+    full_emails = email_collection + [new_email]
+    self.emails = full_emails
   end
 
   def merge_relationship(new_rel)

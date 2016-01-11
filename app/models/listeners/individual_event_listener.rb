@@ -79,5 +79,13 @@ module Listeners
         channel.nack(delivery_info.delivery_tag, false, true)
       end
     end
+
+    def self.run
+      conn = AmqpConnectionProvider.start_connection
+      chan = conn.create_channel
+      chan.prefetch(1)
+      q = chan.queue(self.queue_name, :durable => true)
+      self.new(chan, q).subscribe(:block => true, :manual_ack => true)
+    end
   end
 end

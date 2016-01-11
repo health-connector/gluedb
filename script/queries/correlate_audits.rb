@@ -18,7 +18,9 @@ rest = all_groups.values.select { |ag| ag.length < 2 }
 rest_nfp = rest.select { |ag| ag.last.last == "NFP" }
 rest_hbx = rest.select { |ag| ag.last.last == "HBX" }
 
-CSV.open("audit_issues_2015.csv", "w") do |csv|
+timestamp = Time.now.strftime('%Y%m%d%H%M')
+
+CSV.open("audit_issues_#{timestamp}.csv", "w") do |csv|
   csv << ["Multiple Policies"]
 
   mismatches.each do |v|

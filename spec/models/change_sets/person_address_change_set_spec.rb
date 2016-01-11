@@ -1,7 +1,7 @@
 require "rails_helper"
 
 describe ChangeSets::PersonAddressChangeSet do
-  let(:person) { instance_double("::Person") }
+  let(:person) { instance_double("::Person", :save => address_update_result) }
   let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => [updated_address_resource], :hbx_member_id => hbx_member_id) }
   let(:updated_address_resource) { double(:to_hash => {:address_type => address_kind}, :address_type => address_kind) }
   let(:policies_to_notify) { [policy_to_notify] }
@@ -18,7 +18,7 @@ describe ChangeSets::PersonAddressChangeSet do
 
   before :each do
     allow(Address).to receive(:new).with({:address_type => address_kind}).and_return(new_address)
-    allow(person).to receive(:set_address).with(new_address).and_return(address_update_result)
+    allow(person).to receive(:set_address).with(new_address)
   end
 
   describe "updating a home address" do

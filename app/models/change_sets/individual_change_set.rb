@@ -78,6 +78,8 @@ module ChangeSets
     end
 
     def process_name_change
+      cs = ::ChangeSets::PersonNameChangeSet.new
+      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_ssn_change

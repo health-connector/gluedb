@@ -203,9 +203,9 @@ module ChangeSets
     end
 
     def items_changed?(resource_item, record_item)
-      return false if (resource_address.nil? && record_address.nil?)
-      return true if record_address.nil?
-      !record_address.match(resource_address)
+      return false if (resource_item.nil? && record_item.nil?)
+      return true if record_item.nil?
+      !record_item.match(resource_item)
     end
 
     def phone_has_changed?(phone_kind)

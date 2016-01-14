@@ -146,7 +146,7 @@ module Amqp
 
     def broadcast_event(props, payload)
       publish_props = props.dup
-      out_ex = channel.fanout(ExchangeInformation.event_publish_exchange)
+      out_ex = channel.fanout(ExchangeInformation.event_publish_exchange, :durable => true)
       if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
         publish_props["timestamp"] = Time.now.to_i
       end

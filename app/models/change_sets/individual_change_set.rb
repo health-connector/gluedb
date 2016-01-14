@@ -19,7 +19,7 @@ module ChangeSets
     end
 
     def create_individual_resource
-      new_person = create_new_person
+      new_person = build_new_person
       @record = new_person
       new_person.save
     end

@@ -23,6 +23,15 @@ module RemoteResources
       !record.nil?
     end
 
+    def inspect
+      main_hash = to_hash
+      members_too = main_hash.merge(member_hash)
+      members_too[:addresses] = addresses.map(&:to_hash)
+      members_too[:emails] = emails.map(&:to_hash)
+      members_too[:phones] = phones.map(&:to_hash)
+      members_too.inspect
+    end
+
     def to_hash
       props_hash = {
         :name_first => name_first,

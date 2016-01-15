@@ -32,6 +32,10 @@ module RemoteResources
       members_too.inspect
     end
 
+    def to_s
+      inspect
+    end
+
     def to_hash
       props_hash = {
         :name_first => name_first,

@@ -12,6 +12,7 @@ module Services
       conn = AmqpConnectionProvider.start_connection
       ch = conn.create_channel
       x = ch.default_exchange
+      ch.confirm_select
 
       x.publish(
         data,
@@ -22,6 +23,7 @@ module Services
           :submitted_by => submitted_by
         }
       )
+      ch.wait_for_confirms
       conn.close
     end
 

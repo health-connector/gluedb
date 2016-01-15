@@ -22,10 +22,10 @@ module ChangeSets
     end
 
     def old_name_values(member_id, member, person_resource)
-      {
+      [{
         "member_id" => member_id,
         "ssn" => member.ssn
-      }
+      }]
     end
   end
 end

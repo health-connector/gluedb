@@ -55,7 +55,7 @@ describe ChangeSets::PersonNameChangeSet do
       let(:update_result) { true }
       before :each do
         allow(::CanonicalVocabulary::IdInfoSerializer).to receive(:new).with(
-          policy_to_notify, "change", "change_in_identifying_data_elements", [hbx_member_id], hbx_member_ids, old_name_values
+          policy_to_notify, "change", "change_in_identifying_data_elements", [hbx_member_id], hbx_member_ids, [old_name_values]
         ).and_return(policy_serializer)
         allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
         allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)

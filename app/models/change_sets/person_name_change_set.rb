@@ -51,7 +51,7 @@ module ChangeSets
           old_values_hash["name_sfx"] = person.name_sfx
         end
       end
-      old_values_hash
+      [old_values_hash]
     end
   end
 end

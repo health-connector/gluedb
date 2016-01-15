@@ -407,18 +407,21 @@ class Person
     address_collection = self.addresses.reject { |p| p.address_type == new_address.address_type }
     full_addresses = address_collection + (new_address.nil? ? [] : [new_address])
     self.addresses = full_addresses
+    self.touch
   end
 
   def set_phone(new_phone)
     phone_collection = self.phones.reject { |p| p.phone_type == new_phone.phone_type}
     full_phones = phone_collection + [new_phone]
     self.phones = full_phones
+    self.touch
   end
 
   def set_email(new_email)
     email_collection = self.emails.reject { |p| p.email_type == new_email.email_type }
     full_emails = email_collection + [new_email]
     self.emails = full_emails
+    self.touch
   end
 
   def merge_relationship(new_rel)

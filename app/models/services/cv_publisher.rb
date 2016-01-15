@@ -11,8 +11,8 @@ module Services
       tag = is_maintenance ? "hbx.maintenance_messages" : "hbx.enrollment_messages"
       conn = AmqpConnectionProvider.start_connection
       ch = conn.create_channel
-      x = ch.default_exchange
       ch.confirm_select
+      x = ch.default_exchange
 
       x.publish(
         data,

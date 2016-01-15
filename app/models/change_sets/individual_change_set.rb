@@ -121,7 +121,7 @@ module ChangeSets
     end
 
     def change_count
-      @change_count ||= change_collection.count(&:itself)
+      @change_count ||= (change_collection.count { |a| a })
     end
 
     def change_collection

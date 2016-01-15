@@ -26,7 +26,7 @@ module Listeners
         if change_set.any_changes?
           if change_set.multiple_changes?
             if change_set.process_first_edi_change
-              resource_event_broadcast("info", "individual_updated", individual_id, r_code, remote_resource)
+              resource_event_broadcast("info", "individual_updated_partially", individual_id, r_code, remote_resource)
               channel.nack(delivery_info.delivery_tag, false, true)
             else
               resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))

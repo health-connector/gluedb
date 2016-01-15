@@ -18,7 +18,7 @@ module Services
         :routing_key => "hbx.vocab_validator",
         :reply_to => tag,
         :headers => {
-          :file_name => name,
+          :file_name => file_name,
           :submitted_by => submitted_by
         }
       )

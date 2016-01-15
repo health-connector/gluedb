@@ -226,7 +226,7 @@ module ChangeSets
     end
 
     def address_has_changed?(addy_kind)
-      resource_address = resource.addresses.detect { |adr| adr.address_kind == addy_kind }
+      resource_address = resource.addresses.detect { |adr| adr.address_type == addy_kind }
       record_address = record.addresses.detect { |adr| adr.address_type == addy_kind }
       items_changed?(resource_address, record_address)
     end

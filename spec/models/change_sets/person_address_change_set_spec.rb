@@ -1,9 +1,10 @@
 require "rails_helper"
 
 describe ChangeSets::PersonAddressChangeSet do
+  let(:address_update_result) { true }
 
   describe "with an address to wipe" do
-    let(:person) { instance_double("::Person") }
+    let(:person) { instance_double("::Person", :save => address_update_result) }
     let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => [], :hbx_member_id => hbx_member_id) }
     let(:policies_to_notify) { [policy_to_notify] }
     let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids) }

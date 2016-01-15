@@ -13,7 +13,7 @@ module ChangeSets
       update_result = false
       if new_address.nil?
         person.remove_email_of(address_kind)
-        update_result = true
+        update_result = person.save
       else
         person.set_email(Email.new(new_address.to_hash))
         update_result = person.save

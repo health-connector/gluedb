@@ -160,6 +160,10 @@ module ChangeSets
     end
 
     def home_address_changed?
+      resource_address = resource.addresses.detect { |adr| adr.address_kind == "home" }
+      record_address = record.addresses.detect { |adr| adr.address_type == "home" }
+      # Don't wipe home addresses
+      return false if (resource_address.nil? && (!record_address.nil?))
       address_has_changed?("home")
     end
 
@@ -177,7 +181,7 @@ module ChangeSets
 
     def ssn_changed?
       return false if (resource.ssn.blank? && member.ssn.blank?)
-      resource.dob != member.ssn
+      resource.ssn != member.ssn
     end
 
     def gender_changed?

@@ -148,7 +148,7 @@ module ChangeSets
     end
 
     def work_phone_changed?
-      phone_has_changed("work")
+      phone_has_changed?("work")
     end
 
     def home_email_changed?

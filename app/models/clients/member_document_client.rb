@@ -1,6 +1,7 @@
 module Clients
   class MemberDocumentClient
     def self.call(authority_member)
+      return []
       begin
       if authority_member.blank?
         return []

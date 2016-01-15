@@ -146,11 +146,18 @@ module Amqp
 
     def broadcast_event(props, payload)
       publish_props = props.dup
-      out_ex = channel.fanout(ExchangeInformation.event_publish_exchange, :durable => true)
-      if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
-        publish_props["timestamp"] = Time.now.to_i
+      chan = connection.create_channel
+      begin
+        chan.confirm_select
+        out_ex = chan.fanout(ExchangeInformation.event_publish_exchange, :durable => true)
+        if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
+          publish_props["timestamp"] = Time.now.to_i
+        end
+        out_ex.publish(payload, publish_props)
+        chan.wait_for_confirms
+      ensure
+        chan.close
       end
-      out_ex.publish(payload, publish_props)
     end
 
     def request(properties, payload, timeout = 15)

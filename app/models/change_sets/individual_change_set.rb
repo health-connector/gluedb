@@ -215,8 +215,8 @@ module ChangeSets
     end
 
     def email_has_changed?(email_kind)
-      resource_address = resource.emails.detect { |adr| adr.email_type == addy_kind }
-      record_address = record.emails.detect { |adr| adr.email_type == addy_kind }
+      resource_address = resource.emails.detect { |adr| adr.email_type == email_kind }
+      record_address = record.emails.detect { |adr| adr.email_type == email_kind }
       items_changed?(resource_address, record_address)
     end
 

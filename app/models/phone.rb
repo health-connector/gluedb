@@ -28,6 +28,7 @@ class Phone
   end
 
   def attribute_matches?(attribute, other)
+    return true if (self[attribute].blank? && other[attribute].blank?)
     self[attribute] == other[attribute]
   end
 

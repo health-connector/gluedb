@@ -49,7 +49,7 @@ class Address
   end
 
   def attribute_matches?(attribute, other)
-    return true if (self[attribute] == nil && other[attribute] == "")
+    return true if (self[attribute].blank? && other[attribute].blank?)
     safe_downcase(self[attribute]) == safe_downcase(other[attribute])
   end
 

@@ -17,6 +17,10 @@ module RemoteResources
       Maybe.new(type).split("#").last.downcase.value
     end
 
+    def [](key)
+      self.send(key)
+    end
+
     def to_hash
       {
         :email_type => email_type,

@@ -25,6 +25,10 @@ module RemoteResources
       !::Phone::TYPES.include?(phone_kind)
     end
 
+    def [](key)
+      self.send(key)
+    end
+
     def to_hash
       {
         :phone_type => phone_type,

@@ -50,12 +50,6 @@ module ChangeSets
         process_home_address_change
       elsif mailing_address_changed?
         process_mailing_address_change
-      elsif names_changed?
-        process_name_change
-      elsif ssn_changed?
-        process_ssn_change
-      elsif gender_changed?
-        process_gender_change
       elsif home_email_changed?
         process_home_email_change
       elsif work_email_changed?
@@ -64,6 +58,12 @@ module ChangeSets
         process_home_phone_change
       elsif work_phone_changed?
         process_work_phone_change
+      elsif names_changed?
+        process_name_change
+      elsif ssn_changed?
+        process_ssn_change
+      elsif gender_changed?
+        process_gender_change
       end
     end
 
@@ -176,6 +176,7 @@ module ChangeSets
     end
 
     def ssn_changed?
+      return false if (resource.ssn.blank? && member.ssn.blank?)
       resource.dob != member.ssn
     end
 

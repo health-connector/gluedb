@@ -16,11 +16,13 @@ module Services
 
       x.publish(
         data,
-        :routing_key => "hbx.vocab_validator",
-        :reply_to => tag,
-        :headers => {
-          :file_name => file_name,
-          :submitted_by => submitted_by
+        {
+          :routing_key => "hbx.vocab_validator",
+          :reply_to => tag,
+          :headers => {
+            :file_name => file_name,
+            :submitted_by => submitted_by
+          }
         }
       )
       ch.wait_for_confirms

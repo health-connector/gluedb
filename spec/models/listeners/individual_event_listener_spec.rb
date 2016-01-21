@@ -218,6 +218,14 @@ describe Listeners::IndividualEventListener do
       end
 
       describe "with a valid update" do
+        let(:individual_updated_properties) { {
+            :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated_partially",
+            :headers => {
+                :return_status => "200",
+                :individual_id => individual_id
+            }
+        } }
+
         it "should process the first change and requeue" do
           expect(channel).to receive(:nack).with(delivery_tag, false, true)
           expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)

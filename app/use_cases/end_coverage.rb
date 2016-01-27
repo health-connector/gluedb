@@ -29,6 +29,7 @@ class EndCoverage
 
   def execute_csv(request, listener)
     @request = request
+
     @policy = @policy_repo.where({"_id" => request[:policy_id]}).first
 
     if (@policy.nil?)
@@ -50,7 +51,7 @@ class EndCoverage
       return
     end
 
-    if @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
+    if request[:reason]== 'terminate' && @policy.enrollees.any?{ |e| e.coverage_start > request[:coverage_end].to_date }
       listener.end_date_invalid(end_date: request[:coverage_end])
       listener.fail(subscriber: request[:affected_enrollee_ids])
       return
@@ -60,7 +61,7 @@ class EndCoverage
 
     begin
       update_policy(affected_enrollee_ids)
-    rescue NoContributionStrategyError => e
+    rescue PremiumCalcError => e
       listener.no_contribution_strategy(message: e.message)
       listener.fail(subscriber: request[:affected_enrollee_ids] )
     else
@@ -85,27 +86,49 @@ class EndCoverage
 
   def update_policy(affected_enrollee_ids)
     subscriber = @policy.subscriber
+    start_date  = @policy.subscriber.coverage_start
+    plan = @policy.plan
+    skip_recalc = affected_enrollee_ids.include?(subscriber.m_id) && (plan.year == 2016)
 
-    if @policy.is_shop?
-      strategy = @policy.employer.plan_years.detect{|py| py.start_date.year == @policy.plan.year}.contribution_strategy
-      raise NoContributionStrategyError, "No contribution strategy found for #{@policy.employer.name} (fein: #{@policy.employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+    if @policy.is_shop? && !skip_recalc
+      employer = @policy.employer
+      strategy = employer.plan_years.detect{|py| py.start_date.year == plan.year}.contribution_strategy
+      raise PremiumCalcError, "No contribution data found for #{employer.name} (fein: #{employer.fein}) in plan year #{@policy.plan.year}" if strategy.nil?
+      plan_year = employer.plan_year_of(start_date)
+      raise PremiumCalcError, "policy start date #{start_date} does not fall into any plan years of #{employer.name} (fein: #{employer.fein})" if plan_year.nil?
+    else
+      raise PremiumCalcError, "policy start date #{start_date} not in rate table for #{plan.year} plan #{plan.name} with hios #{plan.hios_plan_id} " unless plan.year == start_date.year
     end
 
     premium_calculator = Premiums::PolicyCalculator.new
 
     if(affected_enrollee_ids.include?(subscriber.m_id))
-      premium_calculator.apply_calculations(@policy)
+      premium_calculator.apply_calculations(@policy) unless skip_recalc
       end_coverage_for_everyone
     else
       end_coverage_for_ids(affected_enrollee_ids)
+      enrollees = []
       rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
       @policy.enrollees.reject!{ |e| e.coverage_status == "inactive" }
       premium_calculator.apply_calculations(@policy)
-      @policy.enrollees << rejected
+      active_enrollees = @policy.enrollees.select{ |e| e.coverage_status == "active" }
+      enrollees << active_enrollees
+      enrollees << rejected
+      enrollees.flatten!
+      enrollees.each do |e|
+        e.policy = nil
+      end
+      @policy.enrollees.delete_all
+      @policy.save!
+      enrollees.each do |e|
+        @policy.enrollees.build(
+            Hash[e.attributes]
+          )
+      end
     end
 
     @policy.updated_by = @request[:current_user]
-    @policy.save
+    @policy.save!
   end
 
   def end_coverage_for_everyone
@@ -152,7 +175,7 @@ class EndCoverage
     end
   end
 
-  class NoContributionStrategyError < StandardError
+  class PremiumCalcError < StandardError
 
   end
 end

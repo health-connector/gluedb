@@ -45,7 +45,7 @@ class CarefirstPolicyUpdatesController < ApplicationController
   def upload_csv
     file = params[:policy_status_file]
 
-    connection = Bunny.new
+    connection = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
     connection.start
     exchange = connection.create_channel.default_exchange
 

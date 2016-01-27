@@ -51,8 +51,8 @@ class QualifyingLifeEvent
   index({sep_start_date:  1})
   index({sep_end_date:  1})
 
-  has_and_belongs_to_many :application_groups
-  accepts_nested_attributes_for :application_groups
+  has_and_belongs_to_many :families
+  accepts_nested_attributes_for :families
 
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true

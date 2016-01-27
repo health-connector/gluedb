@@ -42,7 +42,21 @@ class PersonRelationship
     "other_relationship",
     "unrelated",
     "great_grandparent",
-    "great_grandchild"
+    "great_grandchild",
+    "father_or_mother",
+    "stepson_or_stepdaughter",
+    "grandfather_or_grandmother",
+    "brother_or_sister",
+    "grandson_or_granddaughter",
+    "self",
+    "uncle_or_aunt",
+    "cousin",
+    "son-in-law_or_daughter-in-law",
+    "brother-in-law_or_sister-in-law",
+    "mother-in-law_or_father-in-law",
+    "ward",
+    "ex-spouse",
+    "other_relative"
   ]
 
   INVERSE_MAP = {

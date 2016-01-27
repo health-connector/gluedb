@@ -1,5 +1,5 @@
 class PolicyIdGenerator
-  P_ID_URL = "http://10.83.85.127:8080/sequences/policy_id"
+  P_ID_URL = "http://soa-prod.dchbx.org:8444/sequences/policy_id"
 
   def initialize(size = 1)
     @b_size = size

@@ -13,6 +13,6 @@ class ShopQualifyingLifeEvent < QualifyingLifeEvent
 		termination_of_benefits
 	]
 
-  embedded_in :application_group
+  embedded_in :family
 
 end

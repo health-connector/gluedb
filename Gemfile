@@ -10,6 +10,8 @@ gem "bunny", '1.4.1'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'virtus'
+gem 'spreadsheet'
+gem 'ruby-ole', '1.2.11.7'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -29,6 +31,7 @@ group :development, :assets do
 end
 
 group :test do
+  gem 'test-unit'
 	gem 'mongoid-rspec'
   gem 'rspec-rails' #, '~> 3.0.0.beta'
   gem 'rspec-collection_matchers'
@@ -43,7 +46,8 @@ end
 
 group :production do
   gem 'unicorn', '4.8.2'
-  gem 'bluepill', '0.0.68'
+#  gem 'bluepill', '0.0.68'
+  gem 'eye'
 end
 
 gem "haml"
@@ -54,10 +58,11 @@ gem 'carrierwave-mongoid', '0.7.1', :require => 'carrierwave/mongoid'
 gem 'devise', '3.3.0'
 gem "rsec"
 gem "mongoid_auto_increment"
-gem 'american_date'
+gem 'american_date', '1.1.0'
 gem 'cancancan', '~> 1.9'
 gem 'oj'
 gem 'roo'
 gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
+gem 'forkr', '0.1.7'

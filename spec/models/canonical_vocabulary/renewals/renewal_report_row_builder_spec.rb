@@ -4,8 +4,8 @@ require 'rails_helper'
 module CanonicalVocabulary::Renewals
   describe RenewalReportRowBuilder do
     subject { RenewalReportRowBuilder.new(app_group, primary) }
-    let(:app_group) { double(e_case_id: 'uri#1234', yearwise_incomes: "250000", irs_consent: nil, size: 2, applicants: applicants) }
-    let(:applicants) { [primary, member]}
+    let(:app_group) { double(e_case_id: 'uri#1234', yearwise_incomes: "250000", irs_consent: nil, size: 2, family_members: family_members) }
+    let(:family_members) { [primary, member]}
     let(:primary) { double(person: person)}
     let(:member) { double(person: person, person_demographics: person_demographics, age: 30, tax_status: 'Single', mec: nil)}
     let(:person) { double(name_first: 'Joe', name_last: 'Riden', age: 30, tax_status: 'Single', mec: nil, yearwise_incomes: '120000', incarcerated: false, addresses: addresses) }

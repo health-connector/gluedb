@@ -5,14 +5,14 @@ module CanonicalVocabulary
 
       attr_reader :data_set
 
-      def initialize(application_group, primary)
+      def initialize(family, primary)
         @data_set = []
-        @application_group = application_group
+        @family = family
         @primary = primary
       end
 
       def append_integrated_case_number
-        @data_set << @application_group.e_case_id.split('#')[1]
+        @data_set << @family.e_case_id.split('#')[1]
       end
 
       def append_name_of(member)
@@ -57,9 +57,9 @@ module CanonicalVocabulary
       end
 
       def append_financials
-        @data_set << @application_group.yearly_income("2014")
+        @data_set << @family.yearly_income("2014")
         append_blank 
-        @data_set << @application_group.irs_consent
+        @data_set << @family.irs_consent
       end
 
       def append_age_of(member)
@@ -83,7 +83,7 @@ module CanonicalVocabulary
       end
 
       def append_app_group_size
-        @data_set << @application_group.applicants.count
+        @data_set << @family.family_members.count
       end
 
       def append_yearwise_income_of(member)

@@ -24,11 +24,11 @@ Gluedb::Application.routes.draw do
     resources :users
   end
 
-  resources :application_groups do
+  resources :families do
     get 'page/:page', :action => :index, :on => :collection
 
     # resources :primary_applicant, only: [:new, :create, :update]
-    resources :applicants
+    resources :family_members
 
     member do
       get :link_employee
@@ -72,7 +72,11 @@ Gluedb::Application.routes.draw do
   resources(:vocabulary_requests, :only => [:new, :create])
 
   resources :edi_transaction_set_payments
-  resources :edi_transaction_sets
+  resources :edi_transaction_sets do
+    collection do
+      get :errors
+    end
+  end
   resources :edi_transmissions
 
   resources :csv_transactions, :only => :show
@@ -139,24 +143,31 @@ Gluedb::Application.routes.draw do
         member do
           get :old_cv
         end
+        collection do
+          get :old_group_index
+        end
       end
       resources :policies, :only => [:show, :index]
-      resources :application_groups, :only => [:show, :index]
+      resources :families, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
+      resources :application_groups, :controller => :families, :only => [:show, :index]
+
     end
     namespace :v2 do
       resources :events, :only => [:create]
       resources :people, :only => [:show, :index]
       resources :employers, :only => [:show, :index]
       resources :policies, :only => [:show, :index]
-      resources :application_groups, :only => [:show, :index]
+      resources :families, :only => [:show, :index]
       resources :households, :only => [:show, :index]
       resources :irs_reports, :only => [:index]
       resources :plans, :only => [:show]
       resources :renewal_policies, :only => [:show, :index]
       #resources :premium_calculator
       post 'calculate_premium', to: 'premium_calculator#calculate'
+      resources :application_groups, :controller => :families, :only => [:show, :index]
+      post 'generate_quote', to: 'quote_generator#generate'
     end
   end
 
@@ -188,15 +199,23 @@ Gluedb::Application.routes.draw do
         get 'wsdl'
       end
     end
-    resources :application_groups, :only => [] do
+    resources :families, :only => [] do
       collection do
-        post 'get_by_application_group_id'
+        post 'get_by_family_id'
         get 'wsdl'
       end
     end
     resources :employers, :only => [] do
       collection do
         post 'get_by_employer_id'
+        get 'wsdl'
+      end
+    end
+
+    #duplicate route with old resource name
+    resources :application_groups, :controller => :families,:only => [] do
+      collection do
+        post 'get_by_family_id'
         get 'wsdl'
       end
     end

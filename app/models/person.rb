@@ -21,10 +21,10 @@ class Person
   field :is_active, type: Boolean, default: true
 
   # We've moved to a many-to-many
-  # field :application_group, type: Moped::BSON::ObjectId
+  # field :family, type: Moped::BSON::ObjectId
 
   # TODO: reference authority member by Mongo ID
-  # field :application_group, type: Moped::BSON::ObjectId
+  # field :family, type: Moped::BSON::ObjectId
   field :authority_member_id, type: String, default: nil
   index({"authority_member_id" => 1})
 
@@ -88,8 +88,8 @@ class Person
   scope :all_with_multiple_members, exists({ :'members.1' => true })
   scope :by_name, order_by(name_last: 1, name_first: 1)
 
-  def application_groups
-    ApplicationGroup.where(:applicants.person_id => self.id).to_a
+  def families
+    Family.where(:family_members.person_id => self.id).to_a
   end
 
   def update_attributes_with_delta(props = {})
@@ -347,12 +347,12 @@ class Person
     ([self._id] + other_ids).uniq
   end
 
-  def application_groups
-    query_proxy.application_groups
+  def families
+    query_proxy.families
   end
 
   def relationships_in_group
-    group = application_groups.first
+    group = families.first
     group.person_relationships.select { |r| r.object_person == id }
   end
 
@@ -394,8 +394,25 @@ class Person
     old_relationships.each do |old_rel|
       self.person_relationships.delete(old_rel)
     end
-    self.person_relationships << new_rel
+
+    relationship = self.person_relationships.build({relative: new_rel.relative, kind: new_rel.kind})
+    relationship.save
+    self.save
     self.touch
+    self.reload
+  end
+
+  def find_relationship_with(other_person)
+
+    relationship = person_relationships.detect do |person_relationship|
+      person_relationship.relative_id == other_person.id
+    end
+
+    if relationship
+      return relationship.kind
+    else
+      return nil
+    end
   end
 
   private

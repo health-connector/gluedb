@@ -13,8 +13,8 @@ module Queries
       )
     end
 
-    def application_groups
-      ApplicationGroup.where(
+    def families
+      Family.where(
         "$or" => [
           {
             "person_relationships.subject_person" => @person._id

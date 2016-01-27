@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<individual xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://openhbx.org/api/terms/1.0'>
+  <id>
+    <id>f1e2e78ef032489bb24839b083eee25a</id>
+  </id>
+  <person>
+    <id>
+      <id>f1e2e78ef032489bb24839b083eee25a</id>
+    </id>
+    <person_name>
+      <person_surname>Curtin</person_surname>
+      <person_given_name>Jane</person_given_name>
+      <person_middle_name>Phred</person_middle_name>
+      <person_name_prefix_text>Dr</person_name_prefix_text>
+      <person_name_suffix_text>III</person_name_suffix_text>
+    </person_name>
+    <addresses>
+      <address>
+        <type>urn:openhbx:terms:v1:address_type#home</type>
+        <address_line_1>609 H St, NE</address_line_1>
+        <location_city_name>Washington</location_city_name>
+        <location_state_code>DC</location_state_code>
+        <postal_code>20002</postal_code>
+      </address>
+      <address>
+        <type>urn:openhbx:terms:v1:address_type#mailing</type>
+        <address_line_1>440 4th St, NW</address_line_1>
+        <location_city_name>Washington</location_city_name>
+        <location_state_code>DC</location_state_code>
+        <postal_code>20001</postal_code>
+      </address>
+      <address>
+        <type>urn:openhbx:terms:v1:address_type#work</type>
+        <address_line_1>1600 Pennsylvania Ave</address_line_1>
+        <location_city_name>Washington</location_city_name>
+        <location_state_code>DC</location_state_code>
+        <postal_code>20001</postal_code>
+      </address>
+    </addresses>
+    <emails>
+      <email>
+        <type>urn:openhbx:terms:v1:email_type#work</type>
+        <email_address>dude@dc.gov</email_address>
+      </email>
+    </emails>
+    <phones>
+      <phone>
+        <type>urn:openhbx:terms:v1:phone_type#mobile</type>
+        <full_phone_number></full_phone_number>
+        <is_preferred>false</is_preferred>
+      </phone>
+      <phone>
+        <type>urn:openhbx:terms:v1:phone_type#work</type>
+        <full_phone_number></full_phone_number>
+        <is_preferred>false</is_preferred>
+      </phone>
+    </phones>
+  </person>
+  <person_demographics>
+    <sex>urn:openhbx:terms:v1:gender#unknown</sex>
+    <birth_date>19900522</birth_date>
+    <created_at>2015-09-18T21:34:59Z</created_at>
+    <modified_at>2015-10-05T14:48:08Z</modified_at>
+  </person_demographics>
+  <broker_roles>
+    <broker_role>
+      <id>
+        <id>2068981</id>
+      </id>
+      <npn>2068981</npn>
+      <broker_agency>
+        <id>
+          <id>55fc8383547265664f530000</id>
+        </id>
+        <name>ACME Agency</name>
+      </broker_agency>
+      <created_at>2015-09-18T21:34:59Z</created_at>
+      <modified_at>2015-10-05T14:48:08Z</modified_at>
+    </broker_role>
+  </broker_roles>
+</individual>

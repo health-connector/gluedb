@@ -26,7 +26,7 @@ class VocabularyRequest
 
   def submit_request(email, data)
     return if Rails.env.test?
-    conn = Bunny.new
+    conn = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
     conn.start
     ch = conn.create_channel
     x = ch.default_exchange

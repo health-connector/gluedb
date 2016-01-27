@@ -2,10 +2,12 @@ class IrsGroup
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  embedded_in :application_group
+  embedded_in :family
 
-  # Unique identifier for this Household used for reporting enrollment and premium tax credits to IRS
-  auto_increment :hbx_assigned_id, seed: 9999
+  before_save :set_effective_start_date
+  before_save :set_effective_end_date
+
+  auto_increment :hbx_assigned_id, seed: 1000000000000000 #The 16digit IrsGroup identifier as required by IRS
 
   field :effective_start_date, type: Date
   field :effective_end_date, type: Date
@@ -16,9 +18,11 @@ class IrsGroup
 
   index({hbx_assigned_id: 1})
 
+  validates :hbx_assigned_id, :uniqueness => true
+
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+    raise "undefined parent Family" unless family?
+    self.family
   end
 
   # embedded association: has_many :tax_households
@@ -30,4 +34,12 @@ class IrsGroup
     self.is_active
   end
 
+  private
+  def set_effective_start_date
+    self.effective_start_date = family.active_household.effective_start_date if family.active_household
+  end
+
+  def set_effective_end_date
+    self.effective_end_date = family.active_household.effective_end_date if family.active_household
+  end
 end

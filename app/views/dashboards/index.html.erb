@@ -3,7 +3,7 @@
 <div class="page-header">
   <%= render 'shared/breadcrumb', crumbs: [
       link_to('Dashboards', root_path)
-    ] 
+    ]
   %>
 </div>
 
@@ -16,6 +16,9 @@
         <li><a href="#">Reports</a></li>
         <li><a href="#">Analytics</a></li>
         <li><a href="#">Export</a></li>
+        <% if can? :manage, :all%>
+          <li><a href="#"><%= @last_update %></a></li>
+        <% end%>
       </ul>
     </div>
   </div>
@@ -71,11 +74,3 @@
       </div>
     </div>
   </div>
-
-<% unless Rails.env.test? %>
-  <p class="text-right">
-    <small>
-      <%= "updated: #{Person.first.updated_at.strftime('%m-%d-%Y') if Person.first.updated_at.present?}" %>
-    </small>
-  </p>
-<% end %>

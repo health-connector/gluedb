@@ -140,6 +140,19 @@ module Amqp
       end
     end
 
+    def connection
+      channel.connection
+    end
+
+    def broadcast_event(props, payload)
+      publish_props = props.dup
+      out_ex = channel.fanout(ExchangeInformation.event_publish_exchange)
+      if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
+        publish_props["timestamp"] = Time.now.to_i
+      end
+      out_ex.publish(payload, publish_props)
+    end
+
     def request(properties, payload, timeout = 15)
       req_chan = channel.connection
       ::Amqp::Requestor.new(req_chan).request(properties, payload, timeout)

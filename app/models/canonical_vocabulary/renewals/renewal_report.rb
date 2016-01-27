@@ -23,30 +23,30 @@ module CanonicalVocabulary
         @row = 1
       end
       
-      def setup(application_group)
-        @application_group = application_group
+      def setup(family)
+        @family = family
 
-        # individuals = find_many_individuals_by_id(@application_group.applicant_person_ids)
-        # @primary = individuals.detect { |i| (i.id == @application_group.primary_applicant_id || individuals.count == 1) }
-        @primary = @application_group.primary_applicant
+        # individuals = find_many_individuals_by_id(@family.family_member_person_ids)
+        # @primary = individuals.detect { |i| (i.id == @family.primary_applicant_id || individuals.count == 1) }
+        @primary = @family.primary_applicant
         raise "Primary Applicant Address Not Present" if @primary.person.addresses.empty?
 
-        @other_members = @application_group.applicants.reject { |i| i == @primary }
+        @other_members = @family.family_members.reject { |i| i == @primary }
 
-        @dental = PolicyProjection.new(@application_group, "dental")
-        @health = PolicyProjection.new(@application_group, "health")
+        @dental = PolicyProjection.new(@family, "dental")
+        @health = PolicyProjection.new(@family, "health")
 
         if @health.current.nil? && @dental.current.nil?
           raise "No active health or dental policy"
         end
       end
 
-      def append_household(application_group)
+      def append_household(family)
         begin
-          setup(application_group)
+          setup(family)
           build_report
         rescue Exception  => e
-          @renewal_logger.info "#{application_group.id.match(/\w+$/)},#{e.inspect}"
+          @renewal_logger.info "#{family.id.match(/\w+$/)},#{e.inspect}"
         end
       end
 

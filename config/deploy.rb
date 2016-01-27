@@ -39,28 +39,29 @@ namespace :deploy do
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"
   task :finalize_update do
-    run "cp #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
-    run "cp #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
+    run "rm -f #{release_path}/config/mongoid.yml"
+    run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
+    run "ln -s #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
     run "ln -s #{deploy_to}/shared/pids #{release_path}/pids"
+    run "rm -rf #{release_path}/log"
+    run "ln -s #{deploy_to}/shared/log #{release_path}/log"
+    run "ln -s #{deploy_to}/shared/eye #{release_path}/eye"
   end
 
   desc "Restart nginx and unicorn"
   task :restart, :except => { :no_release => true } do
-    sudo "service nginx restart"
-    sudo "service unicorn restart"
-    sudo "service bluepill_glue restart"
+    sudo "service eye_gluedb restart"
   end
 
   desc "Start nginx and unicorn"
   task :start, :except => { :no_release => true } do
-    run "#{try_sudo} service nginx start"
-    run "#{try_sudo} service unicorn start"
+    run "#{try_sudo} service eye_gluedb quit"
+    run "#{try_sudo} service eye_gluedb load"
   end
 
   desc "Stop nginx and unicorn"
   task :stop, :except => { :no_release => true } do
-    run "#{try_sudo} service unicorn stop"
-    run "#{try_sudo} service nginx stop"
+    run "#{try_sudo} service eye_gluedb stop"
   end
 
   task :cleanup_old, :except => {:no_release => true} do

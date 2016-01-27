@@ -15,6 +15,7 @@ class ExchangeInformation
     'processing_failure_queue',
     'request_exchange',
     'event_exchange',
+    'event_publish_exchange',
     'environment',
     'hbx_id',
     'file_storage_uri'

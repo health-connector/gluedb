@@ -9,7 +9,7 @@ describe EndCoverage do
       affected_enrollee_ids: affected_enrollee_ids,
       coverage_end: coverage_end,
       operation: operation,
-      reason: 'death',
+      reason: 'terminate',
       current_user: current_user,
       transmit: true
     }
@@ -125,6 +125,27 @@ describe EndCoverage do
       it "doesn't execute the resulting action" do
         expect(action).not_to receive(:execute)
         end_coverage.execute(request)
+      end
+    end
+
+    context "on shop 2016 enrollments" do
+      let(:affected_enrollee_ids) { [ subscriber.m_id ] }
+      let(:operation) { 'cancel' }
+      let(:coverage_start) { Date.new(2016, 1, 2)}
+
+      before{
+        plan.update_attribute(:year, 2016)
+        policy.update_attributes!(total_responsible_amount: 300, total_premium_amount: 300)
+      }
+
+      after{
+        plan.update_attribute(:year, 2015)
+        policy.update_attributes!(total_responsible_amount: 0)
+      }
+
+      it "shouldn't touch any of the premiums" do
+        end_coverage.execute(request)
+        expect(policy.total_responsible_amount).to eql(policy.total_premium_amount)
       end
     end
 
@@ -299,7 +320,7 @@ describe EndCoverage do
       }
 
       it 'listener logs fail errors with error message' do
-        expect(bulk_cancel_term_listener).to receive(:no_contribution_strategy).with({:message=>"No contribution strategy found for Fakery (fein: 101010101) in plan year 2015"})
+        expect(bulk_cancel_term_listener).to receive(:no_contribution_strategy).with({:message=>"No contribution data found for Fakery (fein: 101010101) in plan year 2015"})
         expect(bulk_cancel_term_listener).to receive(:fail)
         end_coverage.execute_csv(request,bulk_cancel_term_listener)
       end

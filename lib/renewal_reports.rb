@@ -13,8 +13,8 @@ class RenewalReports
   def generate_groupids
     scope = (@report_type == 'assisted' ? 'insurance_assisted' : 'unassisted')
     policies = Policy.individual_market.send(scope).select{|policy| policy.active_and_renewal_eligible?}
-    groups = policies.map{|policy| policy.application_group_id}.uniq.compact
-    valid_groups = groups.select{|group_id| valid_application_group?(group_id)}
+    groups = policies.map{|policy| policy.family_id}.uniq.compact
+    valid_groups = groups.select{|group_id| valid_family?(group_id)}
     generate_spreadsheet(valid_groups, "#{@report_type}_groups.xls")
   end
 
@@ -32,8 +32,8 @@ class RenewalReports
 
   private
 
-  def valid_application_group?(group_id)
-    group = ApplicationGroup.find(group_id)
+  def valid_family?(group_id)
+    group = Family.find(group_id)
     return false if group.nil?
     with_no_authoriy = group.people.detect{|people| people.authority_member.blank?}
     with_no_authoriy.nil? ? true : false

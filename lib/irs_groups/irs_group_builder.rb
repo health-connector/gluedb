@@ -1,0 +1,41 @@
+class IrsGroupBuilder
+
+  def initialize(family)
+
+    if(family.is_a? Family)
+      @family = family
+    else
+      @family = Family.find(family)
+    end
+  end
+
+  def build
+    @irs_group = @family.irs_groups.build
+  end
+
+  def save
+    @irs_group.save!
+    @family.active_household.irs_group_id = @irs_group._id
+    @family.save!
+  end
+
+  def update
+    return if  @family.households.length < 2
+    assign_exisiting_irs_group_to_new_household
+    @irs_group = @family.active_household.irs_group
+  end
+
+
+  # if by updating the family we have created a new household,
+  # then we should take the Irs Group from previously active household and assign it to the newly active household
+  def assign_exisiting_irs_group_to_new_household
+    all_households = @family.households.sort_by(&:submitted_at)
+    previous_household, current_household = all_households[all_households.length-2, all_households.length]
+
+    return unless current_household.irs_group_id.blank? # irs group already present, so do nothing
+
+    current_household.irs_group_id =  previous_household.irs_group_id
+    current_household.save!
+  end
+
+end

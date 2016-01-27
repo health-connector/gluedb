@@ -13,6 +13,54 @@ class BrokerFactory
     brokers
   end
 
+  def create_many_from_csv(csv)
+    brokers = []
+    csv.each do |broker|
+      brokers << map_broker_data(broker)
+    end
+
+    brokers
+  end
+
+  def map_broker_data(broker_csv_row)
+    broker = Broker.new(
+      :npn => broker_csv_row[" NPN"].strip,
+      :b_type => 'broker',
+      :name_first => broker_csv_row[" First Name"].strip,
+      :name_last => broker_csv_row[" Last Name"].strip,
+      :name_full => broker_csv_row[" Full Name"].strip,
+      :name_middle => (broker_csv_row[" Full Name"].strip.split(" ") - broker_csv_row[" First Name"].strip.to_a - broker_csv_row[" Last Name"].strip.to_a).first,
+      :alternative_name => broker_csv_row[" Agency"].strip,
+      )
+
+    unless broker_csv_row[" Address 1"].strip.blank?
+      broker.addresses << Address.new(
+        :address_type => 'work',
+        :address_1 => broker_csv_row[" Address 1"].strip,
+        :address_2 => broker_csv_row[" Address 2"].strip,
+        :city => broker_csv_row[" City"].strip,
+        :state => broker_csv_row[" State"].strip,
+        :zip => broker_csv_row[" Zip"].strip,
+      )
+    end
+
+    unless broker_csv_row[" Phone"].strip.blank?
+      broker.phones << Phone.new(
+        :phone_type => 'work',
+        :phone_number => broker_csv_row[" Phone"].strip.gsub(/[^0-9]/,""),
+      )
+    end
+
+    unless broker_csv_row[" Email"].strip.blank?
+      broker.emails << Email.new(
+        :email_type => 'work',
+        :email_address => broker_csv_row[" Email"].strip,
+      )
+    end
+
+    broker
+  end
+
   def create_broker(broker_data)
     broker = Broker.new(
       :npn => broker_data.npn.gsub(/[^0-9]/,""),

@@ -6,10 +6,10 @@ describe UpdateEmployer do
   let(:employer) { double(merge_address: nil, merge_phone: nil, merge_email: nil, merge_plan_year: nil, merge_carriers: nil, save!: nil) }
   let(:address_factory) { double(make: address)}
   let(:address) { double }
-  
+
   let(:phone_factory) { double(make: phone)}
   let(:phone) { double }
-  
+
   let(:email_factory) { double(make: email)}
   let(:email) { double }
 
@@ -35,6 +35,10 @@ describe UpdateEmployer do
         phone: {
           phone_type: 'work',
           phone_number: '123-123-1234'
+        },
+        name:{
+          first: 'Joe',
+          last: 'Kramer'
         }
       },
       fte_count: 1,
@@ -66,6 +70,7 @@ describe UpdateEmployer do
     allow(employer).to receive(:fein=)
     allow(employer).to receive(:sic_code=)
     allow(employer).to receive(:notes=)
+    allow(employer).to receive(:update_contact)
   end
 
   it 'finds the employer' do
@@ -104,7 +109,7 @@ describe UpdateEmployer do
   end
 
   it 'makes a plan year' do
-    expect(plan_year_factory).to receive(:make).with({ 
+    expect(plan_year_factory).to receive(:make).with({
       open_enrollment_start: request[:open_enrollment_start],
       open_enrollment_end: request[:open_enrollment_end],
       start_date: request[:plan_year_start],
@@ -115,6 +120,11 @@ describe UpdateEmployer do
       pte_count: request[:pte_count]
     }).and_return(plan_year)
 
+    subject.execute(request)
+  end
+
+  it 'overwrites the contact info' do
+    expect(employer).to receive(:update_contact).with(request[:contact][:name])
     subject.execute(request)
   end
 

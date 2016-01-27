@@ -14,8 +14,8 @@ class PolicyForm
     end
   end
 
-  attr_accessor :application_group_id
-  attr_accessor :application_group
+  attr_accessor :family_id
+  attr_accessor :family
   attr_accessor :carriers
   attr_accessor :coverage_start
   attr_accessor :people
@@ -29,14 +29,14 @@ class PolicyForm
   attr_accessor :household_id
 
   def initialize(params = {})
-    @application_group_id = params[:application_group_id]
+    @family_id = params[:family_id]
     @household_id = params[:household_id]
     
-    @application_group = ApplicationGroup.find(@application_group_id)
+    @family = Family.find(@family_id)
     @carriers = Carrier.all
 
       
-    @people = @application_group.people.map do |p| 
+    @people = @family.people.map do |p|
       SubmittedPerson.new(
         name: p.name_full, 
         include_selected: true, 

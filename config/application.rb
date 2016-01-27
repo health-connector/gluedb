@@ -15,6 +15,8 @@ if defined?(Bundler)
   #  Bundler.require(:default, :assets, Rails.env)
 end
 
+require File.join(File.dirname(__FILE__), "json_log_format")
+
 module Gluedb
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.

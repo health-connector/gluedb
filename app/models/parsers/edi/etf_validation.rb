@@ -15,6 +15,7 @@ module Parsers
       validate :plan_exists
       validate :no_bogus_broker
       validate :on_blacklist
+      validate :has_st_segment
 
       def initialize(f_name, mt, el, carrier, blist, i_cache)
         @file_name = f_name
@@ -23,6 +24,12 @@ module Parsers
         @carrier = carrier
         @blacklisted_bgns = blist
         @import_cache = i_cache
+      end
+
+      def has_st_segment
+        if @etf_loop["ST"].blank?
+          log_error(:etf_loop, "has no ST segment")
+        end
       end
 
       def on_blacklist
@@ -128,10 +135,15 @@ module Parsers
                   puts "has invalid employer: #{employer_loop.fein}"
                   return
                 end
-                plan_year = PlanYear.where({
+                plan_years = PlanYear.where({
                   :employer_id => employer.id,
                   :start_date => { "$lte" => coverage_start }
-                }).order_by(&:start_date).last.start_date.year
+                })
+                if plan_years.empty?
+                  log_error(:etf_loop, "has no valid plan year")
+                  return
+                end
+                plan_year = plan_years.order_by(&:start_date).last.start_date.year
               else
                 plan_year = coverage_start.year
               end

@@ -1,9 +1,9 @@
 class PoliciesController < ApplicationController
   load_and_authorize_resource
-  rescue_from EndCoverage::NoContributionStrategyError, with: :redirect_back_with_message
+  rescue_from EndCoverage::PremiumCalcError, with: :redirect_back_with_message
 
   def new
-    @form = PolicyForm.new(application_group_id: params[:application_group_id], household_id: params[:household_id])
+    @form = PolicyForm.new(family_id: params[:family_id], household_id: params[:household_id])
   end
 
   def show
@@ -18,7 +18,7 @@ class PoliciesController < ApplicationController
     raise request.inspect
 
     CreatePolicy.new.execute(request)
-    redirect_to application_groups_path
+    redirect_to families_path
   end
 
   def edit

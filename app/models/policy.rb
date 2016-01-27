@@ -32,10 +32,13 @@ class Policy
 
 
   validates_presence_of :eg_id
-#  validates_presence_of :plan_id
   validates_presence_of :pre_amt_tot
   validates_presence_of :tot_res_amt
   validates_presence_of :plan_id
+
+  embeds_many :aptc_credits
+  embeds_many :aptc_maximums
+  embeds_many :cost_sharing_variants
 
   embeds_many :enrollees
   accepts_nested_attributes_for :enrollees, reject_if: :all_blank, allow_destroy: true
@@ -43,7 +46,7 @@ class Policy
   embeds_many :comments
   accepts_nested_attributes_for :comments, reject_if: proc { |attribs| attribs['content'].blank? }, allow_destroy: true
 
-  belongs_to :hbx_enrollment_policy, class_name: "ApplicationGroup", inverse_of: :hbx_enrollment_policies, index: true
+  belongs_to :hbx_enrollment_policy, class_name: "Family", inverse_of: :hbx_enrollment_policies, index: true
   belongs_to :carrier, counter_cache: true, index: true
   belongs_to :broker, counter_cache: true, index: true # Assumes that broker change triggers new enrollment group
   belongs_to :plan, counter_cache: true, index: true
@@ -72,13 +75,14 @@ class Policy
   before_create :generate_enrollment_group_id
   before_save :invalidate_find_cache
   before_save :check_for_cancel_or_term
+  before_save :check_multi_aptc
 
   scope :all_active_states,   where(:aasm_state.in => %w[submitted resubmitted effectuated])
   scope :all_inactive_states, where(:aasm_state.in => %w[canceled carrier_canceled terminated])
 
   scope :individual_market, where(:employer_id => nil)
   scope :unassisted, where(:applied_aptc.in => ["0", "0.0", "0.00"])
-  scope :insurance_assisted, where(:applied_aptc.nin => ["0", "0.0", "0.00"])
+    scope :insurance_assisted, where(:applied_aptc.nin => ["0", "0.0", "0.00"])
 
   # scopes of renewal reports
   scope :active_renewal_policies, where({:employer_id => nil, :enrollees => {"$elemMatch" => { :rel_code => "self", :coverage_start => {"$gt" => Date.new(2014,12,31)}, :coverage_end.in => [nil]}}})
@@ -175,6 +179,10 @@ class Policy
 
   def subscriber
     enrollees.detect { |m| m.relationship_status_code == "self" }
+  end
+
+  def spouse
+    enrollees.detect { |m| m.relationship_status_code == "spouse" && !m.canceled? }
   end
 
   def enrollees_sans_subscriber
@@ -526,9 +534,15 @@ class Policy
 
   def coverage_period
     start_date = policy_start
+
     if !policy_end.nil?
-       return (start_date..policy_end)
+#      if policy_end.year > policy_start.year
+#        return (start_date..Date.new(start_date.year, 12, 31))
+#      else
+        return (start_date..policy_end)
+#      end
     end
+
     if employer_id.blank?
        return (start_date..Date.new(start_date.year, 12, 31))
     end
@@ -603,6 +617,66 @@ class Policy
     end_dates.uniq.length > 1
   end
 
+  def rejected?
+    edi_transactions = Protocols::X12::TransactionSetEnrollment.where({ "policy_id" => self.id })
+    (edi_transactions.count == 1 && edi_transactions.first.aasm_state == 'rejected') ? true : false
+  end
+
+  def has_no_enrollees?
+    active_enrollees = self.enrollees.reject{|en| en.canceled?}
+    active_enrollees.empty? ? true : false
+  end
+
+  def belong_to_year?(year)
+    self.subscriber.coverage_start > Date.new((year - 1), 12, 31) && self.subscriber.coverage_start < Date.new(year, 12, 31)
+  end
+
+  def authority_member
+    self.subscriber.person.authority_member
+  end
+
+  def belong_to_authority_member?
+    authority_member.hbx_member_id == self.subscriber.m_id
+  end
+
+  def check_multi_aptc
+    return true unless self.multi_aptc?
+    latest_record = self.latest_aptc_record
+    self.applied_aptc = latest_record.aptc
+    self.pre_amt_tot = latest_record.pre_amt_tot
+    self.tot_res_amt = latest_record.tot_res_amt
+  end
+
+  def reported_tot_res_amt_on(date)
+    return self.tot_res_amt unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).tot_res_amt
+  end
+
+  def reported_pre_amt_tot_on(date)
+    return self.pre_amt_tot unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).pre_amt_tot
+  end
+
+  def reported_aptc_on(date)
+    return self.applied_aptc unless multi_aptc?
+    return 0.0 unless self.aptc_record_on(date)
+    self.aptc_record_on(date).aptc
+  end
+
+  def multi_aptc?
+    self.aptc_credits.any?
+  end
+
+  def latest_aptc_record
+    aptc_credits.sort_by { |aptc_rec| aptc_rec.start_on }.last
+  end
+
+  def aptc_record_on(date)
+    self.aptc_credits.detect { |aptc_rec| aptc_rec.start_on <= date && aptc_rec.end_on >= date }
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s
@@ -630,5 +704,4 @@ class Policy
       enrollee.m_id
     end
   end
-
 end

@@ -13,7 +13,9 @@ module Caches
     end
 
     def self.allocate(klass)
-      Thread.current[key_for(klass)] = self.new(klass)
+      if Thread.current[key_for(klass)].blank?
+        Thread.current[key_for(klass)] = self.new(klass)
+      end
     end
 
     def self.release(klass)

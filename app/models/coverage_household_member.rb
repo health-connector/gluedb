@@ -4,14 +4,14 @@ class CoverageHouseholdMember
 
   embedded_in :coverage_household
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
   field :is_subscriber, type: Boolean, default: false
 
-  include BelongsToApplicant
+  include BelongsToFamilyMember
 
-  def application_group
+  def family
     return nil unless coverage_household
-    coverage_household.application_group
+    coverage_household.family
   end
 
   def is_subscriber?

@@ -7,7 +7,7 @@ module Services
     def self.publish(q_reason_uri, p_id)
       policy = Policy.where(:id => p_id).first
       p_action = policy_action(policy)
-      reason = p_action.downcase
+      reason = (p_action.downcase == "initial_enrollment") ? "initial_enrollment" : p_action.downcase
       operation = (p_action.downcase == "initial_enrollment") ? "add" : "change"
       v_destination = (p_action.downcase == "initial_enrollment") ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
       routing_key = case reason
@@ -45,7 +45,7 @@ module Services
     end
 
     def self.with_channel
-      session = Bunny.new(ExchangeInformation.amqp_uri)
+      session = Bunny.new(ExchangeInformation.amqp_uri, :heartbeat => 10)
       session.start
       chan = session.create_channel
       chan.prefetch(1)
@@ -58,7 +58,8 @@ module Services
       coverage_start = subscriber.coverage_start
       sub_person = subscriber.person
       policies_to_check = sub_person.policies.reject do |pol|
-        pol.canceled? || (pol.id == policy.id) || (pol.coverage_type.downcase != policy.coverage_type.downcase)
+        pol.canceled? || (pol.id == policy.id) || (pol.coverage_type.downcase != policy.coverage_type.downcase) ||
+          (pol.employer_id.blank? != policy.employer_id.blank?)
       end
       initial_enrollment =  ::PolicyInteractions::InitialEnrollment.new
       renewal = ::PolicyInteractions::Renewal.new

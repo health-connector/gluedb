@@ -4,14 +4,14 @@ class HbxEnrollmentExemption
 
   KINDS = %W[hardship health_care_ministry_member incarceration indian_tribe_member religious_conscience]
 
-  embedded_in :applicant
+  embedded_in :family_member
 
   field :kind, type: String
   field :certificate_number, type: String
   field :start_date, type: Date
   field :end_date, type: Date
 
-  field :applicant_id, type: Moped::BSON::ObjectId
+  field :family_member_id, type: Moped::BSON::ObjectId
   field :irs_group_id, type: Moped::BSON::ObjectId
 
   embeds_many :comments
@@ -27,8 +27,8 @@ class HbxEnrollmentExemption
 
 
   def parent
-    raise "undefined parent ApplicationGroup" unless application_group? 
-    self.application_group
+    raise "undefined parent family" unless family
+    self.family
   end
 
   def irs_group=(irs_instance)

@@ -9,11 +9,11 @@ module CanonicalVocabulary
         member.person.addresses[0].location_state_code == 'DC' ? 'D.C. Resident' : 'Not a D.C. Resident'
       end
 
-      def citizenship(applicant)
-        return if applicant.person_demographics.blank?
-        demographics = applicant.person_demographics
+      def citizenship(family_member)
+        return if family_member.person_demographics.blank?
+        demographics = family_member.person_demographics
         if demographics.citizen_status.blank?
-          raise "Citizenship status missing for person #{applicant.person.name_first} #{applicant.person.name_last}"
+          raise "Citizenship status missing for person #{family_member.person.name_first} #{family_member.person.name_last}"
         end
 
         citizenship_mapping = {
@@ -27,9 +27,9 @@ module CanonicalVocabulary
         end
       end
 
-      def tax_status(applicant)
-        return if applicant.financial_statements.empty?
-        financial_statement = applicant.financial_statements[0]
+      def tax_status(family_member)
+        return if family_member.financial_statements.empty?
+        financial_statement = family_member.financial_statements[0]
         tax_status = financial_statement.tax_filing_status.split('#')[1]
         case tax_status
         when 'non-filer'
@@ -37,17 +37,17 @@ module CanonicalVocabulary
         when 'dependent'
           'Tax Dependent'
         when 'tax_filer'
-          tax_filer_status(applicant, financial_statement)
+          tax_filer_status(family_member, financial_statement)
         end
       end
 
-      def tax_filer_status(applicant, financial_statement)
-        return 'Single' if is_single?(applicant)
+      def tax_filer_status(family_member, financial_statement)
+        return 'Single' if is_single?(family_member)
         (financial_statement.is_tax_filing_together == 'true') ? 'Married Filing Jointly' : 'Married Filing Separately'
       end
 
-      def is_single?(applicant)
-        relation = applicant.person_relationships.detect{|i| ['spouse', 'life_partner'].include?(i.relationship_uri)}
+      def is_single?(family_member)
+        relation = family_member.person_relationships.detect{|i| ['spouse', 'life_partner'].include?(i.relationship_uri)}
         relation.blank? ? true : false
       end
 

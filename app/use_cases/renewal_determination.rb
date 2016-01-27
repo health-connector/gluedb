@@ -58,14 +58,15 @@ class RenewalDetermination
       end
       date_market_renewal = policies.select do |pol|
         (pol.plan.coverage_type == plan.coverage_type) &&
-          pol.active_as_of?(renewal_threshold)
+          pol.active_as_of?(renewal_threshold) &&
+          (pol.is_shop? == (!employer.nil?))
       end
       date_market_renewal.each do |r_pol|
         candidate_enrollees = r_pol.enrollees.select do |en|
           r_pol.active_on_date_for?(renewal_threshold, en.m_id) &&
             (en.coverage_end.blank? || (en.coverage_end > renewal_threshold))
         end
-        if (candidate_enrollees.length > policy[:enrollees].length)
+        if (candidate_enrollees.length != policy[:enrollees].length) && (candidate_enrollees.length != 0)
           listener.enrollees_changed_for_renewal({
             :old_policy => candidate_enrollees.length,
             :new_policy => policy[:enrollees].length
@@ -86,7 +87,10 @@ class RenewalDetermination
     coverage_period = (start_date..coverage_end)
     new_policy = OpenStruct.new(:coverage_period => coverage_period, :carrier_id => plan.carrier_id)
     policies_to_check = policies.reject do |pol|
-      pol.canceled? || (pol.policy_start == start_date) || (pol.coverage_type.downcase != plan.coverage_type.downcase)
+      pol.canceled? ||
+        (pol.policy_start == start_date) ||
+        (pol.coverage_type.downcase != plan.coverage_type.downcase) ||
+        (pol.is_shop? == employer.nil?)
     end
     interactions = [
       ::PolicyInteractions::InitialEnrollment.new,

@@ -460,4 +460,100 @@ describe Policy do
       expect(subject).to be_future_active_for(enrollee.m_id)
     end
   end
+
+end
+
+
+describe Policy do
+
+  let(:aptc_credits) { [aptc_credit1, aptc_credit2] }
+  let(:aptc_credit1) { AptcCredit.new(start_on: Date.new(2014, 1, 1), end_on: Date.new(2014, 5, 31), aptc: 100.0, pre_amt_tot: 200.0, tot_res_amt: 100.0) }
+  let(:aptc_credit2) { AptcCredit.new(start_on: Date.new(2014, 6, 1), end_on: Date.new(2014, 12, 31), aptc: 125.0, pre_amt_tot: 300.0, tot_res_amt: 175.0) }
+
+  subject { Policy.new(applied_aptc: 0.0, pre_amt_tot: 250.0, tot_res_amt: 0.0, aptc_credits: aptc_credits) }
+
+  context ".check_multi_aptc" do
+    it "should set premium, responsible amount, aptc from latest aptc credit" do
+      subject.check_multi_aptc
+
+      expect(subject.applied_aptc).to eq(125.0)
+      expect(subject.pre_amt_tot).to eq(300.0) 
+      expect(subject.tot_res_amt).to eq(175.0)
+    end
+  end
+
+  context ".reported_tot_res_amt_on" do
+    let(:date) { Date.new(2014, 2, 1) }
+
+    context 'when aptc credits present' do 
+      it 'should return tot_res_amt from aptc credit for matching date' do
+        expect(subject.reported_tot_res_amt_on(date)).to eq(100.0)
+      end
+    end
+
+    context 'when aptc credit not present for given date' do 
+      let(:date) { Date.new(2015, 2, 1) }
+
+      it 'should return zero' do
+        expect(subject.reported_tot_res_amt_on(date)).to eq(0.0)
+      end
+    end
+
+    context 'when aptc credit not present' do
+      let(:aptc_credits) { [] }
+      it 'should return tot_res_amt from policy record' do
+        expect(subject.reported_tot_res_amt_on(date)).to eq(0.0) 
+      end
+    end
+  end
+
+  context ".reported_pre_amt_tot_on" do
+    let(:date) { Date.new(2014, 6, 1) }
+
+    context 'when aptc credits present' do 
+      it 'should return pre_amt_tot from aptc credit' do
+        expect(subject.reported_pre_amt_tot_on(date)).to eq(300.0)
+      end
+    end
+
+    context 'when aptc credit not present for given date' do 
+      let(:date) { Date.new(2015, 2, 1) }
+      
+      it 'should return zero' do
+        expect(subject.reported_pre_amt_tot_on(date)).to eq(0.0)
+      end
+    end
+
+    context 'when aptc credit not present' do
+      let(:aptc_credits) { [] }
+      it 'should return pre_amt_tot from policy record' do
+        expect(subject.reported_pre_amt_tot_on(date)).to eq(250.0) 
+      end
+    end
+  end
+
+  context ".reported_aptc_on" do
+    let(:date) { Date.new(2014, 12, 31) }
+
+    context 'when aptc credits present' do 
+      it 'should return pre_amt_tot from aptc credit' do
+        expect(subject.reported_aptc_on(date)).to eq(125.0)
+      end
+    end
+
+    context 'when aptc credit not present for given date' do 
+      let(:date) { Date.new(2015, 2, 1) }
+      
+      it 'should return zero' do
+        expect(subject.reported_aptc_on(date)).to eq(0.0)
+      end
+    end
+
+    context 'when aptc credit not present' do
+      let(:aptc_credits) { [] }
+      it 'should return pre_amt_tot from policy record' do
+        expect(subject.reported_aptc_on(date)).to eq(0.0) 
+      end
+    end
+  end
 end

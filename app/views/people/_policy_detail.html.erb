@@ -20,6 +20,17 @@
 		  <dd><%= policy_sponsor(p) %></dd>
 		  <dt>Status</dt>
 		  <dd><%= p.aasm_state.capitalize %></dd>
+		  <%if can? :edit, @people %>
+		  		<% ben_statuses = [] %>
+		  		<% p.enrollees.each do |enrollee| %>
+		  				<% ben_statuses.push(enrollee.ben_stat.upcase) %>
+		  		<% end %> 
+		  		<% ben_statuses.uniq! %>
+		  		<% if ben_statuses.any? {|ben_stat| ben_stat != "ACTIVE" } %>
+		  		<dt>Benefit Status</dt>
+		  		<dd><%= ben_statuses.join(",") %></dd>
+		  	<% end %>
+		  <% end %>
 			<% if (policy_market(p) == "Individual") %>
 			  <dt>Carrier to Bill?</dt>
 			  <dd><%= boolean_to_human(p.carrier_to_bill) %></dd>
@@ -37,9 +48,9 @@
 		<dd><%= p.broker.full_name %></dd>
 		<% end %>
 	        <dt>Created</dt>
-	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>
+	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
 	  	<dt>Updated</dt>
-	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p") %></dd>
+	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
 		</dl>
 	</div>
 	<% if can? :edit, @people%>
@@ -63,5 +74,3 @@
   <h6>Premium Payments</h6>
   <%= render 'payments_table', premium_payments: p.premium_payments %>
 <% end %>
-
-

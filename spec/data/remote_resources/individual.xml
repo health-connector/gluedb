@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<individual xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://openhbx.org/api/terms/1.0'>
+	<id>
+		<id>18941339</id>
+	</id>
+	<person>
+		<id>
+			<id>18941339</id>
+		</id>
+		<person_name>
+			<person_surname>Minerva</person_surname>
+			<person_given_name>Sulis</person_given_name>
+			<person_middle_name>J</person_middle_name>
+			<person_name_prefix_text>Dr.</person_name_prefix_text>
+			<person_name_suffix_text>of Bath</person_name_suffix_text>
+		</person_name>
+
+		<addresses>
+			<address>
+				<type>urn:openhbx:terms:v1:address_type#home</type>
+				<address_line_1>2515 I Bath Street NW</address_line_1>
+				<address_line_2>Apt. Whatever</address_line_2>
+				<location_city_name>Washington</location_city_name>
+				<location_state_code>DC</location_state_code>
+				<postal_code>20037</postal_code>
+			</address>
+
+		</addresses>
+		<emails>
+			<email>
+				<type>urn:openhbx:terms:v1:email_type#home</type>
+				<email_address>sminerva@gmail.com</email_address>
+			</email>
+
+		</emails>
+		<phones>
+			<phone>
+				<type>urn:openhbx:terms:v1:phone_type#home</type>
+				<full_phone_number>5882300123</full_phone_number>
+			</phone>
+			<phone>
+				<type>urn:openhbx:terms:v1:phone_type#beeper</type>
+				<full_phone_number>5882300123</full_phone_number>
+		        </phone>
+		</phones>
+	</person>
+
+	<person_demographics>
+		<ssn>321470519</ssn>
+		<sex>urn:openhbx:terms:v1:gender#female</sex>
+		<birth_date>19730724</birth_date>
+		<created_at>2015-10-15T01:20:52Z</created_at>
+		<modified_at>2015-10-21T17:55:16Z</modified_at>
+
+	</person_demographics>
+
+
+</individual>

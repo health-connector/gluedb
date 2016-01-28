@@ -45,7 +45,7 @@ describe Listeners::IndividualEventListener do
 
     it "should broadcast an error and requeue the message if the request times out" do
       allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["503", nil])
-      expect(channel).to receive(:nack).with(delivery_tag, true, false)
+      expect(channel).to receive(:reject).with(delivery_tag, true)
       expect(subject).to receive(:broadcast_event).with(timeout_error_properties, "")
       subject.on_message(di, props, body)
     end
@@ -242,7 +242,7 @@ describe Listeners::IndividualEventListener do
         } }
 
         it "should process the first change and requeue" do
-          expect(channel).to receive(:nack).with(delivery_tag, true, false)
+          expect(channel).to receive(:reject).with(delivery_tag, true)
           expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
           expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
           subject.on_message(di, props, body)

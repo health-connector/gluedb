@@ -1,6 +1,7 @@
 require "rails_helper"
 
 describe Listeners::IndividualEventListener do
+  let(:timestamp) { Time.mktime(2008,11,13,0,0,0) }
   let(:channel) { double }
   let(:subject) { Listeners::IndividualEventListener.new(channel, nil) }
   let(:individual_id) { "an individual id" }
@@ -10,12 +11,17 @@ describe Listeners::IndividualEventListener do
   let(:di) { double(:delivery_tag => delivery_tag) }
   let(:channel) { double }
 
+  before :each do
+    allow(Time).to receive(:now).and_return(timestamp)
+  end
+
   describe "contacting the 'callback' service to get the full individual resource" do
     let(:other_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.unknown_error",
       :headers => {
         :return_status => "500",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -23,7 +29,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "error.application.gluedb.individual_update_event_listener.resource_not_found",
       :headers => {
         :return_status => "404",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -31,13 +38,14 @@ describe Listeners::IndividualEventListener do
       :routing_key => "error.application.gluedb.individual_update_event_listener.resource_timeout",
       :headers => {
         :return_status => "503",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
     it "should broadcast an error and requeue the message if the request times out" do
       allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["503", nil])
-      expect(channel).to receive(:nack).with(delivery_tag, false, true)
+      expect(channel).to receive(:nack).with(delivery_tag, true, false)
       expect(subject).to receive(:broadcast_event).with(timeout_error_properties, "")
       subject.on_message(di, props, body)
     end
@@ -49,9 +57,9 @@ describe Listeners::IndividualEventListener do
       subject.on_message(di, props, body)
     end
 
-    it "should broadcast an error and requeue the message if the there is any other type of error" do
+    it "should broadcast an error and consume the message if the there is any other type of error" do
       allow(RemoteResources::IndividualResource).to receive(:retrieve).with(subject, individual_id).and_return(["500", "some string about something"])
-      expect(channel).to receive(:nack).with(delivery_tag, false, true)
+      expect(channel).to receive(:ack).with(delivery_tag, false)
       expect(subject).to receive(:broadcast_event).with(other_error_properties, "some string about something")
       subject.on_message(di, props, body)
     end
@@ -66,7 +74,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_created",
       :headers => {
         :return_status => "422",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -74,7 +83,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_created",
       :headers => {
         :return_status => "200",
-        :individual_id => individual_id 
+        :individual_id => individual_id, 
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -123,7 +133,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
         :return_status => "200",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -131,7 +142,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
         :return_status => "422",
-        :individual_id => individual_id 
+        :individual_id => individual_id, 
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -139,7 +151,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_dob_changed",
       :headers => {
         :return_status => "501",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -147,7 +160,8 @@ describe Listeners::IndividualEventListener do
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
         :return_status => "304",
-        :individual_id => individual_id 
+        :individual_id => individual_id,
+        :submitted_timestamp => timestamp.to_i
       }
     } }
 
@@ -222,12 +236,13 @@ describe Listeners::IndividualEventListener do
             :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated_partially",
             :headers => {
                 :return_status => "200",
-                :individual_id => individual_id
+                :individual_id => individual_id,
+                :submitted_timestamp => timestamp.to_i
             }
         } }
 
         it "should process the first change and requeue" do
-          expect(channel).to receive(:nack).with(delivery_tag, false, true)
+          expect(channel).to receive(:nack).with(delivery_tag, true, false)
           expect(individual_change_set).to receive(:process_first_edi_change).and_return(true)
           expect(subject).to receive(:broadcast_event).with(individual_updated_properties, "a body value for the resource")
           subject.on_message(di, props, body)

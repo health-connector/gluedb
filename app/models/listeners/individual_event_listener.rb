@@ -12,6 +12,7 @@ module Listeners
           :headers => {
             :individual_id => ind_id,
             :return_status => r_code.to_s
+            :submitted_timestamp => Time.now.to_i
           }
         },event_body)
     end

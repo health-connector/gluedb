@@ -28,7 +28,7 @@ module Listeners
           if change_set.multiple_changes?
             if change_set.process_first_edi_change
               resource_event_broadcast("info", "individual_updated_partially", individual_id, r_code, remote_resource)
-              channel.nack(delivery_info.delivery_tag, true, false)
+              channel.reject(delivery_info.delivery_tag, true)
             else
               resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
               channel.ack(delivery_info.delivery_tag, false)
@@ -74,7 +74,7 @@ module Listeners
         channel.ack(delivery_info.delivery_tag, false)
       when "503"
         resource_error_broadcast("resource_timeout", individual_id, r_code)
-        channel.nack(delivery_info.delivery_tag, true, false)
+        channel.reject(delivery_info.delivery_tag, true)
       else
         resource_error_broadcast("unknown_error", individual_id, r_code, resource_or_body)
         channel.ack(delivery_info.delivery_tag, false)

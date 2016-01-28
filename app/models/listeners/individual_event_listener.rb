@@ -11,7 +11,7 @@ module Listeners
           :routing_key => "#{level}.application.gluedb.individual_update_event_listener.#{event_key}",
           :headers => {
             :individual_id => ind_id,
-            :return_status => r_code.to_s
+            :return_status => r_code.to_s,
             :submitted_timestamp => Time.now.to_i
           }
         },event_body)

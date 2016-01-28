@@ -29,7 +29,7 @@ CSV.foreach(file_path, :headers => true) do |row|
       person = enrollee.person
 
       person.comments.build({content: "CF 1095-A Recon: Coverage end date changed from #{original_coverage_end}
-                                        to #{enrollee.coverage_end}", user: 'script', created_at: Time.now, updated_at: Time.now})
+                                        to #{enrollee.coverage_end} for policy #{policy.id}", user: 'script', created_at: Time.now, updated_at: Time.now})
 
       person.save
       enrollee.save

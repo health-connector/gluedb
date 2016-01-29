@@ -172,10 +172,10 @@ module ChangeSets
     end
 
     def names_changed?
-      (resource.name_first != record.name_first) &&
-        (resource.name_last != record.name_last) &&
-        (resource.name_middle != record.name_middle) &&
-        (resource.name_pfx != record.name_pfx) &&
+      (resource.name_first != record.name_first) ||
+        (resource.name_last != record.name_last) ||
+        (resource.name_middle != record.name_middle) ||
+        (resource.name_pfx != record.name_pfx) ||
         (resource.name_sfx != record.name_sfx)
     end
 

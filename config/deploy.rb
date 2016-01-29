@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "release-2.2"
+set :branch,      "development"
 set :rails_env,       "production"
 set :deploy_to,       "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -16,9 +16,9 @@ set :default_shell, "bash -l"
 # set :password, 'kermit12'
 # set :ssh_options, {:forward_agent => true, :keys=>[File.join(ENV["HOME"], "ec2", "AWS-dan.thomas-me.com", "ipublic-key.pem")]}
 
-role :web, "10.83.85.127"
-role :app, "10.83.85.127"
-role :db,  "10.83.85.127", :primary => true        # This is where Rails migrations will run
+role :web, "10.83.85.128"
+role :app, "10.83.85.128"
+role :db,  "10.83.85.128", :primary => true        # This is where Rails migrations will run
 # role :db,  "ec2-50-16-240-48.compute-1.amazonaws.com"                          # your slave db-server here
 
 # if you're still using the script/reaper helper you will need
@@ -50,7 +50,7 @@ namespace :deploy do
 
   desc "Restart nginx and unicorn"
   task :restart, :except => { :no_release => true } do
-    sudo "service eye_gluedb restart"
+    sudo "service eye_gluedb reload"
   end
 
   desc "Start nginx and unicorn"

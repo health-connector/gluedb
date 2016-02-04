@@ -1,15 +1,19 @@
 carrier_ids = Carrier.where({
- :abbrev => {"$eq" => "GHMSI"}
+ :abbrev => {"$ne" => "GHMSI"}
 }).map(&:id)
 
 puts carrier_ids
 
-active_start = Date.new(2014,9,1)
-active_end = Date.new(2015,9,1)
+active_start = Date.new(2015,1,31)
+active_end = Date.new(2016,1,31)
 
 plan_ids = Plan.where(:carrier_id => {"$in" => carrier_ids}).map(&:id)
 
 employer_ids = PlanYear.where(:start_date => {"$gt" => active_start, "$lt" => active_end}).map(&:employer_id)
+
+congress_feins = []
+
+cong_employer_ids = Employer.where(:fein => {"$in" => congress_feins}).map(&:id)
 
 eligible_m_pols = pols = Policy.where({
   :enrollees => {"$elemMatch" => {
@@ -42,6 +46,9 @@ Caches::MongoidCache.allocate(Employer)
 eligible_pols.each do |pol|
   if !pol.canceled?
     if !(pol.subscriber.coverage_start > active_end)
+      if cong_employer_ids.include?(pol.employer_id) and pol.subscriber.coverage_start.year != 2016
+        next
+      end
       subscriber_id = pol.subscriber.m_id
       subscriber_member = m_cache.lookup(subscriber_id)
       auth_subscriber_id = subscriber_member.person.authority_member_id

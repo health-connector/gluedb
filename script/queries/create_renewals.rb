@@ -4,8 +4,8 @@ feins = []
 
 emp_ids = Employer.where(:fein => { "$in" => feins } ).map(&:id)
 
-pols_mems = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,12,31)).query).where({ "employer_id" => { "$in" => emp_ids }})
-pols = Policy.where(PolicyStatus::Active.as_of(Date.new(2015,12,31)).query).where({ "employer_id" => { "$in" => emp_ids }}).no_timeout
+pols_mems = Policy.where(PolicyStatus::Active.as_of(Date.new(2016,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }})
+pols = Policy.where(PolicyStatus::Active.as_of(Date.new(2016,1,31)).query).where({ "employer_id" => { "$in" => emp_ids }}).no_timeout
 
 m_ids = []
 
@@ -35,7 +35,7 @@ pols.each do |pol|
     else
       if (sub_member.person.authority_member.hbx_member_id == pol.subscriber.m_id)
         begin
-          r_pol = pol.clone_for_renewal(Date.new(2016,1,1))
+          r_pol = pol.clone_for_renewal(Date.new(2016,2,1))
           calc.apply_calculations(r_pol)
           p_id = polgen.get_id
           old_p_id = pol._id

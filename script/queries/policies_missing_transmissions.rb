@@ -28,7 +28,7 @@ pols_2015.each do |pol|
   if !all_pol_ids.include?(pol.id)
     if !pol.canceled?
       unless ragus.include? pol.id
-        untransmitted.puts("#{pol.created_at} - #{pol.eg_id} - #{pol.plan.carrier.abbrev} - #{pol.subscriber.person.full_name}")
+        untransmitted.puts("#{pol.created_at} - #{pol.eg_id} - #{pol.plan.carrier.abbrev} - #{pol.try(:employer).try(:name)} - #{pol.subscriber.person.full_name}")
         untransmitted_pols << pol.id
       end
     end

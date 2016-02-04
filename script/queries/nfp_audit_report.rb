@@ -22,9 +22,7 @@ headers = [
   "Employer Name"
 ]
 
-congress_feins = [
-
-]
+congress_feins = []
 
 emp_ids = Employer.where(:fein => { "$in" => congress_feins }).map(&:id)
 
@@ -48,6 +46,10 @@ CSV.open("congressional_audit.csv", "w") do |csv|
   pols.each do |pol|
     if !pol.canceled?
       sub = pol.subscriber
+      end_date = Date.new(2015,12,31)
+      if sub.coverage_start.year == 2015 and sub.coverage_end == nil
+        sub.coverage_end = end_date
+      end
       s_person = pol.subscriber.person
       s_am = s_person.authority_member
       s_id = s_person.authority_member.hbx_member_id

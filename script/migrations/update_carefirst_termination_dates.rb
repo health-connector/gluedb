@@ -16,11 +16,11 @@ CSV.foreach(file_path, :headers => true) do |row|
       # Do not update a covered individual's existing coverage end date if the existing end date
       # is earlier than the new coverage end date adjustment.
       original_coverage_end = enrollee.coverage_end
-      if enrollee.coverage_end.present?
-        if enrollee.coverage_end > Date.strptime(row[7], "%m/%d/%Y")
+      if enrollee.coverage_start.present?
+        if enrollee.coverage_start < Date.strptime(row[7], "%m/%d/%Y") #new coverage_end
           enrollee.coverage_end = Date.strptime(row[7], "%m/%d/%Y")
         else
-          puts "coverage_end before calculated date"
+          puts "coverage_start before new coverage_end date"
         end
       else
         enrollee.coverage_end = Date.strptime(row[7], "%m/%d/%Y")

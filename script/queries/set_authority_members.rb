@@ -13,7 +13,12 @@ CSV.open("funky_authority_ids", 'w') do |csv|
   end
 end
 
+count = 0
+
 no_authority_ids.each do |nap|
+  count += 1
   nap.authority_member_id = nap.members.first.hbx_member_id
   nap.save!
 end
+
+puts count

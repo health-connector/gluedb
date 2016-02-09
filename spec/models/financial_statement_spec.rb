@@ -11,7 +11,7 @@ describe FinancialStatement do
 
     alternate_benefit = AlternateBenefit.new
     alternate_benefit.start_date = Date.new(2011, 01, 01)
-    alternate_benefit.end_date = Date.new(2015, 03, 03)
+    alternate_benefit.end_date = Date.new(Date.today.year, 03, 03)
 
     alternate_benefit2 = AlternateBenefit.new
     alternate_benefit2.start_date = Date.new(2013, 01, 01)

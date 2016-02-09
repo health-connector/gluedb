@@ -145,6 +145,9 @@ module Amqp
     end
 
     def broadcast_event(props, payload)
+      broadcaster = ::Amqp::EventBroadcaster.new(connection)
+      broadcaster.broadcast(props, payload)
+=begin
       publish_props = props.dup
       chan = connection.create_channel
       begin
@@ -158,6 +161,7 @@ module Amqp
       ensure
         chan.close
       end
+=end
     end
 
     def request(properties, payload, timeout = 15)

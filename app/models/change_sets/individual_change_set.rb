@@ -51,13 +51,13 @@ module ChangeSets
 
     def process_first_edi_change
       if home_address_changed?
-        process_home_address_change
+        @home_address_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif mailing_address_changed?
-        process_mailing_address_change
+        @mailing_address_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif home_email_changed?
-        process_home_email_change
+        @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif work_email_changed?
-        process_work_email_change
+        @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif home_phone_changed?
         process_home_phone_change
       elsif work_phone_changed?
@@ -69,14 +69,6 @@ module ChangeSets
       elsif gender_changed?
         process_gender_change
       end
-    end
-
-    def process_home_address_change
-      @home_address_changer.perform_update(record, resource, determine_policies_to_transmit)
-    end
-
-    def process_mailing_address_change
-      @mailing_address_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_name_change
@@ -92,14 +84,6 @@ module ChangeSets
     def process_gender_change
       cs = ::ChangeSets::PersonGenderChangeSet.new
       cs.perform_update(member, resource, determine_policies_to_transmit)
-    end
-
-    def process_home_email_change
-      @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
-    end
-
-    def process_work_email_change
-      @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_home_phone_change

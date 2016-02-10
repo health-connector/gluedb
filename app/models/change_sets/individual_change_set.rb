@@ -10,6 +10,8 @@ module ChangeSets
       end
       @home_address_changer = ::ChangeSets::PersonAddressChangeSet.new("home")
       @mailing_address_changer = ::ChangeSets::PersonAddressChangeSet.new("mailing")
+      @home_email_changer = ::ChangeSets::PersonEmailChangeSet.new("home")
+      @work_email_changer = ::ChangeSets::PersonEmailChangeSet.new("work")
     end
 
     def member
@@ -93,13 +95,11 @@ module ChangeSets
     end
 
     def process_home_email_change
-      cs = ::ChangeSets::PersonEmailChangeSet.new("home")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
+      @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_work_email_change
-      cs = ::ChangeSets::PersonEmailChangeSet.new("work")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
+      @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_home_phone_change
@@ -152,11 +152,11 @@ module ChangeSets
     end
 
     def home_email_changed?
-      email_has_changed?("home")
+      @home_email_changer.applicable?(record, resource)
     end
 
     def work_email_changed?
-      email_has_changed?("work")
+      @work_email_changer.applicable?(record, resource)
     end
 
     def home_address_changed?
@@ -212,12 +212,6 @@ module ChangeSets
     def phone_has_changed?(phone_kind)
       resource_address = resource.phones.detect { |adr| adr.phone_type == phone_kind }
       record_address = record.phones.detect { |adr| adr.phone_type == phone_kind }
-      items_changed?(resource_address, record_address)
-    end
-
-    def email_has_changed?(email_kind)
-      resource_address = resource.emails.detect { |adr| adr.email_type == email_kind }
-      record_address = record.emails.detect { |adr| adr.email_type == email_kind }
       items_changed?(resource_address, record_address)
     end
 

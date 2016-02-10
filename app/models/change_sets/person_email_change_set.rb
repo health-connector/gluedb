@@ -22,5 +22,21 @@ module ChangeSets
       notify_policies("change", "personnel_data", person_update.hbx_member_id, policies_to_notify)
       true
     end
+
+    def applicable?(person, person_update)
+      false
+    end
+
+    def applicable?(person, person_update)
+      resource_address = person_update.emails.detect { |adr| adr.email_kind == @address_kind }
+      record_address = person.emails.detect { |adr| adr.email_type == @address_kind }
+      items_changed?(resource_address, record_address)
+    end
+
+    def items_changed?(resource_item, record_item)
+      return false if (resource_item.nil? && record_item.nil?)
+      return true if record_item.nil?
+      !record_item.match(resource_item)
+    end
   end
 end

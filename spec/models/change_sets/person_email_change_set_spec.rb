@@ -128,4 +128,61 @@ describe ChangeSets::PersonEmailChangeSet do
       end
     end
   end
+
+  describe "#applicable?" do
+    let(:email_kind) { "home" }
+    let(:changeset) { ChangeSets::PersonEmailChangeSet.new(email_kind) }
+    let(:person_email) { instance_double("::Email", :email_type => email_kind) }
+    let(:person_resource_email) { double(:email_kind => email_kind ) }
+
+    subject { changeset.applicable?(person, person_resource) }
+
+    describe "given a person with a home email and an update to remove it" do
+      let(:person) { instance_double("::Person", :emails => [person_email]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => []) }
+
+      before(:each) do
+        allow(person_email).to receive(:match).with(nil).and_return(false)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person with no home email and an update to add one" do
+      let(:person) { instance_double("::Person", :emails => []) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => [person_resource_email]) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person with no home email and an update which does not contain one" do
+      let(:person) { instance_double("::Person", :emails => []) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => []) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    describe "given a person update with a different home email from the existing record" do
+      let(:person) { instance_double("::Person", :emails => [person_email]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => [person_resource_email]) }
+
+      before(:each) do
+        allow(person_email).to receive(:match).with(person_resource_email).and_return(false)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person update with the same home email as the existing record" do
+      let(:person) { instance_double("::Person", :emails => [person_email]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => [person_resource_email]) }
+
+      before(:each) do
+        allow(person_email).to receive(:match).with(person_resource_email).and_return(true)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+  end
 end

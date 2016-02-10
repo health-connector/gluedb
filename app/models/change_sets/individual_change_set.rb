@@ -8,6 +8,8 @@ module ChangeSets
       if @individual_exists
         @record = remote_resource.record
       end
+      @home_address_changer = ::ChangeSets::PersonAddressChangeSet.new("home")
+      @mailing_address_changer = ::ChangeSets::PersonAddressChangeSet.new("mailing")
     end
 
     def member
@@ -68,13 +70,11 @@ module ChangeSets
     end
 
     def process_home_address_change
-      cs = ::ChangeSets::PersonAddressChangeSet.new("home")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
+      @home_address_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_mailing_address_change
-      cs = ::ChangeSets::PersonAddressChangeSet.new("mailing")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
+      @mailing_address_changer.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def process_name_change
@@ -160,15 +160,11 @@ module ChangeSets
     end
 
     def home_address_changed?
-      resource_address = resource.addresses.detect { |adr| adr.address_kind == "home" }
-      record_address = record.addresses.detect { |adr| adr.address_type == "home" }
-      # Don't wipe home addresses
-      return false if (resource_address.nil? && (!record_address.nil?))
-      address_has_changed?("home")
+      @home_address_changer.applicable?(record, resource)
     end
 
     def mailing_address_changed?
-      address_has_changed?("mailing")
+      @mailing_address_changer.applicable?(record, resource)
     end
 
     def names_changed?
@@ -222,12 +218,6 @@ module ChangeSets
     def email_has_changed?(email_kind)
       resource_address = resource.emails.detect { |adr| adr.email_type == email_kind }
       record_address = record.emails.detect { |adr| adr.email_type == email_kind }
-      items_changed?(resource_address, record_address)
-    end
-
-    def address_has_changed?(addy_kind)
-      resource_address = resource.addresses.detect { |adr| adr.address_type == addy_kind }
-      record_address = record.addresses.detect { |adr| adr.address_type == addy_kind }
       items_changed?(resource_address, record_address)
     end
 

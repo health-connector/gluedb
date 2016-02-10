@@ -26,5 +26,17 @@ module ChangeSets
     def edi_change_reason
       (address_kind == "home") ? "change_of_location" : "personnel_data"
     end
+
+    def applicable?(person, person_update)
+      resource_address = person_update.addresses.detect { |adr| adr.address_kind == @address_kind }
+      record_address = person.addresses.detect { |adr| adr.address_type == @address_kind }
+      items_changed?(resource_address, record_address)
+    end
+
+    def items_changed?(resource_item, record_item)
+      return false if (resource_item.nil? && record_item.nil?)
+      return true if record_item.nil?
+      !record_item.match(resource_item)
+    end
   end
 end

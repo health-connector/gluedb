@@ -128,4 +128,59 @@ describe ChangeSets::PersonAddressChangeSet do
     end
   end
 
+  describe "given an update with no mailing address against a person with no mailing address" do
+    let(:address_kind) { "mailing" }
+    let(:person) { instance_double("::Person", :addresses => []) }
+    let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => []) }
+    subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
+    it "should not be applicable" do
+      expect(subject.applicable?(person, person_resource)).to be_falsey
+    end
+  end
+
+  describe "given a person update with a different home address as the existing record" do
+    let(:address_kind) { "home" }
+    let(:person) { instance_double("::Person", :addresses => [person_address]) }
+    let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => [person_resource_address]) }
+    let(:person_address) { instance_double("::Address", :address_type => address_kind) }
+    let(:person_resource_address) { double(:address_kind => address_kind) }
+    subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
+    before(:each) do
+      allow(person_address).to receive(:match).with(person_resource_address).and_return(false)
+    end
+    it "should be applicable" do
+      expect(subject.applicable?(person, person_resource)).to be_truthy
+    end
+  end
+
+  describe "given a person update with the same home address as the existing record" do
+    let(:address_kind) { "home" }
+    let(:person) { instance_double("::Person", :addresses => [person_address]) }
+    let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => [person_resource_address]) }
+    let(:person_address) { instance_double("::Address", :address_type => address_kind) }
+    let(:person_resource_address) { double(:address_kind => address_kind) }
+    subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
+    before(:each) do
+      allow(person_address).to receive(:match).with(person_resource_address).and_return(true)
+    end
+    it "should not be applicable" do
+      expect(subject.applicable?(person, person_resource)).to be_falsey
+    end
+  end
+
+  describe "given person who has a mailing address, and an update to remove that mailing address" do
+    let(:address_kind) { "mailing" }
+    let(:person) { instance_double("::Person", :addresses => [person_address]) }
+    let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :addresses => []) }
+    let(:person_address) { instance_double("::Address", :address_type => address_kind) }
+
+    before(:each) do
+      allow(person_address).to receive(:match).with(nil).and_return(false)
+    end
+    subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
+    it "should be applicable" do
+      expect(subject.applicable?(person, person_resource)).to be_truthy
+    end
+  end
 end
+

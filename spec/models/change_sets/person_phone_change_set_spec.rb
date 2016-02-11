@@ -128,4 +128,61 @@ describe ChangeSets::PersonPhoneChangeSet do
       end
     end
   end
+
+  describe "#applicable?" do
+    let(:phone_kind) { "home" }
+    let(:changeset) { ChangeSets::PersonPhoneChangeSet.new(phone_kind) }
+    let(:person_phone) { instance_double("::Phone", :phone_type => phone_kind) }
+    let(:person_resource_phone) { double(:phone_kind => phone_kind ) }
+
+    subject { changeset.applicable?(person, person_resource) }
+
+    describe "given a person with a home phone and an update to remove it" do
+      let(:person) { instance_double("::Person", :phones => [person_phone]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :phones => []) }
+
+      before(:each) do
+        allow(person_phone).to receive(:match).with(nil).and_return(false)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person with no home phone and an update to add one" do
+      let(:person) { instance_double("::Person", :phones => []) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :phones => [person_resource_phone]) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person with no home phone and an update which does not contain one" do
+      let(:person) { instance_double("::Person", :phones => []) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :phones => []) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    describe "given a person update with a different home phone from the existing record" do
+      let(:person) { instance_double("::Person", :phones => [person_phone]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :phones => [person_resource_phone]) }
+
+      before(:each) do
+        allow(person_phone).to receive(:match).with(person_resource_phone).and_return(false)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe "given a person update with the same home email as the existing record" do
+      let(:person) { instance_double("::Person", :phones => [person_phone]) }
+      let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :phones => [person_resource_phone]) }
+
+      before(:each) do
+        allow(person_phone).to receive(:match).with(person_resource_phone).and_return(true)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+  end
 end

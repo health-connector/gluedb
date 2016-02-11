@@ -12,6 +12,8 @@ module ChangeSets
       @mailing_address_changer = ::ChangeSets::PersonAddressChangeSet.new("mailing")
       @home_email_changer = ::ChangeSets::PersonEmailChangeSet.new("home")
       @work_email_changer = ::ChangeSets::PersonEmailChangeSet.new("work")
+      @home_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("phone")
+      @work_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("work")
     end
 
     def member
@@ -128,11 +130,11 @@ module ChangeSets
     end
 
     def home_phone_changed?
-      phone_has_changed?("home")
+      @home_phone_changer.applicable?(record, resource)
     end
 
     def work_phone_changed?
-      phone_has_changed?("work")
+      @work_phone_changer.applicable?(record, resource)
     end
 
     def home_email_changed?
@@ -185,18 +187,6 @@ module ChangeSets
         acc
       end
       selected_policies.values
-    end
-
-    def items_changed?(resource_item, record_item)
-      return false if (resource_item.nil? && record_item.nil?)
-      return true if record_item.nil?
-      !record_item.match(resource_item)
-    end
-
-    def phone_has_changed?(phone_kind)
-      resource_address = resource.phones.detect { |adr| adr.phone_type == phone_kind }
-      record_address = record.phones.detect { |adr| adr.phone_type == phone_kind }
-      items_changed?(resource_address, record_address)
     end
 
     def build_new_person

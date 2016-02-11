@@ -12,7 +12,7 @@ module ChangeSets
       @mailing_address_changer = ::ChangeSets::PersonAddressChangeSet.new("mailing")
       @home_email_changer = ::ChangeSets::PersonEmailChangeSet.new("home")
       @work_email_changer = ::ChangeSets::PersonEmailChangeSet.new("work")
-      @home_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("phone")
+      @home_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("home")
       @work_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("work")
     end
 
@@ -61,9 +61,9 @@ module ChangeSets
       elsif work_email_changed?
         @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif home_phone_changed?
-        process_home_phone_change
+        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif work_phone_changed?
-        process_work_phone_change
+        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif names_changed?
         process_name_change
       elsif ssn_changed?
@@ -86,16 +86,6 @@ module ChangeSets
     def process_gender_change
       cs = ::ChangeSets::PersonGenderChangeSet.new
       cs.perform_update(member, resource, determine_policies_to_transmit)
-    end
-
-    def process_home_phone_change
-      cs = ::ChangeSets::PersonPhoneChangeSet.new("home")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
-    end
-
-    def process_work_phone_change
-      cs = ::ChangeSets::PersonPhoneChangeSet.new("work")
-      cs.perform_update(record, resource, determine_policies_to_transmit)
     end
 
     def any_changes?
@@ -156,9 +146,14 @@ module ChangeSets
     def names_changed?
       (resource.name_first != record.name_first) ||
         (resource.name_last != record.name_last) ||
-        (resource.name_middle != record.name_middle) ||
-        (resource.name_pfx != record.name_pfx) ||
-        (resource.name_sfx != record.name_sfx)
+        name_values_changed?(record.name_middle, resource.name_middle) ||
+        name_values_changed?(record.name_sfx, resource.name_sfx) ||
+        name_values_changed?(record.name_pfx, resource.name_pfx)
+    end
+
+    def name_values_changed?(record_value, resource_value)
+      return false if (record_value.blank? && resource_value.blank?)
+      !(record_value == resource_value)
     end
 
     def ssn_changed?

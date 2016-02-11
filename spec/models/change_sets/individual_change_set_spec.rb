@@ -85,11 +85,84 @@ describe ::ChangeSets::IndividualChangeSet do
   end
 
   context "with a record that does exist" do
+    let(:remote_resource_exists) { true }
+    let(:remote_resource) { double(:exists? => remote_resource_exists, :record => existing_record, :name_first => nil, :name_middle => nil, :name_last => nil, :name_pfx => nil, :name_sfx => nil, :ssn => nil, :gender => nil, :dob => nil, :hbx_member_id => member_id) }
+    let(:existing_record) do
+      Person.new(:members => [Member.new(:hbx_member_id => member_id)])
+    end
+    let(:member_id) { "some member id whatever" }
+    let(:home_address_changer) { double }
+    let(:mailing_address_changer) { double }
+    let(:home_phone_changer) { double }
+    let(:work_phone_changer) { double }
+    let(:home_email_changer) { double }
+    let(:work_email_changer) { double }
+    let(:home_address_changed) { false }
+    let(:mailing_address_changed) { false }
+    let(:home_email_changed) { false }
+    let(:work_email_changed) { false }
+    let(:home_phone_changed) { false }
+    let(:work_phone_changed) { false }
+
+    before :each do 
+      allow(::ChangeSets::PersonAddressChangeSet).to receive(:new).with("home").and_return(home_address_changer)
+      allow(::ChangeSets::PersonAddressChangeSet).to receive(:new).with("mailing").and_return(mailing_address_changer)
+      allow(::ChangeSets::PersonPhoneChangeSet).to receive(:new).with("home").and_return(home_phone_changer)
+      allow(::ChangeSets::PersonPhoneChangeSet).to receive(:new).with("work").and_return(work_phone_changer)
+      allow(::ChangeSets::PersonEmailChangeSet).to receive(:new).with("home").and_return(home_email_changer)
+      allow(::ChangeSets::PersonEmailChangeSet).to receive(:new).with("work").and_return(work_email_changer)
+      allow(home_address_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_address_changed)
+      allow(mailing_address_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(mailing_address_changed)
+      allow(home_phone_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_phone_changed)
+      allow(work_phone_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(work_phone_changed)
+      allow(home_email_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_email_changed)
+      allow(work_email_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(work_email_changed)
+    end
+
     describe "#individual_exists?" do
-      let(:remote_resource_exists) { true }
-      let(:existing_record) { double }
       subject { changeset.individual_exists? }
       it { is_expected.to be_truthy }
+    end
+
+    context "with a no changes" do
+      describe "#any_changes?" do
+        subject { changeset.any_changes? }
+        it { is_expected.to be_falsey }
+      end
+
+      describe "#multiple_changes?" do
+        subject { changeset.multiple_changes? }
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context "with a change of home address" do
+      let(:home_address_changed) { true }
+
+      describe "#any_changes?" do
+        subject { changeset.any_changes? }
+        it { is_expected.to be_truthy }
+      end
+
+      describe "#multiple_changes?" do
+        subject { changeset.multiple_changes? }
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context "with a change of home address, and a change of work email" do
+      let(:home_address_changed) { true }
+      let(:work_email_changed) { true }
+
+      describe "#any_changes?" do
+        subject { changeset.any_changes? }
+        it { is_expected.to be_truthy }
+      end
+
+      describe "#multiple_changes?" do
+        subject { changeset.multiple_changes? }
+        it { is_expected.to be_truthy }
+      end
     end
   end
 end

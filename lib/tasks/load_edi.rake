@@ -35,12 +35,23 @@ namespace :edi do
 
     desc "Import outbound 820s from the exported EDI"
     task :outbound_820 => :environment do
-      f = File.join(Rails.root, "db", "data", "b2b_outbound_820.csv")
+      f = File.join(Rails.root, "db", "data", "all_json.csv")
+      bgn_blacklist = import_bgn_blacklist
+      ic = Parsers::Edi::ImportCache.new
+      Caches::HiosCache.allocate
+      Caches::MongoidCache.allocate(Plan)
       with_progress_bar(f, "820s") do |row|
         record = row.to_hash
         f_name = record['PROTOCOLMESSAGEID']
-        p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'])
-        p.persist!
+        trans_kind = record['TRANSTYPE']
+        case trans_kind
+        when "999"
+        when "TA1"
+        when "820"
+          p = Parsers::Edi::RemittanceTransmission.new(f_name, record['WIREPAYLOADUNPACKED'], ic, pb)
+          p.persist!
+        else
+        end
       end
     end
 
@@ -53,7 +64,7 @@ namespace :edi do
       ic = Parsers::Edi::ImportCache.new
       Caches::HiosCache.allocate
       Caches::MongoidCache.allocate(Plan)
-#     RubyProf.start
+      #     RubyProf.start
       Parsers::Edi::TransmissionFile.init_imports
       with_progress_bar(f834, "834s") do |row, pb|
         record = row.to_hash
@@ -98,11 +109,11 @@ namespace :edi do
         else
         end
       end
-#      result = RubyProf.stop
-#      printer = RubyProf::GraphHtmlPrinter.new(result)
-#      r_file = File.open('profile.html', 'w')
-#      printer.print(r_file)
-#      r_file.close
+      #      result = RubyProf.stop
+      #      printer = RubyProf::GraphHtmlPrinter.new(result)
+      #      r_file = File.open('profile.html', 'w')
+      #      printer.print(r_file)
+      #      r_file.close
       Caches::HiosCache.release
       Caches::MongoidCache.release(Plan)
     end

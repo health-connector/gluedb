@@ -60,16 +60,16 @@ module ChangeSets
         @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif work_email_changed?
         @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif home_phone_changed?
-        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif work_phone_changed?
-        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif names_changed?
         process_name_change
       elsif ssn_changed?
         process_ssn_change
       elsif gender_changed?
         process_gender_change
+      elsif home_phone_changed?
+        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+      elsif work_phone_changed?
+        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       end
     end
 

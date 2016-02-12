@@ -66,11 +66,9 @@ module Listeners
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       individual_id = m_headers["individual_id"].to_s
-      sleep(3)
       r_code, resource_or_body = ::RemoteResources::IndividualResource.retrieve(self, individual_id)
       case r_code.to_s
       when "200"
-        resource_event_broadcast("info", "individual_callback_result", individual_id, r_code, resource_or_body)
         process_retrieved_resource(delivery_info, individual_id, r_code, resource_or_body)
       when "404"
         resource_error_broadcast("resource_not_found", individual_id, r_code)

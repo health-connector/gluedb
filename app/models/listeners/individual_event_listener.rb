@@ -65,6 +65,7 @@ module Listeners
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       individual_id = m_headers["individual_id"].to_s
+      sleep(3)
       r_code, resource_or_body = ::RemoteResources::IndividualResource.retrieve(self, individual_id)
       case r_code.to_s
       when "200"

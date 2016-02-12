@@ -37,7 +37,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "500",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -46,7 +46,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "404",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -55,7 +55,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "503",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -106,7 +106,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "422",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -115,7 +115,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "200",
         :individual_id => individual_id, 
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -173,7 +173,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "200",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -182,7 +182,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "422",
         :individual_id => individual_id, 
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -191,7 +191,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "501",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -200,7 +200,7 @@ describe Listeners::IndividualEventListener do
       :headers => {
         :return_status => "304",
         :individual_id => individual_id,
-        :submitted_timestamp => timestamp.to_i
+        :submitted_timestamp => timestamp
       }
     } }
 
@@ -299,7 +299,7 @@ describe Listeners::IndividualEventListener do
           :headers => {
             :return_status => "200",
             :individual_id => individual_id,
-            :submitted_timestamp => timestamp.to_i
+            :submitted_timestamp => timestamp
           }
         } }
 

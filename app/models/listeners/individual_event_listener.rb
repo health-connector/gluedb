@@ -7,12 +7,13 @@ module Listeners
 
     def resource_event_broadcast(level, event_key, ind_id, r_code, body = "")
         event_body = (body.respond_to?(:to_s) ? body.to_s : body.inspect)
+        submit_time = 
         broadcast_event({
           :routing_key => "#{level}.application.gluedb.individual_update_event_listener.#{event_key}",
           :headers => {
             :individual_id => ind_id,
             :return_status => r_code.to_s,
-            :submitted_timestamp => Time.now.to_i
+            :submitted_timestamp => Time.now
           }
         },event_body)
     end

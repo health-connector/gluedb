@@ -14,6 +14,7 @@ module ChangeSets
       @work_email_changer = ::ChangeSets::PersonEmailChangeSet.new("work")
       @home_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("home")
       @work_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("work")
+      @mobile_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("mobile")
     end
 
     def member
@@ -70,6 +71,8 @@ module ChangeSets
         @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif work_phone_changed?
         @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+      elsif mobile_phone_changed?
+        @mobile_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
       end
     end
 
@@ -111,6 +114,7 @@ module ChangeSets
         work_email_changed?,
         home_phone_changed?,
         work_phone_changed?,
+        mobile_phone_changed?,
         dob_changed?
       ]
     end
@@ -125,6 +129,10 @@ module ChangeSets
 
     def work_phone_changed?
       @work_phone_changer.applicable?(record, resource)
+    end
+
+    def mobile_phone_changed?
+      @mobile_phone_changer.applicable?(record, resource)
     end
 
     def home_email_changed?

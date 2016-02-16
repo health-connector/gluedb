@@ -95,6 +95,7 @@ describe ::ChangeSets::IndividualChangeSet do
     let(:mailing_address_changer) { double }
     let(:home_phone_changer) { double }
     let(:work_phone_changer) { double }
+    let(:mobile_phone_changer) { double }
     let(:home_email_changer) { double }
     let(:work_email_changer) { double }
     let(:home_address_changed) { false }
@@ -103,18 +104,21 @@ describe ::ChangeSets::IndividualChangeSet do
     let(:work_email_changed) { false }
     let(:home_phone_changed) { false }
     let(:work_phone_changed) { false }
+    let(:mobile_phone_changed) { false }
 
     before :each do 
       allow(::ChangeSets::PersonAddressChangeSet).to receive(:new).with("home").and_return(home_address_changer)
       allow(::ChangeSets::PersonAddressChangeSet).to receive(:new).with("mailing").and_return(mailing_address_changer)
       allow(::ChangeSets::PersonPhoneChangeSet).to receive(:new).with("home").and_return(home_phone_changer)
       allow(::ChangeSets::PersonPhoneChangeSet).to receive(:new).with("work").and_return(work_phone_changer)
+      allow(::ChangeSets::PersonPhoneChangeSet).to receive(:new).with("mobile").and_return(mobile_phone_changer)
       allow(::ChangeSets::PersonEmailChangeSet).to receive(:new).with("home").and_return(home_email_changer)
       allow(::ChangeSets::PersonEmailChangeSet).to receive(:new).with("work").and_return(work_email_changer)
       allow(home_address_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_address_changed)
       allow(mailing_address_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(mailing_address_changed)
       allow(home_phone_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_phone_changed)
       allow(work_phone_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(work_phone_changed)
+      allow(mobile_phone_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(mobile_phone_changed)
       allow(home_email_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(home_email_changed)
       allow(work_email_changer).to receive(:applicable?).with(existing_record, remote_resource).and_return(work_email_changed)
     end

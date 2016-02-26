@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 describe Parsers::Edi::PersonLoopValidator do
-  let(:person_loop) { double(carrier_member_id: carrier_member_id)}
+  let(:person_loop) { double(carrier_member_id: carrier_member_id, policy_loops: policy_loops)}
   let(:listener) { double }
+  let(:policy_loops) { [policy_loop] }
+  let(:policy_loop) { double(action: :change) }
   let(:policy) { nil }
   let(:validator) { Parsers::Edi::PersonLoopValidator.new }
 

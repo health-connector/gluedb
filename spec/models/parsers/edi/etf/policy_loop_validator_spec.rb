@@ -1,7 +1,7 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe PolicyLoopValidator do
-  let(:policy) { double(id: carrier_policy_id)}
+  let(:policy) { double(id: carrier_policy_id, action: :change)}
   let(:listener) { double }
   let(:validator) { PolicyLoopValidator.new }
 

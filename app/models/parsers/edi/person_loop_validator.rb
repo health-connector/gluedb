@@ -4,12 +4,6 @@ module Parsers
       def validate(person_loop, listener, policy)
         valid = true
         carrier_member_id = person_loop.carrier_member_id
-        if(carrier_member_id.blank?)
-          listener.missing_carrier_member_id(person_loop)
-          valid = false
-        else
-          listener.found_carrier_member_id(carrier_member_id)
-        end
         if policy
           enrollee = policy.enrollee_for_member_id(person_loop.member_id)
           if enrollee.blank?
@@ -17,9 +11,20 @@ module Parsers
             valid = false
           end
         end
+        policy_loop = person_loop.policy_loops.first
+        if policy_loop
+          is_stop = policy_loop.action == :stop
+          if !is_stop
+            if(carrier_member_id.blank?)
+              listener.missing_carrier_member_id(person_loop)
+              valid = false
+            else
+              listener.found_carrier_member_id(carrier_member_id)
+            end
+          end
+        end
         return false unless valid
         if policy
-          policy_loop = person_loop.policy_loops.first
           is_stop = policy_loop.action == :stop
           if !policy.is_shop?
             enrollee = policy.enrollee_for_member_id(person_loop.member_id)

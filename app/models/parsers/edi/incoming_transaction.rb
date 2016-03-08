@@ -71,6 +71,10 @@ module Parsers
         @policy = policy
       end
 
+      def coverage_end_before_coverage_start(details)
+        @errors << "Coverage end before coverage start: Member #{details[:member_id]}, coverage_start: #{details[:coverage_start]}, coverage_end: #{details[:coverage_end]}"
+      end
+
       def term_or_cancel_for_2014_individual(details)
         @errors << "Cancel/Term issued on 2014 policy. Member #{details[:member_id]}, end date #{details[:date]}"
       end

@@ -22,6 +22,20 @@ module Parsers
               listener.found_carrier_member_id(carrier_member_id)
             end
           end
+          if policy
+            if is_stop
+               enrollee = policy.enrollee_for_member_id(person_loop.member_id)
+               coverage_end_date = Date.strptime(policy_loop.coverage_end,"%Y%m%d") rescue nil
+               if (enrollee.coverage_start > coverage_end_date)
+                 listener.coverage_end_before_coverage_start(
+                   :coverage_end => policy_loop.coverage_end,
+                   :coverage_start => enrollee.coverage_start.strftime("%Y%m%d"),
+                   :member_id => person_loop.member_id
+                 )
+                 valid = false
+               end
+            end
+          end
         end
         return false unless valid
         if policy

@@ -5,6 +5,7 @@ module Parsers
       include ActiveModel::Validations
 
       attr_accessor :file_name, :message_type, :etf_loop
+      validate :on_blacklist
 
       validate :has_pre_amt_tot
       validate :has_all_premium_amounts
@@ -14,7 +15,6 @@ module Parsers
       validate :has_valid_employer
       validate :plan_exists
       validate :no_bogus_broker
-      validate :on_blacklist
       validate :has_st_segment
 
       def initialize(f_name, mt, el, carrier, blist, i_cache)

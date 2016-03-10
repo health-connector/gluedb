@@ -30,12 +30,8 @@ module ChangeSets
       old_values_hash = {
         "member_id" => member_id
       }
-      if person.name_first != person_resource.name_first
-        old_values_hash["name_first"] = person.name_first
-      end
-      if person.name_last != person_resource.name_last
-        old_values_hash["name_last"] = person.name_last
-      end
+      old_values_hash["name_first"] = person.name_first
+      old_values_hash["name_last"] = person.name_last
       if person.name_middle != person_resource.name_middle
         if !person.name_middle.blank?
           old_values_hash["name_middle"] = person.name_middle

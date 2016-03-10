@@ -74,11 +74,15 @@ module CanonicalVocabulary
       has_names = has_name_pfx || has_name_sfx || has_name_first || has_name_middle || has_name_last
       if has_names
         xml['proc'].previous_name do |xml|
-          xml['proc'].name_first(data["name_first"])
+          if has_name_first?
+            xml['proc'].name_first(data["name_first"])
+          end
           if has_name_middle
             xml['proc'].name_middle(data["name_middle"])
           end
-          xml['proc'].name_last(data["name_last"])
+          if has_name_last?
+            xml['proc'].name_last(data["name_last"])
+          end
           if has_name_pfx
             xml['proc'].name_pfx(data["name_pfx"])
           end

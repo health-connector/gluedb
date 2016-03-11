@@ -103,6 +103,7 @@ module Listeners
       chan.prefetch(1)
       q = chan.queue(self.queue_name, :durable => true)
       self.new(chan, q).subscribe(:block => true, :manual_ack => true)
+      conn.close
     end
   end
 end

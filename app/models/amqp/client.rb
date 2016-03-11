@@ -168,5 +168,17 @@ module Amqp
       req_chan = channel.connection
       ::Amqp::Requestor.new(req_chan).request(properties, payload, timeout)
     end
+
+    def with_response_exchange(connection)
+      chan = connection.create_channel
+      begin
+        publish_exchange = chan.default_exchange
+        chan.confirm_select
+        yield publish_exchange
+        chan.wait_for_confirms
+      ensure
+        chan.close
+      end
+    end
   end
 end

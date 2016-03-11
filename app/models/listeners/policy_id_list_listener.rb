@@ -7,7 +7,7 @@ module Listeners
       headers = (properties.headers || {})
       reply_to = properties.reply_to
       response_properties = {
-        :timestamp => Time.now,
+        :timestamp => Time.now.to_i,
         :routing_key => reply_to,
         :headers => {
           :return_status => "200",

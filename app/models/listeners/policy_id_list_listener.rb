@@ -11,7 +11,7 @@ module Listeners
         :routing_key => reply_to,
         :headers => {
           :return_status => "200",
-          :deflated_response => "true"
+          :deflated_payload => "true"
         }
       }
 

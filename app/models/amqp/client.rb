@@ -169,7 +169,7 @@ module Amqp
       ::Amqp::Requestor.new(req_chan).request(properties, payload, timeout)
     end
 
-    def with_response_exchange(connection)
+    def with_response_exchange
       chan = connection.create_channel
       begin
         publish_exchange = chan.default_exchange

@@ -96,7 +96,7 @@ describe ChangeSets::PersonPhoneChangeSet do
     end
 
     describe "updating a work phone" do
-      let(:phone_kind) { "work" }
+      let(:phone_kind) { "home" }
 
       describe "with an invalid new phone" do
         let(:address_update_result) { false }

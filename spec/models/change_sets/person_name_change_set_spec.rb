@@ -36,7 +36,11 @@ describe ChangeSets::PersonNameChangeSet do
     }
 
     let(:old_name_values) {
-      {"member_id"=>"some random member id wahtever", "name_sfx"=>"MD"}
+      {   "member_id"=>"some random member id wahtever",
+          "name_sfx"=>"MD",
+          "name_first" => "Testing",
+          "name_last" => "Errorsman"
+      }
     }
     subject { ChangeSets::PersonNameChangeSet.new }
 

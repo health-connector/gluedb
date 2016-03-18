@@ -172,8 +172,8 @@ module Amqp
     def with_response_exchange
       chan = connection.create_channel
       begin
-        publish_exchange = chan.default_exchange
         chan.confirm_select
+        publish_exchange = chan.default_exchange
         yield publish_exchange
         chan.wait_for_confirms
       ensure

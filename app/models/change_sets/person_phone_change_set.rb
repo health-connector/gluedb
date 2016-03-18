@@ -19,6 +19,7 @@ module ChangeSets
         update_result = person.save
       end
       return false unless update_result
+      return true if (@address_kind == "work")
       notify_policies("change", "personnel_data", person_update.hbx_member_id, policies_to_notify)
       true
     end

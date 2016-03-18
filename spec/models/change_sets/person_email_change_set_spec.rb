@@ -117,12 +117,11 @@ describe ChangeSets::PersonEmailChangeSet do
         end
 
         it "should update the person" do
-          allow(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
           expect(subject.perform_update(person, person_resource, policies_to_notify)).to eq true
         end
 
-        it "should send out policy notifications" do
-          expect(cv_publisher).to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
+        it "should not send out policy notifications" do
+          expect(cv_publisher).not_to receive(:publish).with(true, "#{policy_hbx_id}.xml", policy_cv)
           subject.perform_update(person, person_resource, policies_to_notify)
         end
       end

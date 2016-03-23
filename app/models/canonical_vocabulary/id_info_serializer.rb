@@ -80,10 +80,10 @@ module CanonicalVocabulary
           end
           xml['proc'].name_last(data["name_last"])
           if has_name_pfx
-            xml['proc'].name_pfx(data["name_pfx"])
+            xml['proc'].name_prefix(data["name_pfx"])
           end
           if has_name_sfx
-            xml['proc'].name_sfx(data["name_sfx"])
+            xml['proc'].name_suffix(data["name_sfx"])
           end
         end
       end

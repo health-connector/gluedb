@@ -90,9 +90,9 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
 	all_policies_to_analyze.each do |policy|
 		market = policy.market
 		policy_id = policy._id
-		carrier = Caches::MongoidCache.lookup(Carrier, pol.carrier_id) {pol.carrier}
+		carrier = Caches::MongoidCache.lookup(Carrier, policy.carrier_id) {policy.carrier}
         carrier_name = carrier.name
-        plan = Caches::MongoidCache.lookup(Plan, pol.plan_id) {pol.plan}
+        plan = Caches::MongoidCache.lookup(Plan, policy.plan_id) {policy.plan}
         plan_hios_id = plan.hios_plan_id
         plan_name = plan.name
         plan_metal = plan.metal_level
@@ -100,7 +100,7 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         	if policy.enrollees.size == 1
         		premium_total = policy.pre_amt_tot
         		employer_contribution = policy.tot_emp_res_amt
-        		employer = Caches::MongoidCache.lookup(Employer, pol.employer_id) {pol.employer}
+        		employer = Caches::MongoidCache.lookup(Employer, policy.employer_id) {policy.employer}
         		employer_name = employer.name
         		employer_fein = employer.fein
         		policy.enrollees.each do |enrollee|
@@ -132,9 +132,12 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
         						employer_name,employer_fein]
         			end # Ends enrollee end date checker.
-        		end  # Ends enrollee count. 
+        		end  # Ends enrollees.each loop.
+        	else ## if there's more than one enrollee
+        		next
         	end # Ends enrollee count evaluator
         else ## If it's an IVL policy
+        	next
         end # Ends SHOP/IVL evaluator
 	end
 end

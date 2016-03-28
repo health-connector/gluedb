@@ -78,7 +78,7 @@ class Member
   # Strip non-numeric chars from ssn
   # SSN validation rules, see: http://www.ssa.gov/employer/randomizationfaqs.html#a0=12
   def ssn=(val)
-    return if val.blank?
+    return write_attribute(:ssn, nil) if val.blank?
     write_attribute(:ssn, val.to_s.gsub(/[^0-9]/i, ''))
   end
 

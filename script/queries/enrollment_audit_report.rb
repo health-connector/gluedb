@@ -41,7 +41,16 @@ def different_effective_dates(policy)
 	coverage_start_dates = policy.enrollees.map(&:coverage_start).uniq
 	if coverage_start_dates.size > 1
 		return true
-	elsif coverage_start_dates == 1
+	elsif coverage_start_dates.size == 1
+		return false
+	end
+end
+
+def different_end_dates(policy)
+	coverage_end_dates = policy.enrollees.map(&:coverage_end).uniq
+	if coverage_end_dates.size > 1
+		return true
+	elsif coverage_end_dates.size == 1
 		return false
 	end
 end
@@ -122,7 +131,7 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
         						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
         						employer_name,employer_fein]
-        			else
+        			else ## if there is no end date.
         				csv << [first_name,last_name,hbx_id,dob,market,policy_id,carrier_name,plan_hios_id,plan_name,
         						start_date,"","",plan_metal,
         						premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,
@@ -134,7 +143,43 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         			end # Ends enrollee end date checker.
         		end  # Ends enrollees.each loop.
         	else ## if there's more than one enrollee
-        		next
+        		if different_effective_dates(policy) == false && different_end_dates(policy) == false
+        			premium_total = policy.pre_amt_tot
+        			employer_contribution = policy.tot_emp_res_amt
+        			employer = Caches::MongoidCache.lookup(Employer, policy.employer_id) {policy.employer}
+        			employer_name = employer.name
+        			employer_fein = employer.fein
+        			policy.enrollees.each do |enrollee|
+        				enrollee_person = person_collection.find("members.hbx_member_id" => enrollee.m_id).first
+        				first_name = enrollee_person["name_first"]
+        				last_name = enrollee_person["name_last"]
+        				hbx_id = enrollee.m_id
+        				dob = enrollee_person["members"].first["dob"]
+        				start_date = enrollee.coverage_start
+        				end_date = nil
+        				if enrollee.coverage_end != nil
+        					end_date = enrollee.coverage_end
+        					date_sent = date_term_sent(policy,end_date)
+        					csv << [first_name,last_name,hbx_id,dob,market,policy_id,carrier_name,plan_hios_id,plan_name,
+        							start_date,end_date,date_sent,plan_metal,
+        							premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,
+        							premium_total,premium_total,premium_total,premium_total,premium_total,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_name,employer_fein]
+        				else ## if there is no end date.
+        					csv << [first_name,last_name,hbx_id,dob,market,policy_id,carrier_name,plan_hios_id,plan_name,
+        							start_date,"","",plan_metal,
+        							premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,
+        							premium_total,premium_total,premium_total,premium_total,premium_total,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        							employer_name,employer_fein] 
+        				end
+        			end ## Ends enrollees.each loop.
+        		end ## Ends start and end date checker.
         	end # Ends enrollee count evaluator
         else ## If it's an IVL policy
         	next

@@ -122,7 +122,16 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
         						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
         						employer_name,employer_fein]
-        			end
+        			else
+        				csv << [first_name,last_name,hbx_id,dob,market,policy_id,carrier_name,plan_hios_id,plan_name,
+        						start_date,"","",plan_metal,
+        						premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,premium_total,
+        						premium_total,premium_total,premium_total,premium_total,premium_total,
+        						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        						employer_contribution,employer_contribution,employer_contribution,employer_contribution,
+        						employer_name,employer_fein]
+        			end # Ends enrollee end date checker.
         		end  # Ends enrollee count. 
         	end # Ends enrollee count evaluator
         else ## If it's an IVL policy

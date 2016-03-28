@@ -50,7 +50,7 @@ def date_term_sent(policy,end_date)
 	formatted_end_date = end_date_formatter(end_date)
 	termination_transactions = []
 	policy.transaction_set_enrollments.each do |tse|
-		if tse.body.read(formatted_end_date) != nil
+		if tse.body.read.match(formatted_end_date) != nil && (tse.body.read.match("TERM")||tse.body.read.match("CANCEL"))
 			termination_transactions.push(tse)
 		end
 	end
@@ -58,7 +58,7 @@ def date_term_sent(policy,end_date)
 		termination_transactions.sort_by(&:submitted_at)
 		return termination_transactions.first.submitted_at
 	else
-		return policy.updated_at
+		return "No File Found"
 	end
 end
 
@@ -111,8 +111,8 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         			dob = enrollee_person["members"].first["dob"]
         			start_date = enrollee.coverage_start
         			end_date = nil
-        			if enrollee.end_date != nil
-        				end_date = enrollee.end_date
+        			if enrollee.coverage_end != nil
+        				end_date = enrollee.coverage_end
         				date_sent = date_term_sent(policy,end_date)
         				csv << [first_name,last_name,hbx_id,dob,market,policy_id,carrier_name,plan_hios_id,plan_name,
         						start_date,end_date,date_sent,plan_metal,

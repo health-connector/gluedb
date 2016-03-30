@@ -33,6 +33,8 @@ potential_terminations.each do |policy|
 	end
 end
 
+
+
 all_policies_to_analyze = (created_enrollments + has_terminated_member).uniq!
 
 timestamp = Time.now.strftime('%Y%m%d%H%M')
@@ -82,6 +84,39 @@ def end_date_formatter(date)
 		day = "0"+day
 	end
 	return year+month+day
+end
+
+def monthly_premiums(policy)
+	start_month = policy.subscriber.coverage_start.month
+	if policy.subscriber.coverage_end != nil
+		end_month = policy.subscriber.coverage_end.month
+	end
+	
+end
+
+def enrollment_ranges(policy)
+        enrollment_ranges = []
+        policy.enrollees.each do |enrollee|
+                enrollment_ranges.push({:start_date => enrollee.coverage_start,:end_date => enrollee.coverage_end})
+        end
+        return enrollment_ranges
+end
+
+def premium_months(enrollment_range_hash)
+
+end
+
+def find_end_date(policy,enrollee)
+        if enrollee.coverage_end == nil
+                coverage_start = enrollee.coverage_start
+                policy.employer.plan_years.each do |plan_year|
+                        if plan_year.start_date >= coverage_start && plan_year.end_date < coverage_start
+                                return plan_year.end_date
+                        end
+                end
+        else
+                return enrollee.coverage_end
+        end
 end
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
@@ -179,6 +214,8 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         							employer_name,employer_fein] 
         				end
         			end ## Ends enrollees.each loop.
+        		elsif different_effective_dates(policy) == false && different_end_dates(policy) == true
+
         		end ## Ends start and end date checker.
         	end # Ends enrollee count evaluator
         else ## If it's an IVL policy

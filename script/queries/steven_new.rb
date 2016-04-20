@@ -22,7 +22,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
   CSV.open("stephen_expected_effectuated_20140930_#{timestamp}.csv", 'w') do |csv|
     csv << ["Subscriber ID", "Member ID" , "Person ID", "Policy ID", "Enrollment Group ID",
             "First Name", "Last Name","SSN", "DOB", "Gender", "Relationship",
-            "Plan Name", "HIOS ID", "Carrier Name",
+            "Plan Name", "HIOS ID", "Plan Metal Level", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
             "Coverage Start", "Coverage End",
             "Employer Name", "Address","Email","Phone Number","Broker"]
@@ -65,7 +65,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   en.member.dob.strftime("%Y%m%d"),
                   en.member.gender,
                   en.rel_code,
-                  plan.hios_plan_id, plan.name, carrier.name,
+                  plan.hios_plan_id, plan.name, plan.metal_level, carrier.name,
                   en.pre_amt, pol.pre_amt_tot,pol.applied_aptc, pol.tot_emp_res_amt,
                   en.coverage_start.blank? ? nil : en.coverage_start.strftime("%Y%m%d"),
                   en.coverage_end.blank? ? nil : en.coverage_end.strftime("%Y%m%d"),

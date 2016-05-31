@@ -20,7 +20,7 @@ timestamp = Time.now.strftime('%Y%m%d%H%M')
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
   CSV.open("stephen_expected_effectuated_20140930_#{timestamp}.csv", 'w') do |csv|
-    csv << ["Subscriber ID", "Member ID" , "Person ID", "Policy ID", "Enrollment Group ID",
+    csv << ["Subscriber ID", "Member ID" , "Policy ID", "Enrollment Group ID",
             "First Name", "Last Name","SSN", "DOB", "Gender", "Relationship",
             "Plan Name", "HIOS ID", "Plan Metal Level", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
@@ -58,7 +58,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
               #if !en.canceled?
                 per = en.person
                 csv << [
-                  subscriber_id, en.m_id, per.id, pol._id, pol.eg_id,
+                  subscriber_id, en.m_id, pol._id, pol.eg_id,
                   per.name_first,
                   per.name_last,
                   en.member.ssn,

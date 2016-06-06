@@ -9,7 +9,7 @@ end_date = Time.mktime(2016,2,29,23,59,59)
 
 transaction_errors = Protocols::X12::TransactionSetEnrollment.where("error_list" => {"$exists" => true, "$not" => {"$size" => 0}},
 																	:created_at => {"$gte" => start_date, "$lte" => end_date}).no_timeout
-																	
+
 db = Mongoid::Sessions.default
 carrier_collection = db[:carriers]
 
@@ -123,7 +123,7 @@ timestamp = Time.now.strftime('%Y%m%d%H%M')
 
 CSV.open("transaction_errors_carefirst_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
 			"Error Description"]
 	carefirst_errors.each do |transaction_error|
 		count += 1
@@ -145,13 +145,14 @@ CSV.open("transaction_errors_carefirst_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -166,13 +167,14 @@ CSV.open("transaction_errors_carefirst_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -183,7 +185,7 @@ end
 
 CSV.open("transaction_errors_aetna_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	aetna_errors.each do |transaction_error|
 		count += 1
@@ -205,13 +207,14 @@ CSV.open("transaction_errors_aetna_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -226,13 +229,14 @@ CSV.open("transaction_errors_aetna_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -243,7 +247,7 @@ end
 
 CSV.open("transaction_errors_kaiser_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	kaiser_errors.each do |transaction_error|
 		count += 1
@@ -265,13 +269,14 @@ CSV.open("transaction_errors_kaiser_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -286,13 +291,14 @@ CSV.open("transaction_errors_kaiser_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -303,7 +309,7 @@ end
 
 CSV.open("transaction_errors_united_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	united_errors.each do |transaction_error|
 		count += 1
@@ -325,13 +331,14 @@ CSV.open("transaction_errors_united_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -346,13 +353,14 @@ CSV.open("transaction_errors_united_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -363,7 +371,7 @@ end
 
 CSV.open("transaction_errors_bestlife_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	bestlife_errors.each do |transaction_error|
 		count += 1
@@ -385,13 +393,14 @@ CSV.open("transaction_errors_bestlife_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -406,13 +415,14 @@ CSV.open("transaction_errors_bestlife_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -423,7 +433,7 @@ end
 
 CSV.open("transaction_errors_dchl_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	dchl_errors.each do |transaction_error|
 		count += 1
@@ -445,13 +455,14 @@ CSV.open("transaction_errors_dchl_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -466,13 +477,14 @@ CSV.open("transaction_errors_dchl_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -483,7 +495,7 @@ end
 
 CSV.open("transaction_errors_delta_dental_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	dd_errors.each do |transaction_error|
 		count += 1
@@ -505,13 +517,14 @@ CSV.open("transaction_errors_delta_dental_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -526,13 +539,14 @@ CSV.open("transaction_errors_delta_dental_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -543,7 +557,7 @@ end
 
 CSV.open("transaction_errors_dentegra_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	dentegra_errors.each do |transaction_error|
 		count += 1
@@ -565,13 +579,14 @@ CSV.open("transaction_errors_dentegra_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -586,13 +601,14 @@ CSV.open("transaction_errors_dentegra_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -603,7 +619,7 @@ end
 
 CSV.open("transaction_errors_dominion_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	dominion_errors.each do |transaction_error|
 		count += 1
@@ -625,13 +641,14 @@ CSV.open("transaction_errors_dominion_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -646,13 +663,14 @@ CSV.open("transaction_errors_dominion_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -663,7 +681,7 @@ end
 
 CSV.open("transaction_errors_guardian_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	guardian_errors.each do |transaction_error|
 		count += 1
@@ -685,13 +703,14 @@ CSV.open("transaction_errors_guardian_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -706,13 +725,14 @@ CSV.open("transaction_errors_guardian_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -723,7 +743,7 @@ end
 
 CSV.open("transaction_errors_metlife_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	metlife_errors.each do |transaction_error|
 		count += 1
@@ -745,13 +765,14 @@ CSV.open("transaction_errors_metlife_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -766,13 +787,14 @@ CSV.open("transaction_errors_metlife_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e
@@ -783,7 +805,7 @@ end
 
 CSV.open("transaction_errors_no_carrier_name_#{timestamp}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market",
+			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13"
 			"Error Description"]
 	uncat_errors.each do |transaction_error|
 		count += 1
@@ -805,13 +827,14 @@ CSV.open("transaction_errors_no_carrier_name_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 						error_description]
 			elsif transaction_error.policy_id == nil
 				filename = transaction_error.body.to_s
@@ -826,13 +849,14 @@ CSV.open("transaction_errors_no_carrier_name_#{timestamp}.csv","w") do |csv|
 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
 				market = transmission.gs02
+				isa13 = transmission.isa13
 				ack_nack = transaction_error.try(:ack_nak_processed_at)
 				if ack_nack != nil
 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
 				end
 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market,
+						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
 				 		error_description]
 			end
 		rescue Exception=>e

@@ -1,5 +1,4 @@
 require 'csv'
-require 'pry'
 
 policies = Policy.no_timeout.where(
    :enrollees => {"$elemMatch" =>

@@ -1,4 +1,3 @@
-require 'pry'
 require 'csv'
 
 puts "Started at #{Time.now}"

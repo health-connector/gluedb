@@ -1,4 +1,3 @@
-require 'pry'
 require 'csv'
 
 puts "Started At #{Time.now}"
@@ -12,8 +11,6 @@ transaction_errors = Protocols::X12::TransactionSetEnrollment.where("error_list"
 
 formatted_start_date = start_date.getlocal.strftime('%m-%d-%Y')
 formatted_end_date = end_date.getlocal.strftime('%m-%d-%Y')
-
-binding.pry
 
 db = Mongoid::Sessions.default
 carrier_collection = db[:carriers]
@@ -229,7 +226,7 @@ CSV.open("transaction_errors_ivl_carefirst_#{formatted_start_date}-#{formatted_e
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -291,7 +288,7 @@ CSV.open("transaction_errors_ivl_aetna_#{formatted_start_date}-#{formatted_end_d
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -353,7 +350,7 @@ CSV.open("transaction_errors_ivl_kaiser_#{formatted_start_date}-#{formatted_end_
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -415,7 +412,7 @@ CSV.open("transaction_errors_ivl_united_#{formatted_start_date}-#{formatted_end_
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -477,7 +474,7 @@ CSV.open("transaction_errors_ivl_bestlife_#{formatted_start_date}-#{formatted_en
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -539,7 +536,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end
@@ -601,7 +598,7 @@ CSV.open("transaction_errors_ivl_delta_dental_#{formatted_start_date}-#{formatte
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -663,7 +660,7 @@ CSV.open("transaction_errors_ivl_dentegra_#{formatted_start_date}-#{formatted_en
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -725,7 +722,7 @@ CSV.open("transaction_errors_ivl_dominion_#{formatted_start_date}-#{formatted_en
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -787,7 +784,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end
@@ -849,7 +846,7 @@ CSV.open("transaction_errors_ivl_metlife_#{formatted_start_date}-#{formatted_end
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -911,7 +908,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end
@@ -973,7 +970,7 @@ CSV.open("transaction_errors_shop_carefirst_#{formatted_start_date}-#{formatted_
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1035,7 +1032,7 @@ CSV.open("transaction_errors_shop_aetna_#{formatted_start_date}-#{formatted_end_
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1097,7 +1094,7 @@ CSV.open("transaction_errors_shop_kaiser_#{formatted_start_date}-#{formatted_end
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1159,7 +1156,7 @@ CSV.open("transaction_errors_shop_united_#{formatted_start_date}-#{formatted_end
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1221,7 +1218,7 @@ CSV.open("transaction_errors_shop_bestlife_#{formatted_start_date}-#{formatted_e
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1283,7 +1280,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end
@@ -1345,7 +1342,7 @@ CSV.open("transaction_errors_shop_delta_dental_#{formatted_start_date}-#{formatt
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1407,7 +1404,7 @@ CSV.open("transaction_errors_shop_dentegra_#{formatted_start_date}-#{formatted_e
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1469,7 +1466,7 @@ CSV.open("transaction_errors_shop_dominion_#{formatted_start_date}-#{formatted_e
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1531,7 +1528,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end
@@ -1593,7 +1590,7 @@ CSV.open("transaction_errors_shop_metlife_#{formatted_start_date}-#{formatted_en
 				 		error_description]
 			end
 		rescue Exception=>e
-			binding.pry
+			puts e.inspect
 		end
 	end
 end
@@ -1655,7 +1652,7 @@ end
 # 				 		error_description]
 # 			end
 # 		rescue Exception=>e
-# 			binding.pry
+# 			puts e.inspect
 # 		end
 # 	end
 # end

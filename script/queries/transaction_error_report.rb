@@ -482,67 +482,67 @@ CSV.open("transaction_errors_ivl_bestlife_#{formatted_start_date}-#{formatted_en
 	end
 end
 
-CSV.open("transaction_errors_ivl_dchl_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	dchl_ivl_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_ivl_dchl_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	dchl_ivl_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end
 
 CSV.open("transaction_errors_ivl_delta_dental_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
@@ -730,67 +730,67 @@ CSV.open("transaction_errors_ivl_dominion_#{formatted_start_date}-#{formatted_en
 	end
 end
 
-CSV.open("transaction_errors_ivl_guardian_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	guardian_ivl_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_ivl_guardian_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	guardian_ivl_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end
 
 CSV.open("transaction_errors_ivl_metlife_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
@@ -854,67 +854,67 @@ CSV.open("transaction_errors_ivl_metlife_#{formatted_start_date}-#{formatted_end
 	end
 end
 
-CSV.open("transaction_errors_ivl_no_carrier_name_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	uncat_ivl_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_ivl_no_carrier_name_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	uncat_ivl_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end
 
 CSV.open("transaction_errors_shop_carefirst_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
@@ -1226,67 +1226,67 @@ CSV.open("transaction_errors_shop_bestlife_#{formatted_start_date}-#{formatted_e
 	end
 end
 
-CSV.open("transaction_errors_shop_dchl_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	dchl_shp_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_shop_dchl_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	dchl_shp_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end
 
 CSV.open("transaction_errors_shop_delta_dental_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
@@ -1474,67 +1474,67 @@ CSV.open("transaction_errors_shop_dominion_#{formatted_start_date}-#{formatted_e
 	end
 end
 
-CSV.open("transaction_errors_shop_guardian_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	guardian_shp_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_shop_guardian_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	guardian_shp_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end
 
 CSV.open("transaction_errors_shop_metlife_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
@@ -1598,64 +1598,64 @@ CSV.open("transaction_errors_shop_metlife_#{formatted_start_date}-#{formatted_en
 	end
 end
 
-CSV.open("transaction_errors_shop_no_carrier_name_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
-	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
-			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
-			"Error Description"]
-	uncat_shp_errors.each do |transaction_error|
-		count += 1
-		if count % 1000 == 0
-			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
-		end
-		begin
-			if transaction_error.policy_id != nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				policy = transaction_error.policy
-				eg_id = policy.eg_id
-				subscriber = find_subscriber(policy)
-				subscriber_hbx_id = subscriber.try(:m_id)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-						error_description]
-			elsif transaction_error.policy_id == nil
-				filename = transaction_error.body.to_s
-				carrier_name = find_carrier_name_by_filename(filename)
-				transmission = transaction_error.transmission
-				transaction_kind = transaction_error.transaction_kind
-				error_description = transaction_error.error_list
-				bgn02 = transaction_error.bgn02
-				edi_body = transaction_error.body.read
-				eg_id = parse_edi_for_eg_id(edi_body)
-				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
-				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
-				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
-				market = transmission.gs02
-				isa13 = transmission.isa13
-				ack_nack = transaction_error.try(:ack_nak_processed_at)
-				if ack_nack != nil
-					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
-					ack_nack_time = ack_nack.strftime("%H:%M:%S")
-				end
-				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
-						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
-				 		error_description]
-			end
-		rescue Exception=>e
-			binding.pry
-		end
-	end
-end
+# CSV.open("transaction_errors_shop_no_carrier_name_#{formatted_start_date}-#{formatted_end_date}.csv","w") do |csv|
+# 	csv << ["Carrier","Transaction Kind", "Filename","BGN02","Policy ID","Subscriber HBX ID",
+# 			"Submitted At Date", "Submitted At Time", "Ack/Nack Date", "Ack/Nack Time", "Market", "isa13",
+# 			"Error Description"]
+# 	uncat_shp_errors.each do |transaction_error|
+# 		count += 1
+# 		if count % 1000 == 0
+# 			puts "#{((count.to_d/total_transactions.to_d)*100.to_d)}% complete."
+# 		end
+# 		begin
+# 			if transaction_error.policy_id != nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				policy = transaction_error.policy
+# 				eg_id = policy.eg_id
+# 				subscriber = find_subscriber(policy)
+# 				subscriber_hbx_id = subscriber.try(:m_id)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 						error_description]
+# 			elsif transaction_error.policy_id == nil
+# 				filename = transaction_error.body.to_s
+# 				carrier_name = find_carrier_name_by_filename(filename)
+# 				transmission = transaction_error.transmission
+# 				transaction_kind = transaction_error.transaction_kind
+# 				error_description = transaction_error.error_list
+# 				bgn02 = transaction_error.bgn02
+# 				edi_body = transaction_error.body.read
+# 				eg_id = parse_edi_for_eg_id(edi_body)
+# 				subscriber_hbx_id = parse_edi_for_hbx_id(edi_body)
+# 				submitted_at_date = transaction_error.submitted_at.strftime("%m-%d-%Y")
+# 				submitted_at_time = transaction_error.submitted_at.strftime("%H:%M:%S")
+# 				market = transmission.gs02
+# 				isa13 = transmission.isa13
+# 				ack_nack = transaction_error.try(:ack_nak_processed_at)
+# 				if ack_nack != nil
+# 					ack_nack_date = ack_nack.strftime("%m-%d-%Y")
+# 					ack_nack_time = ack_nack.strftime("%H:%M:%S")
+# 				end
+# 				csv << [carrier_name, transaction_kind, filename.gsub("uploads/#{bgn02}_",""), bgn02, eg_id, subscriber_hbx_id,
+# 						submitted_at_date,submitted_at_time,ack_nack_date,ack_nack_time, market, isa13,
+# 				 		error_description]
+# 			end
+# 		rescue Exception=>e
+# 			binding.pry
+# 		end
+# 	end
+# end

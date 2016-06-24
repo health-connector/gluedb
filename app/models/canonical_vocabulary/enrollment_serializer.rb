@@ -155,7 +155,7 @@ module CanonicalVocabulary
         if mailing_address.nil?
           []
         else
-          mailing_address
+          [mailing_address]
         end
       else
         if mailing_address.nil?

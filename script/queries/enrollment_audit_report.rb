@@ -9,7 +9,7 @@ person_collection = db[:people]
 
 start_date = Time.mktime(2015,10,15,0,0,0)
 
-end_date = Time.mktime(2016,2,29,23,59,59)
+end_date = Time.mktime(2016,5,31,23,59,59)
 
 created_enrollments = Policy.where(:created_at => {"$gte" => start_date, "$lte" => end_date})
 
@@ -26,6 +26,7 @@ end
 has_terminated_member = []
 
 potential_terminations.each do |policy|
+    next if policy.subscriber == nil
 	if policy.canceled?
 		has_terminated_member.push(policy)
 	elsif policy.terminated?
@@ -84,19 +85,19 @@ end
 
 def select_ivl_plan_year(policy)
     if policy.subscriber.coverage_start.year == 2014
-        py_start == Date.new(2014,1,1)
+        py_start = Date.new(2014,1,1)
         py_end = Date.new(2014,12,31)
         date_range = (py_start..py_end)
         end_dates = date_range.to_a.map(&:end_of_month).uniq
         return end_dates
     elsif policy.subscriber.coverage_start.year == 2015
-        py_start == Date.new(2015,1,1)
+        py_start = Date.new(2015,1,1)
         py_end = Date.new(2015,12,31)
         date_range = (py_start..py_end)
         end_dates = date_range.to_a.map(&:end_of_month).uniq
         return end_dates
     elsif policy.subscriber.coverage_start.year == 2016
-        py_start == Date.new(2016,1,1)
+        py_start = Date.new(2016,1,1)
         py_end = Date.new(2016,12,31)
         date_range = (py_start..py_end)
         end_dates = date_range.to_a.map(&:end_of_month).uniq
@@ -134,6 +135,7 @@ end
 
 def monthly_premiums(policy)
     monthly_premiums_hash = []
+    begin
     policy_disposition = PolicyDisposition.new(policy)
     if policy.is_shop?
         check_dates = select_shop_plan_year(policy,policy.employer)
@@ -154,6 +156,12 @@ def monthly_premiums(policy)
         end
         return monthly_premiums_hash
     end
+    rescue Exception=>e
+        puts "#{Time.now} - (count not available) #{policy._id} - #{e.inspect}"
+        puts "------"
+        puts e.backtrace
+        puts "------"
+    end
 end
 
 def monthly_aptc(policy)
@@ -163,13 +171,15 @@ def monthly_aptc(policy)
     check_dates.each do |date|
         monthly_aptc = policy_disposition.as_of(date).applied_aptc.to_s rescue "0.0"
         month = date_hash_formatter(date.month)
-        monthly_premiums_hash.push(month => monthly_aptc)
+        monthly_aptc_hash.push(month => monthly_aptc)
     end
     return monthly_aptc_hash
 end
 
 def use_existing_contributions(policy,total_premium)
     if total_premium == nil
+        return ""
+    elsif total_premium == "0.0"
         return ""
     end
     prem_contribs = []
@@ -181,13 +191,15 @@ def use_existing_contributions(policy,total_premium)
         version_contribution = version.tot_emp_res_amt.to_d
         prem_contribs.push(version_premium => version_contribution)
     end
-    return prem_contribs.detect{|prem_hash| prem_hash[total_premium.to_d]}
+    return prem_contribs.detect{|prem_hash| prem_hash[total_premium.to_d]} rescue "0.0"
 end
 total_count = all_policies_to_analyze.size
 
 count = 0
 
 error_policies = []
+
+
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
@@ -206,6 +218,8 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
         if count.to_d % 1000.to_d == 0
             puts "#{Time.now} - #{count} out of #{total_count} done."
         end
+        next if count < 46139
+
         ## Policy Level Stuff
         market = policy.market
         policy_id = policy._id
@@ -225,6 +239,27 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
             monthly_aptc = monthly_aptc(policy)
         end
         monthly_premiums = monthly_premiums(policy)
+
+        if policy.subscriber == nil
+            policy.enrollees.each do |enrollee|
+                hbx_id = enrollee.m_id
+                enrollee_person = person_collection.find("members.hbx_member_id" => hbx_id).first
+                first_name = enrollee_person["name_first"]
+                last_name = enrollee_person["name_last"]
+                dob = enrollee_person["members"].first["dob"]
+                start_date = enrollee.coverage_start
+                end_date = nil
+                if enrollee.coverage_end != nil
+                    end_date = enrollee.coverage_end
+                    date_sent = date_term_sent(policy,end_date)
+                    premium_data = "Monthly Premiums Cannot be Calculated Due to Lack of a Subscriber"
+                    csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                            start_date, end_date, date_sent, plan_metal_level,premium_data,""*23,employer_name,employer_fein]
+                    end
+                end
+            end
+        end
+
         
         ## Enrollee Level Stuff
         policy.enrollees.each do |enrollee|
@@ -330,18 +365,25 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
                         puts "------"
                     end
 
-                    jan_contrib = use_existing_contributions(policy,jan)[jan.to_d]
-                    feb_contrib = use_existing_contributions(policy,feb)[feb.to_d]
-                    mar_contrib = use_existing_contributions(policy,mar)[mar.to_d]
-                    apr_contrib = use_existing_contributions(policy,apr)[apr.to_d]
-                    may_contrib = use_existing_contributions(policy,may)[may.to_d]
-                    jun_contrib = use_existing_contributions(policy,jun)[jun.to_d]
-                    jul_contrib = use_existing_contributions(policy,jul)[jul.to_d]
-                    aug_contrib = use_existing_contributions(policy,aug)[aug.to_d]
-                    sep_contrib = use_existing_contributions(policy,sep)[sep.to_d]
-                    oct_contrib = use_existing_contributions(policy,oct)[oct.to_d]
-                    nov_contrib = use_existing_contributions(policy,nov)[nov.to_d]
-                    dec_contrib = use_existing_contributions(policy,dec)[dec.to_d]
+                    begin
+                    jan_contrib = use_existing_contributions(policy,jan)[jan.to_d] 
+                    feb_contrib = use_existing_contributions(policy,feb)[feb.to_d] 
+                    mar_contrib = use_existing_contributions(policy,mar)[mar.to_d] 
+                    apr_contrib = use_existing_contributions(policy,apr)[apr.to_d] 
+                    may_contrib = use_existing_contributions(policy,may)[may.to_d] 
+                    jun_contrib = use_existing_contributions(policy,jun)[jun.to_d] 
+                    jul_contrib = use_existing_contributions(policy,jul)[jul.to_d] 
+                    aug_contrib = use_existing_contributions(policy,aug)[aug.to_d] 
+                    sep_contrib = use_existing_contributions(policy,sep)[sep.to_d] 
+                    oct_contrib = use_existing_contributions(policy,oct)[oct.to_d] 
+                    nov_contrib = use_existing_contributions(policy,nov)[nov.to_d] 
+                    dec_contrib = use_existing_contributions(policy,dec)[dec.to_d] 
+                    rescue Exception=>e
+                        puts "#{Time.now} - #{count} #{policy._id} - #{e.inspect}"
+                        puts "------"
+                        puts e.backtrace
+                        puts "------"
+                    end
                     csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                             start_date, "", "", plan_metal_level,
                             jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,
@@ -349,6 +391,7 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
                             oct_contrib,nov_contrib,dec_contrib,
                             employer_name,employer_fein]
                 else ## if it's not shop
+                    begin
                     jan = monthly_premiums.detect{|month_hash| month_hash[:jan]}[:jan]
                     feb = monthly_premiums.detect{|month_hash| month_hash[:feb]}[:feb]
                     mar = monthly_premiums.detect{|month_hash| month_hash[:mar]}[:mar]
@@ -361,7 +404,14 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
                     oct = monthly_premiums.detect{|month_hash| month_hash[:oct]}[:oct]
                     nov = monthly_premiums.detect{|month_hash| month_hash[:nov]}[:nov]
                     dec = monthly_premiums.detect{|month_hash| month_hash[:dec]}[:dec]
+                    rescue
+                        puts "#{Time.now} - #{count} #{policy._id} - #{e.inspect}"
+                        puts "------"
+                        puts e.backtrace
+                        puts "------"
+                    end
 
+                    begin
                     jan_aptc = monthly_aptc.detect{|month_hash| month_hash[:jan]}[:jan]
                     feb_aptc = monthly_aptc.detect{|month_hash| month_hash[:feb]}[:feb]
                     mar_aptc = monthly_aptc.detect{|month_hash| month_hash[:mar]}[:mar]
@@ -373,7 +423,13 @@ CSV.open("enrollment_audit_report_#{timestamp}.csv","w") do |csv|
                     sep_aptc = monthly_aptc.detect{|month_hash| month_hash[:sep]}[:sep]
                     oct_aptc = monthly_aptc.detect{|month_hash| month_hash[:oct]}[:oct]
                     nov_aptc = monthly_aptc.detect{|month_hash| month_hash[:nov]}[:nov]
-                    dec_aptc = monthly_aptc.detect{|month_hash| month_hash[:dec]}[:dec] 
+                    dec_aptc = monthly_aptc.detect{|month_hash| month_hash[:dec]}[:dec]
+                    rescue
+                        puts "#{Time.now} - #{count} #{policy._id} - #{e.inspect}"
+                        puts "------"
+                        puts e.backtrace
+                        puts "------"
+                    end 
                     csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                             start_date, "", "", plan_metal_level,
                             jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,

@@ -33,13 +33,24 @@ def return_ssn(person,enrollee_hbx_id)
 	return correct_member.try(:ssn)
 end
 
+def return_emails(person)
+	unless person.emails = nil
+		emails = person.emails.map(&:email_address)
+		if emails.size == 1
+			return emails.first
+		elsif emails.size > 1
+			return emails.join(',')
+		end
+	end
+end
+
 puts "#{Time.now} - #{assistance_policies.size}"
 
 Caches::MongoidCache.with_cache_for(Plan) do
 	CSV.open("2016_aptc_policies_#{timestamp}.csv", "w") do |csv|
 		csv << ["Enrollment Group ID", "Glue Policy ID", "State", "Name", "HBX ID", "SSN",
 				"Plan Name", "Plan Metal", "HIOS ID", 
-				"Relationship", "APTC Amount", "Responsible Party"]
+				"Relationship", "APTC Amount", "Responsible Party","Subscriber's Email(s)"]
 		assistance_policies.each do |policy|
 			eg_id = policy.eg_id
 			policy_id = policy._id
@@ -50,6 +61,7 @@ Caches::MongoidCache.with_cache_for(Plan) do
 			plan_hios = plan.hios_plan_id
 			state = policy.aasm_state
 			responsible_party = policy.has_responsible_person?
+			emails = return_emails(policy.subscriber.person)
 			policy.enrollees.each do |enrollee|
 				person = enrollee.person
 				name = person.full_name

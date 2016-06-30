@@ -65,7 +65,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   en.member.dob.strftime("%Y%m%d"),
                   en.member.gender,
                   en.rel_code,
-                  plan.hios_plan_id, plan.name, plan.metal_level, carrier.name,
+                  plan.name, plan.hios_plan_id, plan.metal_level, carrier.name,
                   en.pre_amt, pol.pre_amt_tot,pol.applied_aptc, pol.tot_emp_res_amt,
                   en.coverage_start.blank? ? nil : en.coverage_start.strftime("%Y%m%d"),
                   en.coverage_end.blank? ? nil : en.coverage_end.strftime("%Y%m%d"),

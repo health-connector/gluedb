@@ -34,13 +34,11 @@ def return_ssn(person,enrollee_hbx_id)
 end
 
 def return_emails(person)
-	unless person.emails = nil
-		emails = person.emails.map(&:email_address)
-		if emails.size == 1
-			return emails.first
-		elsif emails.size > 1
-			return emails.join(',')
-		end
+	email_addresses = person.emails.map(&:email_address)
+	if email_addresses.size == 1
+		return email_addresses.first
+	elsif email_addresses.size > 1
+		return email_addresses.join(',')
 	end
 end
 
@@ -68,7 +66,7 @@ Caches::MongoidCache.with_cache_for(Plan) do
 				hbx_id = enrollee.m_id
 				ssn = return_ssn(person,hbx_id)
 				relationship = enrollee.rel_code
-				csv << [eg_id,policy_id,state,name,hbx_id,ssn,plan_name,plan_metal,plan_hios,relationship,aptc_amount, responsible_party]
+				csv << [eg_id,policy_id,state,name,hbx_id,ssn,plan_name,plan_metal,plan_hios,relationship,aptc_amount, responsible_party,emails]
 			end
 		end # Ends policies loop
 	end # Closes CSV

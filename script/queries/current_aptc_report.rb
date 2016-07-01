@@ -48,7 +48,7 @@ Caches::MongoidCache.with_cache_for(Plan) do
 	CSV.open("2016_aptc_policies_#{timestamp}.csv", "w") do |csv|
 		csv << ["Enrollment Group ID", "Glue Policy ID", "State", "Name", "HBX ID", "SSN",
 				"Plan Name", "Plan Metal", "HIOS ID", 
-				"Relationship", "APTC Amount", "Responsible Party","Subscriber's Email(s)"]
+				"Relationship", "APTC Amount", "Responsible Party","Start Date", "End Date", "Subscriber's Email(s)"]
 		assistance_policies.each do |policy|
 			eg_id = policy.eg_id
 			policy_id = policy._id
@@ -66,7 +66,12 @@ Caches::MongoidCache.with_cache_for(Plan) do
 				hbx_id = enrollee.m_id
 				ssn = return_ssn(person,hbx_id)
 				relationship = enrollee.rel_code
-				csv << [eg_id,policy_id,state,name,hbx_id,ssn,plan_name,plan_metal,plan_hios,relationship,aptc_amount, responsible_party,emails]
+				start_date = enrollee.coverage_start
+				end_date = enrollee.coverage_end
+				csv << [eg_id,policy_id,state,
+						name,hbx_id,ssn,
+						plan_name,plan_metal,plan_hios,
+						relationship,aptc_amount, responsible_party,start_date,end_date,emails]
 			end
 		end # Ends policies loop
 	end # Closes CSV

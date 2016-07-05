@@ -165,11 +165,13 @@ CSV.foreach(filename, headers: true) do |row|
 		enrollee_list = new_policy.enrollees.all
 		all_ids = enrollee_list.map(&:m_id) | [subscriber_id]
 		subby = new_policy.subscriber
+		edi_type = data_row["Operation Type"]
+		edi_reason = data_row["Reason"]
 		out_file = File.open(File.join("initial_enrollments_generated", "#{subby.coverage_start.month}-#{subby.coverage_start.day} Renewal - #{new_policy.market} - #{subby.person.name_full} - #{new_policy.coverage_type}.xml"), 'w')
 		ie_cv = CanonicalVocabulary::MaintenanceSerializer.new(
 		          			new_policy,
-		          			"add",
-		          			"sep_initial_enrollment",
+		          			edi_type,
+		          			edi_reason,
 		          			all_ids,
 		          			all_ids
 		        			)

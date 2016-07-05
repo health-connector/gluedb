@@ -6,7 +6,9 @@ effective_date = Date.new(2016,2,29)
 potential_policies = Policy.where({:pre_amt_tot => {"$in" => ["0.00", "00.00", "0.0"]},
 								   :enrollees => {"$elemMatch" => {:rel_code => "self", :coverage_start => {"$gt" => effective_date}}}})
 
-CSV.open("policies_with_zero_premium.csv","w") do |csv|
+timestamp = Time.now.strftime('%Y%m%d%H%M')
+
+CSV.open("policies_with_zero_premium_#{timestamp}.csv","w") do |csv|
 	csv << ["Enrollment Group ID", "AASM State",
 		    "Employer Name", "FEIN", 
 			"Subscriber Name", "Subscriber HBX ID", 

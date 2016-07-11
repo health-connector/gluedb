@@ -20,6 +20,16 @@ def does_name_dob_exist?(first_name, last_name, dob)
 	end
 end
 
+def does_enrollee_exist(person,policy)
+	enrollee_hbx_ids = policy.enrollees.map(&:m_id)
+	hbx_id = person.authority_member_id.to_s
+	if enrollee_hbx_ids.include?(hbx_id)
+		return true
+	else
+		return false
+	end
+end
+
 CSV.foreach(filename, headers: true) do |row|
 	begin
 		data_row = row.to_hash
@@ -95,14 +105,16 @@ CSV.foreach(filename, headers: true) do |row|
 			new_policy.save
 		end		
 
-		## Add an enrollee
-		new_policy_enrollee = Enrollee.new
-		new_policy_enrollee.m_id = data_row["HBX ID"]
-		new_policy_enrollee.rel_code = data_row["Relationship"].downcase
-		new_policy_enrollee.coverage_start = data_row["Benefit Begin Date"].to_date
-		new_policy_enrollee.pre_amt = data_row["Premium"].to_d
-		new_policy.enrollees.push(new_policy_enrollee)
-		new_policy.save
+		## Add an enrollee if they don't exist.
+		if does_enrollee_exist(new_person,new_policy) == false
+			new_policy_enrollee = Enrollee.new
+			new_policy_enrollee.m_id = data_row["HBX ID"]
+			new_policy_enrollee.rel_code = data_row["Relationship"].downcase
+			new_policy_enrollee.coverage_start = data_row["Benefit Begin Date"].to_date
+			new_policy_enrollee.pre_amt = data_row["Premium"].to_d
+			new_policy.enrollees.push(new_policy_enrollee)
+			new_policy.save
+		end
 
 		## Add an Employer
 		if data_row["Sponsor Name"] != nil
@@ -165,11 +177,13 @@ CSV.foreach(filename, headers: true) do |row|
 		enrollee_list = new_policy.enrollees.all
 		all_ids = enrollee_list.map(&:m_id) | [subscriber_id]
 		subby = new_policy.subscriber
+		edi_type = data_row["Operation Type"]
+		edi_reason = data_row["Reason"]
 		out_file = File.open(File.join("initial_enrollments_generated", "#{subby.coverage_start.month}-#{subby.coverage_start.day} Renewal - #{new_policy.market} - #{subby.person.name_full} - #{new_policy.coverage_type}.xml"), 'w')
 		ie_cv = CanonicalVocabulary::MaintenanceSerializer.new(
 		          			new_policy,
-		          			"add",
-		          			"sep_initial_enrollment",
+		          			edi_type,
+		          			edi_reason,
 		          			all_ids,
 		          			all_ids
 		        			)

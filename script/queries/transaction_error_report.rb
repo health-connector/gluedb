@@ -2,9 +2,9 @@ require 'csv'
 
 puts "Started At #{Time.now}"
 
-start_date = Time.mktime(2016,1,1,0,0,0)
+start_date = Time.mktime(2016,6,20,0,0,0)
 
-end_date = Time.mktime(2016,6,12,23,59,59)
+end_date = Time.mktime(2016,6,26,23,59,59)
 
 transaction_errors = Protocols::X12::TransactionSetEnrollment.where("error_list" => {"$exists" => true, "$not" => {"$size" => 0}},
 																	:created_at => {"$gte" => start_date, "$lte" => end_date}).no_timeout
@@ -21,10 +21,6 @@ def find_subscriber(policy)
 		subscriber = policy.enrollees.select {|enrollee| enrollee.rel_code == "self"}.first
 	end
 	return subscriber
-end
-
-def find_market(filename)
-
 end
 
 count = 0

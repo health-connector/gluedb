@@ -40,7 +40,7 @@ def format_date(date)
   date.strftime("%Y-%m-%d")
 end
 
-CSV.open("congressional_audit.csv", "w") do |csv|
+CSV.open("non_congressional_audit.csv", "w", ) do |csv|
   csv << headers
   pols.each do |pol|
     start_date = pol.subscriber.coverage_start

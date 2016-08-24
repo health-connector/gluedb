@@ -204,7 +204,7 @@ timestamp = Time.now.strftime('%Y%m%d%H%M')
 tc = 0
 
 start_dates.each do |sd|
-    if sd = Time.mktime(2016,7,1,0,0,0)
+    if sd == Time.mktime(2016,7,1,0,0,0)
         ed = Time.mktime(2016,7,15,23,59,59)
     else
         ed = sd.end_of_month

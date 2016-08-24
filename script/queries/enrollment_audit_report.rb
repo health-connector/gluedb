@@ -7,21 +7,19 @@ puts "Started at #{Time.now}"
 db = Mongoid::Sessions.default
 person_collection = db[:people]
 
-# start_date_1 = Time.mktime(2015,10,15,0,0,0)
-# start_date_2 = Time.mktime(2015,11,1,0,0,0)
-# start_date_3 = Time.mktime(2015,12,1,0,0,0)
-# start_date_4 = Time.mktime(2016,1,1,0,0,0)
-# start_date_5 = Time.mktime(2016,2,1,0,0,0)
-# start_date_6 = Time.mktime(2016,3,1,0,0,0)
-# start_date_7 = Time.mktime(2016,4,1,0,0,0)
-# start_date_8 = Time.mktime(2016,5,1,0,0,0)
-# start_date_9 = Time.mktime(2016,6,1,0,0,0)
+start_date_1 = Time.mktime(2015,10,15,0,0,0)
+start_date_2 = Time.mktime(2015,11,1,0,0,0)
+start_date_3 = Time.mktime(2015,12,1,0,0,0)
+start_date_4 = Time.mktime(2016,1,1,0,0,0)
+start_date_5 = Time.mktime(2016,2,1,0,0,0)
+start_date_6 = Time.mktime(2016,3,1,0,0,0)
+start_date_7 = Time.mktime(2016,4,1,0,0,0)
+start_date_8 = Time.mktime(2016,5,1,0,0,0)
+start_date_9 = Time.mktime(2016,6,1,0,0,0)
 start_date_10 = Time.mktime(2016,7,1,0,0,0)
 
-# start_dates = [start_date_1,start_date_2,start_date_3,start_date_4,start_date_5,start_date_6,start_date_7,start_date_8,
-#                start_date_9,start_date_10]
-
-start_dates = [start_date_10]
+start_dates = [start_date_1,start_date_2,start_date_3,start_date_4,start_date_5,start_date_6,start_date_7,start_date_8,
+               start_date_9,start_date_10]
 
 def dependent_end_date(policy)
     if policy.enrollees.any? {|enrollee| enrollee.coverage_end != nil} == true

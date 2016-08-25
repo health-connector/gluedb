@@ -2,9 +2,9 @@ require 'csv'
 
 puts "Started At #{Time.now}"
 
-start_date = Time.mktime(2016,7,11,0,0,0)
+start_date = Time.mktime(2016,8,15,0,0,0)
 
-end_date = Time.mktime(2016,7,17,23,59,59)
+end_date = Time.mktime(2016,8,21,23,59,59)
 
 transaction_errors = Protocols::X12::TransactionSetEnrollment.where("error_list" => {"$exists" => true, "$not" => {"$size" => 0}},
 																	:created_at => {"$gte" => start_date, "$lte" => end_date}).no_timeout
@@ -145,6 +145,9 @@ end
 
 def parse_edi_for_hbx_id(body)
 	transaction_array = body.split(/~/)
+	if transaction_array.size == 1
+		transaction_array = body.split(/,/)
+	end
 	correct_segment = transaction_array.select{|segment| segment.match(/REF\S0F/)}
 	if correct_segment.count != 0
 		return correct_segment.first.gsub("REF*0F*","")
@@ -155,6 +158,9 @@ end
 
 def parse_edi_for_eg_id(body)
 	transaction_array = body.split(/~/)
+	if transaction_array.size == 1
+		transaction_array = body.split(/,/)
+	end
 	correct_segment = transaction_array.select{|segment| segment.match(/REF\S1L/)}
 	if correct_segment.count != 0
 		return correct_segment.first.gsub("REF*1L*","")

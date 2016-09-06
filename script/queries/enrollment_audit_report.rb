@@ -60,7 +60,7 @@ end
 
 def select_shop_plan_year(policy,employer)
     plan_years = employer.plan_years
-    return nil if plan_years.size == 0
+    return nil if plan_years.blank?
     start_date = policy.subscriber.coverage_start
     correct_plan_year = []
     plan_years.each do |plan_year|
@@ -72,9 +72,31 @@ def select_shop_plan_year(policy,employer)
             correct_plan_year.push(plan_year)
             return end_dates
         end
-        if correct_plan_year.size == 0
-            return nil
-        end
+    end
+    if correct_plan_year.size == 0
+        return nil
+    end
+end
+
+def select_congress_plan_year(policy)
+    if policy.subscriber.coverage_start.year == 2014
+        py_start = Date.new(2014,1,1)
+        py_end = Date.new(2014,12,31)
+        date_range = (py_start..py_end)
+        end_dates = date_range.to_a.map(&:end_of_month).uniq
+        return end_dates
+    elsif policy.subscriber.coverage_start.year == 2015
+        py_start = Date.new(2015,1,1)
+        py_end = Date.new(2015,12,31)
+        date_range = (py_start..py_end)
+        end_dates = date_range.to_a.map(&:end_of_month).uniq
+        return end_dates
+    elsif policy.subscriber.coverage_start.year == 2016
+        py_start = Date.new(2016,1,1)
+        py_end = Date.new(2016,12,31)
+        date_range = (py_start..py_end)
+        end_dates = date_range.to_a.map(&:end_of_month).uniq
+        return end_dates
     end
 end
 
@@ -128,7 +150,7 @@ def date_hash_formatter(month)
     end
 end
 
-def monthly_premiums(policy)
+def monthly_premiums(policy,congressional_employer_ids)
     nil_hash = {:jan => "0.0",:feb => "0.0",:mar => "0.0",:apr => "0.0", 
                 :may => "0.0",:jun => "0.0",:jul => "0.0",:aug => "0.0",
                 :sep => "0.0",:oct => "0.0",:nov => "0.0",:dec => "0.0"}
@@ -136,7 +158,11 @@ def monthly_premiums(policy)
     begin
     policy_disposition = PolicyDisposition.new(policy)
     if policy.is_shop?
-        check_dates = select_shop_plan_year(policy,policy.employer)
+        if is_congressional(policy,congressional_employer_ids) == true
+            check_dates = select_congress_plan_year(policy)
+        else
+            check_dates = select_shop_plan_year(policy,policy.employer)
+        end
         return nil_hash if check_dates == nil
         monthly_premiums = []
         check_dates.each do |date|
@@ -188,7 +214,9 @@ def use_existing_contributions(policy,total_premium)
     policy.versions.each do |version|
         version_premium = version.pre_amt_tot.to_d
         version_contribution = version.tot_emp_res_amt.to_d
-        prem_contribs[version_premium] = version_contribution
+        unless version_contribution.to_s == "0.0"
+            prem_contribs[version_premium] = version_contribution
+        end
     end
     if prem_contribs[total_premium.to_d] == nil
         return "0.0"
@@ -196,6 +224,18 @@ def use_existing_contributions(policy,total_premium)
         return prem_contribs[total_premium.to_d] rescue "0.0"
     end
 end
+
+def is_congressional(policy,congressional_employer_ids)
+    if congressional_employer_ids.include?(policy.employer_id)
+        return true
+    else
+        return false
+    end
+end
+
+congress_feins = %w()
+
+emp_ids = Employer.where(:fein => { "$in" => congress_feins }).map(&:id)
 
 error_policies = []
 
@@ -231,18 +271,20 @@ start_dates.each do |sd|
 
     count = 0
 
+    csv_file = File.new("enrollment_audit_report_#{timestamp}_#{sd.in_time_zone('Eastern Time (US & Canada)').strftime('%m-%d-%Y')}-#{ed.in_time_zone('Eastern Time (US & Canada)').strftime('%m-%d-%Y')}.csv","w")
+    csv_file << ["First Name","Last Name","HBX ID","DOB","Market","Policy ID","Carrier","QHP ID","Plan Name",
+                 "Start Date","End Date","Date Termination Sent","Plan Metal Level",
+                 "Premium Total-Jan","Premium Total-Feb","Premium Total-Mar","Premium Total-Apr","Premium Total-May",
+                 "Premium Total-Jun","Premium Total-Jul","Premium Total-Aug","Premium Total-Sep","Premium Total-Oct",
+                 "Premium Total-Nov","Premium Total-Dec",
+                 "APTC/Employer Contribution-Jan","APTC/Employer Contribution-Feb","APTC/Employer Contribution-Mar",
+                 "APTC/Employer Contribution-Apr","APTC/Employer Contribution-May","APTC/Employer Contribution-Jun",
+                 "APTC/Employer Contribution-Jul","APTC/Employer Contribution-Aug","APTC/Employer Contribution-Sep",
+                 "APTC/Employer Contribution-Oct","APTC/Employer Contribution-Nov","APTC/Employer Contribution-Dec",
+                 "Employer Name","Employer FEIN"].to_csv
+
     Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
-        CSV.open("enrollment_audit_report_#{timestamp}_#{sd.in_time_zone('Eastern Time (US & Canada)').strftime('%m-%d-%Y')}-#{ed.in_time_zone('Eastern Time (US & Canada)').strftime('%m-%d-%Y')}.csv","w") do |csv|       
-            csv << ["First Name","Last Name","HBX ID","DOB","Market","Policy ID","Carrier","QHP ID","Plan Name",
-                    "Start Date","End Date","Date Termination Sent","Plan Metal Level","Premium Total",
-                    "","","","","","","","","","","",
-                    "APTC/Employer Contribution",
-                    "","","","","","","","","","","",
-                    "Employer Name","Employer FEIN"]
-            csv << ["","","","","","","","","","","","","",
-                    "January","February","March","April","May","June","July","August","September","October","November","December",
-                    "January","February","March","April","May","June","July","August","September","October","November","December"]
             all_policies_to_analyze.each do |policy|
                 count += 1
                 if count.to_d % 1000.to_d == 0
@@ -274,8 +316,8 @@ start_dates.each do |sd|
                             end_date = enrollee.coverage_end
                             date_sent = date_term_sent(policy,end_date)
                             premium_data = "Monthly Premiums Cannot be Calculated Due to Lack of a Subscriber"
-                            csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
-                                    start_date, end_date, date_sent, plan_metal_level,premium_data,""*23,employer_name,employer_fein]
+                            csv_file << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                                    start_date, end_date, date_sent, plan_metal_level,premium_data,""*23,employer_name,employer_fein].to_csv
                         end
                     end
                 end
@@ -288,7 +330,7 @@ start_dates.each do |sd|
                     else
                         monthly_aptc = monthly_aptc(policy)
                     end
-                    monthly_premiums = monthly_premiums(policy)
+                    monthly_premiums = monthly_premiums(policy,emp_ids)
 
                     if policy.is_shop?  
                         begin
@@ -385,41 +427,41 @@ start_dates.each do |sd|
                             end_date = enrollee.coverage_end
                             date_sent = date_term_sent(policy,end_date)
                             if policy.is_shop?
-                                csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                                csv_file << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                                         start_date, end_date, date_sent, plan_metal_level,
                                         jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,
                                         jan_contrib,feb_contrib,mar_contrib,apr_contrib,may_contrib,jun_contrib,jul_contrib,aug_contrib,sep_contrib,
                                         oct_contrib,nov_contrib,dec_contrib,
-                                        employer_name,employer_fein]
+                                        employer_name,employer_fein].to_csv
                             else ## if it's not shop
-                                csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                                csv_file << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                                         start_date, end_date, date_sent, plan_metal_level,
                                         jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,
                                         jan_aptc,feb_aptc,mar_aptc,apr_aptc,may_aptc,jun_aptc,jul_aptc,aug_aptc,sep_aptc,oct_aptc,nov_aptc,dec_aptc,
-                                        employer_name,employer_fein]
+                                        employer_name,employer_fein].to_csv
                             end
                         else ## if there's no end date.
                             if policy.is_shop?
-                                csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                                csv_file << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                                         start_date, "", "", plan_metal_level,
                                         jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,
                                         jan_contrib,feb_contrib,mar_contrib,apr_contrib,may_contrib,jun_contrib,jul_contrib,aug_contrib,sep_contrib,
                                         oct_contrib,nov_contrib,dec_contrib,
-                                        employer_name,employer_fein]
+                                        employer_name,employer_fein].to_csv
                             else ## if it's not shop
-                                csv << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
+                                csv_file << [first_name, last_name, hbx_id, dob, market, policy_id, carrier_name, plan_hios_id, plan_name,
                                         start_date, "", "", plan_metal_level,
                                         jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,
                                         jan_aptc,feb_aptc,mar_aptc,apr_aptc,may_aptc,jun_aptc,jul_aptc,aug_aptc,sep_aptc,oct_aptc,nov_aptc,dec_aptc,
-                                        employer_name,employer_fein]
+                                        employer_name,employer_fein].to_csv
                             end
                         end
                     end
                 end
             end
-        end
 
     end # ends MongoidCache
+
 end
 
 

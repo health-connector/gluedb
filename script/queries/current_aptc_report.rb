@@ -33,13 +33,40 @@ def return_ssn(person,enrollee_hbx_id)
 	return correct_member.try(:ssn)
 end
 
+def return_emails(person)
+	email_addresses = person.emails.map(&:email_address)
+	if email_addresses.size == 1
+		return email_addresses.first
+	elsif email_addresses.size > 1
+		return email_addresses.join(',')
+	end
+end
+
+def return_csr_percent(plan)
+	if plan.csr_variant_id.blank?
+		return "0"
+	elsif plan.csr_variant_id == "01"
+		return "0"
+	elsif plan.csr_variant_id == "02"
+		return "100"
+	elsif plan.csr_variant_id == "03"
+		return "0"
+	elsif plan.csr_variant_id == "04"
+		return "73"
+	elsif plan.csr_variant_id == "05"
+		return "87"
+	elsif plan.csr_variant_id == "06"
+		return "94"
+	end
+end
+
 puts "#{Time.now} - #{assistance_policies.size}"
 
 Caches::MongoidCache.with_cache_for(Plan) do
 	CSV.open("2016_aptc_policies_#{timestamp}.csv", "w") do |csv|
 		csv << ["Enrollment Group ID", "Glue Policy ID", "State", "Name", "HBX ID", "SSN",
-				"Plan Name", "Plan Metal", "HIOS ID", 
-				"Relationship", "APTC Amount", "Responsible Party"]
+				"Plan Name", "Plan Metal", "HIOS ID", "CSR Percent", 
+				"Relationship", "APTC Amount", "Responsible Party","Start Date", "End Date", "Subscriber's Email(s)"]
 		assistance_policies.each do |policy|
 			eg_id = policy.eg_id
 			policy_id = policy._id
@@ -48,15 +75,22 @@ Caches::MongoidCache.with_cache_for(Plan) do
 			plan_name = plan.name
 			plan_metal = plan.metal_level
 			plan_hios = plan.hios_plan_id
+			csr_percent = return_csr_percent(plan)
 			state = policy.aasm_state
 			responsible_party = policy.has_responsible_person?
+			emails = return_emails(policy.subscriber.person)
 			policy.enrollees.each do |enrollee|
 				person = enrollee.person
 				name = person.full_name
 				hbx_id = enrollee.m_id
 				ssn = return_ssn(person,hbx_id)
 				relationship = enrollee.rel_code
-				csv << [eg_id,policy_id,state,name,hbx_id,ssn,plan_name,plan_metal,plan_hios,relationship,aptc_amount, responsible_party]
+				start_date = enrollee.coverage_start
+				end_date = enrollee.coverage_end
+				csv << [eg_id,policy_id,state,
+						name,hbx_id,ssn,
+						plan_name,plan_metal,plan_hios, csr_percent,
+						relationship,aptc_amount, responsible_party,start_date,end_date,emails]
 			end
 		end # Ends policies loop
 	end # Closes CSV

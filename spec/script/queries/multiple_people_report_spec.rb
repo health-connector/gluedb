@@ -17,7 +17,6 @@ end
 describe 'find_employers' do
 	carrier = FactoryGirl.create :carrier
 	plan = FactoryGirl.create :plan
-	ivl_policy = FactoryGirl.create :policy
 
 	it 'should return an array if theres a shop policy' do
 		person = FactoryGirl.create :person
@@ -25,5 +24,18 @@ describe 'find_employers' do
 		shop_policy.subscriber.m_id = person.members.first.hbx_member_id
 		shop_policy.save
 		expect(find_employers(person).class.to_s).to eq 'Array'		
+	end
+
+	it 'should return IVL if there are only IVL policies' do
+		person = FactoryGirl.create :person
+		ivl_policy = FactoryGirl.create :policy
+		ivl_policy.subscriber.m_id = person.members.first.hbx_member_id
+		ivl_policy.save
+		expect(find_employers(person)).to eq 'IVL'	
+	end
+
+	it 'should return No Policies Found if there are no policies' do
+		person = FactoryGirl.create :person
+		expect(find_employers(person)).to eq 'No Policies Found'
 	end
 end

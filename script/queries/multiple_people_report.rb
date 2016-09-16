@@ -28,6 +28,8 @@ shop_rows = []
 
 ivl_rows = []
 
+puts "Started at #{Time.now}"
+
 CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 	csv << ["Person 1 HBX ID", "Person 1 First Name", "Person 1 Middle Name", "Person 1 Last Name","Person 1 SSN", "Person 1 DOB","Person 1 Employer Fein(s)","Person 1 Employer Name(s)",
 			"Person 2 HBX ID", "Person 2 First Name", "Person 2 Middle Name", "Person 2 Last Name","Person 2 SSN", "Person 2 DOB","Person 2 Employer Fein(s)","Person 2 Employer Name(s)",
@@ -50,16 +52,14 @@ CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 			"Person 19 HBX ID", "Person 19 First Name", "Person 19 Middle Name", "Person 19 Last Name","Person 19 SSN", "Person 19 DOB","Person 19 Employer Fein(s)","Person 19 Employer Name(s)",
 			"Person 20 HBX ID", "Person 20 First Name", "Person 20 Middle Name", "Person 20 Last Name","Person 20 SSN", "Person 20 DOB","Person 20 Employer Fein(s)","Person 20 Employer Name(s)",
 			"Person 21 HBX ID", "Person 21 First Name", "Person 21 Middle Name", "Person 21 Last Name","Person 21 SSN", "Person 21 DOB","Person 21 Employer Fein(s)","Person 21 Employer Name(s)"]
-	pb = ProgressBar.create(
-        :title => "Checking People by DOB and SSN",
-        :total => Person.all.size,
-        :format => "%t %a %e |%B| %P%%"
-      )
 	skips = []
+	count = 0
+	total_count = Person.all.size
 	Person.all.each do |person|
+		count += 1
+		puts "#{Time.now} - #{count}/#{total_count}" if count % 10000 == 0
 		begin
 		if skips.include?(person)
-			pb.increment
 			next
 		end
 		unless person.members.blank?
@@ -67,13 +67,11 @@ CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 			ssn = person.authority_member.ssn
 		else
 			no_members.push("#{person.full_name}")
-			pb.increment
 			next
 		end
 		unless dob.blank? && ssn.blank?
 			matches = find_matches(dob,ssn,person.name_first,person.name_last)
 		else
-			pb.increment
 			next
 		end
 		if matches.size > 1
@@ -110,7 +108,6 @@ CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 					no_members.push("#{person.full_name}")
 				end
 			end
-			pb.increment
 			if shop_boolean.any?{|tf| tf == true}
 				shop_rows.push(row)
 			else
@@ -118,7 +115,6 @@ CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 			end
 			csv << row
 		else
-			pb.increment
 		end
 		rescue Exception=>e
 			puts "#{person.full_name} - #{e.inspect}"
@@ -182,3 +178,5 @@ no_members_file = File.new("people_with_no_members.txt","w")
 no_members.each do |nm|
 	no_members_file.puts(nm)
 end
+
+puts "Ended at #{Time.now}"

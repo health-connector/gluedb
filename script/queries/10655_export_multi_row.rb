@@ -2,7 +2,7 @@ batch_size = 500
 offset = 0
 policy_count = Policy.count
 
-csv =CSV.open("10655_export_glue_multi_row_sep_16.csv", "w")
+csv =CSV.open("10655_export_glue_multi_row_sep_16_cancelled.csv", "w")
 
 csv << %w(family.eg_id policy.eg_id hbx_enrollment.policy.policy_start policy.aasm_state policy.plan.coverage_type policy.plan.metal_level
         person.authority_member_id person.authority_member.is_incarcerated person.authority_member.citizen_status
@@ -20,7 +20,7 @@ while offset < policy_count
     begin
       next if policy.nil?
       next if policy.policy_start < Date.new(2016, 01, 01)
-      next if !policy.is_active?
+      # next if !policy.is_active?
       next if (policy.plan.metal_level == "catastrophic") ||
           (policy.applied_aptc != 0) || (policy.plan.market_type == 'shop')
 

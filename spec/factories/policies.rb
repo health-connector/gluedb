@@ -14,5 +14,11 @@ FactoryGirl.define do
     after(:create) do |p, evaluator|
       create_list(:enrollee, 2, policy: p)
     end
+
+    trait :shop do
+      employer
+    end
+
+    factory :shop_policy, traits: [:shop]
   end
 end

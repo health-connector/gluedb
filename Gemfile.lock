@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/dchbx/openhbx_cv2.git
+  revision: 8cdb340ba6d9efc7d6f206d9d5c522269e881dc0
+  specs:
+    openhbx_cv2 (0.0.1)
+      activesupport (>= 3.2)
+      nokogiri-happymapper (~> 0.5)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -379,6 +387,7 @@ DEPENDENCIES
   nokogiri (~> 1.6.1)
   nokogiri-happymapper
   oj
+  openhbx_cv2!
   origin
   pd_x12
   prawn (~> 0.11.1)
@@ -401,4 +410,4 @@ DEPENDENCIES
   virtus
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

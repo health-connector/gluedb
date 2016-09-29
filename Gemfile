@@ -12,6 +12,7 @@ gem 'jquery-ui-rails'
 gem 'virtus'
 gem 'spreadsheet'
 gem 'ruby-ole', '1.2.11.7'
+gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
 
 group :development do
   gem 'capistrano', '2.15.4'

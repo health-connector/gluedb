@@ -60,11 +60,19 @@ def return_csr_percent(plan)
 	end
 end
 
+def authority_member?(authority_member_id,member_id)
+	if authority_member_id == member_id
+		return true
+	elsif authority_member_id != member_id
+		return false
+	end
+end
+
 puts "#{Time.now} - #{assistance_policies.size}"
 
 Caches::MongoidCache.with_cache_for(Plan) do
 	CSV.open("2016_aptc_policies_#{timestamp}.csv", "w") do |csv|
-		csv << ["Enrollment Group ID", "Glue Policy ID", "State", "Name", "First Name", "Middle Name", "Last Name", "HBX ID", "SSN",
+		csv << ["Enrollment Group ID", "Glue Policy ID", "State", "Name", "First Name", "Middle Name", "Last Name", "HBX ID","Authority Member?", "SSN",
 				"Plan Name", "Plan Metal", "HIOS ID", "CSR Percent", 
 				"Relationship", "Premium Total", "APTC Amount", "Responsible Party","Start Date", "End Date", "Subscriber's Email(s)"]
 		assistance_policies.each do |policy|
@@ -91,8 +99,9 @@ Caches::MongoidCache.with_cache_for(Plan) do
 				relationship = enrollee.rel_code
 				start_date = enrollee.coverage_start
 				end_date = enrollee.coverage_end
+				authority_member = authority_member?(person.authority_member_id,hbx_id)
 				csv << [eg_id,policy_id,state,
-						name, first_name,middle_name,last_name,hbx_id,ssn,
+						name, first_name,middle_name,last_name,hbx_id,authority_member,ssn,
 						plan_name,plan_metal,plan_hios, csr_percent,
 						relationship,premium_total,aptc_amount, responsible_party,start_date,end_date,emails]
 			end

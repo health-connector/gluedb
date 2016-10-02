@@ -4,15 +4,15 @@ require 'csv'
 redmine_ticket = '8905' # You should only list one ticket number at a time. 
 
 # You can use these settings if you want to use specific enrollment group IDs from Glue.
-# policy_egids = %w()
-# policies = Policy.where(:eg_id => {"$in" => policy_egids})
+policy_egids = %w()
+policies = Policy.where(:eg_id => {"$in" => policy_egids})
 
 # You can use these settings instead if you need a large number of shop enrollments from a specific plan year.
-plan_year_date = Date.new(2015,11,1)
-plan_years = PlanYear.where(start_date: plan_year_date)
-employer_ids = Employer.where(:_id => {"$in" => plan_years.map(&:employer_id)}).map(&:id)
-plan_ids = Plan.where(year: plan_year_date.year).map(&:id)
-policies = Policy.where(:employer_id => {"$in" => employer_ids},:plan_id => {"$in" => plan_ids})
+# plan_year_date = Date.new(2015,11,1)
+# plan_years = PlanYear.where(start_date: plan_year_date)
+# employer_ids = Employer.where(:_id => {"$in" => plan_years.map(&:employer_id)}).map(&:id)
+# plan_ids = Plan.where(year: plan_year_date.year).map(&:id)
+# policies = Policy.where(:employer_id => {"$in" => employer_ids},:plan_id => {"$in" => plan_ids})
 
 def select_enrollment_kind(policy)
 	if policy.is_shop?
@@ -148,7 +148,8 @@ def return_dependent_data(enrollee)
 	dob = authority_member.dob.strftime('%m/%d/%Y')
 	gender = authority_member.gender
 	relationship = enrollee.rel_code
-	return [hbx_id,first_name,middle_name,last_name,ssn,dob,gender,relationship]
+	end_date = enrollee.coverage_end
+	return [hbx_id,first_name,middle_name,last_name,ssn,dob,gender,relationship,end_date]
 end
 
 CSV.open("Redmine-#{redmine_ticket}_enrollments.csv", "w") do |csv|
@@ -161,17 +162,17 @@ CSV.open("Redmine-#{redmine_ticket}_enrollments.csv", "w") do |csv|
 			"Enrollment Group ID","Enrollment Kind","Benefit Begin Date", "Benefit End Date",
 			"Plan Year","HIOS ID","Benefit Package/Benefit Group","Date Plan Selected","Relationship",
 			"HBX ID (Dep 1)","First Name (Dep 1)","Middle Name (Dep 1)","Last Name (Dep 1)",
-			"SSN (Dep 1)","DOB (Dep 1)","Gender (Dep 1)","Relationship (Dep 1)",
+			"SSN (Dep 1)","DOB (Dep 1)","Gender (Dep 1)","Relationship (Dep 1)","Enrollee End Date (Dep 1)",
 			"HBX ID (Dep 2)","First Name (Dep 2)","Middle Name (Dep 2)","Last Name (Dep 2)",
-			"SSN (Dep 2)","DOB (Dep 2)","Gender (Dep 2)","Relationship (Dep 2)",
+			"SSN (Dep 2)","DOB (Dep 2)","Gender (Dep 2)","Relationship (Dep 2)","Enrollee End Date (Dep 2)",
 			"HBX ID (Dep 3)","First Name (Dep 3)","Middle Name (Dep 3)","Last Name (Dep 3)",
-			"SSN (Dep 3)","DOB (Dep 3)","Gender (Dep 3)","Relationship (Dep 3)",
+			"SSN (Dep 3)","DOB (Dep 3)","Gender (Dep 3)","Relationship (Dep 3)","Enrollee End Date (Dep 3)",
 			"HBX ID (Dep 4)","First Name (Dep 4)","Middle Name (Dep 4)","Last Name (Dep 4)",
-			"SSN (Dep 4)","DOB (Dep 4)","Gender (Dep 4)","Relationship (Dep 4)",
+			"SSN (Dep 4)","DOB (Dep 4)","Gender (Dep 4)","Relationship (Dep 4)","Enrollee End Date (Dep 4)",
 			"HBX ID (Dep 5)","First Name (Dep 5)","Middle Name (Dep 5)","Last Name (Dep 5)",
-			"SSN (Dep 5)","DOB (Dep 5)","Gender (Dep 5)","Relationship (Dep 5)",
+			"SSN (Dep 5)","DOB (Dep 5)","Gender (Dep 5)","Relationship (Dep 5)","Enrollee End Date (Dep 5)",
 			"HBX ID (Dep 6)","First Name (Dep 6)","Middle Name (Dep 6)","Last Name (Dep 6)",
-			"SSN (Dep 6)","DOB (Dep 6)","Gender (Dep 6)","Relationship (Dep 6)"]
+			"SSN (Dep 6)","DOB (Dep 6)","Gender (Dep 6)","Relationship (Dep 6)","Enrollee End Date (Dep 6)",]
 	policies.each do |policy|
 		next if policy.policy_start < plan_year_date
 		next if policy.canceled?

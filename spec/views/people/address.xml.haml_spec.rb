@@ -37,19 +37,17 @@ describe "people/_address.xml" do
   }
 
   describe "Given:
-              - NO address_2
-              - No address_3
-              - NO zip extension" do
+              - NO address_2 and no address_3 and no zip extension" do
     let(:address) { instance_double(Address, {
-      :address_type => "home",
-      :address_1 => address_line_1,
-      :address_2 => nil,
-      :address_3 => nil,
-      :city => city,
-      :state => state,
-      :zip => zip,
-      :zip_extension => nil
-    }) }
+                                              :address_type => "home",
+                                              :address_1 => address_line_1,
+                                              :address_2 => nil,
+                                              :address_3 => nil,
+                                              :city => city,
+                                              :state => state,
+                                              :zip => zip,
+                                              :zip_extension => nil
+                                            }) }
 
     it_should_behave_like "an address partial"
 
@@ -71,15 +69,15 @@ describe "people/_address.xml" do
               - An address_2" do
     let(:address_line_2) { "Some apartment number" }
     let(:address) { instance_double(Address, {
-      :address_type => "home",
-      :address_1 => address_line_1,
-      :address_2 => address_line_2,
-      :address_3 => nil,
-      :city => city,
-      :state => state,
-      :zip => zip,
-      :zip_extension => nil
-    }) }
+                                              :address_type => "home",
+                                              :address_1 => address_line_1,
+                                              :address_2 => address_line_2,
+                                              :address_3 => nil,
+                                              :city => city,
+                                              :state => state,
+                                              :zip => zip,
+                                              :zip_extension => nil
+                                            }) }
 
     it_should_behave_like "an address partial"
 
@@ -94,15 +92,15 @@ describe "people/_address.xml" do
               - An address_3" do
     let(:address_line_3) { "Some apartment number" }
     let(:address) { instance_double(Address, {
-        :address_type => "home",
-        :address_1 => address_line_1,
-        :address_2 => nil,
-        :address_3 => address_line_3,
-        :city => city,
-        :state => state,
-        :zip => zip,
-        :zip_extension => nil
-    }) }
+                                              :address_type => "home",
+                                              :address_1 => address_line_1,
+                                              :address_2 => nil,
+                                              :address_3 => address_line_3,
+                                              :city => city,
+                                              :state => state,
+                                              :zip => zip,
+                                              :zip_extension => nil
+                                          }) }
 
     it_should_behave_like "an address partial"
 
@@ -117,15 +115,15 @@ describe "people/_address.xml" do
               - An zip extension" do
     let(:zip_extension) { "Some zip extension" }
     let(:address) { instance_double(Address, {
-        :address_type => "home",
-        :address_1 => address_line_1,
-        :address_2 => nil,
-        :address_3 => nil,
-        :city => city,
-        :state => state,
-        :zip => zip,
-        :zip_extension => zip_extension
-    }) }
+                                              :address_type => "home",
+                                              :address_1 => address_line_1,
+                                              :address_2 => nil,
+                                              :address_3 => nil,
+                                              :city => city,
+                                              :state => state,
+                                              :zip => zip,
+                                              :zip_extension => zip_extension
+                                          }) }
 
     it_should_behave_like "an address partial"
 

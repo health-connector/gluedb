@@ -1,15 +1,11 @@
 require "rails_helper"
 
-
-# %email
-# %type= "urn:openhbx:terms:v1:email_type##{email.email_type}"
-# %email_address= email.email_address
-
 shared_examples_for "a email partial" do
   it "has email_type" do
     expected_node = subject.at_xpath("//email/type")
     expect(expected_node.content).to eq "urn:openhbx:terms:v1:email_type##{email_type}"
   end
+
   it "has email_address" do
     expected_node = subject.at_xpath("//email/email_address")
     expect(expected_node.content).to eq email_address
@@ -28,12 +24,11 @@ describe "people/_email.xml" do
   }
 
   describe "Given:
-                - Have email type
-                - Have email address" do
+                - Have an email type and an email address" do
     let(:email) { instance_double(Email, {
-        :email_type => email_type,
-        :email_address => email_address
-    }) }
+                                            :email_type => email_type,
+                                            :email_address => email_address
+                                        }) }
     it_should_behave_like "a email partial"
   end
 end

@@ -7,7 +7,8 @@ module HandlePolicyNotification
       policy_details = OpenStruct.new({
         :enrollment_group_id => parse_enrollment_group_id(policy_cv),
         :pre_amt_tot => parse_pre_amt_tot(policy_cv),
-        :tot_res_amt => parse_tot_res_amt(policy_cv)
+        :tot_res_amt => parse_tot_res_amt(policy_cv),
+        :tot_emp_res_amt => parse_tot_emp_res_amt(policy_cv)
       })
       context.policy_details = policy_details
     end
@@ -27,6 +28,12 @@ module HandlePolicyNotification
     def parse_tot_res_amt(policy_cv)
       return nil if policy_cv.policy_enrollment.blank?
       policy_cv.policy_enrollment.total_responsible_amount
+    end
+
+    def parse_tot_emp_res_amt(policy_cv)
+      return nil if policy_cv.policy_enrollment.blank?
+      return nil if policy_cv.policy_enrollment.shop_market.blank?
+      policy_cv.policy_enrollment.shop_market.total_employer_responsible_amount
     end
   end
 end

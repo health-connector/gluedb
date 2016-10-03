@@ -5,7 +5,9 @@ module HandlePolicyNotification
     organize(
       ::HandlePolicyNotification::ExtractPolicyDetails,
       ::HandlePolicyNotification::FindExistingPolicy,
-      ::HandlePolicyNotification::ExtractMemberDetails
+      ::HandlePolicyNotification::ExtractMemberDetails,
+      ::HandlePolicyNotification::FindMatchingMembers,
+      ::HandlePolicyNotification::FindInteractingPolicies
     )
   end
 end

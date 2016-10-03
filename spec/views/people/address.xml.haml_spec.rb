@@ -37,7 +37,9 @@ describe "people/_address.xml" do
   }
 
   describe "Given:
-              - NO address_2" do
+              - NO address_2
+              - No address_3
+              - NO zip extension" do
     let(:address) { instance_double(Address, {
       :address_type => "home",
       :address_1 => address_line_1,
@@ -53,6 +55,14 @@ describe "people/_address.xml" do
 
     it "has no address_line_2" do
       expected_node = subject.at_xpath("//address/address_line_2")
+      expect(expected_node).to eq nil
+    end
+    it "has no address_line_3" do
+      expected_node = subject.at_xpath("//address/address_line_3")
+      expect(expected_node).to eq nil
+    end
+    it "has no zip extension" do
+      expected_node = subject.at_xpath("//address/location_postal_extension_code")
       expect(expected_node).to eq nil
     end
   end
@@ -79,26 +89,6 @@ describe "people/_address.xml" do
     end
   end
 
-  describe "Given:
-              - NO address_3" do
-    let(:address) { instance_double(Address, {
-        :address_type => "home",
-        :address_1 => address_line_1,
-        :address_2 => nil,
-        :address_3 => nil,
-        :city => city,
-        :state => state,
-        :zip => zip,
-        :zip_extension => nil
-    }) }
-
-    it_should_behave_like "an address partial"
-
-    it "has no address_line_3" do
-      expected_node = subject.at_xpath("//address/address_line_3")
-      expect(expected_node).to eq nil
-    end
-  end
 
   describe "Given:
               - An address_3" do
@@ -122,26 +112,6 @@ describe "people/_address.xml" do
     end
   end
 
-  describe "Given:
-              - NO zip extension" do
-    let(:address) { instance_double(Address, {
-        :address_type => "home",
-        :address_1 => address_line_1,
-        :address_2 => nil,
-        :address_3 => nil,
-        :city => city,
-        :state => state,
-        :zip => zip,
-        :zip_extension => nil
-    }) }
-
-    it_should_behave_like "an address partial"
-
-    it "has no zip extension" do
-      expected_node = subject.at_xpath("//address/location_postal_extension_code")
-      expect(expected_node).to eq nil
-    end
-  end
 
   describe "Given:
               - An zip extension" do

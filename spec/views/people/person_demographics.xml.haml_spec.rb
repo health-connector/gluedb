@@ -4,7 +4,7 @@ require "rails_helper"
 shared_examples_for "a person_demographics" do
   it "has birth date" do
     expected_node = subject.at_xpath("//person_demographics/birth_date")
-    expect(expected_node.content).to eq  person.authority_member.dob.to_s
+    expect(expected_node.content).to eq  simple_date_for(person.authority_member.dob)
   end
 end
 

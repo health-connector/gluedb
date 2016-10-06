@@ -37,7 +37,9 @@ describe "people/_address.xml" do
   }
 
   describe "Given:
-              - NO address_2 and no address_3 and no zip extension" do
+              - NO address_2 
+              - NO address_3
+              - NO zip extension" do
     let(:address) { instance_double(Address, {
                                               :address_type => "home",
                                               :address_1 => address_line_1,
@@ -55,10 +57,12 @@ describe "people/_address.xml" do
       expected_node = subject.at_xpath("//address/address_line_2")
       expect(expected_node).to eq nil
     end
+
     it "has no address_line_3" do
       expected_node = subject.at_xpath("//address/address_line_3")
       expect(expected_node).to eq nil
     end
+
     it "has no zip extension" do
       expected_node = subject.at_xpath("//address/location_postal_extension_code")
       expect(expected_node).to eq nil
@@ -66,17 +70,21 @@ describe "people/_address.xml" do
   end
 
   describe "Given:
-              - An address_2" do
+              - An address_2
+              - An address 3
+              - A zip extension" do
     let(:address_line_2) { "Some apartment number" }
+    let(:address_line_3) { "Some apartment number" }
+    let(:zip_extension) { "Some zip extension" }
     let(:address) { instance_double(Address, {
                                               :address_type => "home",
                                               :address_1 => address_line_1,
                                               :address_2 => address_line_2,
-                                              :address_3 => nil,
+                                              :address_3 => address_line_3,
                                               :city => city,
                                               :state => state,
                                               :zip => zip,
-                                              :zip_extension => nil
+                                              :zip_extension => zip_extension
                                             }) }
 
     it_should_behave_like "an address partial"
@@ -85,52 +93,17 @@ describe "people/_address.xml" do
       expected_node = subject.at_xpath("//address/address_line_2")
       expect(expected_node.content).to eq address_line_2
     end
-  end
 
-
-  describe "Given:
-              - An address_3" do
-    let(:address_line_3) { "Some apartment number" }
-    let(:address) { instance_double(Address, {
-                                              :address_type => "home",
-                                              :address_1 => address_line_1,
-                                              :address_2 => nil,
-                                              :address_3 => address_line_3,
-                                              :city => city,
-                                              :state => state,
-                                              :zip => zip,
-                                              :zip_extension => nil
-                                          }) }
-
-    it_should_behave_like "an address partial"
-
-    it "has address_line_2" do
+    it "has address_line_3" do
       expected_node = subject.at_xpath("//address/address_line_3")
       expect(expected_node.content).to eq address_line_3
     end
-  end
-
-
-  describe "Given:
-              - An zip extension" do
-    let(:zip_extension) { "Some zip extension" }
-    let(:address) { instance_double(Address, {
-                                              :address_type => "home",
-                                              :address_1 => address_line_1,
-                                              :address_2 => nil,
-                                              :address_3 => nil,
-                                              :city => city,
-                                              :state => state,
-                                              :zip => zip,
-                                              :zip_extension => zip_extension
-                                          }) }
-
-    it_should_behave_like "an address partial"
 
     it "has zip_extension" do
       expected_node = subject.at_xpath("//address/location_postal_extension_code")
       expect(expected_node.content).to eq zip_extension
     end
+
   end
 
 end

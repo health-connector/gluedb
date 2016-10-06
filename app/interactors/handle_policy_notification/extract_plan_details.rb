@@ -1,9 +1,11 @@
 module HandlePolicyNotification
-  class ExtractMemberDetails
+  class ExtractPlanDetails
+    include Interactor
+
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
-    # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
+    # - plan_details (HandlePolicyNotification::PlanDetails)
     def call
 
     end

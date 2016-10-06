@@ -2,9 +2,13 @@ module HandlePolicyNotification
   class ExtractPolicyDetails
     include Interactor
 
+    # Context Requires:
+    # - policy_cv (Openhbx::Cv2::Policy)
+    # Context Outputs:
+    # - policy_details (HandlePolicyNotification::PolicyDetails)
     def call
       policy_cv = context.policy_cv
-      policy_details = OpenStruct.new({
+      policy_details = ::HandlePolicyNotification::PolicyDetails.new({
         :enrollment_group_id => parse_enrollment_group_id(policy_cv),
         :pre_amt_tot => parse_pre_amt_tot(policy_cv),
         :tot_res_amt => parse_tot_res_amt(policy_cv),

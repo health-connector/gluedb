@@ -1,4 +1,4 @@
 module HandlePolicyNotification
-  class FindExistingPolicy
+  class MemberDetails
   end
 end

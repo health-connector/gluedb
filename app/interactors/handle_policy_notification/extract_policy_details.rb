@@ -4,6 +4,7 @@ module HandlePolicyNotification
 
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
+    # - policy_market ("shop" or "individual")
     # Context Outputs:
     # - policy_details (HandlePolicyNotification::PolicyDetails)
     def call

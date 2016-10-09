@@ -147,4 +147,9 @@ module ApplicationHelper
     direction = (column == params[:sort] && params[:direction] == "desc") ? "asc" : "desc"
     ((link_to title, params.merge(:sort => column, :direction => direction, :page => nil) ) + content_tag(:sort, raw("&nbsp;"), class: css_class))
   end
+
+  def simple_date_for(date_time)
+    return nil if date_time.blank?
+    date_time.strftime("%Y%m%d")
+  end
 end

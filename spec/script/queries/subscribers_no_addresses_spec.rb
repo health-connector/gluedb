@@ -9,7 +9,11 @@ describe 'find_previous_home_addresses' do
 
 	it 'should return an array of strings if the person has been updated' do
 		person = FactoryGirl.create :person
-		person.remove_address_of('home')
-		expect(find_previous_home_addresses(person).map(&:class).to_s).to eq 'String'
+    person.name_first = "James"
+    person.save!
+    person.remove_address_of('home')
+    person.save!
+    person = Person.where(name_first: "James").first
+		expect(find_previous_home_addresses(person).map(&:class).uniq.first.to_s).to eq 'String'
 	end
 end

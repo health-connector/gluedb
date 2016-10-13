@@ -21,7 +21,7 @@ FactoryGirl.define do
       name_last ' '
     end
 
-    factory :invalid_person, traits: [:without_first_name, 
-      :without_last_name]
+  factory :invalid_person, traits: [:without_first_name,
+    :without_last_name]
   end
 end

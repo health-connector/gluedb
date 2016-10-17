@@ -137,6 +137,7 @@ Gluedb::Application.routes.draw do
 
   namespace :resources do
     namespace :v1 do
+      resources :individuals, :only => [:show]
       resources :policies, :only => [:show]
     end
   end

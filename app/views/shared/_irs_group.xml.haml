@@ -1,0 +1,13 @@
+%irs_group
+  %id
+    %id= irs_group.hbx_assigned_id
+  %tax_household_ids
+    -household.tax_households.each do |th|
+    %tax_household_id= th.hbx_assigned_id
+  %hbx_enrollment_ids
+    -household.hbx_enrollments.each do |hbx_e|
+    %hbx_enrollment_id= hbx_e.enrollment_group_id
+  %effective_start_date= irs_group.effective_start_date
+  %effective_end_date= irs_group.effective_end_date
+  %comments
+  = render("shared/comments.xml.haml"), :comments => [irs_group.comments]

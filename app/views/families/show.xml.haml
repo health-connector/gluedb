@@ -75,6 +75,10 @@
         -family.households.each do |household|
         = render "shared/household.xml.haml", :household => household
       %irs_groups ## come back to this
+        -if family.irs_groups.any?
+        -family.irs_groups.each do |irs_group|
+          %irs_group
+          = render "shared/irs_group.xml.haml", :irs_group => irs_group
       %qualifying_life_events
       %renewal_consent_through_year = family.renewal_consent_through_year
 

@@ -1,0 +1,7 @@
+%hbx_enrollment_exemption
+  %id
+    %id=hbx_enrollment_exemption.certificate_number
+  %type= "urn:openhbx:terms:v1:enrollment_exemption#{hbx_enrollment_exemption.kind}"
+  %certificate_number=hbx_enrollment_exemption.certificate_number
+  %start_date=simple_date_for(hbx_enrollment_exemption.start_date)
+  %end_date=simple_date_for(hbx_enrollment_exemption.end_date)

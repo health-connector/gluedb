@@ -6,47 +6,66 @@
   -family.family_members.each do |fm|
     - person = fm.person
     %family_member
-      %id = person.authority_member_id
+      %id 
+        %id= person.authority_member_id
       %primary_family_id
-        %id = family.hbx_assigned_id
+        %id
+          %id= family.hbx_assigned_id
       %tax_household_id
-        %id = family.active_household.tax_households.sort_by{|tax_household| tax_household.created_at}.last.hbx_assigned_id
+        %id
+          %id= family.active_household.tax_households.sort_by{|tax_household| tax_household.created_at}.last.hbx_assigned_id
       %person
         %id
-          %id = person.authority_member_id
+          %id= person.authority_member_id
         %person_name
-          %person_surname = person.name_last
-          %person_given_name = person.name_first
-          %person_middle_name = person.name_middle
-          %person_full_name = person.full_name
-          %person_name_prefix_text = person.name_pfx
-          %person_name_suffix_text = person.name_sfx
-          %person_alternate_name = person.alternate_name
+          %person_surname= person.name_last
+          %person_given_name= person.name_first
+          %person_middle_name= person.name_middle
+          %person_full_name= person.full_name
+          %person_name_prefix_text= person.name_pfx
+          %person_name_suffix_text= person.name_sfx
+          %person_alternate_name= person.alternate_name
         %addresses
+        - if person.addresses.any?
+          person.address.each do |address|
+          = render "shared/address.xml.haml", :address => address
         %emails
+        - if person.emails.any?
+          person.emails.each do |email|
+          = render "shared/email.xml.haml", :email => email
         %phones
-      %person_relationships = person.person_relationships
+        - if person.phones.any?
+          person.phones.each do |phone|
+          = render "shared/phone.xml.haml", :phone => phone
+      %person_relationships
+      - if person.person.relationships.any?
+        person.person_relationships do |person_relationship|
+        = render "shared/relationships.xml.haml", :relationship => person_relationship
       %person_demographics
-        %ssn = person.authority_member.ssn
-        %sex = person.authority_member.gender
-        %birth_date = person.authority_member.dob.strftime('%Y%m%d')
-        %death_date = person.authority_member.death_date.strftime('%Y%m%d')
-        %is_incarcerated = person.authority_member.is_incarcerated
-        %language_code = person.authority_member.lui
-        %ethnicity = person.authority_member.ethnicity
-        %race = person.authority_member.race
-        %birth_location = person.authority_member.birth_location
-        %marital_status = person.authority_member.marital_status
-        %citizen_status = person.authority_member.citizen_status
-        %is_state_resident = person.authority_member.is_state_resident
-      %is_primary_applicant = fm.is_primary_applicant
-      %is_consent_applicant = fm.is_consent_applicant
-      %is_coverage_applicant = fm.is_coverage_applicant
+        %ssn= person.authority_member.ssn
+        %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
+        %birth_date= simple_date_for(person.authority_member.dob)
+        %death_date= simple_date_for(person.authority_member.death_date)
+        %is_incarcerated= person.authority_member.is_incarcerated
+        %language_code= person.authority_member.lui
+        %ethnicity= person.authority_member.ethnicity
+        %race= person.authority_member.race
+        %birth_location= person.authority_member.birth_location
+        %marital_status= "urn:openhbx:terms:v1:marital_status##{person.authority_member.marital_status}"
+        %citizen_status= "urn:openhbx:terms:v1:citizen_status##{person.authority_member.citizen_status}"
+        %is_state_resident= person.authority_member.is_state_resident
+      %is_primary_applicant= fm.is_primary_applicant
+      %is_consent_applicant= fm.is_consent_applicant
+      %is_coverage_applicant= fm.is_coverage_applicant
       %person_health
-        %is_tobacco_user = person.authority_member.hlh
-        %is_disabled = person.authority_member.is_disabled
-      %hbx_enrollment_exemptions = fm.hbx_enrollment_exemptions
-      
+        %is_tobacco_user= person.authority_member.hlh
+        %is_disabled= person.authority_member.is_disabled
+      %hbx_enrollment_exemptions 
+      -if fm.hbx_enrollment_exemptions.any?
+        fm.hbx_enrollment_exemptions.each do |exception|
+        = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
+
+
 
 
 

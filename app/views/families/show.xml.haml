@@ -1,0 +1,53 @@
+!!! XML
+%family{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
+  %id
+    %id = @family._id
+  %family_members
+  -family.family_members.each do |fm|
+    - person = fm.person
+    %family_member
+      %id = person.authority_member_id
+      %primary_family_id
+        %id = family.hbx_assigned_id
+      %tax_household_id
+        %id = family.active_household.tax_households.sort_by{|tax_household| tax_household.created_at}.last.hbx_assigned_id
+      %person
+        %id
+          %id = person.authority_member_id
+        %person_name
+          %person_surname = person.name_last
+          %person_given_name = person.name_first
+          %person_middle_name = person.name_middle
+          %person_full_name = person.full_name
+          %person_name_prefix_text = person.name_pfx
+          %person_name_suffix_text = person.name_sfx
+          %person_alternate_name = person.alternate_name
+        %addresses
+        %emails
+        %phones
+      %person_relationships = person.person_relationships
+      %person_demographics
+        %ssn = person.authority_member.ssn
+        %sex = person.authority_member.gender
+        %birth_date = person.authority_member.dob.strftime('%Y%m%d')
+        %death_date = person.authority_member.death_date.strftime('%Y%m%d')
+        %is_incarcerated = person.authority_member.is_incarcerated
+        %language_code = person.authority_member.lui
+        %ethnicity = person.authority_member.ethnicity
+        %race = person.authority_member.race
+        %birth_location = person.authority_member.birth_location
+        %marital_status = person.authority_member.marital_status
+        %citizen_status = person.authority_member.citizen_status
+        %is_state_resident = person.authority_member.is_state_resident
+      %is_primary_applicant = fm.is_primary_applicant
+      %is_consent_applicant = fm.is_consent_applicant
+      %is_coverage_applicant = fm.is_coverage_applicant
+      %person_health
+        %is_tobacco_user = person.authority_member.hlh
+        %is_disabled = person.authority_member.is_disabled
+      %hbx_enrollment_exemptions = fm.hbx_enrollment_exemptions
+      
+
+
+
+

@@ -8,7 +8,7 @@ module Resources
 
         if @family
           respond_to do |format|
-            format.xml { render "family/show" }
+            format.xml { render "families/show" }
           end
         else
           render :nothing => true, :status => 404

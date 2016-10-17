@@ -1,2 +1,63 @@
 !!! XML
 %policy{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
+- policy = @policy
+  %id
+    %id= policy.eg_id
+    - if policy.broker.present?
+    %broker
+      %id= policy.broker.npn
+      %name= policy.broker.full_name
+      %is_active= policy.broker.is_active
+  %enrollees
+  - policy.enrollees.each do |enrollee|
+    %enrollee
+      %member
+        %id
+          %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{enrollee.person.authority_member.hbx_member_id}"
+        = render "people/person.xml.haml", :person => enrollee.person
+        %person_demographics
+          %ssn= enrollee.person.authority_member.ssn
+          %sex= "urn:openhbx:terms:v1:gender##{enrollee.person.authority_member.gender}"
+          %birth_date= simple_date_for(enrollee.person.authority_member.dob)
+      %is_subscriber= enrollee.subscriber?
+      %benefit
+        %premium_amount= enrollee.pre_amt
+        %begin_date= simple_date_for(enrollee.coverage_start)
+        - if !enrollee.coverage_end.blank?
+          %end_date= simple_date_for(enrollee.coverage_end)
+        - if enrollee.cp_id.present?
+          %carrier_assigned_policy_id= enrollee.cp_id
+        - if enrollee.c_id.present?
+          %carrier_assigned_enrollee_id= enrollee.c_id
+  %enrollment
+    %plan
+      %id
+        %id= policy.plan.hios_plan_id
+      %name= policy.plan.name
+      %active_year= policy.plan.year
+      %is_dental_only= policy.plan.coverage_type == "dental"
+      %carrier
+        %id
+          %id= policy.plan.carrier.hbx_carrier_id
+        %name= policy.plan.carrier.name
+      %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{policy.plan.metal_level}"
+      %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{policy.plan.market_type}"
+      %ehb_percent= policy.plan.ehb*100
+    - if policy.is_shop?
+      %shop_market
+        %employer_link
+          - employer = policy.employer
+          %id
+            %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
+          %name= employer.legal_name
+        %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
+    - else
+      %individual_market
+        %is_carrier_to_bill true
+        %applied_aptc_amount= (policy.applied_aptc).round(2)
+    %premium_total_amount= policy.pre_amt_tot.round(2)
+    %total_responsible_amount= policy.tot_res_amt.round(2)
+  %request_submitted_timestamp= simple_date_for(policy.created_at) if policy.created_at
+  %market= policy.is_shop? ? "shop" : "individual"
+  %is_active= policy.is_active
+  %created_at= simple_date_for(policy.created_at) if policy.created_at

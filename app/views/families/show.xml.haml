@@ -1,5 +1,6 @@
 !!! XML
 %family{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
+  @family = family
   %id
     %id = @family._id
   %family_members
@@ -64,7 +65,18 @@
       -if fm.hbx_enrollment_exemptions.any?
         fm.hbx_enrollment_exemptions.each do |exception|
         = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
-
+  %FamilySharedElementGroup
+    %application_type= "urn:openhbx:terms:v1:hbx_service#{family.application_type}"
+    %primary_family_member_id
+      %id= family.primary_applicant.person.authority_member_id
+      %e_case_id= family.e_case_id
+      %households ## you need to come back to this
+      -if family.households.any?
+        -family.households.each do |household|
+        = render "shared/household.xml.haml", :household => household
+      %irs_groups ## come back to this
+      %qualifying_life_events
+      %renewal_consent_through_year = family.renewal_consent_through_year
 
 
 

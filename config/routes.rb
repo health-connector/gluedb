@@ -138,6 +138,7 @@ Gluedb::Application.routes.draw do
   namespace :resources do
     namespace :v1 do
       resources :individuals, :only => [:show]
+      resources :familes, :only => [:show]
     end 
   end
 

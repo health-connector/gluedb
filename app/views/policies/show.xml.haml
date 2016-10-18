@@ -3,11 +3,11 @@
   - policy = @policy
   %id
     %id= policy.eg_id
-    - if policy.broker.present?
-      %broker
-        %id= policy.broker.npn
-        %name= policy.broker.full_name
-        %is_active= policy.broker.is_active
+  - if policy.broker.present?
+    %broker
+      %id= policy.broker.npn
+      %name= policy.broker.full_name
+      %is_active= policy.broker.is_active
   %enrollees
     - policy.enrollees.each do |enrollee|
       %enrollee
@@ -52,7 +52,7 @@
           - employer = policy.employer
           %id
             %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
-          %name= employer.legal_name
+          %name= employer.name
         %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
     - else
       %individual_market

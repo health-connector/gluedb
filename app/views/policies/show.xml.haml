@@ -21,7 +21,7 @@
           %birth_date= simple_date_for(enrollee.person.authority_member.dob)
       %is_subscriber= enrollee.subscriber?
       %benefit
-        %premium_amount= enrollee.pre_amt
+        %premium_amount= enrollee.pre_amt.round(2)
         %begin_date= simple_date_for(enrollee.coverage_start)
         - if !enrollee.coverage_end.blank?
           %end_date= simple_date_for(enrollee.coverage_end)

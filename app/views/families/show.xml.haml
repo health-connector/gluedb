@@ -29,9 +29,7 @@
               - person.phones.each do |phone|
                 = render "shared/v2/phone", :phone => phone
         - if person.person_relationships.any?
-          %person_relationships
-            - person.person_relationships.each do |person_relationship|
-              = render "shared/relationships", :relationship => person_relationship
+          = render "shared/relationships", :person => person
         %person_demographics
           - unless person.authority_member.ssn.blank?
             %ssn= person.authority_member.ssn

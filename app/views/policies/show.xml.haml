@@ -29,6 +29,9 @@
           %carrier_assigned_policy_id= enrollee.cp_id
         - if enrollee.c_id.present?
           %carrier_assigned_enrollee_id= enrollee.c_id
+  - if policy.has_responsible_person?
+    %responsible_party
+      = render "people/person.xml.haml", :person => policy.responsible_person
   %enrollment
     %plan
       %id

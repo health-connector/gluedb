@@ -1,34 +1,34 @@
 !!! XML
 %policy{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
-- policy = @policy
+  - policy = @policy
   %id
     %id= policy.eg_id
     - if policy.broker.present?
-    %broker
-      %id= policy.broker.npn
-      %name= policy.broker.full_name
-      %is_active= policy.broker.is_active
+      %broker
+        %id= policy.broker.npn
+        %name= policy.broker.full_name
+        %is_active= policy.broker.is_active
   %enrollees
-  - policy.enrollees.each do |enrollee|
-    %enrollee
-      %member
-        %id
-          %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{enrollee.person.authority_member.hbx_member_id}"
-        = render "people/person.xml.haml", :person => enrollee.person
-        %person_demographics
-          %ssn= enrollee.person.authority_member.ssn
-          %sex= "urn:openhbx:terms:v1:gender##{enrollee.person.authority_member.gender}"
-          %birth_date= simple_date_for(enrollee.person.authority_member.dob)
-      %is_subscriber= enrollee.subscriber?
-      %benefit
-        %premium_amount= enrollee.pre_amt.round(2)
-        %begin_date= simple_date_for(enrollee.coverage_start)
-        - if !enrollee.coverage_end.blank?
-          %end_date= simple_date_for(enrollee.coverage_end)
-        - if enrollee.cp_id.present?
-          %carrier_assigned_policy_id= enrollee.cp_id
-        - if enrollee.c_id.present?
-          %carrier_assigned_enrollee_id= enrollee.c_id
+    - policy.enrollees.each do |enrollee|
+      %enrollee
+        %member
+          %id
+            %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{enrollee.person.authority_member.hbx_member_id}"
+          = render "people/person.xml.haml", :person => enrollee.person
+          %person_demographics
+            %ssn= enrollee.person.authority_member.ssn
+            %sex= "urn:openhbx:terms:v1:gender##{enrollee.person.authority_member.gender}"
+            %birth_date= simple_date_for(enrollee.person.authority_member.dob)
+        %is_subscriber= enrollee.subscriber?
+        %benefit
+          %premium_amount= enrollee.pre_amt.round(2)
+          %begin_date= simple_date_for(enrollee.coverage_start)
+          - if !enrollee.coverage_end.blank?
+            %end_date= simple_date_for(enrollee.coverage_end)
+          - if enrollee.cp_id.present?
+            %carrier_assigned_policy_id= enrollee.cp_id
+          - if enrollee.c_id.present?
+            %carrier_assigned_enrollee_id= enrollee.c_id
   - if policy.has_responsible_person?
     %responsible_party
       = render "people/responsible_person.xml.haml", :person => policy.responsible_person, :responsible_party => policy.responsible_party

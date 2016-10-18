@@ -61,5 +61,4 @@
     %premium_total_amount= policy.pre_amt_tot.round(2)
     %total_responsible_amount= policy.tot_res_amt.round(2)
   %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
-  %market= policy.is_shop? ? "shop" : "individual"
   %created_at= policy.created_at.iso8601 if policy.created_at

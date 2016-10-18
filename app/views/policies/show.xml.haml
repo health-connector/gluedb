@@ -14,7 +14,7 @@
         %member
           %id
             %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{enrollee.person.authority_member.hbx_member_id}"
-          = render "people/person.xml.haml", :person => enrollee.person
+          = render "people/person", :person => enrollee.person
           %person_demographics
             %ssn= enrollee.person.authority_member.ssn
             %sex= "urn:openhbx:terms:v1:gender##{enrollee.person.authority_member.gender}"
@@ -31,7 +31,7 @@
             %carrier_assigned_enrollee_id= enrollee.c_id
   - if policy.has_responsible_person?
     %responsible_party
-      = render "people/responsible_person.xml.haml", :person => policy.responsible_person, :responsible_party => policy.responsible_person
+      = render "people/responsible_person", :person => policy.responsible_person, :responsible_party => policy.responsible_person
   %enrollment
     %plan
       %id
@@ -44,7 +44,7 @@
           %id= policy.plan.carrier.hbx_carrier_id
         %name= policy.plan.carrier.name
       %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{policy.plan.metal_level}"
-      %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{policy.plan.market_type}"
+      %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{policy.plan.coverage_type}"
       %ehb_percent= policy.plan.ehb*100
     - if policy.is_shop?
       %shop_market
@@ -60,7 +60,6 @@
         %applied_aptc_amount= (policy.applied_aptc).round(2)
     %premium_total_amount= policy.pre_amt_tot.round(2)
     %total_responsible_amount= policy.tot_res_amt.round(2)
-  %request_submitted_timestamp= simple_date_for(policy.created_at) if policy.created_at
+  %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
   %market= policy.is_shop? ? "shop" : "individual"
-  %is_active= policy.is_active
-  %created_at= simple_date_for(policy.created_at) if policy.created_at
+  %created_at= policy.created_at.iso8601 if policy.created_at

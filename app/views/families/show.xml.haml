@@ -29,19 +29,19 @@
         - if person.addresses.any?
           %addresses
             -person.address.each do |address|
-            = render "shared/address.xml.haml", :address => address
+              = render "shared/address.xml.haml", :address => address
         -if person.emails.any?
           %emails
             -person.emails.each do |email|
-            = render "shared/email.xml.haml", :email => email
+              = render "shared/email.xml.haml", :email => email
         -if person.phones.any?
           %phones        
             -person.phones.each do |phone|
-            = render "shared/phone.xml.haml", :phone => phone
+              = render "shared/phone.xml.haml", :phone => phone
       -if person.person.relationships.any?
       %person_relationships
         -person.person_relationships do |person_relationship|
-        = render "shared/relationships.xml.haml", :relationship => person_relationship
+          = render "shared/relationships.xml.haml", :relationship => person_relationship
       %person_demographics
         - unless person.authority_member.ssn.blank?
           %ssn= person.authority_member.ssn
@@ -80,7 +80,7 @@
       -if fm.hbx_enrollment_exemptions.any?
         %hbx_enrollment_exemptions 
           -fm.hbx_enrollment_exemptions.each do |exception|
-          = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
+            = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
     %application_type= "urn:openhbx:terms:v1:hbx_service#{family.application_type}"
     %primary_family_member_id
       %id= family.primary_applicant.person.authority_member_id
@@ -89,17 +89,17 @@
     -if family.households.any?
       %households
         -family.households.each do |household|
-        = render "shared/household.xml.haml", :household => household
+          = render "shared/household.xml.haml", :household => household
     -if family.irs_groups.any?
       %irs_groups
         -family.irs_groups.each do |irs_group|
           %irs_group
-          = render "shared/irs_group.xml.haml", :irs_group => irs_group
+            = render "shared/irs_group.xml.haml", :irs_group => irs_group
     -if family.qualifying_life_events.any?
       %qualifying_life_events
         -family.qualifying_life_events.each do |qle|
           %qualifying_life_event
-          = render "shared/qualifying_life_event.xml.haml", :qualifying_life_event => qle
+            = render "shared/qualifying_life_event.xml.haml", :qualifying_life_event => qle
     -unless family.renewal_consent_through_year.blank?
       %renewal_consent_through_year = family.renewal_consent_through_year
 

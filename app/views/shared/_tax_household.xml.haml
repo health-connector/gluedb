@@ -11,7 +11,7 @@
       %tax_household_members
       -tax_household.tax_household_members.each do |thm|
         %tax_household_member
-        =render "shared/tax_household_member.xml.haml", :tax_household_member => thm
+          = render "shared/tax_household_member.xml.haml", :tax_household_member => thm
     -if tax_household.eligibility_determinations.any?
       %eligibility_determinations
         -tax_household.eligiblity_determinations.each do |elig_determine|

@@ -1,0 +1,16 @@
+%person
+  %id
+    - if person.authority_member.present?
+      %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{person.authority_member_id}"
+    - else
+      %id= "urn:glue:responsible_party_id##{responsible_party.id}"
+  = render :partial => "people/person_name", :object => person
+  - if person.addresses.any?
+    %addresses
+      = render :partial => "people/address", :collection => person.addresses
+  - if person.emails.any?
+    %emails
+      = render :partial => "people/email", :collection => person.emails
+  - if person.phones.any?
+    %phones
+      = render :partial => "people/phone", :collection => person.phones

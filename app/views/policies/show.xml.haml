@@ -24,7 +24,7 @@
               %person_relationship
                 %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{enrollee.relationship_status_code}"
                 %object_individual
-                  %id= subscriber_person.authority_member.hbx_member_id
+                  %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{subscriber_person.authority_member.hbx_member_id}"
           %person_demographics
             %ssn= person.authority_member.ssn
             %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
@@ -74,3 +74,5 @@
     %total_responsible_amount= policy.tot_res_amt.round(2)
   %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
   %created_at= policy.created_at.iso8601 if policy.created_at
+  - if !policy.updated_at.blank?
+    %updated_at= policy.updated_at.iso8601

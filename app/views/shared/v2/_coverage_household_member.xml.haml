@@ -1,0 +1,6 @@
+%coverage_household_member
+  %id
+    %id= coverage_household_member.family_member.person.authority_member_id
+  %person_name
+    = render "shared/v2/name", :object => coverage_household_member.family_member.person
+    

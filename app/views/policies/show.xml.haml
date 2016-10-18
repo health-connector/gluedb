@@ -4,21 +4,31 @@
   %id
     %id= policy.eg_id
   - if policy.broker.present?
+    - broker = policy.broker
     %broker
-      %id= policy.broker.npn
-      %name= policy.broker.full_name
-      %is_active= policy.broker.is_active
+      %id= broker.npn
+      %name= broker.full_name
+      %is_active= broker.is_active
   %enrollees
+    - subscriber = policy.subscriber
+    - subscriber_person = subscriber.person
     - policy.enrollees.each do |enrollee|
+      - person = enrollee.person
       %enrollee
         %member
           %id
-            %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{enrollee.person.authority_member.hbx_member_id}"
-          = render "people/person", :person => enrollee.person
+            %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{person.authority_member.hbx_member_id}"
+          = render "people/person", :person => person
+          - unless enrollee.subscriber?
+            %person_relationships
+              %person_relationship
+                %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{enrollee.relationship_status_code}"
+                %object_individual
+                  %id= subscriber_person.authority_member.hbx_member_id
           %person_demographics
-            %ssn= enrollee.person.authority_member.ssn
-            %sex= "urn:openhbx:terms:v1:gender##{enrollee.person.authority_member.gender}"
-            %birth_date= simple_date_for(enrollee.person.authority_member.dob)
+            %ssn= person.authority_member.ssn
+            %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
+            %birth_date= simple_date_for(person.authority_member.dob)
         %is_subscriber= enrollee.subscriber?
         %benefit
           %premium_amount= enrollee.pre_amt.round(2)
@@ -31,21 +41,23 @@
             %carrier_assigned_enrollee_id= enrollee.c_id
   - if policy.has_responsible_person?
     %responsible_party
-      = render "people/responsible_person", :person => policy.responsible_person, :responsible_party => policy.responsible_person
+      - responsible_party = policy.responsible_person
+      = render "people/responsible_person", :person => responsible_party, :responsible_party => responsible_party
   %enrollment
+    - plan = policy.plan
     %plan
       %id
-        %id= policy.plan.hios_plan_id
-      %name= policy.plan.name
-      %active_year= policy.plan.year
-      %is_dental_only= policy.plan.coverage_type == "dental"
+        %id= plan.hios_plan_id
+      %name= plan.name
+      %active_year= plan.year
+      %is_dental_only= plan.coverage_type == "dental"
       %carrier
         %id
-          %id= policy.plan.carrier.hbx_carrier_id
-        %name= policy.plan.carrier.name
-      %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{policy.plan.metal_level}"
-      %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{policy.plan.coverage_type}"
-      %ehb_percent= policy.plan.ehb*100
+          %id= plan.carrier.hbx_carrier_id
+        %name= plan.carrier.name
+      %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level}"
+      %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
+      %ehb_percent= plan.ehb*100
     - if policy.is_shop?
       %shop_market
         %employer_link

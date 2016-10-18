@@ -1,25 +1,28 @@
 %tax_household
   %id
     %id=tax_household.hbx_assigned_id
-    %primary_applicant_id= tax_household.primary.family_member.person.authority_member_id
+    %primary_applicant_id
+      %id= tax_household.primary.family_member.person.authority_member_id
     %allocated_aptcs
       %allocated_aptc
         %calender_year= Date.today.year.to_s
         %total_amount= tax_household.allocated_aptc_in_dollars
-    %tax_household_members
     -if tax_household.tax_household_members.any?
-    -tax_household.tax_household_members.each do |thm|
-      %tax_household_member
-      =render "shared/tax_household_member.xml.haml", :tax_household_member => thm
-    %eligibility_determinations
-      -if tax_household.eligibility_determinations.any?
-      -tax_household.eligiblity_determinations.each do |elig_determine|
-      %eligibility_determination
-        %id= elig_determine.e_pdc_id
-        %maximum_aptc= elig_determine.max_aptc_in_dollars
-        %csr_percent= elig_determine.csr_percent_as_integer
-        %benchmark_plan_id= elig_determine.benchmark_plan_id
-        %determination_date= simple_date_for(elig_determine.determination_date)
+      %tax_household_members
+      -tax_household.tax_household_members.each do |thm|
+        %tax_household_member
+        =render "shared/tax_household_member.xml.haml", :tax_household_member => thm
+    -if tax_household.eligibility_determinations.any?
+      %eligibility_determinations
+        -tax_household.eligiblity_determinations.each do |elig_determine|
+        %eligibility_determination
+          %id
+            %id=elig_determine.e_pdc_id
+          %maximum_aptc= elig_determine.max_aptc_in_dollars
+          %csr_percent= elig_determine.csr_percent_as_integer
+          %benchmark_plan_id
+            %id= elig_determine.benchmark_plan_id
+          %determination_date= simple_date_for(elig_determine.determination_date)
     %start_date= simple_date_for(tax_household.effective_start_date)
     %end_date= simple_date_for(tax_household.effective_end_date)
     

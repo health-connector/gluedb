@@ -2,7 +2,7 @@
 %family{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
   family = @family
   %id
-    %id = @family._id
+    %id = family._id
   %family_members
   -family.family_members.each do |fm|
     - person = fm.person

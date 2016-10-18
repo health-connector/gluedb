@@ -11,7 +11,6 @@
   %tax_households
     -if household.tax_households.any?
       %tax_household
-      household.tax_households.any?
       household.tax_households.each do |th|
       = render "shared/tax_household.xml.haml", :tax_household =>  th
     

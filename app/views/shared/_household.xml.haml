@@ -13,5 +13,5 @@
     %tax_households
       - household.tax_households.each do |th|
         = render "shared/tax_household", :tax_household =>  th
-    
-
+  - if !household.created_at.blank?
+    %submitted_at= household.created_at.iso8601

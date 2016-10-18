@@ -19,15 +19,15 @@
           - if person.addresses.any?
             %addresses
               - person.addresses.each do |address|
-                = render "shared/address", :address => address
+                = render "shared/v2/address", :address => address
           - if person.emails.any?
             %emails
               - person.emails.each do |email|
-                = render "shared/email", :email => email
+                = render "shared/v2/email", :email => email
           - if person.phones.any?
             %phones        
               - person.phones.each do |phone|
-                = render "shared/phone", :phone => phone
+                = render "shared/v2/phone", :phone => phone
         - if person.person_relationships.any?
           %person_relationships
             - person.person_relationships.each do |person_relationship|

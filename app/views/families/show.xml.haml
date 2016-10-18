@@ -80,6 +80,10 @@
           %irs_group
           = render "shared/irs_group.xml.haml", :irs_group => irs_group
       %qualifying_life_events
+        -if family.qualifying_life_events.any?
+        -family.qualifying_life_events.each do |qle|
+          %qualifying_life_event
+          = render "shared/qualifying_life_event.xml.haml"
       %renewal_consent_through_year = family.renewal_consent_through_year
 
 

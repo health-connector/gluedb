@@ -1,0 +1,9 @@
+%tax_household_member
+  %person
+    %id
+      %id= tax_household_member.family_member.person.authority_member_id
+    %person_name
+      = render "shared/v2/name", :object => tax_household_member.family_member.person
+  %is_insurance_assistance_eligible= tax_household_member.is_ia_eligible
+  %is_medicaid_chip_eligible= tax_household_member.is_medicaid_chip_eligible
+  

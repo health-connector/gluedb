@@ -43,47 +43,64 @@
         person.person_relationships do |person_relationship|
         = render "shared/relationships.xml.haml", :relationship => person_relationship
       %person_demographics
-        %ssn= person.authority_member.ssn
+        - unless person.authority_member.ssn.blank?
+          %ssn= person.authority_member.ssn
         %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
         %birth_date= simple_date_for(person.authority_member.dob)
-        %death_date= simple_date_for(person.authority_member.death_date)
-        %is_incarcerated= person.authority_member.is_incarcerated
-        %language_code= person.authority_member.lui
-        %ethnicity= person.authority_member.ethnicity
-        %race= person.authority_member.race
-        %birth_location= person.authority_member.birth_location
-        %marital_status= "urn:openhbx:terms:v1:marital_status##{person.authority_member.marital_status}"
-        %citizen_status= "urn:openhbx:terms:v1:citizen_status##{person.authority_member.citizen_status}"
-        %is_state_resident= person.authority_member.is_state_resident
-      %is_primary_applicant= fm.is_primary_applicant
-      %is_consent_applicant= fm.is_consent_applicant
-      %is_coverage_applicant= fm.is_coverage_applicant
-      %person_health
-        %is_tobacco_user= person.authority_member.hlh
-        %is_disabled= person.authority_member.is_disabled
-      %hbx_enrollment_exemptions 
+        - unless person.authority_member.death_date.blank?
+          %death_date= simple_date_for(person.authority_member.death_date)
+        - unless person.authority_member.is_incarcerated.blank?
+          %is_incarcerated= person.authority_member.is_incarcerated
+        - unless person.authority_member.lui.blank?
+          %language_code= person.authority_member.lui
+        - unless person.authority_member.ethnicity.blank?
+          %ethnicity= person.authority_member.ethnicity
+        - unless person.authority_member.race.blank?
+          %race= person.authority_member.race
+        - unless person.authority_member.birth_location.blank?
+          %birth_location= person.authority_member.birth_location
+        - unless person.authority_member.marital_status.blank?
+          %marital_status= "urn:openhbx:terms:v1:marital_status##{person.authority_member.marital_status}"
+        - unless person.authority_member.citizen_status.blank?
+          %citizen_status= "urn:openhbx:terms:v1:citizen_status##{person.authority_member.citizen_status}"
+        - unless person.authority_member.is_state_resident.blank?
+          %is_state_resident= person.authority_member.is_state_resident
+      - unless fm.is_primary_applicant.blank?
+        %is_primary_applicant= fm.is_primary_applicant
+      - unless fm.is_consent_applicant.blank?
+        %is_consent_applicant= fm.is_consent_applicant
+      - unless fm.is_coverage_applicant.blank?
+        %is_coverage_applicant= fm.is_coverage_applicant
+      -unless person.authority_member.hlh.blank? && person.authority_member.is_disabled.blank?
+        %person_health
+          - unless person.authority_member.hlh.blank?
+            %is_tobacco_user= person.authority_member.hlh
+          - unless person.authority_member.is_disabled.blank?
+            %is_disabled= person.authority_member.is_disabled
       -if fm.hbx_enrollment_exemptions.any?
-        fm.hbx_enrollment_exemptions.each do |exception|
-        = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
-  %FamilySharedElementGroup
+        %hbx_enrollment_exemptions 
+          -fm.hbx_enrollment_exemptions.each do |exception|
+          = render "shared/hbx_enrollment_exemption.xml.haml", :hbx_enrollment_exception => exception
     %application_type= "urn:openhbx:terms:v1:hbx_service#{family.application_type}"
     %primary_family_member_id
       %id= family.primary_applicant.person.authority_member_id
+    -unless family.e_case_id.blank?
       %e_case_id= family.e_case_id
-      %households ## you need to come back to this
-      -if family.households.any?
+    -if family.households.any?
+      %households
         -family.households.each do |household|
         = render "shared/household.xml.haml", :household => household
-      %irs_groups ## come back to this
-        -if family.irs_groups.any?
+    -if family.irs_groups.any?
+      %irs_groups
         -family.irs_groups.each do |irs_group|
           %irs_group
           = render "shared/irs_group.xml.haml", :irs_group => irs_group
+    -if family.qualifying_life_events.any?
       %qualifying_life_events
-        -if family.qualifying_life_events.any?
         -family.qualifying_life_events.each do |qle|
           %qualifying_life_event
-          = render "shared/qualifying_life_event.xml.haml"
+          = render "shared/qualifying_life_event.xml.haml", :qualifying_life_event => qle
+    -unless family.renewal_consent_through_year.blank?
       %renewal_consent_through_year = family.renewal_consent_through_year
 
 

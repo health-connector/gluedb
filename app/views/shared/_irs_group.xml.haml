@@ -4,12 +4,11 @@
   %tax_household_ids
     - irs_group.households.flat_map(&:tax_households).each do |th|
       %tax_household_id
-        %id= th.hbx_assigned_id
+        %id= th.id
   %hbx_enrollment_ids
     - irs_group.households.flat_map(&:hbx_enrollments).each do |hbx_e|
-      %hbx_enrollment_id= hbx_e.enrollment_group_id
+      %hbx_enrollment_id= hbx_e.policy_id
   %effective_start_date= simple_date_for(irs_group.effective_start_date)
   - if !irs_group.effective_end_date.blank?
     %effective_end_date= simple_date_for(irs_group.effective_end_date)
-  %comments
-    = render "shared/comments", :object => irs_group
+  = render "shared/comments", :object => irs_group

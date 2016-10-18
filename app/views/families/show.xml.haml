@@ -4,105 +4,89 @@
   %id
     %id= family._id
   %family_members
-  - family.family_members.each do |fm|
-    - person = fm.person
-    %family_member
-      %id 
-        %id= person.authority_member_id
-      %primary_family_id
-        %id
-          %id= family.hbx_assigned_id
-      %tax_household_id
-        %id
-          %id= family.active_household.tax_households.sort_by{|tax_household| tax_household.created_at}.last.hbx_assigned_id
-      %person
-        %id
+    - family.family_members.each do |fm|
+      - person = fm.person
+      %family_member
+        %id 
           %id= person.authority_member_id
-        %person_name
-          %person_surname= person.name_last
-          %person_given_name= person.name_first
-          - if !person.name_middle.blank?
-            %person_middle_name= person.name_middle
-          %person_full_name= person.full_name
-          - if !person.name_pfx.blank?
-            %person_name_prefix_text= person.name_pfx
-          - if !person.name_sfx.blank?
-            %person_name_suffix_text= person.name_sfx
-          - if !person.alternate_name.blank?
-            %person_alternate_name= person.alternate_name
-        - if person.addresses.any?
-          %addresses
-            - person.addresses.each do |address|
-              = render "shared/address", :address => address
-        - if person.emails.any?
-          %emails
-            - person.emails.each do |email|
-              = render "shared/email", :email => email
-        - if person.phones.any?
-          %phones        
-            - person.phones.each do |phone|
-              = render "shared/phone", :phone => phone
-      - if person.person_relationships.any?
-        %person_relationships
-          - person.person_relationships.each do |person_relationship|
-            = render "shared/relationships", :relationship => person_relationship
-      %person_demographics
-        - unless person.authority_member.ssn.blank?
-          %ssn= person.authority_member.ssn
-        %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
-        %birth_date= simple_date_for(person.authority_member.dob)
-        - unless person.authority_member.death_date.blank?
-          %death_date= simple_date_for(person.authority_member.death_date)
-        - unless person.authority_member.is_incarcerated.blank?
-          %is_incarcerated= person.authority_member.is_incarcerated
-        - unless person.authority_member.lui.blank?
-          %language_code= person.authority_member.lui
-        - unless person.authority_member.ethnicity.blank?
-          %ethnicity= person.authority_member.ethnicity
-        - unless person.authority_member.race.blank?
-          %race= person.authority_member.race
-        - unless person.authority_member.birth_location.blank?
-          %birth_location= person.authority_member.birth_location
-        - unless person.authority_member.marital_status.blank?
-          %marital_status= "urn:openhbx:terms:v1:marital_status##{person.authority_member.marital_status}"
-        - unless person.authority_member.citizen_status.blank?
-          %citizen_status= "urn:openhbx:terms:v1:citizen_status##{person.authority_member.citizen_status}"
-        - unless person.authority_member.is_state_resident.blank?
-          %is_state_resident= person.authority_member.is_state_resident
-      - unless fm.is_primary_applicant.blank?
-        %is_primary_applicant= fm.is_primary_applicant
-      - unless fm.is_consent_applicant.blank?
-        %is_consent_applicant= fm.is_consent_applicant
-      - unless fm.is_coverage_applicant.blank?
-        %is_coverage_applicant= fm.is_coverage_applicant
-      - unless person.authority_member.hlh.blank? && person.authority_member.is_disabled.blank?
-        %person_health
-          - unless person.authority_member.hlh.blank?
-            %is_tobacco_user= person.authority_member.hlh
-          - unless person.authority_member.is_disabled.blank?
-            %is_disabled= person.authority_member.is_disabled
-      - if fm.hbx_enrollment_exemptions.any?
-        %hbx_enrollment_exemptions 
-          -fm.hbx_enrollment_exemptions.each do |exception|
-            = render "shared/hbx_enrollment_exemption", :hbx_enrollment_exception => exception
-    %application_type= "urn:openhbx:terms:v1:hbx_service#{family.application_type}"
-    %primary_family_member_id
-      %id= family.primary_applicant.person.authority_member_id
-    - unless family.e_case_id.blank?
-      %e_case_id= family.e_case_id
-    - if family.households.any?
-      %households
-        -family.households.each do |household|
-          = render "shared/household", :household => household
-    - if family.irs_groups.any?
-      %irs_groups
-        -family.irs_groups.each do |irs_group|
-          %irs_group
-            = render "shared/irs_group", :irs_group => irs_group
-    - if family.qualifying_life_events.any?
-      %qualifying_life_events
-        - family.qualifying_life_events.each do |qle|
-          %qualifying_life_event
-            = render "shared/qualifying_life_event", :qualifying_life_event => qle
-    - unless family.renewal_consent_through_year.blank?
-      %renewal_consent_through_year= family.renewal_consent_through_year
+        %primary_family_id
+          %id= family.hbx_assigned_id
+        %person
+          %id
+            %id= person.authority_member_id
+          %person_name
+            = render "shared/v2/name", :object => person
+          - if person.addresses.any?
+            %addresses
+              - person.addresses.each do |address|
+                = render "shared/address", :address => address
+          - if person.emails.any?
+            %emails
+              - person.emails.each do |email|
+                = render "shared/email", :email => email
+          - if person.phones.any?
+            %phones        
+              - person.phones.each do |phone|
+                = render "shared/phone", :phone => phone
+        - if person.person_relationships.any?
+          %person_relationships
+            - person.person_relationships.each do |person_relationship|
+              = render "shared/relationships", :relationship => person_relationship
+        %person_demographics
+          - unless person.authority_member.ssn.blank?
+            %ssn= person.authority_member.ssn
+          %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
+          %birth_date= simple_date_for(person.authority_member.dob)
+          - unless person.authority_member.death_date.blank?
+            %death_date= simple_date_for(person.authority_member.death_date)
+          - unless person.authority_member.is_incarcerated.blank?
+            %is_incarcerated= person.authority_member.is_incarcerated
+          - unless person.authority_member.lui.blank?
+            %language_code= person.authority_member.lui
+          - unless person.authority_member.ethnicity.blank?
+            %ethnicity= person.authority_member.ethnicity
+          - unless person.authority_member.race.blank?
+            %race= person.authority_member.race
+          - unless person.authority_member.birth_location.blank?
+            %birth_location= person.authority_member.birth_location
+          - unless person.authority_member.marital_status.blank?
+            %marital_status= "urn:openhbx:terms:v1:marital_status##{person.authority_member.marital_status}"
+          - unless person.authority_member.citizen_status.blank?
+            %citizen_status= "urn:openhbx:terms:v1:citizen_status##{person.authority_member.citizen_status}"
+          - unless person.authority_member.is_state_resident.blank?
+            %is_state_resident= person.authority_member.is_state_resident
+        - unless fm.is_primary_applicant.blank?
+          %is_primary_applicant= fm.is_primary_applicant
+        - unless fm.is_consent_applicant.blank?
+          %is_consent_applicant= fm.is_consent_applicant
+        - unless fm.is_coverage_applicant.blank?
+          %is_coverage_applicant= fm.is_coverage_applicant
+        - unless person.authority_member.hlh.blank? && person.authority_member.is_disabled.blank?
+          %person_health
+            - unless person.authority_member.hlh.blank?
+              %is_tobacco_user= person.authority_member.hlh
+            - unless person.authority_member.is_disabled.blank?
+              %is_disabled= person.authority_member.is_disabled
+        - if fm.hbx_enrollment_exemptions.any?
+          %hbx_enrollment_exemptions 
+            - fm.hbx_enrollment_exemptions.each do |exception|
+              = render "shared/hbx_enrollment_exemption", :hbx_enrollment_exception => exception
+  %application_type= "urn:openhbx:terms:v1:hbx_service##{family.application_type}"
+  %primary_family_member_id
+    %id= family.primary_applicant.person.authority_member_id
+  - unless family.e_case_id.blank?
+    %e_case_id= family.e_case_id
+  - if family.households.any?
+    %households
+      - family.households.each do |household|
+        = render "shared/household", :household => household
+  - if family.irs_groups.any?
+    %irs_groups
+      - family.irs_groups.each do |irs_group|
+        = render "shared/irs_group", :irs_group => irs_group
+  - if family.qualifying_life_events.any?
+    %qualifying_life_events
+      - family.qualifying_life_events.each do |qle|
+        = render "shared/qualifying_life_event", :qualifying_life_event => qle
+  - unless family.renewal_consent_through_year.blank?
+    %renewal_consent_through_year= family.renewal_consent_through_year

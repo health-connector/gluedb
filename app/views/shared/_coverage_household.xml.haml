@@ -2,10 +2,10 @@
   %id
     %id= coverage_household.primary.family_member.person.authority_member_id
   %start_date= simple_date_for(coverage_household.household.effective_start_date)
-  %end_date= simple_date_for(coverage_household.household.effective_end_date)
+  - if !coverage_household.household.effective_end_date.blank?
+    %end_date= simple_date_for(coverage_household.household.effective_end_date)
   - if coverage_household.coverage_household_members.any?
     %coverage_household_members
       - coverage_household.coverage_household_members.each do |chm|
-        %coverage_household_member
-          = render "shared/v2/coverage_household_member", :coverage_household_member => chm
+        = render "shared/v2/coverage_household_member", :coverage_household_member => chm
   %primary_member_id= coverage_household.household.family.primary_applicant.person.authority_member_id

@@ -5,14 +5,13 @@
   %start_date= simple_date_for(household.effective_start_date)
   - if !household.effective_end_date.blank?
     %end_date = simple_date_for(household.effective_end_date)
-  %coverage_households
-    -if household.coverage_households.any?
-      -household.coverage_households.each do |coverage_household|
+  - if household.coverage_households.any?
+    %coverage_households
+      - household.coverage_households.each do |coverage_household|
         = render "shared/coverage_household", :coverage_household => coverage_household
-  %tax_households
-    -if household.tax_households.any?
-      %tax_household
-      -household.tax_households.each do |th|
+  -if household.tax_households.any?
+    %tax_households
+      - household.tax_households.each do |th|
         = render "shared/tax_household", :tax_household =>  th
     
 

@@ -51,17 +51,18 @@
       %name= plan.name
       %active_year= plan.year
       %is_dental_only= plan.coverage_type == "dental"
+      - carrier = Caches::CarrierSingletonCache.lookup(plan.carrier_id)
       %carrier
         %id
-          %id= plan.carrier.hbx_carrier_id
-        %name= plan.carrier.name
+          %id= carrier.hbx_carrier_id
+        %name= carrier.name
       %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level}"
       %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
       %ehb_percent= plan.ehb*100
     - if policy.is_shop?
       %shop_market
+        - employer = policy.employer
         %employer_link
-          - employer = policy.employer
           %id
             %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
           %name= employer.name

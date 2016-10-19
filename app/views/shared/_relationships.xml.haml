@@ -1,6 +1,6 @@
-%relationships
+%person_relationships
   - person.person_relationships.each do |relationship|
-    %relationship
+    %person_relationship
       %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{relationship.kind}"
       %object_individual
         %id= relationship.relative.authority_member_id

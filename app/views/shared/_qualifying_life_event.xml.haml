@@ -1,0 +1,11 @@
+%qualifying_life_event
+  %id
+    %id= qualifying_life_event._id
+    %type= "urn:dc0:terms:v1:qualifying_life_event##{qualifying_life_event.kind}"
+    %event_date= simple_date_for(qualifying_life_event.event_date)
+    %submitted_date=simple_date_for(qualifying_life_event.submitted_date)
+    %special_enrollment_period
+      %begin_date= simple_date_for(qualifying_life_event.sep_start_date)
+      %end_date= simple_date_for(qualifying_life_event.sep_end_date)
+      %number_of_days= qualifying_life_event.duration_in_days
+    

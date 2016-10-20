@@ -6,7 +6,8 @@
   - if policy.broker.present?
     - broker = policy.broker
     %broker
-      %id= broker.npn
+      %id
+        %id= broker.npn
       %name= broker.full_name
       %is_active= broker.is_active
   %enrollees

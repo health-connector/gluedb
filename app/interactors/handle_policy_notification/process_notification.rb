@@ -7,7 +7,8 @@ module HandlePolicyNotification
       ::HandlePolicyNotification::ExtractPlanDetails,
       ::HandlePolicyNotification::ExtractMemberDetails,
       ::HandlePolicyNotification::VerifyRequiredDetailsPresent,
-      ::HandlePolicyNotification::FindInteractingPolicies
+      ::HandlePolicyNotification::FindInteractingPolicies,
+      ::HandlePolicyNotification::FindRenewalCandidates
     )
   end
 end

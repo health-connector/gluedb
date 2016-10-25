@@ -5,7 +5,6 @@ module HandlePolicyNotification
     # Context Outputs:
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
     def call
-
     end
   end
 end

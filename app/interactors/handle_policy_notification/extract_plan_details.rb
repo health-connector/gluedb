@@ -7,7 +7,6 @@ module HandlePolicyNotification
     # Context Outputs:
     # - plan_details (HandlePolicyNotification::PlanDetails)
     def call
-
     end
   end
 end

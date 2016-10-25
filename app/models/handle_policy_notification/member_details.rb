@@ -7,6 +7,7 @@ module HandlePolicyNotification
     attribute :member_premium, Boolean
     attribute :coverage_start, Date
     attribute :coverage_end, Date
+    attribute :eligibility_start, Date
 
     def found_member
       @found_member ||= begin

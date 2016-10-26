@@ -4,7 +4,7 @@ require 'csv'
 redmine_ticket = '8905' # You should only list one ticket number at a time. 
 
 # You can use these settings if you want to use specific enrollment group IDs from Glue.
-policy_egids = %w(214792 215013 214751 214705)
+policy_egids = %w()
 policies = Policy.where(:eg_id => {"$in" => policy_egids})
 
 # You can use these settings instead if you need a large number of shop enrollments from a specific plan year.

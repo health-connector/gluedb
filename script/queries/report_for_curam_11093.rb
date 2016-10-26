@@ -34,9 +34,9 @@ begin
       if person.present? && d["subscriber"].downcase == "y"
         policies = person.policies.includes(:plan).where("enrollees.coverage_start" => {"$gt" => Date.new(2015,12,31)}).to_a
         active_health_policies = policies.select{|p| p.is_active? && p.plan.coverage_type == 'health'}
-        active_health_policy = active_health_policies.sort{|x,y| y.enrollees.first.coverage_start <=> x.enrollees.first.coverage_start}.first
+        active_health_policy = active_health_policies.sort{|x,y| y.policy_start <=> x.policy_start}.first
         active_dental_policies = policies.select{|p| p.is_active? && p.plan.coverage_type == 'dental'}
-        active_dental_policy = active_dental_policies.sort{|x,y| y.enrollees.first.coverage_start <=> x.enrollees.first.coverage_start}.first
+        active_dental_policy = active_dental_policies.sort{|x,y| y.policy_start <=> x.policy_start}.first
         row = [d["applid"],  d["ic_ref"], d["firstname"], d["lastname"], d["hbxid"]]
         if active_health_policy 
           row += [active_health_policy.applied_aptc, active_health_policy.plan.csr_variant_id, csr_percentage(active_health_policy.plan.csr_variant_id), active_health_policy.coverage_type, active_health_policy.eg_id, active_health_policy.plan.name, active_health_policy.plan.try(:renewal_plan).try(:name), active_health_policy.pre_amt_tot.to_s]

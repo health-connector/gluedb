@@ -38,11 +38,12 @@ class FamilyMember
 
   def person=(person_instance)
     return unless person_instance.is_a? Person
+    @person = person_instance
     self.person_id = person_instance._id
   end
 
   def person
-    Person.find(self.person_id) unless self.person_id.blank?
+    @person ||= Person.find(self.person_id) unless self.person_id.blank?
   end
 
   def households

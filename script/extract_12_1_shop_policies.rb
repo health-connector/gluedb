@@ -3,15 +3,12 @@ active_end = Date.new(2016,11,30)
 terminated_end = Date.new(2016,11,30)
 
 employer_ids = PlanYear.where(:start_date => {"$gt" => active_start}, :end_date => {"$lte" => active_end}).pluck(:employer_id)
-puts employer_ids.count
 
 eligible_pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
     :coverage_start => {"$gt" => active_start}
   }}, :employer_id => {"$in" => employer_ids}}).no_timeout
-
-puts eligible_pols.count
 
 def current_plan_year(employer)
   py_window = Date.new(2016, 11, 30)

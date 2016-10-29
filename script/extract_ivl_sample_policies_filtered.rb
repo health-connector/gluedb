@@ -19,19 +19,30 @@ def reducer(plan_cache, hash, enrollment)
   coverage_kind = plan.coverage_type
   current_member_record = hash[enrollment.subscriber.m_id]
   comparison_record = [
-    enrollment.subscriber.m_id,
+    enrollment.subscriber.coverage_start,
     coverage_kind,
+    enrollment.created_at,
     enrollment.eg_id
   ]
   enrollment_count = current_member_record.length
   enrollment_already_superceded = current_member_record.any? do |en|
-    (en[1] == comparison_record[1]) &&
-    (en[0] >= comparison_record[0]) 
+    ((en[1] == comparison_record[1]) &&
+    (en[0] > comparison_record[0])) ||
+    (
+      (en[1] == comparison_record[1]) &&
+      (en[0] == comparison_record[0]) &&
+      (en[2] > comparison_record[2])
+    )
   end
   return hash if enrollment_already_superceded
   filter_superceded_enrollments = current_member_record.reject do |en|
-    (en[1] == comparison_record[1]) &&
-    (en[0] <= comparison_record[0]) 
+    ((en[1] == comparison_record[1]) &&
+    (en[0] <= comparison_record[0])) || 
+    (
+      (en[1] == comparison_record[1]) &&
+      (en[0] == comparison_record[0]) &&
+      (en[2] < comparison_record[2])
+    )
   end
   hash[enrollment.subscriber.m_id] = filter_superceded_enrollments + [comparison_record]
   hash

@@ -58,5 +58,5 @@ end
 results = start_hash.values.flat_map { |v| v.map(&:last) }
 
 results.each do |res|
-  puts "localhost:3000/resources/v1/policies/#{res}.xml"
+  puts "localhost/resources/v1/policies/#{res}.xml"
 end

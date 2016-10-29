@@ -2,7 +2,7 @@ policy_agg = Policy.collection.raw_aggregate([
  {"$match" => {"employer_id" => nil, "enrollees.coverage_start" => {"$gte" => Time.mktime(2015,12,31)}}},
  {"$unwind" => "$enrollees"},
  {"$match" => {"enrollees.rel_code" => "self"}},
- {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,12,31)}}]}},
+ {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,9,30)}}]}},
  {"$group" => {"_id" => "$eg_id"}}
 ])
 

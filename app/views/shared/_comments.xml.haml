@@ -1,7 +1,8 @@
-%n1:comments
+- if object.comments.any?
+  %comments
     - object.comments.each do |comment|
-      %n1:commment
-        %n1:content= comment.content
-        %n1:author= comment.author
-        %n1:date= comment.date
-        %n1:priority_flag= comment.priority_flag
+      %commment
+        %content= comment.content
+        %author= comment.author
+        %date= comment.date
+        %priority_flag= comment.priority_flag

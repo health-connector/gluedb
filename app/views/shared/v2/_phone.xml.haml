@@ -1,17 +1,17 @@
-%n1:phone
-  %n1:type= "urn:openhbx:terms:v1:phone_type##{phone.phone_type}"
+%phone
+  %type= "urn:openhbx:terms:v1:phone_type##{phone.phone_type}"
   - if phone.country_code.present?
-    %n1:country_code= phone.country_code
+    %country_code= phone.country_code
   - if phone.area_code.present?
-    %n1:area_code= phone.area_code
-  %n1:phone_number= phone.phone_number
+    %area_code= phone.area_code
+  %phone_number= phone.phone_number
   - if phone.full_phone_number.present?
-    %n1:full_phone_number= phone.full_phone_number
+    %full_phone_number= phone.full_phone_number
   - else
-    %n1:full_phone_number= phone.phone_number
+    %full_phone_number= phone.phone_number
   - if phone.extension.present?
-    %n1:extension= phone.extension
+    %extension= phone.extension
   - if phone.primary.present?
-    %n1:is_preferred= phone.primary
+    %is_preferred= phone.primary
   - else
-    %n1:is_preferred= false
+    %is_preferred= false

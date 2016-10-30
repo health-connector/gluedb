@@ -15,7 +15,7 @@ module HandlePolicyNotification
         member = enrollee.member
         benefit = enrollee.benefit
         HandlePolicyNotification::MemberDetails.new({
-           :member_premium => benefit.premium_amount
+           :member_premium => benefit.premium_amount,
            :member_id => parse_member_id(member),
            :is_subcriber => enrollee.subscriber?,
            :coverage_start => parse_begin_date(member),

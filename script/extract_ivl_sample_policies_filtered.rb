@@ -2,7 +2,7 @@ policy_agg = Policy.collection.raw_aggregate([
  {"$match" => {"employer_id" => nil, "enrollees.coverage_start" => {"$gte" => Time.mktime(2015,12,31)}}},
  {"$unwind" => "$enrollees"},
  {"$match" => {"enrollees.rel_code" => "self"}},
- {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,9,30)}}]}},
+ {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,12,30)}}]}},
  {"$group" => {"_id" => "$eg_id"}}
 ])
 
@@ -17,7 +17,7 @@ def reducer(plan_cache, hash, enrollment)
   plan = plan_cache.lookup(plan_id)
   return hash if plan.nil?
   coverage_kind = plan.coverage_type
-  current_member_record = hash[enrollment.subscriber.m_id]
+  current_member_record = hash[enrollment.subscriber.person.authority_id]
   comparison_record = [
     enrollment.subscriber.coverage_start,
     coverage_kind,
@@ -44,7 +44,7 @@ def reducer(plan_cache, hash, enrollment)
       (en[2] < comparison_record[2])
     )
   end
-  hash[enrollment.subscriber.m_id] = filter_superceded_enrollments + [comparison_record]
+  hash[enrollment.subscriber.person.authority_member_id] = filter_superceded_enrollments + [comparison_record]
   hash
 end
 

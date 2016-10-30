@@ -17,7 +17,7 @@ def reducer(plan_cache, hash, enrollment)
   plan = plan_cache.lookup(plan_id)
   return hash if plan.nil?
   coverage_kind = plan.coverage_type
-  current_member_record = hash[enrollment.subscriber.person.authority_id]
+  current_member_record = hash[enrollment.subscriber.person.authority_member_id]
   comparison_record = [
     enrollment.subscriber.coverage_start,
     coverage_kind,

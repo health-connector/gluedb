@@ -66,11 +66,11 @@ end
 
 policies_to_compare = Policy.where({:eg_id => {"$in" => enrollment_ids}})
 
-start_hash = Hash.new { |h, key| h[key] = [] }
+start_hash = Hash.new { |h, key| h[key] = Array.new }
 pc = Caches::PlanCache.new
 
-policies_to_compare.each do |pol|
-    reducer(pc, start_hash, pol)
+policies_to_compare.inject(start_hash) do |acc, pol|
+    reducer(pc, acc, pol)
 end
 
 results = start_hash.values.flat_map { |v| v.map(&:last) }

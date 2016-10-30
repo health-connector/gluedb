@@ -2,7 +2,7 @@ policy_agg = Policy.collection.raw_aggregate([
  {"$match" => {"employer_id" => nil, "enrollees.coverage_start" => {"$gte" => Time.mktime(2015,12,31)}}},
  {"$unwind" => "$enrollees"},
  {"$match" => {"enrollees.rel_code" => "self"}},
- {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,12,30)}}]}},
+# {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,12,31)}}]}},
  {"$group" => {"_id" => "$eg_id"}}
 ])
 
@@ -13,8 +13,10 @@ end
 policies = Policy.where({"eg_id" => {"$in" => pol_ids}})
 
 def reducer(plan_cache, hash, enrollment)
+  return hash if enrollment.canceled?
   plan_id = enrollment.plan_id
   plan = plan_cache.lookup(plan_id)
+  raise enrollment.eg_id.inspect if plan.nil?
   return hash if plan.nil?
   coverage_kind = plan.coverage_type
   current_member_record = hash[enrollment.subscriber.person.authority_member_id]
@@ -37,7 +39,7 @@ def reducer(plan_cache, hash, enrollment)
   return hash if enrollment_already_superceded
   filter_superceded_enrollments = current_member_record.reject do |en|
     ((en[1] == comparison_record[1]) &&
-    (en[0] <= comparison_record[0])) || 
+    (en[0] < comparison_record[0])) || 
     (
       (en[1] == comparison_record[1]) &&
       (en[0] == comparison_record[0]) &&
@@ -48,11 +50,11 @@ def reducer(plan_cache, hash, enrollment)
   hash
 end
 
-start_hash = Hash.new { |h, key| h[key] = [] }
+start_hash = Hash.new { |h, key| h[key] = Array.new } 
 pc = Caches::PlanCache.new
 
-policies.each do |pol|
-  reducer(pc, start_hash, pol)
+policies.inject(start_hash) do |acc, pol|
+  reducer(pc, acc, pol)
 end
 
 results = start_hash.values.flat_map { |v| v.map(&:last) }

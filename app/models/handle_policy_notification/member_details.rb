@@ -2,12 +2,12 @@ module HandlePolicyNotification
   class MemberDetails
     include Virtus.model
 
-    attribute :member_id, String
     attribute :is_subscriber, Boolean
-    attribute :member_premium, Boolean
-    attribute :coverage_start, Date
-    attribute :coverage_end, Date
-    attribute :eligibility_start, Date
+    attribute :member_id, String
+    attribute :premium_amount, Float
+    attribute :begin_date, Date
+    attribute :end_date, Date
+    attribute :eligibility_begin_date, Date
 
     def found_member
       @found_member ||= begin
@@ -15,5 +15,6 @@ module HandlePolicyNotification
                           query.execute
                         end
     end
+
   end
 end

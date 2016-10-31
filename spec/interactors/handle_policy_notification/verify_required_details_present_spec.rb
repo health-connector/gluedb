@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe HandlePolicyNotification::ExtractPolicyDetails do
+describe HandlePolicyNotification::VerifyRequiredDetailsPresent do
   let(:enrollment_group_id) { "2938749827349723974" }
   let(:pre_amt_tot) { "290.13" }
   let(:tot_res_amt) { "123.13" }
@@ -15,7 +15,8 @@ describe HandlePolicyNotification::ExtractPolicyDetails do
     })
   }
 
-  subject { HandlePolicyNotification::ExtractPolicyDetails.call(interaction_context) }
+  subject { HandlePolicyNotification::VerifyRequiredDetailsPresent.call(interaction_context) }
+
 
   describe "given a policy element" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :premium_total_amount => pre_amt_tot, :total_responsible_amount => tot_res_amt, :shop_market => shop_enrollment_element) }
@@ -38,21 +39,7 @@ describe HandlePolicyNotification::ExtractPolicyDetails do
     end
   end
 
-  describe "given a policy element with shop information" do
-    let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :premium_total_amount => pre_amt_tot, :total_responsible_amount => tot_res_amt, :shop_market => shop_enrollment_element) }
-    let(:policy_id) { "urn:openhbx:hbx:dc0:resources:v1:policy:hbx_id##{enrollment_group_id}" }
-
-    it "extracts the tot_emp_res_amt" do
-      expect(subject.policy_details.tot_emp_res_amt).to eq tot_emp_res_amt
-    end
-  end
-
-  describe "given a policy element with ivl information" do
-    let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :premium_total_amount => pre_amt_tot, :total_responsible_amount => tot_res_amt, :individual_market => individual_enrollment_element, shop_market: nil) }
-    let(:policy_id) { "urn:openhbx:hbx:dc0:resources:v1:policy:hbx_id##{enrollment_group_id}" }
-
-    it "extracts ivl market" do
-      expect(subject.policy_details.market).to eq "individual"
-    end
+  describe "given a plan element" do 
+    ## fill in specs here
   end
 end

@@ -15,8 +15,7 @@ module HandlePolicyNotification
     include Interactor
 
     # Context requires:
-    # - policy_details
-    # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
+    # - interacting_policies (array of Policy)
     # Context outputs:
     # - continuation_policy (either a Policy or nil)
     def call

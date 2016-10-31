@@ -4,6 +4,8 @@ module HandlePolicyNotification
     # - policy_details (Openhbx::Cv2::Policy)
     # - plan_details (HandlePolicyNotification::PlanDetails)
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
+    # - broker_details (HandlePolicyNotification::BrokerDetails may be nil)
+    # - employer_details (HandlePolicyNotification::EmployerDetails may be nil)
     # - processing_errors (HandlePolicyNotification::ProcessingErrors)
     #
     # Call "fail!" if validation does not pass.

@@ -7,6 +7,11 @@ module HandlePolicyNotification
     # Context Outputs:
     # - broker_details (HandlePolicyNotification::BrokerDetails may be nil)
     def call
+      return if policy_cv.broker_link.nil?
+      broker_link = policy_cv.broker_link
+      context.broker_details = HandlePolicyNotification::BrokerDetails.new({
+         :npn => broker_link.npn_from_id
+      })
     end
   end
 end

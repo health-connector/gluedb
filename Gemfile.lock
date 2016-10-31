@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:dchbx/edi_codec.git
-  revision: 69fe4fa6a4ac4aa15be142dd95df4c198ac97d0e
+  revision: 2f12b5e9496700b27058508fc09d0d5807c259fa
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -425,4 +425,4 @@ DEPENDENCIES
   virtus
 
 BUNDLED WITH
-   1.11.2
+   1.13.6

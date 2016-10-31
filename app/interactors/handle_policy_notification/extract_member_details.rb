@@ -1,5 +1,6 @@
 module HandlePolicyNotification
   class ExtractMemberDetails
+    include Interactor
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
@@ -15,12 +16,12 @@ module HandlePolicyNotification
         member = enrollee.member
         benefit = enrollee.benefit
         HandlePolicyNotification::MemberDetails.new({
-           :member_premium => benefit.premium_amount,
+           :premium_amount => benefit.premium_amount,
            :member_id => parse_member_id(member),
-           :is_subcriber => enrollee.subscriber?,
-           :coverage_start => parse_begin_date(member),
-           :coverage_end => parse_end_date(member),
-           :eligibility_start => parse_eligibility_date(member)
+           :is_subscriber => enrollee.is_subscriber,
+           :begin_date => parse_begin_date(benefit),
+           :end_date => parse_end_date(benefit),
+           :eligibility_begin_date => parse_eligibility_date(benefit)
         })
       end
     end

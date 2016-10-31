@@ -35,6 +35,12 @@ module HandlePolicyNotification
         if member_details.found_member.blank?
           processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
         end
+        if member_details.is_subscriber.blank?
+          processing_errors.errors.add( :member_details, "#{member_details.member_id} doesn't have the subscriber/dependent indicator set.")
+        end
+        if member_details.coverage_start.blank?
+          processing_errors.errors.add( :member_details, "hbx id #{member_details.member_id} does not have a coverage start date")
+        end
       end
 
       if broker_details.found_broker.blank?

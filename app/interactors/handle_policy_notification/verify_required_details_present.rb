@@ -27,6 +27,10 @@ module HandlePolicyNotification
         )
       end
 
+      if plan_details.found_plan.year >= 2017 && plan_details.found_plan.market_type != policy_details.market
+       context.processing_errors.errors.add(:plan_details, "Plan submitted doesn't match the market.") 
+      end
+
       member_details_collection.each do |member_details|
         if member_details.found_member.blank?
           processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
@@ -37,7 +41,7 @@ module HandlePolicyNotification
         processing_errors.errors.add( :broker_details, "No broker found with npn #{broker_details.npn}"
       end
 
-      if employer_details.found_employer.blank?
+      if policy_details.market == "shop" && employer_details.found_employer.blank?
         processing_errors.errors.add( :employer_details, "No employer found with fein #{employer_details.fein}")
       end
 

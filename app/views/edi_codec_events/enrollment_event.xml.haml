@@ -1,0 +1,23 @@
+!!! XML
+%enrollment_event{ :xmlns => "http://openhbx.org/api/terms/1.0", "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance" }
+  %header
+    %hbx_id DC0
+    %submitted_at= Time.now.iso8601
+  %body
+    %enrollment_event_body
+      %enrollment
+        %affected_members
+          - enrollment_event.affected_members.each do |affected_member|
+            %member_before_changes
+              %id
+                %id= affected_member.member_id
+              %person_name
+                = render 'shared/v2/name', object: affected_member.found_person
+        %transaction_id= enrollment_event.transaction_id
+        %is_trading_partner_publishable true
+        - if !enrollment_event.target_policy.blank?
+          %policy
+            - enrollment_event.target_policy.reload
+            = render :partial => "policies/policy", :object => enrollment_event.target_policy
+        - else
+          = raw raw_policy_xml.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)

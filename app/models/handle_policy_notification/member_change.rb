@@ -3,8 +3,9 @@ module HandlePolicyNotification
     include Virtus.model
     
     attribute :member_id, String
-    attribute :premium_amount, String
-    attribute :begin_date, Date
-    attribute :end_date, Date
+
+    def found_person
+      @found_person ||= Person.find_by_member_id(member_id)
+    end
   end
 end

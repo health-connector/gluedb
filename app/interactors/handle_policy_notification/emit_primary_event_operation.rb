@@ -4,8 +4,7 @@ module HandlePolicyNotification
     include Interactor
 
     # Context requires:
-    # - policy_to_create
-    # - continuation_policy_action (either a HandlePolicyNotification::PolicyAction or nil)
+    # - primary_policy_action (a HandlePolicyNotification::PolicyAction)
     def call
     end
   end

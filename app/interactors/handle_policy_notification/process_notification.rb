@@ -5,6 +5,8 @@ module HandlePolicyNotification
     organize(
       ::HandlePolicyNotification::ExtractPolicyDetails,
       ::HandlePolicyNotification::ExtractPlanDetails,
+      ::HandlePolicyNotification::ExtractEmployerDetails,
+      ::HandlePolicyNotification::ExtractBrokerDetails,
       ::HandlePolicyNotification::ExtractMemberDetails,
       ::HandlePolicyNotification::VerifyRequiredDetailsPresent,
       ::HandlePolicyNotification::FindInteractingPolicies,

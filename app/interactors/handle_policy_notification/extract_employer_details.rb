@@ -7,7 +7,7 @@ module HandlePolicyNotification
     # Context Outputs:
     # - employer_details (HandlePolicyNotification::EmployerDetails may be nil)
     def call
-      policy_enrollment = policy_cv.policy_enrollment
+      policy_enrollment = context.policy_cv.policy_enrollment
       return nil if policy_enrollment.blank?
       shop_market = policy_enrollment.shop_market
       return nil if shop_market.blank?

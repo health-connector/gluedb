@@ -13,7 +13,7 @@ module HandlePolicyNotification
         Enrollee.new(md.enrollee_attributes)
       end
       Policy.create!(primary_action.new_policy_attributes.merge({
-
+        :enrollees => enrollees
       }))
     end
   end

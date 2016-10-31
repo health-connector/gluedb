@@ -47,6 +47,7 @@ module Listeners
     end
     
     def extract_policy_cv(payload)
+      Openhbx::Cv::Policy.parse(payload, single: true)
     end
 
     def self.run

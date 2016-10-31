@@ -18,13 +18,13 @@ module HandlePolicyNotification
     protected
 
     def extract_hios_id(policy_cv)
-      return nil if policy_cv.id.blank?
-      policy_cv.id.split("#").last
+      return nil if policy_cv.policy_enrollment.plan.id.blank?
+      policy_cv.policy_enrollment.plan.id.split("#").last
     end
 
     def extract_active_year(policy_cv)
-      return nil if policy_cv.blank?
-      policy_cv.active_year
+      return nil if policy_cv.policy_enrollment.plan.blank?
+      policy_cv.policy_enrollment.plan.active_year
     end
   end
 end

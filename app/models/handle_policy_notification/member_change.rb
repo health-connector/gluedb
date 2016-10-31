@@ -1,5 +1,5 @@
 module HandlePolicyNotification
-  class PolicyAction
+  class MemberChange
     include Virtus.model
     
     attribute :member_id, String

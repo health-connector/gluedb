@@ -7,6 +7,6 @@ module HandlePolicyNotification
     # If we have just policy details, it's a create
     attribute :target_policy, Policy
     attribute :policy_details, ::HandlePolicyNotification::PolicyDetails
-    attribute :member_change, Array[::HandlePolicyNotification::MemberChanges]
+    attribute :member_changes, Array[::HandlePolicyNotification::MemberChange]
   end
 end

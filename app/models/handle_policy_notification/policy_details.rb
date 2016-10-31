@@ -2,6 +2,7 @@ module HandlePolicyNotification
   class PolicyDetails
     include Virtus.model
 
+    attribute :qualifying_event_reason, String
     attribute :market, String # Should be either "shop" or "individual"
     attribute :enrollment_group_id, String
     attribute :pre_amt_tot, String

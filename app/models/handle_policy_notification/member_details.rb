@@ -8,6 +8,7 @@ module HandlePolicyNotification
     attribute :begin_date, Date
     attribute :end_date, Date
     attribute :eligibility_begin_date, Date
+    attribute :relationship, String
 
     def found_member
       @found_member ||= begin

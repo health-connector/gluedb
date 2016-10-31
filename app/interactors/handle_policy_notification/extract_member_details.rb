@@ -6,6 +6,9 @@ module HandlePolicyNotification
     # Context Outputs:
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
     def call
+      extracted__members = extract_members(context.policy_cv)
+      subscriber = extracted_members.detect do |m|
+      end
       context.member_detail_collection = extract_members(context.policy_cv)
     end
 
@@ -46,6 +49,10 @@ module HandlePolicyNotification
     def parse_date_or_nil(date)
       return nil if date.blank?
       Date.strptime(date, "%Y%m%d") rescue nil
+    end
+
+    def parse_relationshipo
+      "child"
     end
   end
 end

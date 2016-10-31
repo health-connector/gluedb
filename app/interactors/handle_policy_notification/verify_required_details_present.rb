@@ -47,47 +47,47 @@ module HandlePolicyNotification
         context.processing_errors.errors.add(:policy_details, "No Enrollment Group ID was submitted.")
       end
 
-      if parse_pre_amt_tot(policy_cv).nil? || parse_tot_res_amt(policy_cv).nil? || parse_tot_emp_res_amt(policy_cv).nil?
+      if parse_pre_amt_tot(policy_cv).nil? || parse_tot_res_amt(policy_cv).nil?
         context.processing_errors.errors.add(:policy_details, "One ore more pieces of premium data was not included.")
       end
 
-      if plan_details.found_plan.nil?
+      if context.plan_details.found_plan.nil?
         context.processing_errors.errors.add(
            :plan_details,
            "No plan found with HIOS ID #{plan_details.hios_id} and active year #{plan_details.active_year}"
         )
       end
 
-      if plan_details.found_plan.year >= 2017 && plan_details.found_plan.market_type != policy_details.market
+      if context.plan_details.found_plan.year >= 2017 && context.plan_details.found_plan.market_type != context.policy_details.market
        context.processing_errors.errors.add(:plan_details, "Plan submitted doesn't match the market.")
       end
 
-      member_details_collection.each do |member_details|
+      context.member_detail_collection.each do |member_details|
         if member_details.found_member.blank?
           processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
         end
         if member_details.is_subscriber.blank?
           processing_errors.errors.add( :member_details, "#{member_details.member_id} doesn't have the subscriber/dependent indicator set.")
         end
-        if member_details.coverage_start.blank?
+        if member_details.begin_date.blank?
           processing_errors.errors.add( :member_details, "hbx id #{member_details.member_id} does not have a coverage start date")
         end
       end
 
-      if broker_details.found_broker.blank?
-        processing_errors.errors.add( :broker_details, "No broker found with npn #{broker_details.npn}")
+      if context.broker_details && context.broker_details.found_broker.blank?
+        processing_errors.errors.add( :broker_details, "No broker found with npn #{context.broker_details.npn}")
       end
 
-      if policy_details.market == "shop" && employer_details.found_employer.blank?
-        processing_errors.errors.add( :employer_details, "No employer found with fein #{employer_details.fein}")
+      if context.policy_details.market == "shop" && context.employer_details.found_employer.blank?
+        processing_errors.errors.add( :employer_details, "No employer found with fein #{context.employer_details.fein}")
       end
 
-      if policy_details.market == "shop"
-        processing_errors.errors.add( :market_type, "we don't support shop yet" )
+      if context.policy_details.market == "shop"
+        context.processing_errors.errors.add( :market_type, "we don't support shop yet" )
       end
 
-      if processing_errors.has_errors?
-        fail!
+      if context.processing_errors.has_errors?
+        context.fail!
       end
     end
   end

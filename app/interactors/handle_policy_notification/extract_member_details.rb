@@ -6,9 +6,6 @@ module HandlePolicyNotification
     # Context Outputs:
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
     def call
-      extracted__members = extract_members(context.policy_cv)
-      subscriber = extracted_members.detect do |m|
-      end
       context.member_detail_collection = extract_members(context.policy_cv)
     end
 

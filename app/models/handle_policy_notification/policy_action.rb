@@ -14,6 +14,15 @@ module HandlePolicyNotification
     attribute :plan_details, ::HandlePolicyNotification::PlanDetails
     attribute :member_changes, Array[::HandlePolicyNotification::MemberChange]
 
+    def transaction_id
+      @transcation_id ||= begin
+                            ran = Random.new
+                            current_time = Time.now.utc
+                            reference_number_base = current_time.strftime("%Y%m%d%H%M%S") + current_time.usec.to_s[0..2]
+                            reference_number_base + sprintf("%05i", ran.rand(65535))
+                          end
+    end
+
     def new_policy_attributes
       base_attributes = {
         :plan => plan_details.found_plan,

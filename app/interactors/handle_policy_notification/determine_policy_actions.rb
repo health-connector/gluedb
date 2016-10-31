@@ -14,10 +14,18 @@ module HandlePolicyNotification
     # - interacting_policies (array of Policy)
     # - renewal_policies (array of Policy)
     # Context outputs:
-    # - policy_to_create 
-    # - continuation_policy_action (either a HandlePolicyNotification::PolicyAction or nil)
+    # - primary_policy_action (a HandlePolicyNotification::PolicyAction)
     # - other_policy_actions (array of HandlePolicyNotification::PolicyAction)
     def call
+      if context.interacting_policies.empty? && context.renewal_policies.any?
+        # 'Passive' renewal
+      elsif context.interacting_policies.empty? && context.renewal_policies.empty?
+        # Plan change, add, or remove
+      elsif context.interacting_policies.any? && context.renewal_policies.empty?
+        # Plan change, add, or remove
+      elsif context.interacting_policies.any? && context.renewal_policies.any?
+        # Either plan change, add, or 'active' renewal
+      end
     end
   end
 end

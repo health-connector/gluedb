@@ -1,5 +1,6 @@
 module HandlePolicyNotification
   class VerifyRequiredDetailsPresent
+    include Interactor
     # Context Requires:
     # - policy_details (Openhbx::Cv2::Policy)
     # - plan_details (HandlePolicyNotification::PlanDetails)
@@ -9,14 +10,44 @@ module HandlePolicyNotification
     # - processing_errors (HandlePolicyNotification::ProcessingErrors)
     #
     # Call "fail!" if validation does not pass.
+
+    def parse_market(policy_cv)
+      return nil if policy_cv.policy_enrollment.blank?
+      policy_cv.policy_enrollment.shop_market.present? ? "shop" : "individual"
+    end
+
+    def parse_enrollment_group_id(policy_cv)
+      return nil if policy_cv.id.blank?
+      policy_cv.id.split("#").last
+    end
+
+    def parse_pre_amt_tot(policy_cv)
+      return nil if policy_cv.policy_enrollment.blank?
+      policy_cv.policy_enrollment.premium_total_amount
+    end
+
+    def parse_tot_res_amt(policy_cv)
+      return nil if policy_cv.policy_enrollment.blank?
+      policy_cv.policy_enrollment.total_responsible_amount
+    end
+
+    def parse_tot_emp_res_amt(policy_cv)
+      return nil if policy_cv.policy_enrollment.blank?
+      return nil if policy_cv.policy_enrollment.shop_market.blank?
+      policy_cv.policy_enrollment.shop_market.total_employer_responsible_amount
+    end
+
     def call
-      if policy_details.market.blank?
+      policy_cv = context.policy_cv
+      if parse_market(policy_cv).nil?
         context.processing_errors.errors.add(:policy_details, "No market found")
       end
-      if policy_details.enrollment_group_id.blank?
+
+      if parse_enrollment_group_id(policy_cv).nil?
         context.processing_errors.errors.add(:policy_details, "No Enrollment Group ID was submitted.")
       end
-      if policy_details.pre_amt_tot.blank? || policy_details.tot_res_amt.blank? || policy_details.tot_emp_res_amt.blank?
+
+      if parse_pre_amt_tot(policy_cv).nil? || parse_tot_res_amt(policy_cv).nil? || parse_tot_emp_res_amt(policy_cv).nil?
         context.processing_errors.errors.add(:policy_details, "One ore more pieces of premium data was not included.")
       end
 
@@ -28,7 +59,7 @@ module HandlePolicyNotification
       end
 
       if plan_details.found_plan.year >= 2017 && plan_details.found_plan.market_type != policy_details.market
-       context.processing_errors.errors.add(:plan_details, "Plan submitted doesn't match the market.") 
+       context.processing_errors.errors.add(:plan_details, "Plan submitted doesn't match the market.")
       end
 
       member_details_collection.each do |member_details|

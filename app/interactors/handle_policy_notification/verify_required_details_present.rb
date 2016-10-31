@@ -82,6 +82,10 @@ module HandlePolicyNotification
         processing_errors.errors.add( :employer_details, "No employer found with fein #{employer_details.fein}")
       end
 
+      if policy_details.market == "shop"
+        processing_errors.errors.add( :market_type, "we don't support shop yet" )
+      end
+
       if processing_errors.has_errors?
         fail!
       end

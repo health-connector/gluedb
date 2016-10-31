@@ -17,15 +17,25 @@ module HandlePolicyNotification
     # - primary_policy_action (a HandlePolicyNotification::PolicyAction)
     # - other_policy_actions (array of HandlePolicyNotification::PolicyAction)
     def call
+      other_policy_actions = []
+      primary_policy_action = nil
       if context.interacting_policies.empty? && context.renewal_policies.any?
         # 'Passive' renewal
       elsif context.interacting_policies.empty? && context.renewal_policies.empty?
         # Plan change, add, or remove
+        processing_errors.errors.add(:event_kind, "right now we only handle passive renewals")
+        fail!
       elsif context.interacting_policies.any? && context.renewal_policies.empty?
         # Plan change, add, or remove
+        processing_errors.errors.add(:event_kind, "right now we only handle passive renewals")
+        fail!
       elsif context.interacting_policies.any? && context.renewal_policies.any?
         # Either plan change, add, or 'active' renewal
+        processing_errors.errors.add(:event_kind, "right now we only handle passive renewals")
+        fail!
       end
+      context.primary_policy_action = primary_policy_action
+      context.other_policy_actions = other_policy_actions
     end
   end
 end

@@ -16,6 +16,12 @@ module HandlePolicyNotification
       coverage_end = subscriber_member_details.coverage_end
       possible_matches = []
       if context.policy_details.market == "shop"
+        possible_matches = subscriber_person.policies.select do |pol|
+          (pol.plan.market_type == "shop") &&
+            (pol.plan.coverage_type == context.plan_details.found_plan_coverage_type) &&
+            (pol.employer.id == context.employer_details.found_employer.id) &&
+            shop_dates_overlap(pol, context.employer_details.found_employer, coverage_start, coverage_end)
+        end
       else
         possible_matches = subscriber_person.policies.select do |pol|
           (pol.plan.market_type != "shop") &&
@@ -24,6 +30,10 @@ module HandlePolicyNotification
         end
       end
       context.interacting_policies = possible_matches.reject { |pol| pol.canceled? }
+    end
+
+    def shop_dates_overlap(policy_to_check, employer, policy_start, policy_end)
+
     end
 
     def ivl_dates_overlap(coverage_start, coverage_end, other_start, other_end)

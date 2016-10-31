@@ -10,9 +10,10 @@ module HandlePolicyNotification
       action_xml = ApplicationController.new.render_to_string({
         :template => "edi_codec_events/enrollment_event",
         :format => :xml,
-        :locals => {:enrollment_event => context.primary_policy_action, :raw_policy_xml => raw_policy_xml}
+        :locals => {:enrollment_event => context.primary_policy_action, :raw_policy_xml => context.raw_policy_xml}
       })
-      edi_builder = EdiCodec::X12::EdiBuilder.new(action_xml)
+      puts action_xml
+      edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
       x12_xml = edi_builder.call.to_xml
       publish_to_bus(x12_xml)
     end

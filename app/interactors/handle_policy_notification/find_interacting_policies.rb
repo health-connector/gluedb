@@ -10,22 +10,22 @@ module HandlePolicyNotification
     # Context outputs:
     # - interacting_policies (array of Policy, may be empty)
     def call
-      subscriber_member_details = context.member_detail_collection.detect { |md| md.is_subscriber? }
-      subscriber_person = Person.where("members.hbx_assigned_id" => subscriber_member_details.member_id).first
-      coverage_start = subscriber_member_details.coverage_start
-      coverage_end = subscriber_member_details.coverage_end
+      subscriber_member_details = context.member_detail_collection.detect { |md| md.is_subscriber }
+      subscriber_person = Person.where("members.hbx_member_id" => subscriber_member_details.member_id).first
+      coverage_start = subscriber_member_details.begin_date
+      coverage_end = subscriber_member_details.end_date
       possible_matches = []
       if context.policy_details.market == "shop"
         possible_matches = subscriber_person.policies.select do |pol|
           (pol.plan.market_type == "shop") &&
-            (pol.plan.coverage_type == context.plan_details.found_plan_coverage_type) &&
+            (pol.plan.coverage_type == context.plan_details.found_plan.coverage_type) &&
             (pol.employer.id == context.employer_details.found_employer.id) &&
             shop_dates_overlap(pol, context.employer_details.found_employer, coverage_start, coverage_end)
         end
       else
         possible_matches = subscriber_person.policies.select do |pol|
           (pol.plan.market_type != "shop") &&
-            (pol.plan.coverage_type == context.plan_details.found_plan_coverage_type) &&
+            (pol.plan.coverage_type == context.plan_details.found_plan.coverage_type) &&
             ivl_dates_overlap(coverage_start, coverage_end, pol.policy_start, pol.policy_end)
         end
       end

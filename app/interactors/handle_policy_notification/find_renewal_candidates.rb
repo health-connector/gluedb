@@ -9,6 +9,7 @@ module HandlePolicyNotification
     # Context outputs:
     # - renewal_policies (a potentially empty array of Policy)
     def call
+      context.renewal_policies = []
     end
   end
 end

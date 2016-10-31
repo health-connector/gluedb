@@ -18,6 +18,8 @@ module HandlePolicyNotification
     # - interacting_policies (array of Policy)
     # Context outputs:
     # - continuation_policy (either a Policy or nil)
+    # - may also alter interacting_policies to remove the policy which was
+    #   chosen as the continuation
     def call
     end
   end

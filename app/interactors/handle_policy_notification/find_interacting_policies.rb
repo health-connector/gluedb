@@ -32,12 +32,46 @@ module HandlePolicyNotification
       context.interacting_policies = possible_matches.reject { |pol| pol.canceled? }
     end
 
-    def shop_dates_overlap(policy_to_check, employer, policy_start, policy_end)
-
+    def shop_dates_overlap(policy_to_check, employer, event_start, event_end)
+      return false if policy_to_check.start_date.nil? || event_start.nil?
+      return false if event_start == event_end
+      return false if policy_start == policy_end
+      event_plan_year_start =  employer_plan_year_start(employer, event_start)
+      policy_plan_year_start = employer_plan_year_start(employer, policy_to_check.policy_start)
+      overlap_date_range(event_start, event_end, policy_to_check.policy_start, policy_to_check.policy_end, event_plan_year_start, policy_plan_year_start)
     end
 
-    def ivl_dates_overlap(coverage_start, coverage_end, other_start, other_end)
+    def ivl_dates_overlap(event_start, event_end, policy_start, policy_end)
+      return false if event_start.nil? || policy_start.nil?
+      return false if event_start == event_end
+      return false if policy_start == policy_end
+      overlap_date_range(event_start, event_end, policy_start, policy_end, event_start.year, policy_start.year)
+    end
 
+    def employer_plan_year_start(employer, start_date)
+      employer.plan_year_of(start_date).start_date
+    end
+
+    def overlap_date_range(event_start, event_end, policy_start, policy_end, event_year, policy_year)
+      if event_end.nil? && policy_end.nil?
+        event_year == policy_year
+      else
+        if event_start < policy_start
+          if event_end.present?
+            event_end >= policy_start
+          else
+            true
+          end
+        elsif policy_start < event_start
+          if policy_end.present?
+            policy_end >= event_start
+          else
+            true
+          end
+        else
+          true
+        end
+      end
     end
   end
 end

@@ -33,9 +33,9 @@ module HandlePolicyNotification
     end
 
     def shop_dates_overlap(policy_to_check, employer, event_start, event_end)
-      return false if policy_to_check.start_date.nil? || event_start.nil?
+      return false if policy_to_check.policy_start.nil? || event_start.nil?
       return false if event_start == event_end
-      return false if policy_start == policy_end
+      return false if policy_to_check.policy_start == policy_to_check.policy_end
       event_plan_year_start =  employer_plan_year_start(employer, event_start)
       policy_plan_year_start = employer_plan_year_start(employer, policy_to_check.policy_start)
       overlap_date_range(event_start, event_end, policy_to_check.policy_start, policy_to_check.policy_end, event_plan_year_start, policy_plan_year_start)

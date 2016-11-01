@@ -35,7 +35,7 @@ module Listeners
 
       result = HandlePolicyNotification::ProcessNotification.call(workflow_arguments)
       
-      if result.fail?
+      if !result.success?
         resource_error_broadcast("invalid_event", "522", {
           :errors => result.processing_errors.errors.to_hash,
           :event => body

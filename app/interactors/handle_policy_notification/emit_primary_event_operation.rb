@@ -30,7 +30,7 @@ module HandlePolicyNotification
 
     def determine_file_name(policy_action)
       market_identifier = (policy_action.policy_details.market == "shop") ? "S" : "I"
-      action_identifier = (policy_action.action == "initial") ? "C_E_" : "C_M"
+      action_identifier = (policy_action.action == "initial") ? "C_E_" : "C_M_"
       carrier_identifier = policy_action.plan_details.found_plan.carrier.abbrev.upcase
       "834_" + policy_action.transaction_id + "_" + carrier_identifier + "_" + action_identifier + market_identifier + "_1.xml"
     end

@@ -34,12 +34,14 @@ module HandlePolicyNotification
              context.employer_details)
         end
       elsif context.interacting_policies.empty? && context.renewal_policies.empty?
-          primary_policy_action = build_initial_enrollment_on(
-             context.policy_details,
-             context.member_detail_collection,
-             context.plan_details,
-             context.broker_details,
-             context.employer_details)
+        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like an initial enrolment")
+        context.fail!
+#          primary_policy_action = build_initial_enrollment_on(
+#             context.policy_details,
+#             context.member_detail_collection,
+#             context.plan_details,
+#             context.broker_details,
+#             context.employer_details)
       elsif context.interacting_policies.any? && context.renewal_policies.empty?
         # Plan change, add, or remove
         context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like a change")

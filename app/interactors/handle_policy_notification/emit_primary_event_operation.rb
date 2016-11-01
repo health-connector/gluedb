@@ -13,7 +13,6 @@ module HandlePolicyNotification
         :format => :xml,
         :locals => {:enrollment_event => context.primary_policy_action, :raw_policy_xml => context.raw_policy_xml}
       })
-      puts action_xml
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
       x12_xml = edi_builder.call.to_xml
       publish_to_bus(x12_xml)

@@ -28,7 +28,7 @@ module Listeners
       policy_cv = extract_policy_cv(body)
       workflow_arguments = {
         :amqp_connection => connection,
-        :raw_policy_xml => body,
+        :raw_policy_xml => Nokogiri::XML(body),
         :policy_cv => policy_cv,
         :processing_errors => HandlePolicyNotification::ProcessingErrors.new
       }

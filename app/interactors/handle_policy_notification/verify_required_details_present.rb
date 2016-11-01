@@ -64,22 +64,19 @@ module HandlePolicyNotification
 
       context.member_detail_collection.each do |member_details|
         if member_details.found_member.blank?
-          processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
-        end
-        if member_details.is_subscriber.blank?
-          processing_errors.errors.add( :member_details, "#{member_details.member_id} doesn't have the subscriber/dependent indicator set.")
+          context.processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
         end
         if member_details.begin_date.blank?
-          processing_errors.errors.add( :member_details, "hbx id #{member_details.member_id} does not have a coverage start date")
+          context.processing_errors.errors.add( :member_details, "hbx id #{member_details.member_id} does not have a coverage start date")
         end
       end
 
       if context.broker_details && context.broker_details.found_broker.blank?
-        processing_errors.errors.add( :broker_details, "No broker found with npn #{context.broker_details.npn}")
+        context.processing_errors.errors.add( :broker_details, "No broker found with npn #{context.broker_details.npn}")
       end
 
       if context.policy_details.market == "shop" && context.employer_details.found_employer.blank?
-        processing_errors.errors.add( :employer_details, "No employer found with fein #{context.employer_details.fein}")
+        context.processing_errors.errors.add( :employer_details, "No employer found with fein #{context.employer_details.fein}")
       end
 
       if context.policy_details.market == "shop"

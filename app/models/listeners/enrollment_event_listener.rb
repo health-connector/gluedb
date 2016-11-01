@@ -27,6 +27,7 @@ module Listeners
 
       policy_cv = extract_policy_cv(body)
       workflow_arguments = {
+        :amqp_connection => connection,
         :original_payload => body,
         :policy_cv => policy_cv,
         :processing_errors => HandlePolicyNotification::ProcessingErrors.new

@@ -62,6 +62,17 @@ module HandlePolicyNotification
        context.processing_errors.errors.add(:plan_details, "Plan submitted doesn't match the market.")
       end
 
+      existing_subscriber = context.member_detail_collection.detect do |md|
+        md.is_subscriber
+      end
+
+      if existing_subscriber.nil?
+        context.processing_errors.errors.add(
+          :member_details,
+          "there is not a subscriber specified"
+        )
+      end
+
       context.member_detail_collection.each do |member_details|
         if member_details.found_member.blank?
           context.processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")

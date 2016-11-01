@@ -20,7 +20,7 @@ module HandlePolicyNotification
       other_policy_actions = []
       primary_policy_action = nil
       if context.interacting_policies.empty? && context.renewal_policies.any?
-        if !continuation_policy.nil?
+        if !context.continuation_policy.nil?
           # 'Active' renewal
           context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like an active renewal")
           fail!

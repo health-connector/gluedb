@@ -21,9 +21,18 @@ module HandlePolicyNotification
            :is_subscriber => enrollee.is_subscriber,
            :begin_date => parse_begin_date(benefit),
            :end_date => parse_end_date(benefit),
+           :relationship => parse_relationship(member),
            :eligibility_begin_date => parse_eligibility_date(benefit)
         })
       end
+    end
+
+    def parse_relationship(member)
+      first_relationship = member.person_relationships.first
+      return nil if first_relationship.blank?
+      rel_value = first_relationship.relationship_uri
+      return nil if rel_value.blank?
+      rel_value
     end
 
     def parse_member_id(member)

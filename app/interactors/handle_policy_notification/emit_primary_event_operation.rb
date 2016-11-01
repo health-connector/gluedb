@@ -20,12 +20,11 @@ module HandlePolicyNotification
 
     def publish_to_bus(x12_payload)
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(context.amqp_connection) do |chan|
-         headers = {
+         ex = chan.default_exchange
+         ex.publish(x12_payload, :routing_key => determine_routing_key(context.primary_policy_action), :headers => {
            "market" => context.primary_policy_action.policy_details.market,
            "file_name" => determine_file_name(context.primary_policy_action)
-         }
-         ex = chan.default_exchange
-         ex.publish(x12_payload,{:routing_key => determine_routing_key(context.primary_policy_action), "headers" => headers})
+         })
       end
     end
 

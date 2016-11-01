@@ -18,7 +18,7 @@ module HandlePolicyNotification
         HandlePolicyNotification::MemberDetails.new({
            :premium_amount => benefit.premium_amount,
            :member_id => parse_member_id(member),
-           :is_subscriber => enrollee.is_subscriber,
+           :is_subscriber => enrollee.subscriber?,
            :begin_date => parse_begin_date(benefit),
            :end_date => parse_end_date(benefit),
            :relationship => parse_relationship(member),

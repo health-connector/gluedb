@@ -48,8 +48,15 @@ module HandlePolicyNotification
         context.fail!
       elsif context.interacting_policies.any? && context.renewal_policies.any?
         # Either plan change, add, or 'active' renewal
-        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like a change with possible renewals")
-        context.fail!
+          # Making this a passive renewal for the moment because we had the dental issue.
+          primary_policy_action = build_passive_renewal_on(
+             context.policy_details,
+             context.member_detail_collection,
+             context.plan_details,
+             context.broker_details,
+             context.employer_details)
+#        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like a change with possible renewals")
+#        context.fail!
       end
       context.primary_policy_action = primary_policy_action
       context.other_policy_actions = other_policy_actions

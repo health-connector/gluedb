@@ -15,7 +15,6 @@ plan_data.each do |pd|
     plan.save!
   else
     plan.update_attributes(pd)
-    plan.save
   end
 end
 puts "After: total #{Plan.count} plans"

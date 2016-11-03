@@ -13,6 +13,7 @@ module HandlePolicyNotification
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
     # - interacting_policies (array of Policy)
     # - renewal_policies (array of Policy)
+    # - carrier_switch_renewals (array of Policy)
     # Context outputs:
     # - primary_policy_action (a HandlePolicyNotification::PolicyAction)
     # - other_policy_actions (array of HandlePolicyNotification::PolicyAction)
@@ -22,8 +23,7 @@ module HandlePolicyNotification
       if context.interacting_policies.empty? && context.renewal_policies.any?
         if !context.continuation_policy.nil?
           # 'Active' renewal
-          context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like an active renewal")
-          fail!
+          not_yet_supported("active renewal")
         else
           # 'Passive' renewal
           primary_policy_action = build_passive_renewal_on(
@@ -34,24 +34,29 @@ module HandlePolicyNotification
              context.employer_details)
         end
       elsif context.interacting_policies.empty? && context.renewal_policies.empty?
-        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like an initial enrolment")
-        context.fail!
-#          primary_policy_action = build_initial_enrollment_on(
-#             context.policy_details,
-#             context.member_detail_collection,
-#             context.plan_details,
-#             context.broker_details,
-#             context.employer_details)
+        if context.carrier_switch_renewals.any?
+          not_yet_supported("carrier switch renewal")
+        else
+          primary_policy_action = build_initial_enrollment_on(
+             context.policy_details,
+             context.member_detail_collection,
+             context.plan_details,
+             context.broker_details,
+             context.employer_details)
+        end
       elsif context.interacting_policies.any? && context.renewal_policies.empty?
         # Plan change, add, or remove
-        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like a change")
-        context.fail!
+        not_yet_supported("change on active policy")
       elsif context.interacting_policies.any? && context.renewal_policies.any?
-        context.processing_errors.errors.add(:event_kind, "right now we only handle passive renewals, this looks like a change with possible renewals")
-        context.fail!
+        not_yet_supported("change with possible renewal")
       end
       context.primary_policy_action = primary_policy_action
       context.other_policy_actions = other_policy_actions
+    end
+
+    def not_yet_supported(kind)
+      context.processing_errors.errors.add(:event_kind, "we don't yet handle #{kind} events")
+      context.fail!
     end
 
     def build_initial_enrollment_on(policy_details, member_detail_collection, plan_details, broker_details, employer_details)
@@ -62,7 +67,8 @@ module HandlePolicyNotification
         :member_changes => member_changes,
         :plan_details => plan_details,
         :broker_details => broker_details,
-        :employer_details => employer_details
+        :employer_details => employer_details,
+        :transmit => true
       })
     end
 
@@ -74,7 +80,8 @@ module HandlePolicyNotification
         :member_changes => member_changes,
         :plan_details => plan_details,
         :broker_details => broker_details,
-        :employer_details => employer_details
+        :employer_details => employer_details,
+        :transmit => true
       })
     end
 

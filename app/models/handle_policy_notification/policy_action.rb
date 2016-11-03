@@ -13,6 +13,7 @@ module HandlePolicyNotification
     attribute :broker_details, ::HandlePolicyNotification::BrokerDetails
     attribute :plan_details, ::HandlePolicyNotification::PlanDetails
     attribute :member_changes, Array[::HandlePolicyNotification::MemberChange]
+    attribute :transmit, Boolean, :default => true
 
     def transaction_id
       @transcation_id ||= begin

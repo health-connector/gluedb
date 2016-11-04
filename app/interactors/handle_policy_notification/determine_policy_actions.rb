@@ -60,22 +60,17 @@ module HandlePolicyNotification
     end
 
     def build_initial_enrollment_on(policy_details, member_detail_collection, plan_details, broker_details, employer_details)
-      member_changes = build_member_changes(member_detail_collection)
-      HandlePolicyNotification::PolicyAction.new({
-        :action => "initial",
-        :policy_details => policy_details,
-        :member_changes => member_changes,
-        :plan_details => plan_details,
-        :broker_details => broker_details,
-        :employer_details => employer_details,
-        :transmit => true
-      })
+      event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, "initial")
     end
 
     def build_passive_renewal_on(policy_details, member_detail_collection, plan_details, broker_details,employer_details)
+      event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, "auto_renew")
+    end
+
+    def event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, action)
       member_changes = build_member_changes(member_detail_collection)
       HandlePolicyNotification::PolicyAction.new({
-        :action => "renew",
+        :action => action,
         :policy_details => policy_details,
         :member_changes => member_changes,
         :plan_details => plan_details,

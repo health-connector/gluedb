@@ -2,8 +2,7 @@ policy_agg = Policy.collection.raw_aggregate([
  {"$match" => {"employer_id" => nil, "enrollees.coverage_start" => {"$gte" => Time.mktime(2015,12,31)}}},
  {"$unwind" => "$enrollees"},
  {"$match" => {"enrollees.rel_code" => "self"}},
- {"$match" => {"enrollees.coverage_start" => {"$lt" => Time.mktime(2017,1,1)}}},
-# {"$match" => {"$or" => [{"enrollees.coverage_end" => nil}, {"enrollees.coverage_end" => {"$gt" => Time.mktime(2016,12,31)}}]}},
+ {"$match" => {"enrollees.coverage_start" => {"$lte" => Time.mktime(2016,12,31)}}},
  {"$group" => {"_id" => "$eg_id"}}
 ])
 
@@ -61,5 +60,5 @@ end
 results = start_hash.values.flat_map { |v| v }.select { |en| en.last }.map { |a| a[3] }
 
 results.each do |res|
-  puts "localhost/resources/v1/policies/#{res}.xml"
+  puts "http://localhost:3000/resources/v1/policies/#{res}.xml"
 end

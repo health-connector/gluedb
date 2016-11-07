@@ -1,6 +1,6 @@
 active_start = Date.new(2015,12,31)
 active_end = Date.new(2016,12,31)
-terminated_end = Date.new(2016,12,31)
+terminated_end = Date.new(2016,10,31)
 
 congress_feins = ["536002558","536002523", "536002522"]
 cong_employer_ids = Employer.where(:fein => {"$in" => congress_feins}).map(&:id)
@@ -8,17 +8,15 @@ cong_employer_ids = Employer.where(:fein => {"$in" => congress_feins}).map(&:id)
 eligible_pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
-    :coverage_start => {"$gt" => active_start}
+    :coverage_start => {"$gt" => active_start, "$lte" => active_end}
   }}, :employer_id => {"$in" => cong_employer_ids}}).no_timeout
-
-puts eligible_pols.count
 
 enrollment_ids = []
 
 eligible_pols.each do |pol|
   if !pol.canceled?
     if !(pol.subscriber.coverage_start > active_end)
-      unless (!pol.subscriber.coverage_end.blank?) && pol.subscriber.coverage_end <= terminated_end
+      unless (!pol.subscriber.coverage_end.blank?) && pol.subscriber.coverage_end < terminated_end
         enrollment_ids << pol.eg_id
       end
     end
@@ -28,7 +26,7 @@ end
 def reducer(plan_cache, hash, enrollment)
   plan_id = enrollment.plan_id
   plan = plan_cache.lookup(plan_id)
-#  return hash if plan.nil?
+  return hash if plan.nil?
   coverage_kind = plan.coverage_type
   current_member_record = hash[enrollment.subscriber.person.authority_member_id]
   comparison_record = [
@@ -76,7 +74,14 @@ policies_to_compare.inject(start_hash) do |acc, pol|
 end
 
 results = start_hash.values.flat_map { |v| v.map(&:last) }
+puts results.count
 
-results.each do |res|
-  puts "localhost/resources/v1/policies/#{res}.xml"
+pol_results = Policy.collection.raw_aggregate([
+  {"$match" => {"eg_id" => {"$in" => results}}},
+  {"$unwind" => "$enrollees"},
+  {"$group" => {"_id" => "$enrollees.m_id"}}
+])
+
+pol_results.each do |res|
+  puts "localhost/resources/v1/individuals/#{res["_id"]}.xml"
 end

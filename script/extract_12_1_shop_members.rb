@@ -1,24 +1,51 @@
-active_start = Date.new(2015,12,31)
-active_end = Date.new(2016,12,31)
-terminated_end = Date.new(2016,12,31)
+active_start = Date.new(2015,11,30)
+active_end = Date.new(2016,11,30)
+terminated_end = Date.new(2016,11,30)
 
-congress_feins = ["536002558","536002523", "536002522"]
-cong_employer_ids = Employer.where(:fein => {"$in" => congress_feins}).map(&:id)
+employer_ids = PlanYear.where(:start_date => {"$gt" => active_start}, :end_date => {"$lte" => active_end}).pluck(:employer_id)
 
 eligible_pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
     :coverage_start => {"$gt" => active_start}
-  }}, :employer_id => {"$in" => cong_employer_ids}}).no_timeout
+  }}, :employer_id => {"$in" => employer_ids}}).no_timeout
 
-puts eligible_pols.count
+def current_plan_year(employer)
+  py_window = Date.new(2016, 11, 30)
+  employer.plan_years.detect do |plan_year|
+    py_start = plan_year.start_date
+    py_end = plan_year.end_date
+    date_range = (py_start..py_end)
+    date_range.include?(py_window)
+  end
+end
+
+def in_current_plan_year?(policy,employer)
+  plan_year = current_plan_year(employer)
+  return false unless plan_year
+  policy_start_date = policy.subscriber.coverage_start
+  py_start = plan_year.start_date
+  py_end = plan_year.end_date
+  date_range = (py_start..py_end)
+  if date_range.include?(policy_start_date)
+    return true
+  else
+    return false
+  end
+end
+
+Caches::MongoidCache.allocate(Employer)
 
 enrollment_ids = []
 
 eligible_pols.each do |pol|
   if !pol.canceled?
     if !(pol.subscriber.coverage_start > active_end)
-      unless (!pol.subscriber.coverage_end.blank?) && pol.subscriber.coverage_end <= terminated_end
+      unless (!pol.subscriber.coverage_end.blank?) && pol.subscriber.coverage_end < terminated_end
+        employer = Caches::MongoidCache.lookup(Employer, pol.employer_id) {pol.employer}
+        if !in_current_plan_year?(pol,employer)
+          next
+        end
         enrollment_ids << pol.eg_id
       end
     end
@@ -28,7 +55,7 @@ end
 def reducer(plan_cache, hash, enrollment)
   plan_id = enrollment.plan_id
   plan = plan_cache.lookup(plan_id)
-#  return hash if plan.nil?
+  return hash if plan.nil?
   coverage_kind = plan.coverage_type
   current_member_record = hash[enrollment.subscriber.person.authority_member_id]
   comparison_record = [
@@ -77,6 +104,14 @@ end
 
 results = start_hash.values.flat_map { |v| v.map(&:last) }
 
-results.each do |res|
-  puts "localhost/resources/v1/policies/#{res}.xml"
+puts results.count
+
+pol_results = Policy.collection.raw_aggregate([
+  {"$match" => {"eg_id" => {"$in" => results}}},
+  {"$unwind" => "$enrollees"},
+  {"$group" => {"_id" => "$enrollees.m_id"}}
+])
+
+pol_results.each do |res|
+  puts "localhost/resources/v1/individuals/#{res["_id"]}.xml"
 end

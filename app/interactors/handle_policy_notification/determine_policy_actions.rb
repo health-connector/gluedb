@@ -64,7 +64,7 @@ module HandlePolicyNotification
     end
 
     def build_passive_renewal_on(policy_details, member_detail_collection, plan_details, broker_details,employer_details)
-      event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, "auto_renew")
+      event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, "renew")
     end
 
     def event_on_all_members(policy_details, member_detail_collection, plan_details, broker_details, employer_details, action)

@@ -37,12 +37,7 @@ module HandlePolicyNotification
         if context.carrier_switch_renewals.any?
           not_yet_supported("carrier switch renewal")
         else
-          primary_policy_action = build_initial_enrollment_on(
-             context.policy_details,
-             context.member_detail_collection,
-             context.plan_details,
-             context.broker_details,
-             context.employer_details)
+          not_yet_supported("initial enrollment")
         end
       elsif context.interacting_policies.any? && context.renewal_policies.empty?
         # Plan change, add, or remove

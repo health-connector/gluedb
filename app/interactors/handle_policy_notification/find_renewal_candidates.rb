@@ -26,6 +26,7 @@ module HandlePolicyNotification
         end
       end
       context.renewal_policies = possible_renewals
+      context.carrier_switch_renewals = carrier_switch_renewals
     end
 
     def is_an_ivl_carrier_switch_renewal_compared_to(pol, plan, coverage_start)

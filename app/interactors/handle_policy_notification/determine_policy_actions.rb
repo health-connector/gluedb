@@ -23,7 +23,13 @@ module HandlePolicyNotification
       if context.interacting_policies.empty? && context.renewal_policies.any?
         if !context.continuation_policy.nil?
           # 'Active' renewal
-          not_yet_supported("active renewal")
+          # not_yet_supported("active renewal")
+          primary_policy_action = build_passive_renewal_on(
+             context.policy_details,
+             context.member_detail_collection,
+             context.plan_details,
+             context.broker_details,
+             context.employer_details)
         else
           # 'Passive' renewal
           primary_policy_action = build_passive_renewal_on(
@@ -43,7 +49,13 @@ module HandlePolicyNotification
         # Plan change, add, or remove
         not_yet_supported("change on active policy")
       elsif context.interacting_policies.any? && context.renewal_policies.any?
-        not_yet_supported("change with possible renewal")
+          primary_policy_action = build_passive_renewal_on(
+             context.policy_details,
+             context.member_detail_collection,
+             context.plan_details,
+             context.broker_details,
+             context.employer_details)
+        # not_yet_supported("change with possible renewal")
       end
       context.primary_policy_action = primary_policy_action
       context.other_policy_actions = other_policy_actions

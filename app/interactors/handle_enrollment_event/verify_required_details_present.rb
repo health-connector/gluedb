@@ -1,4 +1,4 @@
-module HandleEnrollmentNotification
+module HandleEnrollmentEvent
   class VerifyRequiredDetailsPresent
     include Interactor
     # Context Requires:

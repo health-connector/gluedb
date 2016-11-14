@@ -4,11 +4,18 @@ module HandleEnrollmentEvent
 
     # Context Requires:
     # - enrollment_event_cv (OpenHbx::Cv2::EnrollmentEvent)
+    # - processing_errors (HandleEnrollmentNotification::ProcessingErrors)
+    # - raw_event_xml (A string containing the actual event)
     # Context Outputs:
     # - policy_details (HandlePolicyNotification::PolicyDetails)
     # - policy_cv (Openhbx::Cv2::Policy, might be nil if xml is structured wrong)
     def call
       policy_cv = extract_policy_cv(context.enrollment_event_cv)
+      if policy_cv.nil?
+        context.processing_errors.errors.add(:policy_cv, "No policy found in source xml:\n\n#{raw_event_xml}")
+        context.fail!
+        return
+      end
       context.policy_cv = policy_cv
       policy_details = ::HandleEnrollmentEvent::PolicyDetails.new({
         :enrollment_group_id => parse_enrollment_group_id(policy_cv),

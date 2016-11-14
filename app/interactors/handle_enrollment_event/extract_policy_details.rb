@@ -3,12 +3,14 @@ module HandleEnrollmentEvent
     include Interactor
 
     # Context Requires:
-    # - policy_cv (Openhbx::Cv2::Policy)
+    # - enrollment_event_cv (OpenHbx::Cv2::EnrollmentEvent)
     # Context Outputs:
     # - policy_details (HandlePolicyNotification::PolicyDetails)
+    # - policy_cv (Openhbx::Cv2::Policy, might be nil if xml is structured wrong)
     def call
-      policy_cv = context.policy_cv
-      policy_details = ::HandlePolicyNotification::PolicyDetails.new({
+      policy_cv = extract_policy_cv(context.enrollment_event_cv)
+      context.policy_cv = policy_cv
+      policy_details = ::HandleEnrollmentEvent::PolicyDetails.new({
         :enrollment_group_id => parse_enrollment_group_id(policy_cv),
         :pre_amt_tot => parse_pre_amt_tot(policy_cv),
         :tot_res_amt => parse_tot_res_amt(policy_cv),
@@ -20,7 +22,12 @@ module HandleEnrollmentEvent
 
     protected
 
+    def extract_policy_cv(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.enrollment.policy.value
+    end
+
     def parse_enrollment_group_id(policy_cv)
+      return nil if policy_cv.nil?
       return nil if policy_cv.id.blank?
       policy_cv.id.split("#").last
     end

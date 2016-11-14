@@ -6,6 +6,7 @@ module HandleEnrollmentEvent
     # Context Outputs:
     # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
     def call
+      return if context.policy_cv.nil?
       context.member_detail_collection = extract_members(context.policy_cv)
     end
 
@@ -15,7 +16,7 @@ module HandleEnrollmentEvent
       enrollees.map do |enrollee|
         member = enrollee.member
         benefit = enrollee.benefit
-        HandlePolicyNotification::MemberDetails.new({
+        HandleEnrollmentEvent::MemberDetails.new({
            :premium_amount => benefit.premium_amount,
            :member_id => parse_member_id(member),
            :is_subscriber => enrollee.subscriber?,

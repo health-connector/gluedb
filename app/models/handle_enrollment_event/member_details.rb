@@ -10,6 +10,8 @@ module HandleEnrollmentEvent
     attribute :eligibility_begin_date, Date
     attribute :relationship, String
 
+    attr_accessor :member_information
+
     def found_member
       @found_member ||= begin
                           query = Queries::MemberByHbxIdQuery.new(member_id)

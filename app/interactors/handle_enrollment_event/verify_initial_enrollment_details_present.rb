@@ -1,5 +1,5 @@
 module HandleEnrollmentEvent
-  class VerifyRequiredDetailsPresent
+  class VerifyInitialEnrollmentDetailsPresent
     include Interactor
     # Context Requires:
     # - policy_details (Openhbx::Cv2::Policy)

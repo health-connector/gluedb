@@ -17,6 +17,7 @@ module HandleEnrollmentEvent
         member = enrollee.member
         benefit = enrollee.benefit
         HandleEnrollmentEvent::MemberDetails.new({
+           :member_information => enrollee,
            :premium_amount => benefit.premium_amount,
            :member_id => parse_member_id(member),
            :is_subscriber => enrollee.subscriber?,

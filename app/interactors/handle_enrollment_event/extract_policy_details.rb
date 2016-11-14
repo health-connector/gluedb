@@ -12,9 +12,9 @@ module HandleEnrollmentEvent
     def call
       policy_cv = extract_policy_cv(context.enrollment_event_cv)
       if policy_cv.nil?
-        context.processing_errors.errors.add(:policy_cv, "No policy found in source xml:\n\n#{raw_event_xml}")
+        context.processing_errors.errors.add(:policy_cv, "No policy found in source xml:\n\n#{context.raw_event_xml}")
         context.fail!
-        return
+        return nil
       end
       context.policy_cv = policy_cv
       policy_details = ::HandleEnrollmentEvent::PolicyDetails.new({

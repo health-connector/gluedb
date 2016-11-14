@@ -10,7 +10,7 @@ module HandleEnrollmentEvent
       HandleEnrollmentEvent::VerifyInitialEnrollmentDetails,
       HandleEnrollmentEvent::CreateNewMembers,
       HandleEnrollmentEvent::CreateNewPolicy,
-      HandleEnrollmentEvent::TransmitShopPolicy,
+      HandleEnrollmentEvent::TransmitNewShopPolicy,
       HandleEnrollmentEvent::TransformAndEmitVocabulary
     )
   end

@@ -2,7 +2,7 @@ module HandleEnrollmentEvent
   class VerifyInitialEnrollmentDetails
     include Interactor
     # Context Requires:
-    # - policy_details (Openhbx::Cv2::Policy)
+    # - policy_details (HandleEnrollmentEvent::PolicyDetails)
     # - plan_details (HandleEnrollmentEvent::PlanDetails)
     # - member_detail_collection (array of HandleEnrollmentEvent::MemberDetails)
     # - employer_details (HandleEnrollmentEvent::EmployerDetails may be nil)

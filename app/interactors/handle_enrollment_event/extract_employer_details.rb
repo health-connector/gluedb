@@ -5,7 +5,7 @@ module HandleEnrollmentEvent
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
-    # - employer_details (HandlePolicyNotification::EmployerDetails may be nil)
+    # - employer_details (HandleEnrollmentEvent::EmployerDetails may be nil)
     def call
       policy_enrollment = context.policy_cv.policy_enrollment
       return nil if policy_enrollment.blank?

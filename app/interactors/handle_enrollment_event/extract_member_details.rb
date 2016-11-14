@@ -4,7 +4,7 @@ module HandleEnrollmentEvent
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
-    # - member_detail_collection (array of HandlePolicyNotification::MemberDetails)
+    # - member_detail_collection (array of HandleEnrollmentEvent::MemberDetails)
     def call
       return if context.policy_cv.nil?
       context.member_detail_collection = extract_members(context.policy_cv)

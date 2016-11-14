@@ -1,13 +1,13 @@
 module HandleEnrollmentEvent
-  class VerifyInitialEnrollmentDetailsPresent
+  class VerifyInitialEnrollmentDetails
     include Interactor
     # Context Requires:
     # - policy_details (Openhbx::Cv2::Policy)
-    # - plan_details (HandleEnrollmentNotification::PlanDetails)
-    # - member_detail_collection (array of HandleEnrollmentNotification::MemberDetails)
-    # - employer_details (HandleEnrollmentNotification::EmployerDetails may be nil)
-    # - broker_details (HandleEnrollmentNotification::EmployerDetails may be nil)
-    # - processing_errors (HandleEnrollmentNotification::ProcessingErrors)
+    # - plan_details (HandleEnrollmentEvent::PlanDetails)
+    # - member_detail_collection (array of HandleEnrollmentEvent::MemberDetails)
+    # - employer_details (HandleEnrollmentEvent::EmployerDetails may be nil)
+    # - broker_details (HandleEnrollmentEvent::EmployerDetails may be nil)
+    # - processing_errors (HandleEnrollmentEvent::ProcessingErrors)
     #
     # Call "fail!" if validation does not pass.
 

@@ -5,7 +5,7 @@ module HandleEnrollmentEvent
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
-    # - plan_details (HandlePolicyNotification::PlanDetails)
+    # - plan_details (HandleEnrollmentEvent::PlanDetails)
     def call
       policy_cv = context.policy_cv
       plan_details = ::HandleEnrollmentEvent::PlanDetails.new({

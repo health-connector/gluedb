@@ -7,7 +7,7 @@ module HandleEnrollmentEvent
       HandleEnrollmentEvent::ExtractPlanDetails,
       HandleEnrollmentEvent::ExtractEmployerDetails,
       HandleEnrollmentEvent::ExtractMemberDetails,
-      HandleEnrollmentEvent::VerifyInitialEnrollmentDetailsPresent,
+      HandleEnrollmentEvent::VerifyInitialEnrollmentDetails,
       HandleEnrollmentEvent::CreateNewMembers,
       HandleEnrollmentEvent::CreateNewPolicy,
       HandleEnrollmentEvent::TransmitShopPolicy,

@@ -5,7 +5,7 @@ module HandleEnrollmentEvent
     # Context Requires:
     # - policy_cv (Openhbx::Cv2::Policy)
     # Context Outputs:
-    # - broker_details (HandlePolicyNotification::BrokerDetails may be nil)
+    # - broker_details (HandleEnrollmentEvent::BrokerDetails may be nil)
     def call
       return if context.policy_cv.broker_link.nil?
       broker_link = context.policy_cv.broker_link

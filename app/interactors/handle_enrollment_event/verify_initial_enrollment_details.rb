@@ -8,6 +8,7 @@ module HandleEnrollmentEvent
     # - employer_details (HandleEnrollmentEvent::EmployerDetails may be nil)
     # - broker_details (HandleEnrollmentEvent::EmployerDetails may be nil)
     # - processing_errors (HandleEnrollmentEvent::ProcessingErrors)
+    # - raw_event_xml (a string containing the raw event xml)
     #
     # Call "fail!" if validation does not pass.
 
@@ -74,24 +75,29 @@ module HandleEnrollmentEvent
       end
 
       context.member_detail_collection.each do |member_details|
-        if member_details.found_member.blank?
-          context.processing_errors.errors.add( :member_details, "No member found with hbx id #{member_details.member_id}")
-        end
         if member_details.begin_date.blank?
           context.processing_errors.errors.add( :member_details, "hbx id #{member_details.member_id} does not have a coverage start date")
         end
       end
 
       if context.broker_details && context.broker_details.found_broker.blank?
-        context.processing_errors.errors.add( :broker_details, "No broker found with npn #{context.broker_details.npn}")
+        context.processing_errors.errors.add(:broker_details, "No broker found with npn #{context.broker_details.npn}")
       end
 
       if context.policy_details.market == "shop" && context.employer_details.found_employer.blank?
-        context.processing_errors.errors.add( :employer_details, "No employer found with fein #{context.employer_details.fein}")
+        context.processing_errors.errors.add(:employer_details, "No employer found with fein #{context.employer_details.fein}")
       end
 
       if context.policy_details.market == "shop"
-        context.processing_errors.errors.add( :market_type, "we don't support shop yet" )
+        context.processing_errors.errors.add(:market_type, "we don't support shop yet" )
+      end
+
+      raw_event_xml = context.raw_event_xml
+      begin
+        edi_builder = EdiCodec::X12::BenefitEnrollment.new(raw_event_xml)
+        x12_xml = edi_builder.call.to_xml
+      rescue Exception => e
+        context.processing_errors.errors.add(:edi_transformation, {error: e.class.name, message: e.message , backtrace: e.backtrace.join("\n")}.to_json)
       end
 
       if context.processing_errors.has_errors?

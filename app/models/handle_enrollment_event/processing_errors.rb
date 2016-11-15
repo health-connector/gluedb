@@ -10,6 +10,7 @@ module HandleEnrollmentEvent
     attr_reader :member_details
     attr_reader :broker_details
     attr_reader :market_type
+    attr_reader :edi_transformation
 
     def initialize
       @errors = ActiveModel::Errors.new(self)

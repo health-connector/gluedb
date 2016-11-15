@@ -8,7 +8,7 @@ module HandleEnrollmentEvent
       HandleEnrollmentEvent::VerifyDependentAddDetails,
       HandleEnrollmentEvent::UpdatePolicy,
       HandleEnrollmentEvent::TransmitShopChange,
-      HandleEnrollmentEvent::TransformAndEmitVocabulary
+      HandleEnrollmentEvent::TransformAndEmitMaintenance
     )
   end
 end

@@ -9,5 +9,6 @@ module HandleEnrollmentEvent
     attribute :tot_res_amt, String
     attribute :tot_emp_res_amt, String
     attribute :applied_aptc, String
+    attribute :transaction_id, String
   end
 end

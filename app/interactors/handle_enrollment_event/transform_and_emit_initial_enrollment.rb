@@ -19,7 +19,7 @@ module HandleEnrollmentEvent
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(context.amqp_connection) do |chan|
          ex = chan.default_exchange
          ex.publish(x12_payload, :routing_key => "hbx.enrollment_messages", :headers => {
-           "market" => context.primary_policy_action.policy_details.market,
+           "market" => context.policy_details.market,
            "file_name" => determine_file_name
          })
       end

@@ -63,6 +63,7 @@ Eye.application 'eye_gluedb' do
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 2)
   define_multi_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY, 7)
   define_multi_worker("enrollment_event_listener", "script/amqp/enrollment_event_listener.rb", BUS_DIRECTORY, 2)
+  define_multi_worker("enrollment_event_handler", "script/amqp/enrollment_event_handler.rb", BUS_DIRECTORY, 2)
 #  define_multi_worker("individual_event_listener", "script/amqp/individual_event_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("policy_id_list_listener", "script/amqp/policy_id_list_listener.rb", BUS_DIRECTORY, 1)
 

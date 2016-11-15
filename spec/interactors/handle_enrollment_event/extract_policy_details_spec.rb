@@ -5,9 +5,10 @@ describe HandleEnrollmentEvent::ExtractPolicyDetails do
   let(:pre_amt_tot) { "290.13" }
   let(:tot_res_amt) { "123.13" }
   let(:tot_emp_res_amt) { "234.30" }
+  let(:transaction_id) { "123455463456345634563456" }
   let(:enrollment_event_cv) { instance_double(Openhbx::Cv2::EnrollmentEvent, event: enrollment_event_event) }
   let(:enrollment_event_event) { instance_double(Openhbx::Cv2::EnrollmentEventEvent, body: enrollment_event_body) }
-  let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment) }
+  let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment, transaction_id: transaction_id) }
   let(:enrollment) { instance_double(Openhbx::Cv2::Enrollment, policy: policy_cv) }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :id => policy_id, :policy_enrollment => enrollment_element) }
   let(:shop_enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollmentShopMarket, :total_employer_responsible_amount => tot_emp_res_amt) }
@@ -46,6 +47,10 @@ describe HandleEnrollmentEvent::ExtractPolicyDetails do
   describe "given a policy element" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :premium_total_amount => pre_amt_tot, :total_responsible_amount => tot_res_amt, :shop_market => shop_enrollment_element) }
     let(:policy_id) { "urn:openhbx:hbx:dc0:resources:v1:policy:hbx_id##{enrollment_group_id}" }
+
+    it "extracts the transaction id" do
+      expect(subject.policy_details.transaction_id).to eq transaction_id
+    end
 
     it "extracts the enrollment group id" do
       expect(subject.policy_details.enrollment_group_id).to eq enrollment_group_id

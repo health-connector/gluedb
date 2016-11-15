@@ -22,12 +22,17 @@ module HandleEnrollmentEvent
         :pre_amt_tot => parse_pre_amt_tot(policy_cv),
         :tot_res_amt => parse_tot_res_amt(policy_cv),
         :tot_emp_res_amt => parse_tot_emp_res_amt(policy_cv),
-        :market => parse_market(policy_cv)
+        :market => parse_market(policy_cv),
+        :transaction_id => parse_transaction_id(context.enrollment_event_cv)
       })
       context.policy_details = policy_details
     end
 
     protected
+
+    def parse_transaction_id(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.transaction_id.strip.value
+    end
 
     def extract_policy_cv(enrollment_event_cv)
       Maybe.new(enrollment_event_cv).event.body.enrollment.policy.value

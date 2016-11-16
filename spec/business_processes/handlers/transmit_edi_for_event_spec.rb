@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe TransformAndEmitEnrollment do
+describe Handlers::TransmitEdiForEvent do
   let(:enrollment_group_id) { "2938749827349723974" }
   let(:pre_amt_tot) { "290.13" }
   let(:tot_res_amt) { "123.13" }
@@ -40,7 +40,7 @@ describe TransformAndEmitEnrollment do
     })
   }
 
-  let(:handler) {  TransformAndEmitEnrollment.new(app, enrollment_type) }
+  let(:handler) {  Handlers::TransmitEdiForEvent.new(app, enrollment_type) }
 
   before :each do
     allow(EdiCodec::X12::BenefitEnrollment).to receive(:new).with(raw_event_xml).and_return(transform_slug)

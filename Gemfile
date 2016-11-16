@@ -70,3 +70,4 @@ gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '0.1.7'
 gem 'edi_codec', git: "git@github.com:dchbx/edi_codec.git"
+gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"

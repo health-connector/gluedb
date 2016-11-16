@@ -14,6 +14,12 @@ GIT
       activesupport (>= 3.2)
       nokogiri-happymapper (~> 0.5)
 
+GIT
+  remote: https://github.com/dchbx/ruby-middleware.git
+  revision: 8c787fbd14b6c7e6f177a0069762bc1669b6fe5d
+  specs:
+    ibsciss-middleware (0.4.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -390,6 +396,7 @@ DEPENDENCIES
   font-awesome-rails (= 4.2.0.0)
   forkr (= 0.1.7)
   haml
+  ibsciss-middleware!
   interactor (~> 3.0)
   interactor-rails (= 2.0.2)
   jquery-rails

@@ -1,9 +1,14 @@
-class InitialEnrollmentClient
+class EnrollmentEventClient
   attr_reader :stack
+
+  delegate :call, :to => :stack
 
   def initialize
     @stack =  Middleware::Builder.new do |b|
-      b.use TransformAndEmitEnrollment, :initial_enrollment
+      b.use Handlers::ReducerHandler
+      b.use Handlers::EnricherHandler
+      b.use Handlers::PersistanceHandler
+      b.use Handlers::PublisherHandler
     end
   end
 

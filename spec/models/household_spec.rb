@@ -77,4 +77,29 @@ describe Household do
       end
     end
   end
+
+  describe "irs_group" do
+
+    context "irs_group_id = nil" do
+      it "returns nil" do
+          expect(subject.irs_group).to be nil
+      end
+    end
+
+    context "irs_group_id != nil" do
+
+      let(:irs_group) {IrsGroup.new(id:'1111111111111111')}
+      let(:family) {FactoryGirl.build(:family, irs_groups:[irs_group])}
+
+      before do
+        subject.family = family
+        subject.irs_group_id="1111111111111111"
+        allow(subject).to receive(:irs_group_id).and_return(irs_group)
+      end
+
+      it "returns irs_group" do
+        expect(subject.irs_group).to be irs_group
+      end
+    end
+  end
 end

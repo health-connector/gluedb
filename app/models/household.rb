@@ -59,6 +59,7 @@ class Household
   end
 
   def irs_group
+    return nil if self.irs_group_id.nil?
     parent.irs_groups.find(self.irs_group_id)
   end
 

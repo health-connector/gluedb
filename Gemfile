@@ -12,6 +12,9 @@ gem 'jquery-ui-rails'
 gem 'virtus'
 gem 'spreadsheet'
 gem 'ruby-ole', '1.2.11.7'
+gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
+gem "interactor", "~> 3.0"
+gem 'interactor-rails', '2.0.2'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -66,3 +69,5 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '0.1.7'
+gem 'edi_codec', git: "git@github.com:dchbx/edi_codec.git"
+gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"

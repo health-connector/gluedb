@@ -1,5 +1,5 @@
 module Handlers
-  class EnricherHandler < Base
+  class EnrichHandler < Base
 
     def call(context)
       event_list = merge_or_split(context.event_list)

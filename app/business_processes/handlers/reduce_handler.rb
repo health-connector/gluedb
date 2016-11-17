@@ -1,5 +1,5 @@
 module Handlers
-  class ReducerHandler < Base
+  class ReduceHandler < Base
 
     def call(context)
       reduced_list = perform_reduction(context.event_list)

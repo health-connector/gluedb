@@ -1,5 +1,5 @@
 module Handlers
-  class PersistanceHandler < Base
+  class PersistHandler < Base
 
     def call(context)
       update_database(context)

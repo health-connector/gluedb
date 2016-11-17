@@ -1,5 +1,5 @@
 module Handlers
-  class PublisherHandler < Base
+  class PublishHandler < Base
 
     def call(context)
       @app.call(context)

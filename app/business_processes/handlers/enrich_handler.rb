@@ -4,20 +4,21 @@ module Handlers
     def call(context)
       event_list = merge_or_split(context.event_list)
       event_list.map do |element|
-        @app.call(duplicate_context(context, element))
+        super(duplicate_context(context, element))
       end
     end
 
     protected
-
-    def duplicate_context(context, event_element)
+    def duplicate_context(context, reduced_set)
       new_context = OpenStruct.new
       context.each_pair do |k, v|
-        if !(k.to_s == "event_list")
+        if (k.to_s == "business_process_history")
+          context[k] = v.dup
+        elsif !(k.to_s == "event_list")
           context[k] = v
         end
       end
-      new_context.raw_event_xml = event_element
+      new_context.event_list = reduced_set
       new_context
     end
 

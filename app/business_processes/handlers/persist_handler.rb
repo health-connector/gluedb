@@ -3,7 +3,7 @@ module Handlers
 
     def call(context)
       update_database(context)
-      @app.call(context)
+      super(context)
     end
 
     protected

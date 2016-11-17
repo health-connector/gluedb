@@ -10,7 +10,9 @@ module Handlers
       @app = app
     end
 
-    def call
+    def call(context)
+      current_process_history = context.business_process_history || []
+      context.business_process_history = current_process_history + [self.class.name]
       @app.call(context)
     end
 

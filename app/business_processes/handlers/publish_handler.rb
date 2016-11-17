@@ -2,7 +2,7 @@ module Handlers
   class PublishHandler < Base
 
     def call(context)
-      @app.call(context)
+      super(context)
     end
   end
 end

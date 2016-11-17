@@ -2,9 +2,8 @@
 module Handlers
   class TransmitEdiForEvent < Base
     
-    def initialize(app, enroll_type = :initial_enrollment)
+    def initialize(app)
       @app = app
-      @enroll_type = enroll_type
     end
 
     # Context requires:
@@ -22,7 +21,7 @@ module Handlers
     def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(amqp_connection) do |chan|
         ex = chan.default_exchange
-        ex.publish(x12_payload, :routing_key => routing_key, :headers => {
+        ex.publish(x12_payload, :routing_key => routing_key(enrollment_event_cv), :headers => {
           "market" => determine_market(enrollment_event_cv),
           "file_name" => determine_file_name(enrollment_event_cv)
         })
@@ -41,7 +40,7 @@ module Handlers
     def determine_file_name(enrollment_event_cv)
       market_identifier = shop_market?(enrollment_event_cv) ? "S" : "I"
       carrier_identifier = find_carrier_abbreviation(enrollment_event_cv)
-      category_identifier = (@enroll_type == :initial_enrollment) ? "_C_E_" : "_C_M_"
+      category_identifier = is_initial?(enrollment_event_cv) ? "_C_E_" : "_C_M_"
       "834_" + transaction_id(enrollment_event_cv) + "_" + carrier_identifier + category_identifier + market_identifier + "_1.xml"
     end
 
@@ -55,8 +54,13 @@ module Handlers
       shop_enrollment.nil? ? "individual" : "shop"
     end
 
-    def routing_key
-      (@enroll_type == :initial_enrollment) ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
+    def is_initial?(enrollment_event_cv)
+      event_name = Maybe.new(enrollment_event_cv).event.event_name.strip.split("#").last.downcase.value
+      (event_name == "initial")
+    end
+
+    def routing_key(enrollment_event_cv)
+      is_initial?(enrollment_event_cv) ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
     end
 
     def transaction_id(enrollment_event_cv)

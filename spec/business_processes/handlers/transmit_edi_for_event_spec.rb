@@ -7,7 +7,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:tot_emp_res_amt) { "234.30" }
   let(:transaction_id) { "123455463456345634563456" }
   let(:enrollment_event_cv) { instance_double(Openhbx::Cv2::EnrollmentEvent, event: enrollment_event_event) }
-  let(:enrollment_event_event) { instance_double(Openhbx::Cv2::EnrollmentEventEvent, body: enrollment_event_body) }
+  let(:enrollment_event_event) { instance_double(Openhbx::Cv2::EnrollmentEventEvent, body: enrollment_event_body, event_name: event_type) }
   let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment, transaction_id: transaction_id) }
   let(:enrollment) { instance_double(Openhbx::Cv2::Enrollment, policy: policy_cv) }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => enrollment_element) }
@@ -40,7 +40,7 @@ describe Handlers::TransmitEdiForEvent do
     })
   }
 
-  let(:handler) {  Handlers::TransmitEdiForEvent.new(app, enrollment_type) }
+  let(:handler) {  Handlers::TransmitEdiForEvent.new(app) }
 
   before :each do
     allow(EdiCodec::X12::BenefitEnrollment).to receive(:new).with(raw_event_xml).and_return(transform_slug)
@@ -50,6 +50,7 @@ describe Handlers::TransmitEdiForEvent do
 
   describe "given an initial enrollment for IVL" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => :individual_enrollment_element, :shop_market => nil, :plan => plan_link) }
+    let(:event_type) { "urn:openhbx:terms:v1:enrollment#initial" }
 
     let(:enrollment_type) { :initial_enrollment }
     let(:expected_properties) do
@@ -70,6 +71,7 @@ describe Handlers::TransmitEdiForEvent do
 
   describe "given a maintenance enrollment for IVL" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => :individual_enrollment_element, :shop_market => nil, :plan => plan_link) }
+    let(:event_type) { "urn:openhbx:terms:v1:enrollment#change_member_add" }
 
     let(:enrollment_type) { :maint }
     let(:expected_properties) do
@@ -90,6 +92,7 @@ describe Handlers::TransmitEdiForEvent do
 
   describe "given an initial enrollment for SHOP" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => nil, :shop_market => shop_enrollment_element, :plan => plan_link) }
+    let(:event_type) { "urn:openhbx:terms:v1:enrollment#initial" }
 
     let(:enrollment_type) { :initial_enrollment }
     let(:expected_properties) do
@@ -110,6 +113,7 @@ describe Handlers::TransmitEdiForEvent do
 
   describe "given a maintenance enrollment for SHOP" do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => nil, :shop_market => shop_enrollment_element, :plan => plan_link) }
+    let(:event_type) { "urn:openhbx:terms:v1:enrollment#change_product" }
 
     let(:enrollment_type) { :whatever_but_not_ie }
     let(:expected_properties) do

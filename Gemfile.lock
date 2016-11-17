@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/dchbx/openhbx_cv2.git
-  revision: 44224b06eee99b42a32c1ae364aeddc50653b34c
+  revision: 89ab4cd86898797245c096a3348296e529e9492d
   specs:
     openhbx_cv2 (0.0.1)
       activesupport (>= 3.2)

@@ -5,10 +5,10 @@ class EnrollmentEventClient
 
   def initialize
     @stack =  Middleware::Builder.new do |b|
-      b.use Handlers::ReducerHandler
-      b.use Handlers::EnricherHandler
-      b.use Handlers::PersistanceHandler
-      b.use Handlers::PublisherHandler
+      b.use Handlers::ReduceHandler
+      b.use Handlers::EnrichHandler
+      b.use Handlers::PersistHandler
+      b.use Handlers::PublishHandler
     end
   end
 

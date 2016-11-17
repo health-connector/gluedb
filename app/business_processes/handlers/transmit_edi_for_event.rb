@@ -1,6 +1,7 @@
 # Put an Enrollment Event CV onto the bus after transforming
 module Handlers
-  class TransmitEdiForEvent
+  class TransmitEdiForEvent < Base
+    
     def initialize(app, enroll_type = :initial_enrollment)
       @app = app
       @enroll_type = enroll_type

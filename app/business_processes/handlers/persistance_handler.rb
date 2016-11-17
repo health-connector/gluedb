@@ -1,8 +1,5 @@
 module Handlers
-  class PersistanceHandler
-    def initialize(app)
-      @app = app
-    end
+  class PersistanceHandler < Base
 
     def call(context)
       update_database(context)

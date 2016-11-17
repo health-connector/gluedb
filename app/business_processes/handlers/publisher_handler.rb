@@ -1,8 +1,5 @@
 module Handlers
-  class PublisherHandler
-    def initialize(app)
-      @app = app
-    end
+  class PublisherHandler < Base
 
     def call(context)
       @app.call(context)

@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "3.2.3"
+set :branch,      "release-3.7"
 set :rails_env,       "production"
 set :deploy_to,       "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -32,9 +32,9 @@ namespace :deploy do
 
   desc "Make sure bundler doesn't try to load test gems."
   task :ensure_gems_correct do
-    run "cp -f #{deploy_to}/shared/Gemfile.lock #{release_path}/Gemfile.lock"
     run "mkdir -p #{release_path}/.bundle"
     run "cp -f #{deploy_to}/shared/.bundle/config #{release_path}/.bundle/config"
+    run "cd #{release_path} && bundle install"
   end
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"

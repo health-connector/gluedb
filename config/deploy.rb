@@ -12,17 +12,10 @@ set :deploy_via, :copy
 set :user, "nginx"
 set :use_sudo, false
 set :default_shell, "bash -l"
-# set :user, "deployer"
-# set :password, 'kermit12'
-# set :ssh_options, {:forward_agent => true, :keys=>[File.join(ENV["HOME"], "ec2", "AWS-dan.thomas-me.com", "ipublic-key.pem")]}
 
 role :web, "10.83.85.128"
 role :app, "10.83.85.128"
 role :db,  "10.83.85.128", :primary => true        # This is where Rails migrations will run
-# role :db,  "ec2-50-16-240-48.compute-1.amazonaws.com"                          # your slave db-server here
-
-# if you're still using the script/reaper helper you will need
-# these http://github.com/rails/irs_process_scripts
 
 default_run_options[:pty] = true  # prompt for sudo password, if needed
 after "deploy:restart", "deploy:cleanup_old"  # keep only last 5 releases

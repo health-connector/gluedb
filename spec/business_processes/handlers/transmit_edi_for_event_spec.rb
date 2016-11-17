@@ -8,7 +8,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:transaction_id) { "123455463456345634563456" }
   let(:enrollment_event_cv) { instance_double(Openhbx::Cv2::EnrollmentEvent, event: enrollment_event_event) }
   let(:enrollment_event_event) { instance_double(Openhbx::Cv2::EnrollmentEventEvent, body: enrollment_event_body, event_name: event_type) }
-  let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment, transaction_id: transaction_id) }
+  let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment, transaction_id: transaction_id, publishable?: publish_event_to_trading_partners) }
   let(:enrollment) { instance_double(Openhbx::Cv2::Enrollment, policy: policy_cv) }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => enrollment_element) }
   let(:shop_enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollmentShopMarket) }
@@ -23,6 +23,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:exchange_slug) { double }
   let(:plan) { instance_double(Plan, carrier: carrier) }
   let(:carrier) { instance_double(Carrier, abbrev: "GhmSi") }
+  let(:publish_event_to_trading_partners) { true }
 
   let(:app) do
     Proc.new do |context|
@@ -52,7 +53,6 @@ describe Handlers::TransmitEdiForEvent do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => :individual_enrollment_element, :shop_market => nil, :plan => plan_link) }
     let(:event_type) { "urn:openhbx:terms:v1:enrollment#initial" }
 
-    let(:enrollment_type) { :initial_enrollment }
     let(:expected_properties) do
       { 
         :routing_key => "hbx.enrollment_messages",
@@ -73,7 +73,6 @@ describe Handlers::TransmitEdiForEvent do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => :individual_enrollment_element, :shop_market => nil, :plan => plan_link) }
     let(:event_type) { "urn:openhbx:terms:v1:enrollment#change_member_add" }
 
-    let(:enrollment_type) { :maint }
     let(:expected_properties) do
       { 
         :routing_key => "hbx.maintenance_messages",
@@ -94,7 +93,6 @@ describe Handlers::TransmitEdiForEvent do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => nil, :shop_market => shop_enrollment_element, :plan => plan_link) }
     let(:event_type) { "urn:openhbx:terms:v1:enrollment#initial" }
 
-    let(:enrollment_type) { :initial_enrollment }
     let(:expected_properties) do
       { 
         :routing_key => "hbx.enrollment_messages",
@@ -115,7 +113,6 @@ describe Handlers::TransmitEdiForEvent do
     let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => nil, :shop_market => shop_enrollment_element, :plan => plan_link) }
     let(:event_type) { "urn:openhbx:terms:v1:enrollment#change_product" }
 
-    let(:enrollment_type) { :whatever_but_not_ie }
     let(:expected_properties) do
       { 
         :routing_key => "hbx.maintenance_messages",
@@ -129,6 +126,17 @@ describe Handlers::TransmitEdiForEvent do
     it "should transmit a correctly named file, in the right market" do
       expect(exchange_slug).to receive(:publish).with(transformation_result_xml, expected_properties)
       handler.call(interaction_context)  
+    end
+  end
+
+  describe "given an event which isn't publishable" do
+    let(:enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollment, :individual_market => nil, :shop_market => shop_enrollment_element, :plan => plan_link) }
+    let(:event_type) { "urn:openhbx:terms:v1:enrollment#change_product" }
+    let(:publish_event_to_trading_partners) { false }
+
+    it "does not transmit" do
+      expect(exchange_slug).not_to receive(:publish)
+      handler.call(interaction_context)
     end
   end
 end

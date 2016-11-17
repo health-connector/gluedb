@@ -12,9 +12,11 @@ module Handlers
     # - raw_event_xml (a string containing the raw event xml)
     def call(context)
       action_xml = context.raw_event_xml
-      edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
-      x12_xml = edi_builder.call.to_xml
-      publish_to_bus(context.amqp_connection, context.enrollment_event_cv, x12_xml)
+      if is_publishable?(context.enrollment_event_cv)
+        edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+        x12_xml = edi_builder.call.to_xml
+        publish_to_bus(context.amqp_connection, context.enrollment_event_cv, x12_xml)
+      end
       @app.call(context)
     end
 
@@ -45,6 +47,11 @@ module Handlers
     end
 
     protected
+
+    def is_publishable?(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.publishable?.value
+    end
+
     def extract_policy(enrollment_event_cv)
       Maybe.new(enrollment_event_cv).event.body.enrollment.policy.value
     end

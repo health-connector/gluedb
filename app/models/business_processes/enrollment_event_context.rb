@@ -5,9 +5,10 @@ module BusinessProcesses
     attr_accessor :business_process_history
     attr_accessor :amqp_connection
     attr_accessor :event_list
+    attr_accessor :errors
 
     def initialize
-      @enrollment_event_errors = ::BusinessProcesses::EnrollmentEventErrors.new
+      @errors = ::BusinessProcesses::EnrollmentEventErrors.new
     end
 
     private

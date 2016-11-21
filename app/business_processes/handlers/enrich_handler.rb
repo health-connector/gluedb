@@ -65,7 +65,7 @@ module Handlers
       return false if pol.subscriber.blank?
       return false if (pol.subscriber.m_id != subscriber_id)
       return false unless (plan.coverage_type == pol.plan.coverage_type)
-      return false unless (plan.active_year == pol.plan.active_year)
+      return false unless (plan.year == pol.plan.year)
       return true if pol.subscriber.coverage_end.blank?
       pol.subscriber.coverage_end < subscriber_start
     end

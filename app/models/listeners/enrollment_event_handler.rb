@@ -38,7 +38,7 @@ module Listeners
           }.to_json)
           channel.ack(delivery_info.delivery_tag, false)
         else
-          resource_event_broadcast("info", "event_processed", "200") 
+          resource_event_broadcast("info", "event_processed", "200", res.raw_event_xml) 
           channel.ack(delivery_info.delivery_tag, false)
         end
       end

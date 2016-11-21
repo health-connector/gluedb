@@ -10,7 +10,7 @@ module Handlers
 
     def extract_enrollee_start(enrollee)
       val = Maybe.new(enrollee).benefit.begin_date.strip.value
-      return nil val.blank?
+      return nil if val.blank?
       Date.strptime(val, "%Y%m%d")
     end
 

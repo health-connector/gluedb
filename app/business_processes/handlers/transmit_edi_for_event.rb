@@ -49,7 +49,9 @@ module Handlers
     protected
 
     def is_publishable?(enrollment_event_cv)
-      Maybe.new(enrollment_event_cv).event.body.publishable?.value
+      pub_value = Maybe.new(enrollment_event_cv).event.body.publishable?.value
+      Rails.logger.info { "Got a publishable? value of: #{pub_value}" }
+      return pub_value
     end
 
     def is_initial?(enrollment_event_cv)

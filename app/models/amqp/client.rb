@@ -84,7 +84,8 @@ module Amqp
           $stderr.puts "=== Processing Failure ==="
           fail_with(e)
           begin
-            existing_retry_count = properties.headers["x-redelivery-count"].to_i
+            p_headers = properties.headers || {}
+            existing_retry_count = p_headers["x-redelivery-count"].to_i
             if existing_retry_count > 5
               $stderr.puts "=== Redelivery Attempts Exceeded ==="
               $stderr.puts properties.to_hash.inspect

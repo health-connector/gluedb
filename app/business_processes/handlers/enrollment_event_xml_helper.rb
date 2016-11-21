@@ -9,7 +9,9 @@ module Handlers
     end
 
     def extract_enrollee_start(enrollee)
-      Maybe.new(enrollee).benefit.begin_date.strip.strptime("%Y%m%d").value
+      val = Maybe.new(enrollee).benefit.begin_date.strip.value
+      return nil val.blank?
+      Date.strptime(val, "%Y%m%d")
     end
 
     def extract_enrollment_group_id(policy_cv)

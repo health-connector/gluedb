@@ -15,7 +15,9 @@ module BusinessProcesses
 
     def initialize_clone(other)
       @errors = other.errors.clone
-      @business_process_history = other.business_process_history.clone
+      if other.business_process_history.present?
+        @business_process_history = other.business_process_history.clone
+      end
       if other.amqp_connection.present?
         @amqp_connection = other.amqp_connection
       end

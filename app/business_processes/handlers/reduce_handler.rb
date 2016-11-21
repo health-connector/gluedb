@@ -11,14 +11,7 @@ module Handlers
     protected
 
     def duplicate_context(context, reduced_set)
-      new_context = OpenStruct.new
-      context.each_pair do |k, v|
-        if (k.to_s == "business_process_history")
-          context[k] = v.dup
-        elsif !(k.to_s == "event_list")
-          context[k] = v
-        end
-      end
+      new_context = context.clone
       new_context.event_list = reduced_set
       new_context
     end

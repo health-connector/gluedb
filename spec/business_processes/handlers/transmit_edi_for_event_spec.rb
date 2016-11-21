@@ -35,7 +35,6 @@ describe Handlers::TransmitEdiForEvent do
 
   let(:interaction_context) {
     OpenStruct.new({
-      :enrollment_event_cv => enrollment_event_cv,
       :raw_event_xml => raw_event_xml,
       :amqp_connection => amqp_connection
     })
@@ -44,6 +43,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:handler) {  Handlers::TransmitEdiForEvent.new(app) }
 
   before :each do
+    allow(Openhbx::Cv2::EnrollmentEvent).to receive(:parse).with(raw_event_xml, :single => true).and_return(enrollment_event_cv)
     allow(EdiCodec::X12::BenefitEnrollment).to receive(:new).with(raw_event_xml).and_return(transform_slug)
     allow(::Amqp::ConfirmedPublisher).to receive(:with_confirmed_channel).with(amqp_connection).and_yield(channel_slug)
     allow(Plan).to receive(:where).with(:hios_plan_id => hios_id, :year => 2016).and_return([plan])

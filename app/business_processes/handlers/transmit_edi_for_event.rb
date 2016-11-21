@@ -1,21 +1,22 @@
 # Put an Enrollment Event CV onto the bus after transforming
 module Handlers
   class TransmitEdiForEvent < Base
+    include EnrollmentEventXmlHelper
     
     def initialize(app)
       @app = app
     end
 
     # Context requires:
-    # - enrollment_event_cv (Openhbx::Cv2::EnrollmentEvent)
     # - amqp_connection (A connection to an amqp service)
     # - raw_event_xml (a string containing the raw event xml)
     def call(context)
       action_xml = context.raw_event_xml
-      if is_publishable?(context.enrollment_event_cv)
+      enrollment_event_cv = enrollment_event_cv_for(action_xml)
+      if is_publishable?(enrollment_event_cv)
         edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
         x12_xml = edi_builder.call.to_xml
-        publish_to_bus(context.amqp_connection, context.enrollment_event_cv, x12_xml)
+        publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
       end
       @app.call(context)
     end
@@ -38,7 +39,6 @@ module Handlers
       found_plan.carrier.abbrev.upcase
     end
 
-
     def determine_file_name(enrollment_event_cv)
       market_identifier = shop_market?(enrollment_event_cv) ? "S" : "I"
       carrier_identifier = find_carrier_abbreviation(enrollment_event_cv)
@@ -50,15 +50,6 @@ module Handlers
 
     def is_publishable?(enrollment_event_cv)
       Maybe.new(enrollment_event_cv).event.body.publishable?.value
-    end
-
-    def extract_policy(enrollment_event_cv)
-      Maybe.new(enrollment_event_cv).event.body.enrollment.policy.value
-    end
-
-    def determine_market(enrollment_event_cv)
-      shop_enrollment = Maybe.new(enrollment_event_cv).event.body.enrollment.policy.policy_enrollment.shop_market.value 
-      shop_enrollment.nil? ? "individual" : "shop"
     end
 
     def is_initial?(enrollment_event_cv)
@@ -76,16 +67,6 @@ module Handlers
 
     def shop_market?(enrollment_event_cv)
       determine_market(enrollment_event_cv) == "shop"
-    end
-
-    def extract_hios_id(policy_cv)
-      return nil if policy_cv.policy_enrollment.plan.id.blank?
-      policy_cv.policy_enrollment.plan.id.split("#").last
-    end
-
-    def extract_active_year(policy_cv)
-      return nil if policy_cv.policy_enrollment.plan.blank?
-      policy_cv.policy_enrollment.plan.active_year
     end
   end
 end

@@ -3,7 +3,7 @@ module Handlers
     include EnrollmentEventXmlHelper
 
     def call(context)
-      event_list = merge_or_split(context.event_list)
+      event_list = merge_or_split(context, context.event_list)
       if !context.errors.has_errors?
         event_list.map do |element|
           super(duplicate_context(context, element))

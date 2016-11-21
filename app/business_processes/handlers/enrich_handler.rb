@@ -56,7 +56,7 @@ module Handlers
       coverage_type = plan.coverage_type
       subscriber_person = Person.find_by_member_id(subscriber_id)
       subscriber_person.policies.select do |pol|
-        overlapping_policy?(pol)
+        overlapping_policy?(pol, plan, subscriber_id, subscriber_start)
       end
     end
 

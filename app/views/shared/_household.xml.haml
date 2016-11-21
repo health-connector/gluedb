@@ -1,7 +1,8 @@
 %household
   %id
     %id= household._id
-  %irs_group_id= household.irs_group.hbx_assigned_id
+  - if household.irs_group.present?
+    %irs_group_id= household.irs_group.hbx_assigned_id
   %start_date= simple_date_for(household.effective_start_date)
   - if !household.effective_end_date.blank?
     %end_date = simple_date_for(household.effective_end_date)

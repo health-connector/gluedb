@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "3.2.3"
+set :branch,      "release-3.7"
 set :rails_env,       "production"
 set :deploy_to,       "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -12,17 +12,10 @@ set :deploy_via, :copy
 set :user, "nginx"
 set :use_sudo, false
 set :default_shell, "bash -l"
-# set :user, "deployer"
-# set :password, 'kermit12'
-# set :ssh_options, {:forward_agent => true, :keys=>[File.join(ENV["HOME"], "ec2", "AWS-dan.thomas-me.com", "ipublic-key.pem")]}
 
 role :web, "10.83.85.128"
 role :app, "10.83.85.128"
 role :db,  "10.83.85.128", :primary => true        # This is where Rails migrations will run
-# role :db,  "ec2-50-16-240-48.compute-1.amazonaws.com"                          # your slave db-server here
-
-# if you're still using the script/reaper helper you will need
-# these http://github.com/rails/irs_process_scripts
 
 default_run_options[:pty] = true  # prompt for sudo password, if needed
 after "deploy:restart", "deploy:cleanup_old"  # keep only last 5 releases
@@ -32,9 +25,9 @@ namespace :deploy do
 
   desc "Make sure bundler doesn't try to load test gems."
   task :ensure_gems_correct do
-    run "cp -f #{deploy_to}/shared/Gemfile.lock #{release_path}/Gemfile.lock"
     run "mkdir -p #{release_path}/.bundle"
     run "cp -f #{deploy_to}/shared/.bundle/config #{release_path}/.bundle/config"
+    run "cd #{release_path} && bundle install"
   end
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"

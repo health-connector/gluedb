@@ -24,30 +24,24 @@ module Listeners
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
 
-      enrollment_cv = extract_enrollment_cv(body)
-      workflow_arguments = {
-        :amqp_connection => connection,
-        :raw_event_xml => body,
-        :enrollment_event_cv => enrollment_cv,
-        :processing_errors => HandleEnrollmentEvent::ProcessingErrors.new
-      }
+      workflow_arguments = BusinessProcesses::EnrollmentEventContext.new
+      workflow_arguments.amqp_connection = connection
+      workflow_arguments.event_list = [body]
 
-      result = HandleEnrollmentEvent::ProcessInitialEnrollment.call(workflow_arguments)
-      
-      if !result.success?
-        resource_error_broadcast("invalid_event", "522", {
-          :errors => result.processing_errors.errors.to_hash,
-          :event => body
-        }.to_json)
-        channel.ack(delivery_info.delivery_tag, false)
-      else
-        resource_event_broadcast("info", "event_processed", "200") 
-        channel.ack(delivery_info.delivery_tag, false)
+      results = EnrollmentEventClient.new.call(workflow_arguments)
+
+      results.flatten.each do |res|
+        if res.errors.has_errors?
+          resource_error_broadcast("invalid_event", "522", {
+            :errors => res.errors.errors.to_hash,
+            :event => res.raw_event_xml
+          }.to_json)
+          channel.ack(delivery_info.delivery_tag, false)
+        else
+          resource_event_broadcast("info", "event_processed", "200") 
+          channel.ack(delivery_info.delivery_tag, false)
+        end
       end
-    end
-    
-    def extract_enrollment_cv(payload)
-      Openhbx::Cv2::EnrollmentEvent.parse(payload, single: true)
     end
 
     def self.run

@@ -1,10 +1,14 @@
 module Handlers
   class ReduceHandler < Base
-
     def call(context)
       reduced_list = perform_reduction(context.event_list)
       reduced_list.map do |element|
-        super(duplicate_context(context, element))
+        new_context = duplicate_context(context, element)
+        begin
+          super(duplicate_context(context, element))
+        rescue
+          # Add error information to duplicated context
+        end
       end
     end
 

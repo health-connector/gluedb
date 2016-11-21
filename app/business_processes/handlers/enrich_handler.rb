@@ -9,7 +9,7 @@ module Handlers
           super(duplicate_context(context, element))
         end
       else
-        context
+        [context]
       end
     end
 
@@ -36,7 +36,7 @@ module Handlers
         context.errors.add(:process, "We don't currently process shop")
         return []
       end
-      if competing_coverage(enrollment_event_cv, policy_cv).any?
+      if competing_coverage(policy_cv).any?
         context.errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
         return []
       end
@@ -48,7 +48,7 @@ module Handlers
       Policy.where(:eg_id => enrollment_group_id).any?
     end
 
-    def find_competing_coverage(policy_cv)
+    def competing_coverage(policy_cv)
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)

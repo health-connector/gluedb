@@ -2,6 +2,7 @@ module Handlers
   class PublishHandler < Base
 
     def call(context)
+      notify_trading_partners(context)
       super(context)
     end
 

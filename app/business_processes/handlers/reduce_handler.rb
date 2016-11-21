@@ -4,11 +4,11 @@ module Handlers
       reduced_list = perform_reduction(context.event_list)
       reduced_list.map do |element|
         new_context = duplicate_context(context, element)
-        begin
+#        begin
           super(duplicate_context(context, element))
-        rescue
+#        rescue
           # Add error information to duplicated context
-        end
+#        end
       end
     end
 

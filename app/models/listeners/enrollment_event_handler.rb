@@ -25,7 +25,7 @@ module Listeners
       m_headers = (properties.headers || {}).to_hash.stringify_keys
 
       workflow_arguments = BusinessProcesses::EnrollmentEventContext.new
-      event_message = BusinessProcess::EnrollmentEventMessage.new
+      event_message = BusinessProcesses::EnrollmentEventMessage.new
       event_message.message_tag = delivery_info.delivery_tag
       event_message.event_xml = body
       workflow_arguments.amqp_connection = connection

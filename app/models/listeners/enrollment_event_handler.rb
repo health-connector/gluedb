@@ -25,8 +25,11 @@ module Listeners
       m_headers = (properties.headers || {}).to_hash.stringify_keys
 
       workflow_arguments = BusinessProcesses::EnrollmentEventContext.new
+      event_message = BusinessProcess::EnrollmentEventMessage.new
+      event_message.message_tag = delivery_info.delivery_tag
+      event_message.event_xml = body
       workflow_arguments.amqp_connection = connection
-      workflow_arguments.event_list = [body]
+      workflow_arguments.event_list = [event_message]
 
       results = EnrollmentEventClient.new.call(workflow_arguments)
 
@@ -34,11 +37,11 @@ module Listeners
         if res.errors.has_errors?
           resource_error_broadcast("invalid_event", "522", {
             :errors => res.errors.errors.to_hash,
-            :event => res.raw_event_xml
+            :event => res.event_xml
           }.to_json)
           channel.ack(delivery_info.delivery_tag, false)
         else
-          resource_event_broadcast("info", "event_processed", "200", res.raw_event_xml) 
+          resource_event_broadcast("info", "event_processed", "200", res.event_xml) 
           channel.ack(delivery_info.delivery_tag, false)
         end
       end

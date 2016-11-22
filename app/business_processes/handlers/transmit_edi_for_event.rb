@@ -9,9 +9,8 @@ module Handlers
 
     # Context requires:
     # - amqp_connection (A connection to an amqp service)
-    # - raw_event_xml (a string containing the raw event xml)
     def call(context)
-      action_xml = context.raw_event_xml
+      action_xml = context.event_message.event_xml
       enrollment_event_cv = enrollment_event_cv_for(action_xml)
       if is_publishable?(enrollment_event_cv)
         edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)

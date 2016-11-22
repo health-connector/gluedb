@@ -16,12 +16,12 @@ module Handlers
     protected
     def duplicate_context(context, event_xml)
       new_context = context.clone
-      new_context.raw_event_xml = event_xml
+      new_context.event_message = event_xml
       new_context
     end
 
     def merge_or_split(context, event_list)
-      last_event = event_list.last
+      last_event = event_list.last.event_xml
       enrollment_event_cv = enrollment_event_cv_for(last_event)
       policy_cv = extract_policy(enrollment_event_cv)
       if event_list.length > 1

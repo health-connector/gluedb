@@ -23,9 +23,6 @@ module BusinessProcesses
       if other.amqp_connection.present?
         @amqp_connection = other.amqp_connection
       end
-      if other.raw_event_xml.present?
-        @raw_event_xml = other.raw_event_xml.clone
-      end
       if other.event_message.present?
         @event_message = other.event_message.clone
       end

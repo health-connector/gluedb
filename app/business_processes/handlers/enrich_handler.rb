@@ -38,6 +38,7 @@ module Handlers
       end
       if competing_coverage(policy_cv).any?
         context.errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
+        context.errors.add(:process, last_event)
         return []
       end
       event_list

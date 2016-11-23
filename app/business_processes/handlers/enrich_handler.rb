@@ -70,7 +70,7 @@ module Handlers
       return false unless (plan.year == pol.plan.year)
       return false unless pol.employer_id.blank?
       return true if pol.subscriber.coverage_end.blank?
-      pol.subscriber.coverage_end < subscriber_start
+      !(pol.subscriber.coverage_end < subscriber_start)
     end
   end
 end

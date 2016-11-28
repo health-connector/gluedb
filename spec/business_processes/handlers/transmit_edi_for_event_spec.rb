@@ -24,6 +24,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:plan) { instance_double(Plan, carrier: carrier) }
   let(:carrier) { instance_double(Carrier, abbrev: "GhmSi") }
   let(:publish_event_to_trading_partners) { true }
+  let(:event_message) { instance_double(BusinessProcesses::EnrollmentEventMessage, :event_xml => raw_event_xml) }
 
   let(:app) do
     Proc.new do |context|
@@ -34,8 +35,8 @@ describe Handlers::TransmitEdiForEvent do
   let(:amqp_connection) { double }
 
   let(:interaction_context) {
-    OpenStruct.new({
-      :raw_event_xml => raw_event_xml,
+    instance_double(BusinessProcesses::EnrollmentEventContext, {
+      :event_message => event_message,
       :amqp_connection => amqp_connection
     })
   }

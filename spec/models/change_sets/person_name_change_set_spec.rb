@@ -6,14 +6,14 @@ describe ChangeSets::PersonNameChangeSet do
     let(:person) { instance_double("::Person", current_name) }
     let(:person_resource) { instance_double("::RemoteResources::IndividualResource", {:hbx_member_id => hbx_member_id}.merge(name_attributes)) } 
     let(:policies_to_notify) { [policy_to_notify] }
-    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids) }
+    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids, :is_shop? => true) }
     let(:hbx_member_ids) { [hbx_member_id, hbx_member_id_2] }
     let(:policy_hbx_id) { "some randome_policy id whatevers" }
     let(:hbx_member_id) { "some random member id wahtever" }
     let(:hbx_member_id_2) { "some other, differently random member id wahtever" }
     let(:policy_cv) { "some policy cv data" }
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
-    let(:cv_publisher) { instance_double("::Services::CvPublisher") }
+    let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
 
     let(:name_attributes) {
       {
@@ -62,7 +62,7 @@ describe ChangeSets::PersonNameChangeSet do
           policy_to_notify, "change", "change_in_identifying_data_elements", [hbx_member_id], hbx_member_ids, [old_name_values]
         ).and_return(policy_serializer)
         allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
-        allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+        allow(::Services::NfpPublisher).to receive(:new).and_return(cv_publisher)
       end
 
       it "should update the person" do

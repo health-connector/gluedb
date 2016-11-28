@@ -24,7 +24,8 @@
               %object_individual
                 %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{subscriber_person.authority_member.hbx_member_id}"
         %person_demographics
-          %ssn= person.authority_member.ssn
+          - if !person.authority_member.ssn.blank?
+            %ssn= person.authority_member.ssn
           %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
           %birth_date= simple_date_for(person.authority_member.dob)
       %is_subscriber= enrollee.subscriber?
@@ -74,4 +75,4 @@
 %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?
-  %updated_at= policy.updated_at.iso8601
+  %modified_at= policy.updated_at.iso8601

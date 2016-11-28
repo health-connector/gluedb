@@ -6,7 +6,7 @@ describe ChangeSets::PersonGenderChangeSet do
     let(:member) { instance_double("::Member", :gender => old_gender) }
     let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :hbx_member_id => hbx_member_id, :gender => new_gender) }
     let(:policies_to_notify) { [policy_to_notify] }
-    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids, :is_shop? => true) }
+    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids, :is_shop? => true, :enrollees => []) }
     let(:hbx_member_ids) { [hbx_member_id, hbx_member_id_2] }
     let(:policy_hbx_id) { "some randome_policy id whatevers" }
     let(:hbx_member_id) { "some random member id wahtever" }
@@ -14,6 +14,8 @@ describe ChangeSets::PersonGenderChangeSet do
     let(:policy_cv) { "some policy cv data" }
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
     let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
 
     let(:old_gender) { "female" }
 
@@ -25,6 +27,14 @@ describe ChangeSets::PersonGenderChangeSet do
     subject { ChangeSets::PersonGenderChangeSet.new }
 
     before :each do
+      allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+       { :policy => policy_to_notify, "member_id" => hbx_member_id, "gender" => old_gender }
+      ).and_return(affected_member)
+      allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+        affected_member,
+        policy_to_notify,
+        "urn:openhbx:terms:v1:enrollment#change_member_name_or_demographic"
+      ).and_return(identity_change_transmitter)
       allow(member).to receive(:update_attributes).with({"gender" => new_gender}).and_return(update_result)
     end
 

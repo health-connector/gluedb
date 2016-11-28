@@ -14,6 +14,8 @@ describe ChangeSets::PersonSsnChangeSet do
     let(:policy_cv) { "some policy cv data" }
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
     let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
 
     let(:old_ssn) { "999999999" }
 
@@ -25,6 +27,14 @@ describe ChangeSets::PersonSsnChangeSet do
     subject { ChangeSets::PersonSsnChangeSet.new }
 
     before :each do
+      allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+       { :policy => policy_to_notify}.merge(old_ssn_values)
+      ).and_return(affected_member)
+      allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+        affected_member,
+        policy_to_notify,
+        "urn:openhbx:terms:v1:enrollment#change_member_name_or_demographic"
+      ).and_return(identity_change_transmitter)
       allow(member).to receive(:update_attributes).with({"ssn" => new_ssn}).and_return(update_result)
     end
 

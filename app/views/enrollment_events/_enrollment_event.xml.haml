@@ -1,5 +1,6 @@
 %header
   %hbx_id DC0
+  %submitted_at= Time.now.iso8601
 %event
   %body
     %enrollment_event_body
@@ -8,7 +9,8 @@
       %transaction_id= transaction_id
       %is_trading_partner_publishable true
       %enrollment
-        %transaction_id= transaction_id
+        %transaction_id
+          %id= transaction_id
         %type= event_type 
         %market= policy.is_shop? ? "urn:openhbx:terms:v1:aca_marketplace#shop" : "urn:openhbx:terms:v1:aca_marketplace#individual"
         %policy

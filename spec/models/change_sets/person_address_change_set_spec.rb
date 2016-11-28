@@ -16,12 +16,22 @@ describe ChangeSets::PersonAddressChangeSet do
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
     let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
     let(:address_kind) { "billing" }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
     subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
 
     before :each do
       allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
         policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
       ).and_return(policy_serializer)
+      allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+       { :policy => policy_to_notify, :member_id => hbx_member_id }
+      ).and_return(affected_member)
+      allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+        affected_member,
+        policy_to_notify,
+        "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
+      ).and_return(identity_change_transmitter)
       allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
       allow(::Services::NfpPublisher).to receive(:new).and_return(cv_publisher)
     end
@@ -54,15 +64,28 @@ describe ChangeSets::PersonAddressChangeSet do
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
     let(:cv_publisher) { instance_double("::Services::CvPublisher") }
     let(:new_address) { double }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
     subject { ChangeSets::PersonAddressChangeSet.new(address_kind) }
 
     before :each do
+      allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+       { :policy => policy_to_notify, :member_id => hbx_member_id }
+      ).and_return(affected_member)
+      allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+        affected_member,
+        policy_to_notify,
+        cv_change_reason,
+      ).and_return(identity_change_transmitter)
       allow(Address).to receive(:new).with({:address_type => address_kind}).and_return(new_address)
       allow(person).to receive(:set_address).with(new_address)
     end
 
     describe "updating a home address" do
       let(:address_kind) { "home" }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
+    let(:cv_change_reason) { "urn:openhbx:terms:v1:enrollment#change_member_address" }
 
       describe "with an invalid new address" do
         let(:address_update_result) { false }
@@ -75,6 +98,14 @@ describe ChangeSets::PersonAddressChangeSet do
         let(:address_update_result) { true }
 
         before :each do
+          allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+            { :policy => policy_to_notify, :member_id => hbx_member_id }
+          ).and_return(affected_member)
+          allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+            affected_member,
+            policy_to_notify,
+            "urn:openhbx:terms:v1:enrollment#change_member_address"
+          ).and_return(identity_change_transmitter)
           allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
             policy_to_notify, "change", "change_of_location", [hbx_member_id], hbx_member_ids
           ).and_return(policy_serializer)
@@ -96,6 +127,9 @@ describe ChangeSets::PersonAddressChangeSet do
 
     describe "updating a mailing address" do
       let(:address_kind) { "mailing" }
+      let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+      let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
+      let(:cv_change_reason) { "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers" }
 
       describe "with an invalid new address" do
         let(:address_update_result) { false }
@@ -108,6 +142,14 @@ describe ChangeSets::PersonAddressChangeSet do
         let(:address_update_result) { true }
 
         before :each do
+          allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+            { :policy => policy_to_notify, :member_id => hbx_member_id }
+          ).and_return(affected_member)
+          allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+            affected_member,
+            policy_to_notify,
+            cv_change_reason
+          ).and_return(identity_change_transmitter)
           allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
             policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
           ).and_return(policy_serializer)

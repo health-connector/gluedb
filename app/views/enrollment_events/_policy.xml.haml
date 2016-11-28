@@ -1,0 +1,77 @@
+%id
+  %id= policy.eg_id
+- if policy.broker.present?
+  - broker = policy.broker
+  %broker
+    %id
+      %id= broker.npn
+    %name= broker.full_name
+    %is_active= broker.is_active
+%enrollees
+  - subscriber = policy.subscriber
+  - subscriber_person = subscriber.person
+  - enrollees.each do |enrollee|
+    - person = enrollee.person
+    %enrollee
+      %member
+        %id
+          %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{person.authority_member.hbx_member_id}"
+        = render "people/person", :person => person
+        - unless enrollee.subscriber?
+          %person_relationships
+            %person_relationship
+              %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{enrollee.relationship_status_code}"
+              %object_individual
+                %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{subscriber_person.authority_member.hbx_member_id}"
+        %person_demographics
+          %ssn= person.authority_member.ssn
+          %sex= "urn:openhbx:terms:v1:gender##{person.authority_member.gender}"
+          %birth_date= simple_date_for(person.authority_member.dob)
+      %is_subscriber= enrollee.subscriber?
+      %benefit
+        %premium_amount= enrollee.pre_amt.round(2)
+        %begin_date= simple_date_for(enrollee.coverage_start)
+        - if !enrollee.coverage_end.blank?
+          %end_date= simple_date_for(enrollee.coverage_end)
+        - if enrollee.cp_id.present?
+          %carrier_assigned_policy_id= enrollee.cp_id
+        - if enrollee.c_id.present?
+          %carrier_assigned_enrollee_id= enrollee.c_id
+- if policy.has_responsible_person?
+  %responsible_party
+    - responsible_party = policy.responsible_person
+    = render "people/responsible_person", :person => responsible_party, :responsible_party => responsible_party
+%enrollment
+  - plan = policy.plan
+  %plan
+    %id
+      %id= plan.hios_plan_id
+    %name= plan.name
+    %active_year= plan.year
+    %is_dental_only= plan.coverage_type == "dental"
+    - carrier = plan.carrier
+    %carrier
+      %id
+        %id= carrier.hbx_carrier_id
+      %name= carrier.name
+    %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level}"
+    %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
+    %ehb_percent= plan.ehb*100
+  - if policy.is_shop?
+    %shop_market
+      - employer = policy.employer
+      %employer_link
+        %id
+          %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
+        %name= employer.name
+      %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
+  - else
+    %individual_market
+      %is_carrier_to_bill true
+      %applied_aptc_amount= (policy.applied_aptc).round(2)
+  %premium_total_amount= policy.pre_amt_tot.round(2)
+  %total_responsible_amount= policy.tot_res_amt.round(2)
+%request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
+%created_at= policy.created_at.iso8601 if policy.created_at
+- if !policy.updated_at.blank?
+  %updated_at= policy.updated_at.iso8601

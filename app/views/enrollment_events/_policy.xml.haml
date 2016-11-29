@@ -55,8 +55,8 @@
       %id
         %id= carrier.hbx_carrier_id
       %name= carrier.name
-    %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level}"
-    %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type}"
+    %metal_level= "urn:openhbx:terms:v1:plan_metal_level##{plan.metal_level.downcase}"
+    %coverage_type= "urn:openhbx:terms:v1:qhp_benefit_coverage##{plan.coverage_type.downcase}"
     %ehb_percent= plan.ehb*100
   - if policy.is_shop?
     %shop_market

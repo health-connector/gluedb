@@ -92,7 +92,7 @@ module Amqp
               $stderr.puts payload
               publish_processing_failed(delivery_info, properties, payload, e)
             else
-              redeliver(existing_retry_count, delivery_info, properties, payload)
+              redeliver(channel, existing_retry_count, delivery_info, properties, payload)
             end
           rescue => e
             $stderr.puts "=== Redelivery Failure ==="
@@ -104,13 +104,10 @@ module Amqp
       end
     end
 
-    def redeliver(existing_retry_count, delivery_info, properties, payload)
+    def redeliver(a_channel, existing_retry_count, delivery_info, properties, payload)
       new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
-      new_properties[:routing_key] = queue.name
-      ::Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |chan|
-        chan.default_exchange.publish(payload, new_properties)
-      end
-      channel.acknowledge(delivery_info.delivery_tag, false)
+      queue.publish(payload, new_properties)
+      a_channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
     def error_properties(error_routing_key, delivery_info, properties, exception = nil)

@@ -65,6 +65,8 @@
         %id
           %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
         %name= employer.name
+        - if !employer.dba.blank?
+          %dba= employer.dba
       %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
   - else
     %individual_market

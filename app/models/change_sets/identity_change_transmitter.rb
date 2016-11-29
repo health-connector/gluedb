@@ -27,7 +27,7 @@ module ChangeSets
        conn = AmqpConnectionProvider.start_connection
        transmitter = ::Services::EnrollmentEventTransmitter.new
        transmitter.call(conn, render_result)
-       con.close
+       conn.close
     end
 
     def transaction_id

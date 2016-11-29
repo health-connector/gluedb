@@ -2,12 +2,13 @@ module ChangeSets
   class PersonNameChangeSet
     def perform_update(person, person_resource, policies_to_notify)
       old_values_hash = old_name_values(person_resource.hbx_member_id, person, person_resource)
+      old_id_hash = old_name_hash(person_resource.hbx_member_id, person, person_resource)
       update_value = person.update_attributes(name_update_hash(person_resource))
       return false unless update_value
       policies_to_notify.each do |pol|
         af = ::BusinessProcesses::AffectedMember.new({
           :policy => pol
-        }.merge(old_values_hash.first))
+        }.merge(old_id_hash))
         ict = IdentityChangeTransmitter.new(af, pol, "urn:openhbx:terms:v1:enrollment#change_member_name_or_demographic")
         ict.publish
         if pol.is_shop?
@@ -31,6 +32,18 @@ module ChangeSets
       name_hash["name_pfx"] = person_resource.name_pfx.blank? ? nil : person_resource.name_pfx 
       name_hash["name_sfx"] = person_resource.name_sfx.blank? ? nil : person_resource.name_sfx
       name_hash
+    end
+
+    def old_name_hash(member_id, person, person_resource)
+      old_values_hash = {
+        "member_id" => member_id
+      }
+      old_values_hash["name_first"] = person.name_first
+      old_values_hash["name_last"] = person.name_last
+      old_values_hash["name_middle"] = person.name_middle
+      old_values_hash["name_pfx"] = person.name_pfx
+      old_values_hash["name_sfx"] = person.name_sfx
+      old_values_hash
     end
 
     def old_name_values(member_id, person, person_resource)

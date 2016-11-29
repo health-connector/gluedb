@@ -44,11 +44,22 @@ describe ChangeSets::PersonNameChangeSet do
           "name_last" => "Errorsman"
       }
     }
+
+    let(:old_id_values) {
+       {
+         "name_pfx" => nil,
+          "name_sfx"=>"MD",
+          "name_first" => "Testing",
+          "name_last" => "Errorsman",
+          "name_middle" => "For"
+       }
+    }
+
     subject { ChangeSets::PersonNameChangeSet.new }
 
     before :each do
       allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
-       { :policy => policy_to_notify, "member_id" => hbx_member_id }.merge(old_name_values)
+       { :policy => policy_to_notify, "member_id" => hbx_member_id }.merge(old_id_values)
       ).and_return(affected_member)
       allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
         affected_member,

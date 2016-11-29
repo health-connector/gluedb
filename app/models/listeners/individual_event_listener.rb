@@ -24,45 +24,53 @@ module Listeners
 
     def process_retrieved_resource(delivery_info, individual_id, r_code, remote_resource)
       change_set = ::ChangeSets::IndividualChangeSet.new(remote_resource)
-      if change_set.individual_exists?
-        if change_set.any_changes?
-          if change_set.dropping_subscriber_home_address?
+      begin
+        if change_set.individual_exists?
+          if change_set.any_changes?
+            if change_set.dropping_subscriber_home_address?
               resource_event_broadcast("error", "subscriber_home_address_required", individual_id, "422", remote_resource)
               channel.ack(delivery_info.delivery_tag, false)
-          elsif change_set.multiple_changes?
-            if change_set.process_first_edi_change
-              resource_event_broadcast("info", "individual_updated_partially", individual_id, r_code, remote_resource)
-              channel.reject(delivery_info.delivery_tag, true)
-            else
-              resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
-              channel.ack(delivery_info.delivery_tag, false)
-            end
-          else
-            if change_set.dob_changed?
-              resource_event_broadcast("error", "individual_dob_changed", individual_id, "501", remote_resource)
-              channel.ack(delivery_info.delivery_tag, false)
-            else
+            elsif change_set.multiple_changes?
               if change_set.process_first_edi_change
-                resource_event_broadcast("info", "individual_updated", individual_id, r_code, remote_resource)
-                channel.ack(delivery_info.delivery_tag, false)
+                resource_event_broadcast("info", "individual_updated_partially", individual_id, r_code, remote_resource)
+                channel.reject(delivery_info.delivery_tag, true)
               else
                 resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
                 channel.ack(delivery_info.delivery_tag, false)
               end
+            else
+              if change_set.dob_changed?
+                resource_event_broadcast("error", "individual_dob_changed", individual_id, "501", remote_resource)
+                channel.ack(delivery_info.delivery_tag, false)
+              else
+                if change_set.process_first_edi_change
+                  resource_event_broadcast("info", "individual_updated", individual_id, r_code, remote_resource)
+                  channel.ack(delivery_info.delivery_tag, false)
+                else
+                  resource_event_broadcast("error", "individual_updated", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+                  channel.ack(delivery_info.delivery_tag, false)
+                end
+              end
             end
+          else
+            resource_event_broadcast("info", "individual_updated", individual_id, "304", remote_resource)
+            channel.ack(delivery_info.delivery_tag, false)
           end
         else
-          resource_event_broadcast("info", "individual_updated", individual_id, "304", remote_resource)
-          channel.ack(delivery_info.delivery_tag, false)
+          if change_set.create_individual_resource
+            resource_event_broadcast("info", "individual_created", individual_id, r_code, remote_resource)
+            channel.ack(delivery_info.delivery_tag, false)
+          else
+            resource_event_broadcast("error", "individual_created", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
+            channel.ack(delivery_info.delivery_tag, false)
+          end
         end
-      else
-        if change_set.create_individual_resource
-          resource_event_broadcast("info", "individual_created", individual_id, r_code, remote_resource)
-          channel.ack(delivery_info.delivery_tag, false)
-        else
-          resource_event_broadcast("error", "individual_created", individual_id, "422", JSON.dump({:resource => remote_resource.to_s, :errors => change_set.full_error_messages }))
-          channel.ack(delivery_info.delivery_tag, false)
-        end
+      rescue BusinessProcesses::TransformationError => e
+        resource_error_broadcast("edi_transformation_failure", individual_id, "500", {
+          errors: e.message,
+          input: e.input          
+        }.to_json)
+        channel.ack(delivery_info.delivery_tag, false)
       end
     end
 

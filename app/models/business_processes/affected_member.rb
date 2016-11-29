@@ -15,7 +15,18 @@ module BusinessProcesses
       :ssn,
       :dob]
 
-    (FROM_PERSON + FROM_MEMBER).each do |prop|
+    FROM_PERSON.each do |prop|
+      class_eval(<<-RUBY_CODE)
+        attr_reader :#{prop.to_s}
+
+        def #{prop.to_s}=(val)
+          @old_names_set = true
+          @#{prop.to_s} = val
+        end
+      RUBY_CODE
+    end
+
+    FROM_MEMBER.each do |prop|
       class_eval(<<-RUBY_CODE)
         attr_reader :#{prop.to_s}
 
@@ -29,7 +40,7 @@ module BusinessProcesses
     FROM_PERSON.each do |prop|
       class_eval(<<-RUBY_CODE)
         def old_#{prop.to_s}
-          if @old_#{prop.to_s}_set
+          if @old_names_set
             return #{prop.to_s}
           end
           enrollee.person.#{prop.to_s}

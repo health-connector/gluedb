@@ -38,10 +38,10 @@ module Listeners
           "action_transformation_failed",
           "500",
           enrollment_event_resource,
-          {
+          m_headers.merge({
             :error_kind => e.class.name.to_s,
             :error_message => e.message
-          }
+          })
         )
       end
       channel.ack(delivery_info.delivery_tag, false)

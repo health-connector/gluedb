@@ -55,7 +55,7 @@ end
 
 Eye.application 'eye_gluedb' do
   notify :tevans, :info
-  notify :dthomas, :info
+#  notify :dthomas, :info
 
   define_forked_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY)
   define_forked_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY)

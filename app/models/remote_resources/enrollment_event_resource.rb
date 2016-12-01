@@ -13,7 +13,7 @@ module RemoteResources
       found_action = false
       event_doc.xpath("//cv:enrollment_event_body/cv:enrollment/cv:type", XML_NS).each do |node|
         found_action = true
-        node.context = action_uri
+        node.content = action_uri
       end
       raise "Could not find enrollment action to correct it" unless found_action
       event_doc.to_xml(:indent => 2)

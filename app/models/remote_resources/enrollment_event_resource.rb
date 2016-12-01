@@ -11,7 +11,7 @@ module RemoteResources
     def transform_action_to(action_uri)
       event_doc = Nokogiri::XML(@body)
       found_action = false
-      event_doc.at_xpath("cv:enrollment_event_body/cv:enrollment/cv:type", XML_NS) do |node|
+      event_doc.at_xpath("//cv:enrollment_event_body/cv:enrollment/cv:type", XML_NS) do |node|
         found_action = true
         node.context = action_uri
       end

@@ -18,6 +18,10 @@ module BusinessProcesses
       @policy_cv ||= extract_policy(enrollment_event_xml)
     end
 
+    def hbx_enrollment_id
+      @hbx_enrollment_id ||= Maybe.new(policy_cv).id.value
+    end
+
     def subscriber
       @subscriber ||= extract_subscriber(policy_cv)
     end

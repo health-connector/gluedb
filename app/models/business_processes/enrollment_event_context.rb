@@ -13,6 +13,14 @@ module BusinessProcesses
       @errors = ::BusinessProcesses::EnrollmentEventErrors.new
     end
 
+    def hbx_enrollment_id
+      if !event_message.nil?
+        event_message.hbx_enrollment_id
+      elsif !event_list.nil?
+        event_list.map(&:hbx_enrollment_id).to_json
+      end
+    end
+
     private
 
     def initialize_clone(other)

@@ -41,12 +41,31 @@ module Handlers
         context.errors.add(:process, last_event)
         return []
       end
+      if bogus_renewal?(enrollment_event_cv, policy_cv)
+        context.errors.add(:process, "This enrollment is marked as a renewal, but doesn't have active coverage for the preceeding year.")
+        context.errors.add(:process, last_event)
+        return []
+      end
       event_list
     end
 
     def already_exists?(policy_cv)
       enrollment_group_id = extract_enrollment_group_id(policy_cv)
       Policy.where(:eg_id => enrollment_group_id).any?
+    end
+
+    def bogus_renewal?(enrollment_event_cv, policy_cv)
+      return false unless is_ivl_renewal?(enrollment_event_cv)
+      subscriber_enrollee = extract_subscriber(policy_cv)
+      subscriber_id = extract_member_id(subscriber_enrollee)
+      subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      plan = extract_plan(policy_cv)
+      coverage_type = plan.coverage_type
+      subscriber_person = Person.find_by_member_id(subscriber_id)
+      return [] if subscriber_person.nil?
+      subscriber_person.policies.any? do |pol|
+        ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
+      end
     end
 
     def competing_coverage(policy_cv)
@@ -60,6 +79,27 @@ module Handlers
       subscriber_person.policies.select do |pol|
         overlapping_policy?(pol, plan, subscriber_id, subscriber_start)
       end
+    end
+
+    def extract_enrollment_action(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.value
+    end
+
+    def is_ivl_renewal?(enrollment_event_cv)
+      return false if (determine_market(enrollment_event_cv) == "shop")
+      [
+        "urn:openhbx:terms:v1:enrollment#auto_renew",
+        "urn:openhbx:terms:v1:enrollment#active_renew"
+      ].include?(extract_enrollment_action(enrollment_event_cv))
+    end
+
+    def ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
+      return false if pol.is_shop?
+      return false unless (pol.plan.year == plan.year - 1)
+      return false unless (pol.plan.carrier_id == plan.carrier_id)
+      return false if pol.canceled?
+      return false if pol.terminated?
+      true
     end
 
     def overlapping_policy?(pol, plan, subscriber_id, subscriber_start)

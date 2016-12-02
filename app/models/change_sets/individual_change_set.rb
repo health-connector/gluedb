@@ -120,7 +120,7 @@ module ChangeSets
     end
 
     def multiple_contact_changes?
-      contact_change_collection.size > 1
+      (contact_change_collection.count { |a| a }) > 1
     end
 
     def contact_change_collection

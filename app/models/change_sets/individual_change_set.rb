@@ -166,8 +166,8 @@ module ChangeSets
     end
 
     def names_changed?
-      (resource.name_first != record.name_first) ||
-        (resource.name_last != record.name_last) ||
+      name_values_changed?(record.name_first, resource.name_first) ||
+        name_values_changed?(record.name_last, resource.name_last) ||
         name_values_changed?(record.name_middle, resource.name_middle) ||
         name_values_changed?(record.name_sfx, resource.name_sfx) ||
         name_values_changed?(record.name_pfx, resource.name_pfx)
@@ -175,7 +175,9 @@ module ChangeSets
 
     def name_values_changed?(record_value, resource_value)
       return false if (record_value.blank? && resource_value.blank?)
-      !(record_value == resource_value)
+      return true if record_value.blank?
+      return true if resource_value.blank?
+      !(record_value.strip.downcase == resource_value.strip.downcase)
     end
 
     def ssn_changed?

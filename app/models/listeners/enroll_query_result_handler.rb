@@ -56,13 +56,13 @@ module Listeners
       when "200"
         process_retrieved_resource(delivery_info, hbx_enrollment_id, r_code, resource_or_body, m_headers, enrollment_action)
       when "404"
-        resource_error_broadcast("resource_not_found", hbx_enrollment_id, r_code, m_headers)
+        resource_error_broadcast("resource_not_found", r_code, m_headers, m_headers)
         channel.ack(delivery_info.delivery_tag, false)
       when "503"
-        resource_error_broadcast("resource_timeout", hbx_enrollment_id, r_code, m_headers, m_headers)
+        resource_error_broadcast("resource_timeout", r_code, m_headers, m_headers)
         channel.reject(delivery_info.delivery_tag, true)
       else
-        resource_error_broadcast("unknown_error", hbx_enrollment_id, r_code, resource_or_body, m_headers)
+        resource_error_broadcast("unknown_error", r_code, resource_or_body, m_headers)
         channel.ack(delivery_info.delivery_tag, false)
       end
     end

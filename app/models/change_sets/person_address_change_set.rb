@@ -8,7 +8,7 @@ module ChangeSets
       @address_kind = addy_kind
     end
 
-    def perform_update(person, person_update, policies_to_notify)
+    def perform_update(person, person_update, policies_to_notify, transmit = true)
       new_address = person_update.addresses.detect { |au| au.address_type == address_kind }
       update_result = false
       if new_address.nil?

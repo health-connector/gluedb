@@ -1,6 +1,6 @@
 module ChangeSets
   class PersonNameChangeSet
-    def perform_update(person, person_resource, policies_to_notify)
+    def perform_update(person, person_resource, policies_to_notify, transmit = true)
       old_values_hash = old_name_values(person_resource.hbx_member_id, person, person_resource)
       old_id_hash = old_name_hash(person_resource.hbx_member_id, person, person_resource)
       update_value = person.update_attributes(name_update_hash(person_resource))

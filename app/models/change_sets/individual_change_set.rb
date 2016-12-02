@@ -57,22 +57,22 @@ module ChangeSets
         @home_address_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif mailing_address_changed?
         @mailing_address_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif home_email_changed?
-        @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif work_email_changed?
-        @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif names_changed?
         process_name_change
       elsif ssn_changed?
         process_ssn_change
       elsif gender_changed?
         process_gender_change
-      elsif home_phone_changed?
-        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+      elsif work_email_changed?
+        @work_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif work_phone_changed?
-        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif mobile_phone_changed?
-        @mobile_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+        @mobile_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
+      elsif home_phone_changed?
+        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
+      elsif home_email_changed?
+        @home_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       end
     end
 
@@ -116,6 +116,20 @@ module ChangeSets
         work_phone_changed?,
         mobile_phone_changed?,
         dob_changed?
+      ]
+    end
+
+    def multiple_contact_changes?
+      contact_change_collection.size > 1
+    end
+
+    def contact_change_collection
+      [
+        home_email_changed?,
+        work_email_changed?,
+        home_phone_changed?,
+        work_phone_changed?,
+        mobile_phone_changed?
       ]
     end
 

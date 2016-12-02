@@ -1,6 +1,6 @@
 module ChangeSets
   class PersonSsnChangeSet
-    def perform_update(member, person_resource, policies_to_notify)
+    def perform_update(member, person_resource, policies_to_notify, transmit = true)
       old_values_hash = old_name_values(person_resource.hbx_member_id, member, person_resource)
       update_value = member.update_attributes(name_update_hash(person_resource))
       return false unless update_value

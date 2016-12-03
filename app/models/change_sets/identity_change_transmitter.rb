@@ -24,7 +24,6 @@ module ChangeSets
            :event_type => event_kind,
            :transaction_id => transaction_id
          })
-       Rails.logger.error { "RENDER RESULT:\n#{render_result}" } 
        conn = AmqpConnectionProvider.start_connection
        transmitter = ::Services::EnrollmentEventTransmitter.new
        transmitter.call(conn, render_result)

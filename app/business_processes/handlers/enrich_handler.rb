@@ -46,12 +46,25 @@ module Handlers
         context.errors.add(:process, last_event)
         return []
       end
+      if invalid_ivl_plan_year?(enrollment_event_cv, policy_cv)
+        context.errors.add(:process, "This enrollment has a set of coverage dates which don't match the active year of the plan.")
+        context.errors.add(:process, last_event)
+        return []
+      end
       event_list
     end
 
     def already_exists?(policy_cv)
       enrollment_group_id = extract_enrollment_group_id(policy_cv)
       Policy.where(:eg_id => enrollment_group_id).any?
+    end
+
+    def invalid_ivl_plan_year?(enrollment_event_cv, policy_cv)
+      return false unless is_ivl_renewal?(enrollment_event_cv)
+      subscriber_enrollee = extract_subscriber(policy_cv)
+      subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      plan = extract_plan(policy_cv)
+      subscriber_start.year != plan.year
     end
 
     def bogus_renewal?(enrollment_event_cv, policy_cv)

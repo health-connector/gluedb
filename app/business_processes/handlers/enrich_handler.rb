@@ -110,6 +110,7 @@ module Handlers
       return false if pol.is_shop?
       return false unless (pol.plan.year == plan.year - 1)
       return false unless (pol.plan.carrier_id == plan.carrier_id)
+      return false unless (plan.coverage_type == pol.plan.coverage_type)
       return false if pol.canceled?
       return false if pol.terminated?
       true

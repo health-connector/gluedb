@@ -117,7 +117,7 @@ module Handlers
     end
 
     def is_ivl_renewal?(enrollment_event_cv)
-      is_ivl_passive_renewal?(enrollment_event_cv) || ivl_ivl_active_renewal?(enrollment_event_cv)
+      is_ivl_passive_renewal?(enrollment_event_cv) || is_ivl_active_renewal?(enrollment_event_cv)
     end
 
     def ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)

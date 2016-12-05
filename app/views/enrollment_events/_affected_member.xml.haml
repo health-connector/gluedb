@@ -1,0 +1,33 @@
+%affected_member
+  - enrollee = affected_member.enrollee
+  - person = enrollee.person
+  %member
+    %id
+      %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{person.authority_member.hbx_member_id}"
+    %person
+      %id
+        %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{person.authority_member_id}"
+      %person_name
+        %person_surname= affected_member.old_name_last
+        %person_given_name= affected_member.old_name_first
+        - if !affected_member.old_name_middle.blank?
+          %person_middle_name= affected_member.old_name_middle
+        - if !affected_member.old_name_pfx.blank?
+          %person_name_prefix_text= affected_member.old_name_pfx
+        - if !affected_member.old_name_sfx.blank?
+          %person_name_suffix_text= affected_member.old_name_sfx
+    %person_demographics
+      - if !affected_member.old_ssn.blank?
+        %ssn= affected_member.old_ssn
+      %sex= "urn:openhbx:terms:v1:gender##{affected_member.old_gender}"
+      %birth_date= simple_date_for(affected_member.old_dob)
+  %is_subscriber= enrollee.subscriber?
+  %benefit
+    %premium_amount= enrollee.pre_amt.round(2)
+    %begin_date= simple_date_for(enrollee.coverage_start)
+    - if !enrollee.coverage_end.blank?
+      %end_date= simple_date_for(enrollee.coverage_end)
+    - if enrollee.cp_id.present?
+      %carrier_assigned_policy_id= enrollee.cp_id
+    - if enrollee.c_id.present?
+      %carrier_assigned_enrollee_id= enrollee.c_id

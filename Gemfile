@@ -41,7 +41,7 @@ group :test do
   gem 'capybara'
   gem "capybara-webkit"
   gem 'factory_girl_rails'
-  gem 'database_cleaner', '1.3.0'
+  gem 'database_cleaner', '1.5.3'
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
   gem 'simplecov', :require => false, :group => :test

@@ -1,24 +1,21 @@
 module Handlers
   class ReduceHandler < Base
-
     def call(context)
       reduced_list = perform_reduction(context.event_list)
       reduced_list.map do |element|
-        super(duplicate_context(context, element))
+        new_context = duplicate_context(context, element)
+#        begin
+          super(duplicate_context(context, element))
+#        rescue
+          # Add error information to duplicated context
+#        end
       end
     end
 
     protected
 
     def duplicate_context(context, reduced_set)
-      new_context = OpenStruct.new
-      context.each_pair do |k, v|
-        if (k.to_s == "business_process_history")
-          context[k] = v.dup
-        elsif !(k.to_s == "event_list")
-          context[k] = v
-        end
-      end
+      new_context = context.clone
       new_context.event_list = reduced_set
       new_context
     end

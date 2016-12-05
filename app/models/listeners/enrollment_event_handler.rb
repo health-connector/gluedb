@@ -5,49 +5,45 @@ module Listeners
       "#{ec.hbx_id}.#{ec.environment}.q.glue.enrollment_event_handler"
     end
 
-    def resource_event_broadcast(level, event_key, r_code, body = "")
+    def resource_event_broadcast(level, event_key, r_code, body = "", other_headers = {})
         event_body = (body.respond_to?(:to_s) ? body.to_s : body.inspect)
-        submit_time = 
         broadcast_event({
           :routing_key => "#{level}.application.gluedb.enrollment_event_handler.#{event_key}",
-          :headers => {
+          :headers => other_headers.merge({
             :return_status => r_code.to_s,
             :submitted_timestamp => Time.now
-          }
+          })
         },event_body)
     end
 
-    def resource_error_broadcast(event_key, r_code, body = "")
-      resource_event_broadcast("error", event_key, r_code, body)
+    def resource_error_broadcast(event_key, r_code, body = "", other_headers)
+      resource_event_broadcast("error", event_key, r_code, body, other_headers)
     end
 
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
 
-      enrollment_cv = extract_enrollment_cv(body)
-      workflow_arguments = {
-        :amqp_connection => connection,
-        :raw_event_xml => body,
-        :enrollment_event_cv => enrollment_cv,
-        :processing_errors => HandleEnrollmentEvent::ProcessingErrors.new
-      }
+      workflow_arguments = BusinessProcesses::EnrollmentEventContext.new
+      event_message = BusinessProcesses::EnrollmentEventMessage.new
+      event_message.message_tag = delivery_info.delivery_tag
+      event_message.event_xml = body
+      workflow_arguments.amqp_connection = connection
+      workflow_arguments.event_list = [event_message]
 
-      result = HandleEnrollmentEvent::ProcessInitialEnrollment.call(workflow_arguments)
-      
-      if !result.success?
-        resource_error_broadcast("invalid_event", "522", {
-          :errors => result.processing_errors.errors.to_hash,
-          :event => body
-        }.to_json)
-        channel.ack(delivery_info.delivery_tag, false)
-      else
-        resource_event_broadcast("info", "event_processed", "200") 
-        channel.ack(delivery_info.delivery_tag, false)
+      results = EnrollmentEventClient.new.call(workflow_arguments)
+
+      results.flatten.each do |res|
+        if res.errors.has_errors?
+          resource_error_broadcast("invalid_event", "522", {
+            :errors => res.errors.errors.to_hash,
+            :event => res.event_xml
+          }.to_json, {:hbx_enrollment_id => res.hbx_enrollment_id})
+          channel.ack(delivery_info.delivery_tag, false)
+        else
+          resource_event_broadcast("info", "event_processed", "200", res.event_xml, {:hbx_enrollment_id => res.hbx_enrollment_id}) 
+          channel.ack(delivery_info.delivery_tag, false)
+        end
       end
-    end
-    
-    def extract_enrollment_cv(payload)
-      Openhbx::Cv2::EnrollmentEvent.parse(payload, single: true)
     end
 
     def self.run

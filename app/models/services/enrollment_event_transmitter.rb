@@ -1,23 +1,19 @@
 # Put an Enrollment Event CV onto the bus after transforming
-module Handlers
-  class TransmitEdiForEvent < Base
-    include EnrollmentEventXmlHelper
-    
-    def initialize(app)
-      @app = app
-    end
+module Services
+  class EnrollmentEventTransmitter
+    include Handlers::EnrollmentEventXmlHelper
 
-    # Context requires:
-    # - amqp_connection (A connection to an amqp service)
-    def call(context)
-      action_xml = context.event_message.event_xml
+    def call(amqp_connection, action_xml)
       enrollment_event_cv = enrollment_event_cv_for(action_xml)
       if is_publishable?(enrollment_event_cv)
-        edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
-        x12_xml = edi_builder.call.to_xml
-        publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
+        begin
+          edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+          x12_xml = edi_builder.call.to_xml
+          publish_to_bus(amqp_connection, enrollment_event_cv, x12_xml)
+        rescue Exception => e
+          raise BusinessProcesses::TransformationError.new(action_xml, e.message)
+        end
       end
-      @app.call(context)
     end
 
     def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)

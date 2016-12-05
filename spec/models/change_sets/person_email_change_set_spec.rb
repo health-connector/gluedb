@@ -7,23 +7,33 @@ describe ChangeSets::PersonEmailChangeSet do
     let(:person) { instance_double("::Person", :save => address_update_result) }
     let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => [], :hbx_member_id => hbx_member_id) }
     let(:policies_to_notify) { [policy_to_notify] }
-    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids) }
+    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids, :is_shop? => true, :enrollees => nil) }
     let(:hbx_member_ids) { [hbx_member_id, hbx_member_id_2] }
     let(:policy_hbx_id) { "some randome_policy id whatevers" }
     let(:hbx_member_id) { "some random member id wahtever" }
     let(:hbx_member_id_2) { "some other, differently random member id wahtever" }
     let(:policy_cv) { "some policy cv data" }
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
-    let(:cv_publisher) { instance_double("::Services::CvPublisher") }
+    let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
     let(:email_kind) { "home" }
+    let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+    let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
     subject { ChangeSets::PersonEmailChangeSet.new(email_kind) }
 
     before :each do
+      allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+        { :policy => policy_to_notify, :member_id => hbx_member_id }
+      ).and_return(affected_member)
+      allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+        affected_member,
+        policy_to_notify,
+        "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
+      ).and_return(identity_change_transmitter)
       allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
         policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
       ).and_return(policy_serializer)
       allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
-      allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+      allow(::Services::NfpPublisher).to receive(:new).and_return(cv_publisher)
     end
 
     it "should update the person" do
@@ -45,14 +55,14 @@ describe ChangeSets::PersonEmailChangeSet do
     let(:person_resource) { instance_double("::RemoteResources::IndividualResource", :emails => [updated_email_resource], :hbx_member_id => hbx_member_id) }
     let(:updated_email_resource) { double(:to_hash => {:email_type => email_kind}, :email_type => email_kind) }
     let(:policies_to_notify) { [policy_to_notify] }
-    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids) }
+    let(:policy_to_notify) { instance_double("Policy", :eg_id => policy_hbx_id, :active_member_ids => hbx_member_ids, :is_shop? => true) }
     let(:hbx_member_ids) { [hbx_member_id, hbx_member_id_2] }
     let(:policy_hbx_id) { "some randome_policy id whatevers" }
     let(:hbx_member_id) { "some random member id wahtever" }
     let(:hbx_member_id_2) { "some other, differently random member id wahtever" }
     let(:policy_cv) { "some policy cv data" }
     let(:policy_serializer) { instance_double("::CanonicalVocabulary::MaintenanceSerializer") }
-    let(:cv_publisher) { instance_double("::Services::CvPublisher") }
+    let(:cv_publisher) { instance_double(::Services::NfpPublisher) }
     let(:email_kind) { "home" }
     let(:new_email) { double }
     subject { ChangeSets::PersonEmailChangeSet.new(email_kind) }
@@ -74,13 +84,23 @@ describe ChangeSets::PersonEmailChangeSet do
 
       describe "with a valid new email" do
         let(:address_update_result) { true }
+        let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+        let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
 
         before :each do
+          allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+            { :policy => policy_to_notify, :member_id => hbx_member_id }
+          ).and_return(affected_member)
+          allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+            affected_member,
+            policy_to_notify,
+            "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
+          ).and_return(identity_change_transmitter)
           allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
             policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
           ).and_return(policy_serializer)
           allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
-          allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+          allow(::Services::NfpPublisher).to receive(:new).and_return(cv_publisher)
         end
 
         it "should update the person" do
@@ -97,6 +117,8 @@ describe ChangeSets::PersonEmailChangeSet do
 
     describe "updating a work email" do
       let(:email_kind) { "work" }
+      let(:identity_change_transmitter) { instance_double(::ChangeSets::IdentityChangeTransmitter, :publish => nil) }
+      let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember) }
 
       describe "with an invalid new email" do
         let(:address_update_result) { false }
@@ -109,11 +131,19 @@ describe ChangeSets::PersonEmailChangeSet do
         let(:address_update_result) { true }
 
         before :each do
+          allow(::BusinessProcesses::AffectedMember).to receive(:new).with(
+            { :policy => policy_to_notify, :member_id => hbx_member_id }
+          ).and_return(affected_member)
+          allow(::ChangeSets::IdentityChangeTransmitter).to receive(:new).with(
+            affected_member,
+            policy_to_notify,
+            "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
+          ).and_return(identity_change_transmitter)
           allow(::CanonicalVocabulary::MaintenanceSerializer).to receive(:new).with(
             policy_to_notify, "change", "personnel_data", [hbx_member_id], hbx_member_ids
           ).and_return(policy_serializer)
           allow(policy_serializer).to receive(:serialize).and_return(policy_cv)
-          allow(::Services::CvPublisher).to receive(:new).and_return(cv_publisher)
+          allow(::Services::NfpPublisher).to receive(:new).and_return(cv_publisher)
         end
 
         it "should update the person" do

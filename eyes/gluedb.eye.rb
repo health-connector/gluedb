@@ -55,7 +55,7 @@ end
 
 Eye.application 'eye_gluedb' do
   notify :tevans, :info
-  notify :dthomas, :info
+#  notify :dthomas, :info
 
   define_forked_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY)
   define_forked_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY)
@@ -63,8 +63,9 @@ Eye.application 'eye_gluedb' do
   define_multi_worker("employer_updated_listener", "script/amqp/employer_updated_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 2)
   define_multi_worker("enrollment_event_listener", "script/amqp/enrollment_event_listener.rb", BUS_DIRECTORY, 2)
-  define_multi_worker("enrollment_event_handler", "script/amqp/enrollment_event_handler.rb", BUS_DIRECTORY, 2)
-#  define_multi_worker("individual_event_listener", "script/amqp/individual_event_listener.rb", BUS_DIRECTORY, 1)
+  define_multi_worker("enrollment_event_handler", "script/amqp/enrollment_event_handler.rb", BUS_DIRECTORY, 1)
+  define_multi_worker("enroll_query_result_handler", "script/amqp/enroll_query_result_handler.rb", BUS_DIRECTORY, 1)
+  define_multi_worker("individual_event_listener", "script/amqp/individual_event_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("policy_id_list_listener", "script/amqp/policy_id_list_listener.rb", BUS_DIRECTORY, 1)
 
   process("unicorn") do

@@ -84,16 +84,15 @@ module Amqp
           $stderr.puts "=== Processing Failure ==="
           fail_with(e)
           begin
-            existing_retry_count = properties.headers["x-redelivery-count"].to_i
+            p_headers = properties.headers || {}
+            existing_retry_count = p_headers["x-redelivery-count"].to_i
             if existing_retry_count > 5
               $stderr.puts "=== Redelivery Attempts Exceeded ==="
               $stderr.puts properties.to_hash.inspect
               $stderr.puts payload
               publish_processing_failed(delivery_info, properties, payload, e)
             else
-              new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
-              queue.publish(payload, new_properties)
-              channel.acknowledge(delivery_info.delivery_tag, false)
+              redeliver(channel, existing_retry_count, delivery_info, properties, payload)
             end
           rescue => e
             $stderr.puts "=== Redelivery Failure ==="
@@ -103,6 +102,12 @@ module Amqp
         end
         stop_if_needed
       end
+    end
+
+    def redeliver(a_channel, existing_retry_count, delivery_info, properties, payload)
+      new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
+      queue.publish(payload, new_properties)
+      a_channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
     def error_properties(error_routing_key, delivery_info, properties, exception = nil)

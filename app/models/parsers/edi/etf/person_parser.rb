@@ -27,6 +27,8 @@ module Parsers
         def interpret_contact_info(con_kind, con_val)
           if con_kind == "TE"
             @phone = con_val
+          elsif con_kind == "HP"
+            @phone = con_val
           elsif con_kind == "EM"
             @email = con_val
           end

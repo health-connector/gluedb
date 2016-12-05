@@ -9,7 +9,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:enrollment_event_cv) { instance_double(Openhbx::Cv2::EnrollmentEvent, event: enrollment_event_event) }
   let(:enrollment_event_event) { instance_double(Openhbx::Cv2::EnrollmentEventEvent, body: enrollment_event_body, event_name: event_type) }
   let(:enrollment_event_body) { instance_double(Openhbx::Cv2::EnrollmentEventBody, enrollment: enrollment, transaction_id: transaction_id, publishable?: publish_event_to_trading_partners) }
-  let(:enrollment) { instance_double(Openhbx::Cv2::Enrollment, policy: policy_cv) }
+  let(:enrollment) { instance_double(Openhbx::Cv2::Enrollment, policy: policy_cv, enrollment_type: event_type) }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => enrollment_element) }
   let(:shop_enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollmentShopMarket) }
   let(:individual_enrollment_element) { instance_double(Openhbx::Cv2::PolicyEnrollmentIndividualMarket) }
@@ -24,6 +24,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:plan) { instance_double(Plan, carrier: carrier) }
   let(:carrier) { instance_double(Carrier, abbrev: "GhmSi") }
   let(:publish_event_to_trading_partners) { true }
+  let(:event_message) { instance_double(BusinessProcesses::EnrollmentEventMessage, :event_xml => raw_event_xml) }
 
   let(:app) do
     Proc.new do |context|
@@ -34,9 +35,8 @@ describe Handlers::TransmitEdiForEvent do
   let(:amqp_connection) { double }
 
   let(:interaction_context) {
-    OpenStruct.new({
-      :enrollment_event_cv => enrollment_event_cv,
-      :raw_event_xml => raw_event_xml,
+    instance_double(BusinessProcesses::EnrollmentEventContext, {
+      :event_message => event_message,
       :amqp_connection => amqp_connection
     })
   }
@@ -44,6 +44,7 @@ describe Handlers::TransmitEdiForEvent do
   let(:handler) {  Handlers::TransmitEdiForEvent.new(app) }
 
   before :each do
+    allow(Openhbx::Cv2::EnrollmentEvent).to receive(:parse).with(raw_event_xml, :single => true).and_return(enrollment_event_cv)
     allow(EdiCodec::X12::BenefitEnrollment).to receive(:new).with(raw_event_xml).and_return(transform_slug)
     allow(::Amqp::ConfirmedPublisher).to receive(:with_confirmed_channel).with(amqp_connection).and_yield(channel_slug)
     allow(Plan).to receive(:where).with(:hios_plan_id => hios_id, :year => 2016).and_return([plan])

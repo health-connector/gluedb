@@ -57,22 +57,22 @@ module ChangeSets
         @home_address_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif mailing_address_changed?
         @mailing_address_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif home_email_changed?
-        @home_email_changer.perform_update(record, resource, determine_policies_to_transmit)
-      elsif work_email_changed?
-        @work_email_changer.perform_update(record, resource, determine_policies_to_transmit)
       elsif names_changed?
         process_name_change
       elsif ssn_changed?
         process_ssn_change
       elsif gender_changed?
         process_gender_change
-      elsif home_phone_changed?
-        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+      elsif work_email_changed?
+        @work_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif work_phone_changed?
-        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+        @work_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif mobile_phone_changed?
-        @mobile_phone_changer.perform_update(record, resource, determine_policies_to_transmit)
+        @mobile_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
+      elsif home_phone_changed?
+        @home_phone_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
+      elsif home_email_changed?
+        @home_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       end
     end
 
@@ -119,6 +119,20 @@ module ChangeSets
       ]
     end
 
+    def multiple_contact_changes?
+      (contact_change_collection.count { |a| a }) > 1
+    end
+
+    def contact_change_collection
+      [
+        home_email_changed?,
+        work_email_changed?,
+        home_phone_changed?,
+        work_phone_changed?,
+        mobile_phone_changed?
+      ]
+    end
+
     def dob_changed?
       resource.dob != member.dob
     end
@@ -152,8 +166,8 @@ module ChangeSets
     end
 
     def names_changed?
-      (resource.name_first != record.name_first) ||
-        (resource.name_last != record.name_last) ||
+      name_values_changed?(record.name_first, resource.name_first) ||
+        name_values_changed?(record.name_last, resource.name_last) ||
         name_values_changed?(record.name_middle, resource.name_middle) ||
         name_values_changed?(record.name_sfx, resource.name_sfx) ||
         name_values_changed?(record.name_pfx, resource.name_pfx)
@@ -161,7 +175,9 @@ module ChangeSets
 
     def name_values_changed?(record_value, resource_value)
       return false if (record_value.blank? && resource_value.blank?)
-      !(record_value == resource_value)
+      return true if record_value.blank?
+      return true if resource_value.blank?
+      !(record_value.strip.downcase == resource_value.strip.downcase)
     end
 
     def ssn_changed?

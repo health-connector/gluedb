@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:dchbx/edi_codec.git
-  revision: 6231d8337d1bb2f5ac884d9d5ade92d3bac7e5e6
+  revision: 813e3c3b87ace75f4ab95dbec2a9769d217e7a27
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/dchbx/openhbx_cv2.git
-  revision: 89ab4cd86898797245c096a3348296e529e9492d
+  revision: f3624dda50b6235b7a2b64c9e2ce192c20fd8ed4
   specs:
     openhbx_cv2 (0.0.1)
       activesupport (>= 3.2)
@@ -118,7 +118,7 @@ GEM
     coffee-script-source (1.9.1.1)
     colored (1.2)
     commonjs (0.2.7)
-    database_cleaner (1.3.0)
+    database_cleaner (1.5.3)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     designmodo-flatuipro-rails (1.3.0.0.branch)
@@ -387,7 +387,7 @@ DEPENDENCIES
   carrierwave-mongoid (= 0.7.1)
   ci_reporter (= 2.0.0)
   coffee-rails (~> 3.2.1)
-  database_cleaner (= 1.3.0)
+  database_cleaner (= 1.5.3)
   designmodo-flatuipro-rails (~> 1.3.0.0.branch)
   devise (= 3.3.0)
   edi_codec!

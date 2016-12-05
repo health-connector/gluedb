@@ -8,7 +8,7 @@ module ChangeSets
       @address_kind = addy_kind
     end
 
-    def perform_update(person, person_update, policies_to_notify)
+    def perform_update(person, person_update, policies_to_notify, transmit = true)
       new_address = person_update.emails.detect { |au| au.email_type == address_kind }
       update_result = false
       if new_address.nil?
@@ -20,7 +20,9 @@ module ChangeSets
       end
       return false unless update_result
       return true if (@address_kind == "work")
-      notify_policies("change", "personnel_data", person_update.hbx_member_id, policies_to_notify)
+      if transmit
+        notify_policies("change", "personnel_data", person_update.hbx_member_id, policies_to_notify, "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers")
+      end
       true
     end
 

@@ -63,7 +63,7 @@
       - employer = policy.employer
       %employer_link
         %id
-          %id= "urn:openhbx:terms:v1:employer:fein##{employer.fein}"
+          %id= "urn:openhbx:terms:v1:employer:id##{employer.hbx_id}"
         %name= employer.name
         - if !employer.dba.blank?
           %dba= employer.dba

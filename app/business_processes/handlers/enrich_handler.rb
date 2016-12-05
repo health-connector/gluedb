@@ -2,6 +2,8 @@ module Handlers
   class EnrichHandler < Base
     include EnrollmentEventXmlHelper
 
+    XML_NS = { "cv" => "http://openhbx.org/api/terms/1.0" }
+
     def call(context)
       event_list = merge_or_split(context, context.event_list)
       if !context.errors.has_errors?
@@ -51,7 +53,9 @@ module Handlers
         context.errors.add(:process, last_event)
         return []
       end
-      event_list
+      event_list.map do |ev|
+        rewrite_active_renewal_to_carrier_switch(ev)
+      end
     end
 
     def already_exists?(policy_cv)
@@ -67,14 +71,19 @@ module Handlers
       subscriber_start.year != plan.year
     end
 
-    def bogus_renewal?(enrollment_event_cv, policy_cv)
-      return false unless is_ivl_passive_renewal?(enrollment_event_cv)
+    def extract_policy_details(policy_cv)
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
       plan = extract_plan(policy_cv)
       coverage_type = plan.coverage_type
       subscriber_person = Person.find_by_member_id(subscriber_id)
+      [plan, subscriber_person, subscriber_id, subscriber_start]
+    end
+
+    def bogus_renewal?(enrollment_event_cv, policy_cv)
+      return false unless is_ivl_passive_renewal?(enrollment_event_cv)
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
       return false if subscriber_person.nil?
       !subscriber_person.policies.any? do |pol|
         ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
@@ -82,12 +91,7 @@ module Handlers
     end
 
     def competing_coverage(policy_cv)
-      subscriber_enrollee = extract_subscriber(policy_cv)
-      subscriber_id = extract_member_id(subscriber_enrollee)
-      subscriber_start = extract_enrollee_start(subscriber_enrollee)
-      plan = extract_plan(policy_cv)
-      coverage_type = plan.coverage_type
-      subscriber_person = Person.find_by_member_id(subscriber_id)
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
       return [] if subscriber_person.nil?
       subscriber_person.policies.select do |pol|
         overlapping_policy?(pol, plan, subscriber_id, subscriber_start)
@@ -135,6 +139,35 @@ module Handlers
       return false unless pol.employer_id.blank?
       return true if pol.subscriber.coverage_end.blank?
       !(pol.subscriber.coverage_end < subscriber_start)
+    end
+
+    def rewrite_active_renewal_to_carrier_switch(event_item)
+      event_xml = event_item.event_xml
+      enrollment_event_cv = enrollment_event_cv_for(event_xml)
+      policy_cv = extract_policy(enrollment_event_cv)
+      if is_ivl_active_renewal?(enrollment_event_cv)
+        plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
+        if subscriber_person
+          has_renewal = subscriber_person.policies.any? do |pol|
+            ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
+          end
+          if !has_renewal
+            event_item.event_xml = transform_action_to(event_xml, "urn:openhbx:terms:v1:enrollment#initial")
+          end
+        end
+      end
+      event_item
+    end
+
+    def transform_action_to(event_xml, action_uri)
+      event_doc = Nokogiri::XML(event_xml)
+      found_action = false
+      event_doc.xpath("//cv:enrollment_event_body/cv:enrollment/cv:type", XML_NS).each do |node|
+        found_action = true
+        node.content = action_uri
+      end
+      raise "Could not find enrollment action to correct it" unless found_action
+      event_doc.to_xml(:indent => 2)
     end
   end
 end

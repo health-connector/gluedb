@@ -68,7 +68,7 @@ module Handlers
     end
 
     def bogus_renewal?(enrollment_event_cv, policy_cv)
-      return false unless is_ivl_renewal?(enrollment_event_cv)
+      return false unless is_ivl_passive_renewal?(enrollment_event_cv)
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
@@ -98,12 +98,22 @@ module Handlers
       Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.value
     end
 
-    def is_ivl_renewal?(enrollment_event_cv)
+    def is_ivl_active_renewal?(enrollment_event_cv)
+      return false if (determine_market(enrollment_event_cv) == "shop")
+      [
+        "urn:openhbx:terms:v1:enrollment#active_renew"
+      ].include?(extract_enrollment_action(enrollment_event_cv))
+    end
+
+    def is_ivl_passive_renewal?(enrollment_event_cv)
       return false if (determine_market(enrollment_event_cv) == "shop")
       [
         "urn:openhbx:terms:v1:enrollment#auto_renew",
-        "urn:openhbx:terms:v1:enrollment#active_renew"
       ].include?(extract_enrollment_action(enrollment_event_cv))
+    end
+
+    def is_ivl_renewal?(enrollment_event_cv)
+      is_ivl_passive_renewal?(enrollment_event_cv) || ivl_ivl_active_renewal?(enrollment_event_cv)
     end
 
     def ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)

@@ -38,7 +38,7 @@ module Handlers
         context.errors.add(:process, "We don't currently process shop")
         return []
       end
-      if competing_coverage(policy_cv).any?
+      if competing_coverage(enrollment_event_cv, policy_cv).any?
         context.errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
         context.errors.add(:process, last_event)
         return []
@@ -90,7 +90,8 @@ module Handlers
       end
     end
 
-    def competing_coverage(policy_cv)
+    def competing_coverage(enrollment_event_cv, policy_cv)
+      return [] if is_ivl_active_renewal?(enrollment_event_cv)
       plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
       return [] if subscriber_person.nil?
       subscriber_person.policies.select do |pol|

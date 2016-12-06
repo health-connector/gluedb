@@ -5,7 +5,11 @@ timey = Time.now
 puts "Report started at #{timey}"
 
 policies = Policy.no_timeout.where(
-  {"eg_id" => {"$not" => /DC0.{32}/}}
+  {"eg_id" => {"$not" => /DC0.{32}/},
+  :enrollees => {"$elemMatch" => {
+    :rel_code => "self", 
+    :coverage_start => {"$gt" => Date.new(2014,12,31)}
+    }}}
 )
 
 def bad_eg_id(eg_id)

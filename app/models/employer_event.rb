@@ -2,10 +2,10 @@ class EmployerEvent
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :event_time, Time
-  field :event_name, String
-  field :resource_body, String
-  field :employer_id, String
+  field :event_time, type: Time
+  field :event_name, type: String
+  field :resource_body, type: String
+  field :employer_id, type: String
 
   index({event_time: 1, event_name: 1, employer_id: 1})
 

@@ -84,7 +84,7 @@ Eye.application 'eye_gluedb' do
 
   define_forked_worker("enrollment_creator", "script/amqp/enrollment_creator.rb", BUS_DIRECTORY)
   define_forked_worker("person_matcher", "script/amqp/person_matcher.rb", BUS_DIRECTORY)
-  define_forked_worker("employer_workers", "script/amqp/employer_workers.rb", BUS_DIRECTORY)
+  define_named_forker("employer_workers", "script/amqp/employer_workers.rb", BUS_DIRECTORY)
   define_multi_worker("broker_updated_listener", "script/amqp/broker_updated_listener.rb", BUS_DIRECTORY, 1)
 #  define_multi_worker("employer_updated_listener", "script/amqp/employer_updated_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 2)

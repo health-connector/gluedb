@@ -18,8 +18,8 @@ module Handlers
           x12_xml = edi_builder.call.to_xml
           publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
         rescue Exception => e
-          context.errors.add(:event_xml, action_xml)
           context.errors.add(:event_xml, e.message)
+          context.errors.add(:event_xml, action_xml)
           return context
         end
       end

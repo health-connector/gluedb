@@ -16,6 +16,31 @@ def start_command_for(worker_command)
   "bundle exec rails r -e production #{worker_command}"
 end
 
+def define_named_forker(worker_n, worker_path, directory)
+    worker_name = worker_n
+    process(worker_name) do
+      start_command start_command_for(worker_path)
+      stop_on_delete true
+      stop_signals [:TERM, 10.seconds, :KILL]
+      start_timeout 15.seconds
+      pid_file File.join(PID_DIRECTORY, "#{worker_name}.pid")
+      daemonize true
+      working_dir directory
+      stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")
+      monitor_children do
+        start_grace 3.seconds
+        trigger :transition, from: :starting, to: :up, do: Proc.new {
+          process.instance_eval do
+            @name = `ps -p #{pid} -o cmd=`.strip
+          end
+        }
+        stop_command "kill -QUIT {PID}"
+        check :cpu, :every => 30, :below => 80, :times => 3
+        check :memory, :every => 30, :below => 500.megabytes, :times => [4,7]
+      end
+    end
+end
+
 def define_forked_worker(worker_n, worker_path, directory)
     worker_name = worker_n
     process(worker_name) do

@@ -12,6 +12,12 @@ Eye.config do
   contact :dthomas, :mail, 'dan.thomas@dc.gov'
 end
 
+class Eye::ChildProcess
+  def name
+    `ps -p #{pid} -o cmd=`.strip
+  end
+end
+
 def start_command_for(worker_command)
   "bundle exec rails r -e production #{worker_command}"
 end

@@ -1,6 +1,6 @@
 require "multi_forkr"
 
-MultiForkr.run({
+MultiForkr.new({
 Listeners::EmployerEventReducerListener => 1,
 Listeners::EmployerUpdatedListener => 1
-})
+}).run

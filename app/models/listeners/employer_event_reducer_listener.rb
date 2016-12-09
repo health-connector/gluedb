@@ -50,7 +50,7 @@ module Listeners
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       employer_id = m_headers["employer_id"].to_s
-      event_name = delivery_info.routing_key
+      event_name = m_headers["event_name"].to_s
       event_time = get_timestamp(properties)
       if EmployerEvent.newest_event?(employer_id, event_name, event_time)
         r_code, resource_or_body = request_resource(employer_id)

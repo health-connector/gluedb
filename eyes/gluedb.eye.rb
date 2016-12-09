@@ -28,7 +28,7 @@ def define_named_forker(worker_n, worker_path, directory)
       working_dir directory
       stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")
       monitor_children do
-        start_grace 3.seconds
+#        start_grace 3.seconds
         trigger :transition, from: :starting, to: :up, do: Proc.new {
           process.instance_eval do
             @name = `ps -p #{pid} -o cmd=`.strip

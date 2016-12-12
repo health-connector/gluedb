@@ -103,7 +103,8 @@ CSV.open("currently_active_shop_policies_#{Time.now}.csv", "w") do |csv|
 	csv << ["Enrollment Group ID", "AASM State", "Employer Name", "Employer FEIN", 
 			"Subscriber HBX ID","Subscriber First Name", "Subscriber Last Name",
 			"Plan Name", "Plan HIOS ID", "Coverage Type",
-			"Start Date", "End Date"]
+			"Start Date", "End Date",
+			"Premium Total", "Employer Contribution","Employee Contribution"]
 	correct_policies.each do |policy|
 		eg_id = policy.eg_id
 		aasm = policy.aasm_state
@@ -120,9 +121,13 @@ CSV.open("currently_active_shop_policies_#{Time.now}.csv", "w") do |csv|
 		coverage_type = plan.coverage_type
 		start_date = policy.policy_start
 		end_date = policy.policy_end
+		premium_total = policy.pre_amt_tot
+		employer_contrib = policy.tot_emp_res_amt
+		employee_contrib = policy.tot_res_amt
 		csv << [eg_id, aasm, employer_name,employer_fein,
 				subscriber_hbx_id,first_name,last_name,
 				plan_name,hios_id,coverage_type,
-				start_date,end_date]
+				start_date,end_date,
+				premium_total,employer_contrib,employee_contrib]
 	end
 end

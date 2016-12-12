@@ -5,7 +5,7 @@ timestamp = Time.now.strftime('%Y%m%d%H%M')
 
 CSV.open("renewal_plans_all_after_update_#{timestamp}.csv","w") do |csv|
 	csv << ["Plan Name", "Plan Year", "Plan HIOS ID", "Renewal Plan Name", "Renewal Plan Year", "Renewal Plan HIOS ID", "Plan ID", "Renewal Plan ID", "Plan Created", "Plan EHB"]
-	Plan.where(:year => {"$gte" => 2014}).to_a.each do |plan|
+	Plan.where(:year => {"$eq" => 2016}).to_a.each do |plan|
 		plan_name = plan.try(:name)
 		plan_year = plan.try(:year)
 		plan_hios = plan.try(:hios_plan_id)

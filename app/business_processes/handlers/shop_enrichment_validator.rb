@@ -35,7 +35,7 @@ module Handlers
         errors.add(:employer, l_event)
         return false
       end
-      if competing_coverage(enrollment_event_cv, policy_cv).any?
+      if competing_coverage(enrollment_event_cv, policy_cv, plan_year, employer).any?
         errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
         errors.add(:process, last_event)
         return false

@@ -50,6 +50,7 @@ module Handlers
     def shop_renewal_candidates
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_person = Person.find_by_member_id(subscriber_id)
       return [] if subscriber_person.nil?
       subscriber_end = extract_enrollee_end(subscriber_enrollee)
@@ -65,6 +66,7 @@ module Handlers
     def competing_coverage(enrollment_event_cv, policy_cv, plan_year, employer)
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_person = Person.find_by_member_id(subscriber_id)
       return [] if subscriber_person.nil?
       subscriber_end = extract_enrollee_end(subscriber_enrollee)

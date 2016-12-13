@@ -10,6 +10,9 @@ class TransformSimpleEdiFileSet
     action_xml = File.read(file_path)
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
+      if determine_market(enrollment_event_cv) == "shop"
+        action_xml = rewrite_shop_ids(action_xml)
+      end
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
       x12_xml = edi_builder.call.to_xml
       publish_to_file(enrollment_event_cv, x12_xml)
@@ -21,6 +24,24 @@ class TransformSimpleEdiFileSet
     File.open(File.join(@out_path, file_name), 'w') do |f|
       f.write(x12_payload)
     end
+  end
+
+  def rewrite_shop_ids(event_xml)
+    enrollment_event_cv = enrollment_event_cv_for(event_xml)
+    policy_cv = extract_policy(enrollment_event_cv)
+    transform_fein_to_hbx_id(event_xml, policy_cv)
+  end
+
+  def transform_fein_to_hbx_id(event_xml, policy_cv)
+    employer = find_employer(policy_cv)
+    event_doc = Nokogiri::XML(event_xml)
+    found_action = false
+    event_doc.xpath("//cv:employer_link/cv:id/cv:id", XML_NS).each do |node|
+      found_action = true
+      node.content = employer.hbx_id
+    end
+    raise "Could not find employer_link to correct it" unless found_action
+    event_doc.to_xml(:indent => 2)
   end
 
   def find_carrier_abbreviation(enrollment_event_cv)

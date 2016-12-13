@@ -37,6 +37,9 @@ module Handlers
       if determine_market(enrollment_event_cv) == "shop"
         validator = ShopEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?
+        event_list.map do |ev|
+          rewrite_shop_ids(ev)
+        end
       else
         validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?
@@ -44,6 +47,26 @@ module Handlers
           rewrite_active_renewal_to_carrier_switch(ev)
         end
       end
+    end
+
+    def rewrite_shop_ids(event_item)
+      event_xml = event_item.event_xml
+      enrollment_event_cv = enrollment_event_cv_for(event_xml)
+      policy_cv = extract_policy(enrollment_event_cv)
+      event_item.event_xml = transform_fein_to_hbx_id(event_xml, policy_cv)
+      event_item
+    end
+
+    def transform_fein_to_hbx_id(event_xml, policy_cv)
+      employer = find_employer(policy_cv)
+      event_doc = Nokogiri::XML(event_xml)
+      found_action = false
+      event_doc.xpath("//cv:employer_link/cv:id/cv:id", XML_NS).each do |node|
+        found_action = true
+        node.content = employer.hbx_id
+      end
+      raise "Could not find employer_link to correct it" unless found_action
+      event_doc.to_xml(:indent => 2)
     end
 
     def already_exists?(policy_cv)

@@ -14,6 +14,12 @@ module Handlers
       Date.strptime(val, "%Y%m%d")
     end
 
+    def extract_enrollee_end(enrollee)
+      val = Maybe.new(enrollee).benefit.end_date.strip.value
+      return nil if val.blank?
+      Date.strptime(val, "%Y%m%d")
+    end
+
     def extract_enrollment_group_id(policy_cv)
       Maybe.new(policy_cv).id.strip.split("#").last.value
     end
@@ -45,6 +51,29 @@ module Handlers
     def determine_market(enrollment_event_cv)
       shop_enrollment = Maybe.new(enrollment_event_cv).event.body.enrollment.policy.policy_enrollment.shop_market.value
       shop_enrollment.nil? ? "individual" : "shop"
+    end
+
+    def extract_employer_link(policy_cv)
+      shop_enrollment = Maybe.new(policy_cv).policy_enrollment.shop_market.value
+      Maybe.new(shop_enrollment).employer_link.value
+    end
+
+    def extract_shop_enrollment(policy_cv)
+      Maybe.new(policy_cv).policy_enrollment.shop_market.value
+    end
+
+    def find_employer_plan_year(policy_cv)
+      employer = find_employer(policy_cv)
+      subscriber_enrollee = extract_subscriber(policy_cv)
+      subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      employer.plan_year_of(subcriber_start)
+    end
+
+    def find_employer(policy_cv)
+      employer_link = extract_employer_link(policy_cv)
+      employer_fein = Maybe.new(employer_link).id.strip.split("#").last.value
+      return nil if employer_fein.blank?
+      Employer.where(fein: employer_fein).first
     end
   end
 end

@@ -22,7 +22,7 @@ class EmployerEvent
     })
     self.where(:employer_id => new_employer_id, :event_name => new_event_name, :_id => {"$ne" => new_event._id}).each do |old_record|
       yield old_record
-      old_record.destroy!
+      old_record.destroy
     end
   end
 

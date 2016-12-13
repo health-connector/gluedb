@@ -35,8 +35,8 @@ module Handlers
         return []
       end
       if determine_market(enrollment_event_cv) == "shop"
-        context.errors.add(:process, "We don't currently process shop")
-        return []
+        validator = ShopEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
+        return [] unless validator.valid?
       else
         validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?

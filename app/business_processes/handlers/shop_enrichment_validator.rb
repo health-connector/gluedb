@@ -52,6 +52,8 @@ module Handlers
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
       subscriber_id = extract_member_id(subscriber_enrollee)
       subscriber_person = Person.find_by_member_id(subscriber_id)
+      employer = find_employer(policy_cv)
+      plan_year = find_employer_plan_year(policy_cv)
       return [] if subscriber_person.nil?
       subscriber_end = extract_enrollee_end(subscriber_enrollee)
       if subscriber_end.blank?

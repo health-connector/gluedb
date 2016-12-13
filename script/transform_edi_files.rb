@@ -2,6 +2,8 @@
 class TransformSimpleEdiFileSet
   include Handlers::EnrollmentEventXmlHelper
 
+  XML_NS = { "cv" => "http://openhbx.org/api/terms/1.0" }
+
   def initialize(out_path)
     @out_path = out_path
   end
@@ -10,9 +12,10 @@ class TransformSimpleEdiFileSet
     action_xml = File.read(file_path)
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
-      if determine_market(enrollment_event_cv) == "shop"
+      if shop_market?(enrollment_event_cv)
         action_xml = rewrite_shop_ids(action_xml)
       end
+      puts action_xml
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
       x12_xml = edi_builder.call.to_xml
       publish_to_file(enrollment_event_cv, x12_xml)

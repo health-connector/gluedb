@@ -61,6 +61,7 @@ module Listeners
     end
 
     def self.run
+      Process.setproctitle("%s - %s" % [self.name , $$])
       conn = AmqpConnectionProvider.start_connection
       chan = conn.create_channel
       chan.prefetch(1)

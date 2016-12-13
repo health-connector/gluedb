@@ -66,7 +66,7 @@ module Handlers
       employer = find_employer(policy_cv)
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
-      employer.plan_year_of(subcriber_start)
+      employer.plan_year_of(subscriber_start)
     end
 
     def find_employer(policy_cv)

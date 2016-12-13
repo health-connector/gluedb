@@ -38,7 +38,7 @@ module Handlers
         validator = ShopEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?
         event_list.map do |ev|
-          rewrite_shop_ids(ev)
+          rewrite_shop_ids(ev, validator.should_be_renewal?)
         end
       else
         validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
@@ -49,15 +49,16 @@ module Handlers
       end
     end
 
-    def rewrite_shop_ids(event_item)
+    def rewrite_shop_ids(event_item, is_renewal)
       event_xml = event_item.event_xml
       enrollment_event_cv = enrollment_event_cv_for(event_xml)
       policy_cv = extract_policy(enrollment_event_cv)
-      event_item.event_xml = transform_fein_to_hbx_id(event_xml, policy_cv)
+      new_action = is_renewal ? "urn:openhbx:terms:v1:enrollment#change_product" : "urn:openhbx:terms:v1:enrollment#initial"
+      event_item.event_xml = transform_fein_to_hbx_id(event_xml, policy_cv, new_action)
       event_item
     end
 
-    def transform_fein_to_hbx_id(event_xml, policy_cv)
+    def transform_fein_to_hbx_id(event_xml, policy_cv, action)
       employer = find_employer(policy_cv)
       event_doc = Nokogiri::XML(event_xml)
       found_action = false
@@ -66,7 +67,7 @@ module Handlers
         node.content = employer.hbx_id
       end
       raise "Could not find employer_link to correct it" unless found_action
-      event_doc.to_xml(:indent => 2)
+      transform_action_to(event_doc.to_xml(:indent => 2), action)
     end
 
     def already_exists?(policy_cv)

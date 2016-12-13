@@ -43,7 +43,23 @@ module Handlers
       true
     end
 
-    def should_be_shop_plan_change?
+    def should_be_renewal?
+      shop_renewal_candidates.any?
+    end
+
+    def shop_renewal_candidates
+      subscriber_enrollee = extract_subscriber(policy_cv)
+      subscriber_start = extract_enrollee_start(subscriber_enrollee)
+      subscriber_person = Person.find_by_member_id(subscriber_id)
+      return [] if subscriber_person.nil?
+      subscriber_end = extract_enrollee_end(subscriber_enrollee)
+      if subscriber_end.blank?
+        subscriber_end = plan_year.end_date
+      end
+      plan = extract_plan(policy_cv)
+      subscriber_person.policies.select do |pol|
+        renewal_candidate?(pol, plan, employer, subscriber_id, subscriber_start)
+      end
     end
 
     def competing_coverage(enrollment_event_cv, policy_cv, plan_year, employer)
@@ -73,13 +89,25 @@ module Handlers
     end
 
     def overlapping_policy?(pol, plan, employer, subscriber_id, subscriber_start, subscriber_end)
+      return false if pol.employer_id.blank?
       return false if pol.canceled?
       return false if pol.subscriber.blank?
       return false if (pol.subscriber.m_id != subscriber_id)
       return false unless (plan.coverage_type == pol.plan.coverage_type)
-      return false if pol.employer_id.blank?
       return false unless (pol.employer_id == employer.id)
       pol.coverage_period.overlaps?(subscriber_start..subscriber_end)
+    end
+
+    def renewal_candidate?(pol, plan, employer, subscriber_id, subscriber_start, subscriber_end)
+      return false if pol.employer_id.blank?
+      return false if pol.canceled?
+      return false if pol.subscriber.blank?
+      return false if (pol.subscriber.m_id != subscriber_id)
+      return false unless (plan.coverage_type == pol.plan.coverage_type)
+      return false unless (plan.carrier_id == pol.plan.carrier_id)
+      return false unless (pol.employer_id == employer.id)
+      return false unless (plan.year == pol.plan.year + 1)
+      pol.coverage_period.end == subscriber_start - 1.day
     end
   end
 end

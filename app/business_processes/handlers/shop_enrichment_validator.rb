@@ -102,7 +102,7 @@ module Handlers
       pol.coverage_period.overlaps?(subscriber_start..subscriber_end)
     end
 
-    def renewal_candidate?(pol, plan, employer, subscriber_id, subscriber_start, subscriber_end)
+    def renewal_candidate?(pol, plan, employer, subscriber_id, subscriber_start)
       return false if pol.employer_id.blank?
       return false if pol.canceled?
       return false if pol.subscriber.blank?

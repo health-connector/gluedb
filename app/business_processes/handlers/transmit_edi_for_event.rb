@@ -15,7 +15,7 @@ module Handlers
         })
       end
       enrollees = term.policy.enrollees.select do |en|
-        term.member_ids.include?(m.m_id)
+        term.member_ids.include?(en.m_id)
       end
       render_result = ApplicationController.new.render_to_string(
         :layout => "enrollment_event",

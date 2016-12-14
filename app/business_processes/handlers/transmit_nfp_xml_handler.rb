@@ -2,7 +2,6 @@ module Handlers
   class TransmitNfpXmlHandler < Base
     def call(context)
       if context.terminations.any?
-        raise "SHOULD BE TRIGGERING SOMETHING HERE"
         context.terminations.each do |term|
           if term.policy.is_shop?
             serializer = ::CanonicalVocabulary::MaintenanceSerializer.new(

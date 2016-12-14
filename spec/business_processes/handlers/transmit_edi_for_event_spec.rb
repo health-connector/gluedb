@@ -37,7 +37,8 @@ describe Handlers::TransmitEdiForEvent do
   let(:interaction_context) {
     instance_double(BusinessProcesses::EnrollmentEventContext, {
       :event_message => event_message,
-      :amqp_connection => amqp_connection
+      :amqp_connection => amqp_connection,
+      :terminations => []
     })
   }
 

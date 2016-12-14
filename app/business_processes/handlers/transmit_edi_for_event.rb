@@ -58,7 +58,7 @@ module Handlers
           return context
         end
       end
-      @app.call(context)
+      super(context)
     end
 
     def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)

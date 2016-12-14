@@ -6,7 +6,7 @@ module Handlers
           term.execute!
         end
       end
-      @app.call(context)
+      super(context)
     end
   end
 end

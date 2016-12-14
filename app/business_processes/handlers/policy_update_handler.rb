@@ -3,7 +3,7 @@ module Handlers
     def call(context)
       if context.terminations.any?
         context.terminations.each do |term|
-          termination.execute!
+          term.execute!
         end
       end
       @app.call(context)

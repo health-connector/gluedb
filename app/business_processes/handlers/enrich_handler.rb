@@ -38,7 +38,7 @@ module Handlers
         validator = ShopEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?
         event_list.map do |ev|
-          rewrite_shop_ids(ev, validator.should_be_renewal?, validator.terminations)
+          rewrite_shop_ids(context, ev, validator.should_be_renewal?, validator.terminations)
         end
       else
         validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
@@ -49,12 +49,12 @@ module Handlers
       end
     end
 
-    def rewrite_shop_ids(event_item, is_renewal, terminations)
+    def rewrite_shop_ids(context, event_item, is_renewal, terminations)
       event_xml = event_item.event_xml
       enrollment_event_cv = enrollment_event_cv_for(event_xml)
       policy_cv = extract_policy(enrollment_event_cv)
       new_action = is_renewal ? "urn:openhbx:terms:v1:enrollment#change_product" : "urn:openhbx:terms:v1:enrollment#initial"
-      event_item.terminations = terminations
+      context.terminations = context.terminations + terminations
       event_item.event_xml = transform_action_to(event_xml, new_action)
       event_item
     end

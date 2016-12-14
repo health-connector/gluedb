@@ -14,25 +14,25 @@ module Handlers
       shop_enrollment = extract_shop_enrollment(policy_cv)
       if shop_enrollment.nil?
         errors.add(:employer, "Could not locate shop elements")
-        errors.add(:employer, l_event)
+        errors.add(:employer, last_event)
         return false
       end
       employer_link = extract_employer_link(policy_cv)
       if shop_enrollment.nil?
         errors.add(:employer, "Could not locate employer_link element")
-        errors.add(:employer, l_event)
+        errors.add(:employer, last_event)
         return false
       end
       employer = find_employer(policy_cv)
       if employer.nil?
         errors.add(:employer, "Could not locate employer \"#{employer_link.id}\"")
-        errors.add(:employer, l_event)
+        errors.add(:employer, last_event)
         return false
       end
       plan_year = find_employer_plan_year(policy_cv)
       if plan_year.nil?
         errors.add(:employer, "Could employer has no plan year for this period")
-        errors.add(:employer, l_event)
+        errors.add(:employer, last_event)
         return false
       end
       if competing_coverage(enrollment_event_cv, policy_cv, plan_year, employer).any?

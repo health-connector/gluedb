@@ -2,10 +2,11 @@ module Handlers
   class TransmitNfpXmlHandler < Base
     def call(context)
       if context.terminations.any?
+        raise "SHOULD BE TRIGGERING SOMETHING HERE"
         context.terminations.each do |term|
           if term.policy.is_shop?
             serializer = ::CanonicalVocabulary::MaintenanceSerializer.new(
-              term.policy, "terminate", "termination_of_benefits", term.affected_member_ids, term.policy.active_member_ids
+              term.policy, "terminate", "termination_of_benefits", term.affected_member_ids, term.member_ids
             )
             cv = serializer.serialize
             pubber = ::Services::NfpPublisher.new

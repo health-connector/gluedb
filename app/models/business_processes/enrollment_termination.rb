@@ -17,6 +17,7 @@ module BusinessProcesses
     end
 
     def execute!
+      t_policy = policy
       t_policy.aasm_state = "hbx_terminated"
       t_policy.enrollees.each do |en|
         unless en.coverage_ended?

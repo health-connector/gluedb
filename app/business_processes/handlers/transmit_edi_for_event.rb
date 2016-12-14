@@ -31,7 +31,7 @@ module Handlers
       enrollment_event_cv = enrollment_event_cv_for(render_result)
       if is_publishable?(enrollment_event_cv)
         begin
-          edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+          edi_builder = EdiCodec::X12::BenefitEnrollment.new(render_result)
           x12_xml = edi_builder.call.to_xml
           publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
         rescue Exception => e

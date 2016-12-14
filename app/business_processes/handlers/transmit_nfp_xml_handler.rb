@@ -9,7 +9,7 @@ module Handlers
             )
             cv = serializer.serialize
             pubber = ::Services::NfpPublisher.new
-            pubber.publish(true, "#{pol.eg_id}.xml", cv)
+            pubber.publish(true, "#{term.policy.eg_id}.xml", cv)
           end
         end
       end

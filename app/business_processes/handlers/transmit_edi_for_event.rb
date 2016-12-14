@@ -29,15 +29,13 @@ module Handlers
           :transaction_id => term.transaction_id
         })
       enrollment_event_cv = enrollment_event_cv_for(render_result)
-      if is_publishable?(enrollment_event_cv)
-        begin
-          edi_builder = EdiCodec::X12::BenefitEnrollment.new(render_result)
-          x12_xml = edi_builder.call.to_xml
-          publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
-        rescue Exception => e
-          context.errors.add(:event_xml, e.message)
-          context.errors.add(:event_xml, action_xml)
-        end
+      begin
+        edi_builder = EdiCodec::X12::BenefitEnrollment.new(render_result)
+        x12_xml = edi_builder.call.to_xml
+        publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
+      rescue Exception => e
+        context.errors.add(:event_xml, e.message)
+        context.errors.add(:event_xml, action_xml)
       end
     end
 

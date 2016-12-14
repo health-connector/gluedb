@@ -21,7 +21,7 @@ module BusinessProcesses
       t_policy.aasm_state = "hbx_terminated"
       t_policy.enrollees.each do |en|
         unless en.coverage_ended?
-          en.coverage_end = termnation_date
+          en.coverage_end = termination_date
           en.coverage_status = 'inactive'
           en.employment_status_code = 'terminated'
         end

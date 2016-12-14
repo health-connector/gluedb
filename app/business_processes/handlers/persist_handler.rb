@@ -12,6 +12,7 @@ module Handlers
       process_stack = Middleware::Builder.new do |b|
         b.use Handlers::MemberPersistHandler
         b.use Handlers::PolicyPersistHandler
+        b.use Handlers::PolicyUpdateHandler
       end
       process_stack.call(context)
     end

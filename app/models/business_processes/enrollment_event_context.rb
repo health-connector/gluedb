@@ -4,6 +4,7 @@ module BusinessProcesses
     attr_accessor :business_process_history
     attr_accessor :amqp_connection
     attr_accessor :event_list
+    attr_accessor :terminations
     attr_accessor :errors
     attr_accessor :event_message
 
@@ -11,6 +12,7 @@ module BusinessProcesses
 
     def initialize
       @errors = ::BusinessProcesses::EnrollmentEventErrors.new
+      @terminations = []
     end
 
     def hbx_enrollment_id
@@ -33,6 +35,9 @@ module BusinessProcesses
       end
       if other.event_message.present?
         @event_message = other.event_message.clone
+      end
+      if other.terminations.any?
+        @terminations = other.terminations.clone
       end
     end
   end

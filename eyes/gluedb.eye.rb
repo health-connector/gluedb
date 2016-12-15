@@ -60,6 +60,25 @@ def define_forked_heavy_worker(worker_n, worker_path, directory)
     end
 end
 
+def define_forked_largemem_worker(worker_n, worker_path, directory)
+    worker_name = worker_n
+    process(worker_name) do
+      start_command start_command_for(worker_path)
+      stop_on_delete true
+      stop_signals [:TERM, 10.seconds, :KILL]
+      start_timeout 15.seconds
+      pid_file File.join(PID_DIRECTORY, "#{worker_name}.pid")
+      daemonize true
+      working_dir directory
+      stdall File.join(LOG_DIRECTORY, "#{worker_name}.log")
+      monitor_children do
+        stop_command "kill -QUIT {PID}"
+#        check :cpu, :every => 30, :below => 80, :times => 3
+        check :memory, :every => 30, :below => 600.megabytes, :times => [4,7]
+      end
+    end
+end
+
 def define_multi_worker(worker_n, worker_path, directory, number)
   (1..number).each do |num|
     worker_name = worker_n + "_" + num.to_s
@@ -83,7 +102,7 @@ Eye.application 'eye_gluedb' do
 #  notify :dthomas, :info
 
   define_forked_worker("employer_workers", "script/amqp/employer_workers.rb", BUS_DIRECTORY)
-  define_forked_worker("legacy_listeners", "script/amqp/legacy_listeners.rb", BUS_DIRECTORY)
+  define_forked_largemem_worker("legacy_listeners", "script/amqp/legacy_listeners.rb", BUS_DIRECTORY)
   define_multi_worker("broker_updated_listener", "script/amqp/broker_updated_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 2)
   define_multi_worker("enrollment_event_listener", "script/amqp/enrollment_event_listener.rb", BUS_DIRECTORY, 2)

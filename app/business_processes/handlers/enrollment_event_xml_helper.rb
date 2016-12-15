@@ -75,5 +75,9 @@ module Handlers
       return nil if employer_fein.blank?
       Employer.where(fein: employer_fein).first
     end
+
+    def extract_enrollment_action(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.value
+    end
   end
 end

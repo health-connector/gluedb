@@ -17,7 +17,9 @@ Gluedb::Application.routes.draw do
   #   resources :comments #, only: [:new, :create]
   # end
   resources :employer_events, only: [:index] do
-    get :download
+    collection do
+      get :download
+    end
   end
 
   namespace :admin do

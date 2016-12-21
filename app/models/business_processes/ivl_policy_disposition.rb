@@ -109,7 +109,7 @@ module BusinessProcesses
           if c_pol.coverage_period.begin == subscriber_start
             cancellation = ::BusinessProcesses::EnrollmentCancellation.new(c_pol.eg_id, c_pol.active_member_ids)
             if plan.carrier_id == c_pol.plan.carrier_id
-              term.transmit = false
+              cancellation.transmit = false
             end
             cancel_pols << cancellation
           end

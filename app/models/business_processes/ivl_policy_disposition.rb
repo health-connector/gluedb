@@ -43,7 +43,7 @@ module BusinessProcesses
       return false if (!renewal_candidates.any? && !competing_policies.any?)
       plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return false if subscriber_person.nil?
-      pol_member_id = extract_policy_member_ids(policy_cv).map { |mi| mi.strip.split("#").last.value }.compact
+      pol_member_id = extract_policy_member_ids(policy_cv).map { |mi| mi.strip.split("#").last }.compact
       if renewal_candidates.any?
         renewal_candidates.each do |rc|
           if plan.carrier_id == rc.plan.carrier_id

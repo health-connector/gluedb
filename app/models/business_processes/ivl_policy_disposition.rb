@@ -86,7 +86,7 @@ module BusinessProcesses
       if competing_policies.any?
         competing_policies.each do |c_pol|
           # Terminate the enrollment - transmit ONLY if different carrier
-          if c_pol.coverage_period.start < subscriber_start
+          if c_pol.coverage_period.begin < subscriber_start
             term = BusinessProcess::EnrollmentTermination.new(rc.eg_id, subscriber_start - 1.day, c_pol.active_member_ids)
             if plan.carrier_id == rc.plan.carrier_id
               term.transmit = false
@@ -106,7 +106,7 @@ module BusinessProcesses
       if competing_policies.any?
         competing_policies.each do |c_pol|
           # cancel the enrollment - transmit ONLY if different carrier
-          if c_pol.coverage_period.start == subscriber_start
+          if c_pol.coverage_period.being == subscriber_start
             cancellation = BusinessProcess::EnrollmentCancellation.new(c_pol.eg_id, c_pol.active_member_ids)
             if plan.carrier_id == c_pol.plan.carrier_id
               term.transmit = false

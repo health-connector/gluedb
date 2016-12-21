@@ -65,7 +65,21 @@ class EmployerEvent
     doc.xpath("//cv:plan_year[not(cv:benefit_groups)]", {:cv => XML_NS}).each do |node|
       node.remove
     end
-    doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2)
+    event_header = <<-XMLHEADER
+                        <employer_event>
+                                <event_name>#{event_name}</event_name>
+                                <resource_instance_uri>
+                                        <id>#{employer_id}</id>
+                                </resource_instance_uri>
+                                <body>
+    XMLHEADER
+    event_trailer = <<-XMLTRAILER
+                                </body>
+                        </employer_event>
+    XMLTRAILER
+    event_header + 
+      doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2) +
+      event_trailer
   end
 
   def self.get_digest_for(carrier)

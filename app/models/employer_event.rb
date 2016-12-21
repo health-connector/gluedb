@@ -34,6 +34,7 @@ class EmployerEvent
     doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier.hbx_carrier_id}')]", {:cv => XML_NS}).any?
   end
 
+  # TODO: ALL of this should be in the codec
   def clean_for(carrier)
     doc = Nokogiri::XML(resource_body)
 

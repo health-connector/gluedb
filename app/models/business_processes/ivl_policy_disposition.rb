@@ -159,7 +159,6 @@ module BusinessProcesses
     end
 
     def competing_ivl_coverage(enrollment_event_cv, policy_cv)
-      return [] if is_ivl_active_renewal?(enrollment_event_cv)
       plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
       return [] if subscriber_person.nil?
       subscriber_person.policies.select do |pol|

@@ -79,5 +79,12 @@ module Handlers
     def extract_enrollment_action(enrollment_event_cv)
       Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.value
     end
+    
+    def extract_policy_member_ids(policy_cv)
+      extracted_ids = policy_cv.enrollees.map do |en|
+        Maybe.new(en).member.id.value
+      end
+      extracted_ids.compact
+    end
   end
 end

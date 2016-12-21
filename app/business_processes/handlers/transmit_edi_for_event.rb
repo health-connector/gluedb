@@ -48,12 +48,16 @@ module Handlers
     def call(context)
       action_xml = context.event_message.event_xml
       enrollment_event_cv = enrollment_event_cv_for(action_xml)
+      update_bgn = (context.terminations.any? || context.cancellations.any?)
       context.terminations.each do |term|
         send_single_termination(context, term)
       end
+      context.cancellations.each do |cancel|
+        send_single_termination(context, cancel)
+      end
       if is_publishable?(enrollment_event_cv)
         begin
-          edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+          edi_builder = EdiCodec::X12::BenefitEnrollment.new(update_transaction_id(action_xml, update_bgn))
           x12_xml = edi_builder.call.to_xml
           publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
         rescue Exception => e
@@ -91,6 +95,26 @@ module Handlers
     end
 
     protected
+
+    def new_transaction_id
+      ran = Random.new
+      current_time = Time.now.utc
+      reference_number_base = current_time.strftime("%Y%m%d%H%M%S") + current_time.usec.to_s[0..2]
+      reference_number_base + sprintf("%05i", ran.rand(65535))
+    end
+
+    def update_transaction_id(action_xml, change_bgn = false)
+      return action_xml unless change_bgn
+      new_id_for_bgn = new_transaction_id
+      the_xml = Nokogiri::XML(action_xml)
+      the_xml.xpath("//cv:enrollment/cv:transaction_id/cv:id", {:cv => "http://openhbx.org/api/terms/1.0"}).each do |node|
+        node.content = new_id_for_bgn
+      end
+      the_xml.xpath("//cv:enrollment_event_body/cv:transaction_id", {:cv => "http://openhbx.org/api/terms/1.0"}).each do |node|
+        node.content = new_id_for_bgn
+      end
+      the_xml.to_xml(:indent => 2)
+    end
 
     def is_publishable?(enrollment_event_cv)
       Maybe.new(enrollment_event_cv).event.body.publishable?.value

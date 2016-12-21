@@ -6,6 +6,11 @@ module Handlers
           term.execute!
         end
       end
+      if context.cancellations.any?
+        context.cancellations.each do |term|
+          term.execute!
+        end
+      end
       super(context)
     end
   end

@@ -8,10 +8,6 @@ module BusinessProcesses
       @policy_cv = p_cv
     end
 
-    def processable_kind?
-      false
-    end
-
     def change_kind
       @change_kind ||= extract_enrollment_action(enrollment_event_cv)
     end
@@ -27,14 +23,56 @@ module BusinessProcesses
     end
 
     def policy_action
+      current_action = extract_enrollment_action(enrollment_event_cv)
+      # If they say it's a renewal, it's a renewal
+      return current_action if is_ivl_active_renewal? || is_ivl_passive_renewal?
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
+      return "urn:openhbx:terms:v1:enrollment#initial" if subscriber_person.nil?
       # Determine and provide correct action here
+      if competing_policies.any?
+        competing_policies.each do |c_pol|
+          if c_pol.plan.carrier_id == plan.carrier_id
+            return "urn:openhbx:terms:v1:enrollment#change_product"
+          end
+        end
+      end
+      "urn:openhbx:terms:v1:enrollment#initial"
     end
 
-    def member_count_change?
+    def members_changed?
+      return false if (!renewal_candidates.any? && !competing_policies.any?)
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
+      return false if subscriber_person.nil?
+      pol_member_id = extract_policy_member_ids(policy_cv).map { |mi| mi.strip.split("#").last.value }.compact
+      if renewal_candidates.any?
+        renewal_candidates.each do |rc|
+          if plan.carrier_id == rc.plan.carrier_id
+            rc_member_ids = rc.enrollees.map(&:m_id).uniq
+            new_member_ids = pol_member_ids - rc_member_ids
+            drop_member_ids = rc_member_ids - pol_member_ids
+            if new_member_ids.any? || drop_member_ids.any?
+              return true
+            end
+          end
+        end
+      end
+      if competing_policies.any?
+        competing_policies.each do |rc|
+          if plan.carrier_id == rc.plan.carrier_id
+            rc_member_ids = rc.enrollees.map(&:m_id).uniq
+            new_member_ids = pol_member_ids - rc_member_ids
+            drop_member_ids = rc_member_ids - pol_member_ids
+            if new_member_ids.any? || drop_member_ids.any?
+              return true
+            end
+          end
+        end
+      end
+      false
     end
 
     def terminations
-      [plan, subscriber_person, subscriber_id, subscriber_start] = extract_policy_details
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return [] if subscriber_person.nil?
       terms = []
       if renewal_candidates.any?
@@ -62,7 +100,7 @@ module BusinessProcesses
 
     def cancels
       return [] if !competing_policies.any?
-      [plan, subscriber_person, subscriber_id, subscriber_start] = extract_policy_details
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return [] if subscriber_person.nil?
       cancel_pols = []
       if competing_policies.any?

@@ -38,13 +38,16 @@ describe Handlers::TransmitEdiForEvent do
     instance_double(BusinessProcesses::EnrollmentEventContext, {
       :event_message => event_message,
       :amqp_connection => amqp_connection,
-      :terminations => []
+      :terminations => [],
+      :cancellations => [],
+      :business_process_history => []
     })
   }
 
   let(:handler) {  Handlers::TransmitEdiForEvent.new(app) }
 
   before :each do
+    allow(interaction_context).to receive(:business_process_history=).with(any_args)
     allow(Openhbx::Cv2::EnrollmentEvent).to receive(:parse).with(raw_event_xml, :single => true).and_return(enrollment_event_cv)
     allow(EdiCodec::X12::BenefitEnrollment).to receive(:new).with(raw_event_xml).and_return(transform_slug)
     allow(::Amqp::ConfirmedPublisher).to receive(:with_confirmed_channel).with(amqp_connection).and_yield(channel_slug)

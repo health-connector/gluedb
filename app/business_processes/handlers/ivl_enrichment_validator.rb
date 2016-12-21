@@ -12,8 +12,8 @@ module Handlers
 
     def valid?
       policy_disposition = ::BusinessProcesses::IvlPolicyDisposition.new(enrollment_event_cv, policy_cv)
-      if policy_disposition.competing_policies.any? && !policy_disposition.processable_kind?
-        errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
+      if policy_disposition.members_changed?
+        errors.add(:process, "It seems the member composition has changed.  We don't currently process that.")
         errors.add(:process, last_event)
         return false
       end

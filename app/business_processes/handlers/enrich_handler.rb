@@ -43,9 +43,13 @@ module Handlers
       else
         validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
         return [] unless validator.valid?
-        event_list.map do |ev|
-          rewrite_active_renewal_to_carrier_switch(ev)
-        end
+        disposition = BusinessProcesses::IvlPolicyDisposition.new(enrollment_event_cv, policy_cv)
+        context.terminations = disposition.terminations
+        context.cancellations = disposition.cancellations
+        new_event = event_list.last
+        new_event_xml = transform_action_to(last_event, disposition.policy_action)
+        new_event.event_xml = new_event_xml
+        [new_event]
       end
     end
 
@@ -100,24 +104,6 @@ module Handlers
       return false if pol.canceled?
       return false if pol.terminated?
       true
-    end
-
-    def rewrite_active_renewal_to_carrier_switch(event_item)
-      event_xml = event_item.event_xml
-      enrollment_event_cv = enrollment_event_cv_for(event_xml)
-      policy_cv = extract_policy(enrollment_event_cv)
-      if is_ivl_active_renewal?(enrollment_event_cv)
-        plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
-        if subscriber_person
-          has_renewal = subscriber_person.policies.any? do |pol|
-            ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
-          end
-          if !has_renewal
-            event_item.event_xml = transform_action_to(event_xml, "urn:openhbx:terms:v1:enrollment#initial")
-          end
-        end
-      end
-      event_item
     end
 
     def transform_action_to(event_xml, action_uri)

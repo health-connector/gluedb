@@ -28,14 +28,18 @@ class EmployerEvent
     end
   end
 
-  def remove_other_carrier_nodes(xml, carrier_hbx_id)
-    doc = Nokogiri::XML(xml)
+  def has_data_for?(carrier)
+    doc = Nokogiri::XML(resource_body)
 
-    data_for_carrier = doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier_hbx_id}')]", {:cv => XML_NS}).any?
+    doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier.hbx_carrier_id}')]", {:cv => XML_NS}).any?
+  end
+
+  def clean_for(carrier)
+    doc = Nokogiri::XML(resource_body)
 
     doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
       carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content
-      if carrier_id != carrier_hbx_id
+      if carrier_id != carrier.hbx_carrier_id 
         node.remove
       end
     end
@@ -62,4 +66,48 @@ class EmployerEvent
     end
     doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2)
   end
+
+  def self.get_digest_for(carrier)
+    events = self.order_by(event_time: 1)
+    events_for_carrier = events.select do |ev|
+      ev.has_data_for?(carrier)
+    end
+    return nil unless events_for_carrier.any?
+    render_set(carrier, events_for_carrier)
+  end
+
+  def self.render_set(carrier, event_set)
+    sorted_events = event_set.sort_by(&:event_time)
+    first_event_time = sorted_events.first.event_time
+    last_event_time = sorted_events.last.event_time
+    carrier_abbrev = carrier.abbrev.upcase
+    header = <<-XMLHEADER
+<?xml version="1.0" encoding="UTF-8"?>
+<employer_digest_event
+        xmlns="http://openhbx.org/api/terms/1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://openhbx.org/api/terms/1.0 organization.xsd">
+        <event_name>urn:openhbx:events:v1:employer#digest_period_ended</event_name>
+        <resource_instance_uri>
+                <id>urn:openhbx:resources:v1:carrier:abbreviation##{carrier_abbrev}</id>
+        </resource_instance_uri>
+        <body>
+                <employer_events>
+                        <coverage_period>
+                                <begin_datetime>#{first_event_time.iso8601}</begin_datetime>
+                                <end_datetime>#{last_event_time.iso8601}</end_datetime>
+                        </coverage_period>
+    XMLHEADER
+    trailer = <<-XMLTRAILER
+                </employer_events>
+        </body>
+</employer_digest_event>
+    XMLTRAILER
+    content = sorted_events.inject("") do |acc, ev|
+      acc + "\n" + ev.clean_for(carrier)
+    end
+
+    header + content + trailer
+  end
+
 end

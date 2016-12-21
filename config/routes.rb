@@ -16,7 +16,9 @@ Gluedb::Application.routes.draw do
   # concern :commentable do
   #   resources :comments #, only: [:new, :create]
   # end
-  resources :employer_events, only: [:index]
+  resources :employer_events, only: [:index] do
+    get :download
+  end
 
   namespace :admin do
     namespace :settings do

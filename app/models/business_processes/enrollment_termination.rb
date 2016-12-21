@@ -49,6 +49,7 @@ module BusinessProcesses
       @termination_date = other.termination_date.clone
       @affected_member_ids = other.affected_member_ids.clone
       @member_ids = other.member_ids.clone
+      @terminate = other.terminate
     end
   end
 end

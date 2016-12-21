@@ -47,6 +47,7 @@ module BusinessProcesses
       @hbx_enrollment_id = other.hbx_enrollment_id.clone
       @affected_member_ids = other.affected_member_ids.clone
       @member_ids = other.member_ids.clone
+      @terminate = other.terminate
     end
   end
 end

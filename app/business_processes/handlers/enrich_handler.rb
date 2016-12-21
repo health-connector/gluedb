@@ -45,7 +45,7 @@ module Handlers
         return [] unless validator.valid?
         disposition = BusinessProcesses::IvlPolicyDisposition.new(enrollment_event_cv, policy_cv)
         context.terminations = disposition.terminations
-        context.cancellations = disposition.cancellations
+        context.cancellations = disposition.cancels
         new_event = event_list.last
         new_event_xml = transform_action_to(last_event, disposition.policy_action)
         new_event.event_xml = new_event_xml

@@ -119,7 +119,7 @@ module BusinessProcesses
     end
 
     def competing_policies
-      @competing_policies ||= competing_ivl_coverage(enrollment_event_cv, policy_cv)
+      @competing_policies ||= competing_ivl_coverage
     end
 
     def bogus_ivl_renewal?
@@ -158,8 +158,8 @@ module BusinessProcesses
         end
     end
 
-    def competing_ivl_coverage(enrollment_event_cv, policy_cv)
-      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
+    def competing_ivl_coverage
+      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return [] if subscriber_person.nil?
       subscriber_person.policies.select do |pol|
         overlapping_policy?(pol, plan, subscriber_id, subscriber_start)

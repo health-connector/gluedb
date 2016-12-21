@@ -13,6 +13,8 @@ module BusinessProcesses
       @transmit = true
     end
 
+    def transmit?; @transmit; end
+
     def policy
       @policy ||= Policy.where(:eg_id => @hbx_enrollment_id).first
     end

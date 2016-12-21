@@ -2,41 +2,43 @@
 module Handlers
   class TransmitEdiForEvent < Base
     include EnrollmentEventXmlHelper
-    
+
     def initialize(app)
       @app = app
     end
 
     def send_single_termination(context, term)
-      affected_members = term.affected_member_ids.map do |a_member_id|
-        ::BusinessProcesses::AffectedMember.new({
-          :policy => term.policy,
-          :member_id => a_member_id
-        })
-      end
-      enrollees = term.policy.enrollees.select do |en|
-        term.member_ids.include?(en.m_id)
-      end
-      render_result = ApplicationController.new.render_to_string(
-        :layout => "enrollment_event",
-        :partial => "enrollment_events/enrollment_event",
-        :format => :xml,
-        :locals => {
-          :affected_members => affected_members,
-          :policy => term.policy,
-          :enrollees => enrollees,
-          :event_type => "urn:openhbx:terms:v1:enrollment#terminate_enrollment",
-          :transaction_id => term.transaction_id
-        })
-      enrollment_event_cv = enrollment_event_cv_for(render_result)
-      if is_publishable?(enrollment_event_cv)
-        begin
-          edi_builder = EdiCodec::X12::BenefitEnrollment.new(render_result)
-          x12_xml = edi_builder.call.to_xml
-          publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
-        rescue Exception => e
-          context.errors.add(:event_xml, e.message)
-          context.errors.add(:event_xml, action_xml)
+      if term.transmit?
+        affected_members = term.affected_member_ids.map do |a_member_id|
+          ::BusinessProcesses::AffectedMember.new({
+            :policy => term.policy,
+            :member_id => a_member_id
+          })
+        end
+        enrollees = term.policy.enrollees.select do |en|
+          term.member_ids.include?(en.m_id)
+        end
+        render_result = ApplicationController.new.render_to_string(
+          :layout => "enrollment_event",
+          :partial => "enrollment_events/enrollment_event",
+          :format => :xml,
+          :locals => {
+            :affected_members => affected_members,
+            :policy => term.policy,
+            :enrollees => enrollees,
+            :event_type => "urn:openhbx:terms:v1:enrollment#terminate_enrollment",
+            :transaction_id => term.transaction_id
+          })
+        enrollment_event_cv = enrollment_event_cv_for(render_result)
+        if is_publishable?(enrollment_event_cv)
+          begin
+            edi_builder = EdiCodec::X12::BenefitEnrollment.new(render_result)
+            x12_xml = edi_builder.call.to_xml
+            publish_to_bus(context.amqp_connection, enrollment_event_cv, x12_xml)
+          rescue Exception => e
+            context.errors.add(:event_xml, e.message)
+            context.errors.add(:event_xml, action_xml)
+          end
         end
       end
     end

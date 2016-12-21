@@ -1,15 +1,17 @@
+# Finds 2017 employments for an employer by fein and date.Takes a fein and a date as arguments
+feins = %w()
 
-congressional_feins = %w()
+effective_date = Date.new(2017,1,1)
 
-congressional_employers = Employer.where(:fein => {"$in" => congressional_feins}).map(&:id)
+employers = Employer.where(:fein => {"$in" => congressional_feins}).map(&:id)
 
 plans_2017 = Plan.where(year: 2017).map(&:id)
 
-congressional_policies_2017 = Policy.where(:employer_id => {"$in" => congressional_employers},
+policies_2017 = Policy.where(:employer_id => {"$in" => congressional_employers},
                                            :plan_id => {"$in" => plans_2017},
                                            :enrollees => {"$elemMatch" => {
                                               :rel_code => "self",
-                                              :coverage_start => {"$gt" => Date.new(2016,12,31)}
+                                              :coverage_start => {"$gte" => effective_date}
                                             }})
 
 def renewal_or_initial(policy)
@@ -24,7 +26,7 @@ renewal_enrollments = []
 
 initial_enrollments = []
 
-congressional_policies_2017.each do |pol|
+policies_2017.each do |pol|
   result = renewal_or_initial(pol)
   if result == "initial"
     initial_enrollments << pol
@@ -33,13 +35,13 @@ congressional_policies_2017.each do |pol|
   end
 end
 
-initial_en = File.new("congressional_initial_enrollments.txt","w")
+initial_en = File.new("initial_enrollments.txt","w")
 
 initial_enrollments.each do |ie|
   initial_en.puts(ie.eg_id)
 end
 
-renewal_en = File.new("congressional_renewals.txt","w")
+renewal_en = File.new("renewal_enrollments.txt","w")
 
 renewal_enrollments.each do |re|
   renewal_en.puts(re.eg_id)

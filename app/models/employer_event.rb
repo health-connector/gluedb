@@ -36,7 +36,7 @@ class EmployerEvent
 
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
     if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == FIRST_TIME_EMPLOYER_EVENT_NAME)
-      create_new_event_and_delete_old(
+      create_new_event_and_remove_old(
         new_employer_id,
         FIRST_TIME_EMPLOYER_EVENT_NAME,
         new_event_time,
@@ -45,7 +45,7 @@ class EmployerEvent
           yield old_record
       end
     else
-      create_new_event_and_delete_old(
+      create_new_event_and_remove_old(
         new_employer_id,
         new_event_name,
         new_event_time,

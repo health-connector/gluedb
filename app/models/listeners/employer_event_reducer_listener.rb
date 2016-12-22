@@ -124,8 +124,8 @@ module Listeners
       chan = conn.create_channel
       q = create_queues(chan)
       create_bindings(chan, q)
-      chan.close
       run_chan = conn.create_channel
+      chan.close
       run_chan.prefetch(1)
       self.new(run_chan, q).subscribe(:block => true, :manual_ack => true)
       conn.close

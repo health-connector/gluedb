@@ -28,7 +28,7 @@ class EmployerEvent
       event_time: new_event_time,
       resource_body: new_payload
     })
-    self.where(match_criteria.merge({:_id => {"$ne" => new_event._id})).each do |old_record|
+    self.where(match_criteria.merge({:_id => {"$ne" => new_event._id}})).each do |old_record|
       yield old_record
       old_record.destroy
     end

@@ -40,7 +40,7 @@ module EmployerEvents
       end
       event_header = <<-XMLHEADER
                         <employer_event>
-                                <event_name>urn:openhbx:events:v1:employer##{event_name}</event_name>
+                                <event_name>urn:openhbx:events:v1:employer##{employer_event.event_name}</event_name>
                                 <resource_instance_uri>
                                         <id>#{employer_event.employer_id}</id>
                                 </resource_instance_uri>

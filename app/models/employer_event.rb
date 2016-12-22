@@ -32,7 +32,8 @@ class EmployerEvent
     events = self.order_by(event_time: 1)
     carrier_file = EmployerEvents::CarrierFile.new(carrier)
     events.each do |ev|
-      EmployerEvents::Renderer.new(ev).render_for(carrier, carrier_file)
+      event_renderer = EmployerEvents::Renderer.new(ev)
+      carrier_file.render_event_using(event_renderer)
     end
     carrier_file.result
   end

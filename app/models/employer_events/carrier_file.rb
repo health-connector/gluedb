@@ -13,9 +13,11 @@ module EmployerEvents
       @end_timestamp = nil
     end
 
-    def <<(data)
-      @empty = false
-      @buffer << data
+    def render_event_using(renderer)
+      if renderer.render_for(carrier, @buffer)
+        @empty = false
+        update_timestamp(renderer.timestamp)
+      end
     end
 
     def update_timestamps(timestamp)

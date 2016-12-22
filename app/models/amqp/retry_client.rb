@@ -20,7 +20,8 @@ module Amqp
           begin
             p_headers = properties.headers || {}
             existing_retry_count = extract_retry_count(p_headers)
-            if existing_retry_count > 5
+            # Because of the way this works '10' actually equates to 5 retries
+            if existing_retry_count > 10
               $stderr.puts "=== Redelivery Attempts Exceeded ==="
               $stderr.puts properties.to_hash.inspect
               $stderr.puts payload
@@ -40,12 +41,9 @@ module Amqp
 
     def extract_retry_count(headers)
       $stderr.puts headers.inspect
-=begin
       deaths = headers["x-death"]
       return 0 if deaths.blank?
-      deaths.map { |d| d["count"].to_i }.max
-=end
-      0
+      [deaths.length, (deaths.map { |d| d["count"].blank? ? 0 : d["count"].to_i }.max)].max
     end
 
     def redeliver(a_channel, delivery_info)

@@ -122,11 +122,11 @@ module Listeners
       Process.setproctitle("%s - %s" % [self.name , $$])
       conn = AmqpConnectionProvider.start_connection
       chan = conn.create_channel
-      chan.prefetch(1)
       q = create_queues(chan)
       create_bindings(chan, q)
       chan.close
       run_chan = conn.create_channel
+      run_chan.prefetch(1)
       self.new(run_chan, q).subscribe(:block => true, :manual_ack => true)
       conn.close
     end

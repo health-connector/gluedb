@@ -11,20 +11,48 @@ class EmployerEvent
 
   index({event_time: 1, event_name: 1, employer_id: 1})
 
+  FIRST_TIME_EMPLOYER_EVENT_NAME = "benefit_coverage_initial_application_eligible"
+
   def self.newest_event?(new_employer_id, new_event_name, new_event_time)
     !self.where(:employer_id => new_employer_id, :event_name => new_event_name, :event_time => {"$gte" => new_event_time}).any?
   end
 
-  def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
+  def self.not_yet_seen_by_carrier?(new_employer_id)
+    self.where(:event_name => FIRST_TIME_EMPLOYER_EVENT_NAME, :employer_id => new_employer_id).any?
+  end
+
+  def self.create_new_event_and_remove_old(new_employer_id, new_event_name, new_event_time, new_payload, match_criteria)
     new_event = self.create!({
       employer_id: new_employer_id,
       event_name: new_event_name,
       event_time: new_event_time,
       resource_body: new_payload
     })
-    self.where(:employer_id => new_employer_id, :event_name => new_event_name, :_id => {"$ne" => new_event._id}).each do |old_record|
+    self.where(match_criteria.merge({:_id => {"$ne" => new_event._id})).each do |old_record|
       yield old_record
       old_record.destroy
+    end
+  end
+
+  def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
+    if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == FIRST_TIME_EMPLOYER_EVENT_NAME)
+      create_new_event_and_delete_old(
+        new_employer_id,
+        FIRST_TIME_EMPLOYER_EVENT_NAME,
+        new_event_time,
+        new_payload,
+        {:employer_id => new_employer_id}) do |old_record|
+          yield old_record
+      end
+    else
+      create_new_event_and_delete_old(
+        new_employer_id,
+        new_event_name,
+        new_event_time,
+        new_payload,
+        {:employer_id => new_employer_id, :event_name => new_event_name}) do |old_record|
+          yield old_record
+      end
     end
   end
 

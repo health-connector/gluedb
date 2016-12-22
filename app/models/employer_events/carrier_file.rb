@@ -6,6 +6,7 @@ module EmployerEvents
     attr_reader :end_timestamp
 
     def initialize(carrier)
+      @carrier = carrier
       @empty = true
       @buffer = StringIO.new
       @begin_timestamp = nil

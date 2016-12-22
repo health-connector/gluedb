@@ -8,8 +8,13 @@ module EmployerEvents
       @employer_event = e_event
     end
 
-    def render_for(carrier, out = "")
+    def render_for(carrier, out)
       doc = Nokogiri::XML(employer_event.resource_body)
+      unless doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier.hbx_carrier_id}')]", {:cv => XML_NS}).any?
+        return out
+      end
+
+      out.update_timestamps(employer_event.event_time)
 
       doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
         carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content

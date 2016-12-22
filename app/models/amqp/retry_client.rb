@@ -40,8 +40,8 @@ module Amqp
     end
 
     def extract_retry_count(headers)
-      $stderr.puts headers.inspect
       deaths = headers["x-death"]
+      $stderr.puts deaths.inspect
       return 0 if deaths.blank?
       [deaths.length, (deaths.map { |d| d["count"].blank? ? 0 : d["count"].to_i }.max)].max
     end

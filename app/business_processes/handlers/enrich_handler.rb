@@ -35,40 +35,37 @@ module Handlers
         return []
       end
       if determine_market(enrollment_event_cv) == "shop"
-        context.errors.add(:process, "We don't currently process shop")
-        return []
+        validator = ShopEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
+        return [] unless validator.valid?
+        event_list.map do |ev|
+          rewrite_shop_ids(context, ev, validator.should_be_renewal?, validator.terminations)
+        end
+      else
+        validator = IvlEnrichmentValidator.new(context.errors, enrollment_event_cv, policy_cv, last_event)
+        return [] unless validator.valid?
+        disposition = BusinessProcesses::IvlPolicyDisposition.new(enrollment_event_cv, policy_cv)
+        context.terminations = disposition.terminations
+        context.cancellations = disposition.cancels
+        new_event = event_list.last
+        new_event_xml = transform_action_to(last_event, disposition.policy_action)
+        new_event.event_xml = new_event_xml
+        [new_event]
       end
-      if competing_coverage(enrollment_event_cv, policy_cv).any?
-        context.errors.add(:process, "We found competing coverage for this enrollment.  We don't currently process that.")
-        context.errors.add(:process, last_event)
-        return []
-      end
-      if bogus_renewal?(enrollment_event_cv, policy_cv)
-        context.errors.add(:process, "This enrollment is marked as a renewal, but doesn't have active coverage for the preceeding year.")
-        context.errors.add(:process, last_event)
-        return []
-      end
-      if invalid_ivl_plan_year?(enrollment_event_cv, policy_cv)
-        context.errors.add(:process, "This enrollment has a set of coverage dates which don't match the active year of the plan.")
-        context.errors.add(:process, last_event)
-        return []
-      end
-      event_list.map do |ev|
-        rewrite_active_renewal_to_carrier_switch(ev)
-      end
+    end
+
+    def rewrite_shop_ids(context, event_item, is_renewal, terminations)
+      event_xml = event_item.event_xml
+      enrollment_event_cv = enrollment_event_cv_for(event_xml)
+      policy_cv = extract_policy(enrollment_event_cv)
+      new_action = is_renewal ? "urn:openhbx:terms:v1:enrollment#change_product" : "urn:openhbx:terms:v1:enrollment#initial"
+      context.terminations = context.terminations + terminations
+      event_item.event_xml = transform_action_to(event_xml, new_action)
+      event_item
     end
 
     def already_exists?(policy_cv)
       enrollment_group_id = extract_enrollment_group_id(policy_cv)
       Policy.where(:eg_id => enrollment_group_id).any?
-    end
-
-    def invalid_ivl_plan_year?(enrollment_event_cv, policy_cv)
-      return false unless is_ivl_renewal?(enrollment_event_cv)
-      subscriber_enrollee = extract_subscriber(policy_cv)
-      subscriber_start = extract_enrollee_start(subscriber_enrollee)
-      plan = extract_plan(policy_cv)
-      subscriber_start.year != plan.year
     end
 
     def extract_policy_details(policy_cv)
@@ -79,28 +76,6 @@ module Handlers
       coverage_type = plan.coverage_type
       subscriber_person = Person.find_by_member_id(subscriber_id)
       [plan, subscriber_person, subscriber_id, subscriber_start]
-    end
-
-    def bogus_renewal?(enrollment_event_cv, policy_cv)
-      return false unless is_ivl_passive_renewal?(enrollment_event_cv)
-      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
-      return false if subscriber_person.nil?
-      !subscriber_person.policies.any? do |pol|
-        ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
-      end
-    end
-
-    def competing_coverage(enrollment_event_cv, policy_cv)
-      return [] if is_ivl_active_renewal?(enrollment_event_cv)
-      plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
-      return [] if subscriber_person.nil?
-      subscriber_person.policies.select do |pol|
-        overlapping_policy?(pol, plan, subscriber_id, subscriber_start)
-      end
-    end
-
-    def extract_enrollment_action(enrollment_event_cv)
-      Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.value
     end
 
     def is_ivl_active_renewal?(enrollment_event_cv)
@@ -129,35 +104,6 @@ module Handlers
       return false if pol.canceled?
       return false if pol.terminated?
       true
-    end
-
-    def overlapping_policy?(pol, plan, subscriber_id, subscriber_start)
-      return false if pol.canceled?
-      return false if pol.subscriber.blank?
-      return false if (pol.subscriber.m_id != subscriber_id)
-      return false unless (plan.coverage_type == pol.plan.coverage_type)
-      return false unless (plan.year == pol.plan.year)
-      return false unless pol.employer_id.blank?
-      return true if pol.subscriber.coverage_end.blank?
-      !(pol.subscriber.coverage_end < subscriber_start)
-    end
-
-    def rewrite_active_renewal_to_carrier_switch(event_item)
-      event_xml = event_item.event_xml
-      enrollment_event_cv = enrollment_event_cv_for(event_xml)
-      policy_cv = extract_policy(enrollment_event_cv)
-      if is_ivl_active_renewal?(enrollment_event_cv)
-        plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details(policy_cv)
-        if subscriber_person
-          has_renewal = subscriber_person.policies.any? do |pol|
-            ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
-          end
-          if !has_renewal
-            event_item.event_xml = transform_action_to(event_xml, "urn:openhbx:terms:v1:enrollment#initial")
-          end
-        end
-      end
-      event_item
     end
 
     def transform_action_to(event_xml, action_uri)

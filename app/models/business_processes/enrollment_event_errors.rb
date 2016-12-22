@@ -5,6 +5,7 @@ module BusinessProcesses
     attr_reader :errors
     attr_reader :process
     attr_reader :event_xml
+    attr_reader :employer
 
     delegate :add, :to => :errors
 

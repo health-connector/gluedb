@@ -2,6 +2,8 @@
 class TransformSimpleEdiFileSet
   include Handlers::EnrollmentEventXmlHelper
 
+  XML_NS = { "cv" => "http://openhbx.org/api/terms/1.0" }
+
   def initialize(out_path)
     @out_path = out_path
   end

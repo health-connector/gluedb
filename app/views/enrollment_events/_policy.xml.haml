@@ -67,6 +67,7 @@
         %name= employer.name
         - if !employer.dba.blank?
           %dba= employer.dba
+        %fein= employer.fein
       %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
   - else
     %individual_market

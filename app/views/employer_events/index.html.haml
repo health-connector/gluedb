@@ -1,0 +1,11 @@
+%table.table.table-condensed
+  %thead
+    %th Employer HBX ID
+    %th Event Name
+    %th Event Time
+  %tbody
+    - @employer_events.each do |emp_event|
+      %tr
+        %td= emp_event.employer_id
+        %td= emp_event.event_name
+        %td= emp_event.event_time

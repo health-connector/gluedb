@@ -14,7 +14,7 @@ module Amqp
           else
             publish_argument_errors(delivery_info, properties, payload)
           end
-        rescue => e
+        rescue Exception => e
           $stderr.puts "=== Processing Failure ==="
           fail_with(e)
           begin
@@ -39,9 +39,13 @@ module Amqp
     end
 
     def extract_retry_count(headers)
+      $stderr.puts p_headers.inspect
+=begin
       deaths = p_headers["x-death"]
       return 0 if deaths.blank?
       deaths.map { |d| d["count"].to_i }.max
+=end
+      0
     end
 
     def redeliver(a_channel, delivery_info)

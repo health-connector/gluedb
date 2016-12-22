@@ -1,5 +1,6 @@
 module EmployerEvents
   class CarrierFile
+    attr_reader :carrier
     attr_reader :buffer
     attr_reader :begin_timestamp
     attr_reader :end_timestamp

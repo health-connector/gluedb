@@ -118,11 +118,13 @@ class EmployerEvent
         </body>
 </employer_digest_event>
     XMLTRAILER
-    content = sorted_events.inject("") do |acc, ev|
-      acc + "\n" + ev.clean_for(carrier)
+    xml_result = header.dup
+    sorted_events.each do |ev|
+      xml_result << ev.clean_for(carrier)
+      xml_result << "\n"
     end
-
-    header + content + trailer
+    xml_result << trailer
+    xml_result
   end
 
 end

@@ -40,6 +40,7 @@ module Amqp
     end
 
     def extract_retry_count(headers)
+      $stderr.puts headers.inspect
       deaths = headers["x-death"]
       $stderr.puts deaths.inspect
       return 0 if deaths.blank?

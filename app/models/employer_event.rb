@@ -34,54 +34,6 @@ class EmployerEvent
     doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier.hbx_carrier_id}')]", {:cv => XML_NS}).any?
   end
 
-  # TODO: ALL of this should be in the codec
-  def clean_for(carrier)
-    doc = Nokogiri::XML(resource_body)
-
-    doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
-      carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content
-      if carrier_id != carrier.hbx_carrier_id 
-        node.remove
-      end
-    end
-    doc.xpath("//cv:employer_census_families", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group/cv:reference_plan", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group/cv:elected_plans[not(cv:elected_plan)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group[not(cv:elected_plans)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:plan_year/cv:benefit_groups[not(cv:benefit_group)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:plan_year[not(cv:benefit_groups)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    event_header = <<-XMLHEADER
-                        <employer_event>
-                                <event_name>urn:openhbx:events:v1:employer##{event_name}</event_name>
-                                <resource_instance_uri>
-                                        <id>#{employer_id}</id>
-                                </resource_instance_uri>
-                                <body>
-    XMLHEADER
-    event_trailer = <<-XMLTRAILER
-                                </body>
-                        </employer_event>
-    XMLTRAILER
-    event_header + 
-      doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2) +
-      event_trailer
-  end
-
   def self.get_digest_for(carrier)
     events = self.order_by(event_time: 1)
     events_for_carrier = events.select do |ev|
@@ -120,7 +72,7 @@ class EmployerEvent
     XMLTRAILER
     xml_result = header.dup
     sorted_events.each do |ev|
-      xml_result << ev.clean_for(carrier)
+      EmployerEvents::Renderer.new(ev).render_for(carrier, xml_result)
       xml_result << "\n"
     end
     xml_result << trailer

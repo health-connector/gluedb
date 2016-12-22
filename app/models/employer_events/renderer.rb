@@ -1,5 +1,7 @@
 module EmployerEvents
   class Renderer
+    XML_NS = "http://openhbx.org/api/terms/1.0"
+
     attr_reader :employer_event
 
     def initialize(e_event)

@@ -22,6 +22,7 @@ class EmployerEvent
   end
 
   def self.create_new_event_and_remove_old(new_employer_id, new_event_name, new_event_time, new_payload, match_criteria)
+    raise "NOPE"
     new_event = self.create!({
       employer_id: new_employer_id,
       event_name: new_event_name,

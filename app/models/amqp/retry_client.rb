@@ -44,7 +44,7 @@ module Amqp
       deaths = headers["x-death"]
       $stderr.puts deaths.inspect
       return 0 if deaths.blank?
-      [deaths.length, (deaths.map { |d| d["count"].blank? ? 0 : d["count"].to_i }.max)].max
+      [deaths.length, ((deaths.map { |d| d["count"].blank? ? 0 : d["count"].to_i }.max) * 2)].max
     end
 
     def redeliver(a_channel, delivery_info)

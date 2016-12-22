@@ -16,7 +16,7 @@ module EmployerEvents
     def render_event_using(renderer)
       if renderer.render_for(carrier, @buffer)
         @empty = false
-        update_timestamp(renderer.timestamp)
+        update_timestamps(renderer.timestamp)
       end
     end
 

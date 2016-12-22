@@ -56,7 +56,7 @@ module EmployerEvents
                         </employer_event>
       XMLTRAILER
       out << event_header
-      doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2) +
+      out << doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2)
       out << event_trailer
       out
     end

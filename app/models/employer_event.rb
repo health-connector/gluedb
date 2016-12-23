@@ -81,9 +81,9 @@ class EmployerEvent
       end
     end
     z_file = Tempfile.new("employer_events_digest")
+    zip_path = z_file.path + ".zip"
     z_file.close
     z_file.unlink
-    zip_path = z_file.path + ".zip"
     Zip::File.open(zip_path, ::Zip::File::CREATE) do |zip|
       carrier_files.each do |car|
         car.write_to_zip(zip)

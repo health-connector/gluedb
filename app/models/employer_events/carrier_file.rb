@@ -16,8 +16,8 @@ module EmployerEvents
     def file_name
       return nil if @begin_timestamp.blank?
       return nil if @end_timestamp.blank?
-      start_timestamp_string = ""
-      end_timestamp_string = ""
+      start_timestamp_string = @begin_timestamp.strftime("%Y%m%d%H%M%S")
+      end_timestamp_string = @end_timestamp.strftime("%Y%m%d%H%M%S")
       carrier.abbrev.upcase + "_" + start_timestamp_string + "_" + end_timestamp_string + ".xml"
     end
 

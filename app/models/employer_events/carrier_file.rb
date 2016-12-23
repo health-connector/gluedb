@@ -13,6 +13,14 @@ module EmployerEvents
       @end_timestamp = nil
     end
 
+    def file_name
+      return nil if @begin_timestamp.blank?
+      return nil if @end_timestamp.blank?
+      start_timestamp_string = ""
+      end_timestamp_string = ""
+      carrier.abbrev.upcase + "_" + start_timestamp_string + "_" + end_timestamp_string + ".xml"
+    end
+
     def render_event_using(renderer)
       if renderer.render_for(carrier, @buffer)
         @empty = false
@@ -52,7 +60,7 @@ module EmployerEvents
       XMLTRAILER
       @buffer << trailer
       header << @buffer.string
-      header
+      [file_name, header]
     end
   end
 end

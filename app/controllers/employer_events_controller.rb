@@ -8,6 +8,12 @@ class EmployerEventsController < ApplicationController
   def download
     @carrier = Carrier.find(params[:carrier_id])
 
-    send_data EmployerEvent.get_digest_for(@carrier), :filename => "#{@carrier.abbrev}.xml", :type => :xml
+    digest_result = EmployerEvent.get_digest_or(@carrier)
+
+    if digest_result
+      send_data digest_result.last, :filename => digest_result.first, :type => :xml
+    else
+      render :status => 404, :nothing => true
+    end
   end
 end

@@ -13,7 +13,7 @@ module EmployerEvents
     # Return true if we rendered anything
     def render_for(carrier, out)
       doc = Nokogiri::XML(employer_event.resource_body)
-      unless doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier.hbx_carrier_id}')]", {:cv => XML_NS}).any?
+      unless doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']", {:cv => XML_NS}).any?
         return false
       end
 

@@ -80,7 +80,7 @@ class EmployerEvent
         car.render_event_using(event_renderer)
       end
     end
-    z_file = Tempfile.new
+    z_file = Tempfile.new("employer_events_digest")
     z_file.close
     z_file.unlink
     zip_path = z_file.path + ".zip"

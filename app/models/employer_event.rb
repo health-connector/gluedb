@@ -84,7 +84,7 @@ class EmployerEvent
     zip_path = z_file.path + ".zip"
     z_file.close
     z_file.unlink
-    Zip::File.open(zip_path, ::Zip::File::CREATE) do |zip|
+    ::Zip::File.open(zip_path, ::Zip::File::CREATE) do |zip|
       carrier_files.each do |car|
         car.write_to_zip(zip)
       end

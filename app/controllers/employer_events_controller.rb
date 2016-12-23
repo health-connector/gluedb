@@ -6,14 +6,12 @@ class EmployerEventsController < ApplicationController
   end
 
   def download
-    @carrier = Carrier.find(params[:carrier_id])
+    zip_path = EmployerEvent.get_all_digests
 
-    digest_result = EmployerEvent.get_digest_or(@carrier)
-
-    if digest_result
-      send_data digest_result.last, :filename => digest_result.first, :type => :xml
-    else
-      render :status => 404, :nothing => true
+    begin
+      send_data zip_path, :filename => "carrier_events.zip"
+    ensure
+      FileUtils.rm_f(zip_path)
     end
   end
 end

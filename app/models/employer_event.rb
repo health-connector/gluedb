@@ -1,3 +1,5 @@
+require 'zip'
+
 class EmployerEvent
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -65,6 +67,29 @@ class EmployerEvent
       carrier_file.render_event_using(event_renderer)
     end
     carrier_file.result
+  end
+
+  def self.get_all_digests
+    events = self.order_by(event_time: 1)
+    carrier_files = Carrier.all.map do |car|
+      EmployerEvents::CarrierFile.new(car)
+    end
+    events.each do |ev|
+      event_renderer = EmployerEvents::Renderer.new(ev)
+      carrier_files.each do |car|
+        car.render_event_using(event_renderer)
+      end
+    end
+    z_file = Tempfile.new
+    z_file.close
+    z_file.unlink
+    zip_path = z_file.path + ".zip"
+    Zip::File.open(zip_path, ::Zip::File::CREATE) do |zip|
+      carrier_files.each do |car|
+        car.write_to_zip(zip)
+      end
+    end
+    zip_path
   end
 
 end

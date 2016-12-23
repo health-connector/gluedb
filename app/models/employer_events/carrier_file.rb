@@ -62,13 +62,13 @@ module EmployerEvents
       header << @buffer.string
       [file_name, header]
     end
-  end
 
-  def write_to_zip(zip)
-    return if @empty
-    f_name, data = result
-    zip.get_output_stream(f_name) do |os|
-      os.write(data)
+    def write_to_zip(zip)
+      return if @empty
+      f_name, data = result
+      zip.get_output_stream(f_name) do |os|
+        os.write(data)
+      end
     end
   end
 end

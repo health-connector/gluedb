@@ -7,7 +7,35 @@ module BusinessProcesses
     include Handlers::EnrollmentEventXmlHelper
 
     def hash
-      [subscriber_id, coverage_type, employer_fein, plan_active_year].hash
+      [subscriber_id, coverage_type, employer_fein].hash
+    end
+
+    def drop!
+      amqp_response_channel.acknowledge(message_tag, false)
+    end
+
+    def duplicates?(other)
+      return false unless other.active_year == active_year
+      return false unless other.hbx_enrollment_id == hbx_enrollment_id
+      (other.is_coverage_starter? && self.is_cancel?) ||
+        (other.is_cancel? && self.is_coverage_starter?)
+    end
+
+    def is_coverage_starter?
+      [
+        "urn:openhbx:terms:v1:enrollment#initial",
+        "urn:openhbx:terms:v1:enrollment#auto_renew",
+        "urn:openhbx:terms:v1:enrollment#active_renew"
+      ].include?(enrollment_action)
+    end
+
+    def is_cancel?
+      return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
+      extract_enrollee_start(subscriber) == extract_enrollee_end(subscriber)
+    end
+
+    def enrollment_action
+      @enrollment_action ||= extract_enrollment_action(enrollment_event_xml)
     end
 
     def enrollment_event_xml

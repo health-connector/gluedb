@@ -6,15 +6,34 @@ module BusinessProcesses
 
     include Handlers::EnrollmentEventXmlHelper
 
-    def hash
-      [subscriber_id, coverage_type, employer_fein].hash
+    def initialize
+      @droppable = false
     end
 
-    def drop!
+    def hash
+      bucket_id.hash
+    end
+
+    def bucket_id 
+      [subscriber_id, coverage_type, employer_fein]
+    end
+
+    def mark_for_drop!
+      @droppable = true
+    end
+
+    def drop_if_marked!
+      return false unless @droppable
       amqp_response_channel.acknowledge(message_tag, false)
+      # GC hint by nilling out references
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
     end
 
     def duplicates?(other)
+      return false unless other.bucket_id == bucket_id
       return false unless other.active_year == active_year
       return false unless other.hbx_enrollment_id == hbx_enrollment_id
       (other.is_coverage_starter? && self.is_cancel?) ||

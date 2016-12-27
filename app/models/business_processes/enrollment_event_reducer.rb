@@ -2,34 +2,25 @@ module BusinessProcesses
   class EnrollmentEventReducer
     include Enumerable
 
-    def initialize
-      @set_holder = Hash.new { |h,k| h[k] = Array.new }
+    def initialize(messages)
+      @items = messages
     end
 
-    def merge!(item)
-      h_key = item.hash
-      existing_sets = @set_holder[h_key]
-      matches, no_match = existing_sets.partition { |s| s.duplicates?(item) }
-      if matches.any?
-        matches.each do |match|
-          match.drop!
-          # GC hint
-          match.freeze
-        end
-        item.drop!
-        # GC hint
-        match.freeze
-        @set_holder[h_key] = no_match + [item]
-      else
-        @set_holder[h_key] = no_match + [item]
-      end
-      self
-    end
-
-    def each
-      @set_holder.values.each do |val|
-        yield val
-      end
+    def buckets
+      @buckets ||= begin
+                     @items.combination(2).each do |a, b|
+                       if a.hash == b.hash
+                         if a.duplicates?(b)
+                           a.mark_for_drop!
+                           b.mark_for_drop!
+                         end
+                       end
+                     end
+                     [dropped, free_of_dupes]  = @items.partition(&:drop_if_marked!)
+                     # GC hint
+                     dropped = nil
+                     free_of_dupes.group_by(&:bucket_id).values
+                   end
     end
   end
 end

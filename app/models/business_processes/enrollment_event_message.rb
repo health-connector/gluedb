@@ -15,7 +15,7 @@ module BusinessProcesses
     end
 
     def bucket_id 
-      [subscriber_id, coverage_type, employer_fein]
+      [subscriber_id, coverage_type, employer_hbx_id]
     end
 
     def mark_for_drop!
@@ -81,8 +81,8 @@ module BusinessProcesses
       @active_year ||= extract_active_year(policy_cv)
     end
 
-    def employer_fein
-      @employer_fein ||= begin
+    def employer_hbx_id
+      @employer_hbx_id ||= begin
                            if determine_market(enrollment_event_xml) == "individual"
                              nil
                            else

@@ -7,7 +7,7 @@ module BusinessProcesses
     include Handlers::EnrollmentEventXmlHelper
 
     def hash
-      [subscriber_id, coverage_type, employer_fein, plan_active_year].hash
+      [subscriber_id, coverage_type, employer_hbx_id, plan_active_year].hash
     end
 
     def enrollment_event_xml
@@ -34,8 +34,8 @@ module BusinessProcesses
       @active_year ||= extract_active_year(policy_cv)
     end
 
-    def employer_fein
-      @employer_fein ||= begin
+    def employer_hbx_id
+      @employer_hbx_id ||= begin
                            if determine_market(enrollment_event_xml) == "individual"
                              nil
                            else

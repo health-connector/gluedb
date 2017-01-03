@@ -3,9 +3,9 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "release-3.7"
-set :rails_env,       "production"
-set :deploy_to,       "/var/www/deployments/gluedb"
+set :branch,      "release-4.0"
+set :rails_env,   "production"
+set :deploy_to,   "/var/www/deployments/gluedb"
 set :deploy_via, :copy
 
 
@@ -28,6 +28,7 @@ namespace :deploy do
     run "mkdir -p #{release_path}/.bundle"
     run "cp -f #{deploy_to}/shared/.bundle/config #{release_path}/.bundle/config"
     run "cd #{release_path} && bundle install"
+    run "cd #{release_path} && bundle exec rails -e production script/amqp/configure_amqp_topology.rb"
   end
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"

@@ -45,6 +45,7 @@ group :test do
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
   gem 'simplecov', :require => false, :group => :test
+  gem 'rubycritic', :require => false
 end
 
 group :production do

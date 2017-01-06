@@ -33,6 +33,10 @@ group :development, :assets do
   gem "rails_best_practices"
 end
 
+group :development, :test do
+  gem "parallel_tests"
+end
+
 group :test do
   gem 'test-unit'
 	gem 'mongoid-rspec'
@@ -46,6 +50,7 @@ group :test do
   gem 'savon', '2.7'
   gem 'simplecov', :require => false, :group => :test
   gem 'rubycritic', :require => false
+  gem 'rspec_junit_formatter'
 end
 
 group :production do

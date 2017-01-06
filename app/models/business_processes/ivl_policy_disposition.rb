@@ -24,8 +24,8 @@ module BusinessProcesses
 
     def policy_action
       current_action = extract_enrollment_action(enrollment_event_cv)
-      # If they say it's a renewal, it's a renewal
-      return current_action if is_ivl_active_renewal? || is_ivl_passive_renewal?
+      # If they say it's a passive renewal, it's a passive renewal
+      return current_action if is_ivl_passive_renewal?
       plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return "urn:openhbx:terms:v1:enrollment#initial" if subscriber_person.nil?
       # Determine and provide correct action here

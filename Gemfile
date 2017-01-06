@@ -28,7 +28,7 @@ group :development, :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'therubyracer', :platforms => :ruby
   gem 'less-rails-bootstrap', '3.2.0', :group => :test
-  gem 'designmodo-flatuipro-rails', '~> 1.3.0.0.branch', :group => :test
+  gem 'designmodo-flatuipro-rails', git: "git@github.com:dchbx/designmodo-flatuipro-rails.git", :group => :test
   gem 'font-awesome-rails', '4.2.0.0'
   gem "rails_best_practices"
 end

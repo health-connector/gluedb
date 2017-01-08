@@ -7,7 +7,7 @@ module Handlers
       reduced_list = perform_reduction(context)
       reduced_list.map do |element|
 #        begin
-          super(new_context)
+          super(element)
 #        rescue
           # Add error information to duplicated context
 #        end

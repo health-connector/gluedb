@@ -5,44 +5,26 @@ module Listeners
       "#{ec.hbx_id}.#{ec.environment}.q.glue.enrollment_event_batch_handler"
     end
 
-    def resource_event_broadcast(level, event_key, r_code, body = "", other_headers = {})
-        event_body = (body.respond_to?(:to_s) ? body.to_s : body.inspect)
-        broadcast_event({
-          :routing_key => "#{level}.application.gluedb.enrollment_event_batch_handler.#{event_key}",
-          :headers => other_headers.merge({
-            :return_status => r_code.to_s,
-            :submitted_timestamp => Time.now
-          })
-        },event_body)
-    end
-
-    def resource_error_broadcast(event_key, r_code, body = "", other_headers)
-      resource_event_broadcast("error", event_key, r_code, body, other_headers)
-    end
-
     def process
       events = []
+      responder = ::ExternalEvents::EventResponder.new(
+        "application.gluedb.enrollment_event_batch_handler",
+        channel
+      )
       di, props, payload = queue.pop({:manual_ack => true})
       while (di != nil) do
-        event_message = BusinessProcesses::EnrollmentEventMessage.new
-        event_message.message_tag = di.delivery_tag
-        event_message.amqp_response_channel = channel
-        event_message.event_xml = payload 
+        headers = props.headers || {}
+        event_message = ExternalEvents::EnrollmentEventNotification.new(
+          responder,
+          di.delivery_tag,
+          extract_timestamp(props),
+          payload,
+          headers
+        )
         events << event_message
         di, props, payload = queue.pop({:manual_ack => true})
       end
-      batch = BusinessProcesses::EnrollmentEventMessageBatch.new(events)
-      results = EnrollmentEventProcessingClient.new.call(batch)
-      results.flatten.each do |res|
-        if res.errors.has_errors?
-          resource_error_broadcast("invalid_event", "522", {
-            :errors => res.errors.errors.to_hash,
-            :event => res.event_xml
-          }.to_json, {:hbx_enrollment_id => res.hbx_enrollment_id})
-        else
-          resource_event_broadcast("info", "event_processed", "200", res.event_xml, {:hbx_enrollment_id => res.hbx_enrollment_id}) 
-        end
-      end
+      results = EnrollmentEventProcessingClient.new.call(events)
     end
 
    def self.create_queues(chan)

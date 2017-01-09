@@ -16,7 +16,7 @@ module BusinessProcesses
                          end
                        end
                      end
-                     [dropped, free_of_dupes]  = @items.partition(&:drop_if_marked!)
+                     dropped, free_of_dupes  = @items.partition(&:drop_if_marked!)
                      # GC hint
                      dropped = nil
                      free_of_dupes.group_by(&:bucket_id).values

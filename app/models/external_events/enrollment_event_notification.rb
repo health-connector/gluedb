@@ -16,6 +16,7 @@ module ExternalEvents
       @errors = []
       @timestamp = t_stamp
       @droppable = false
+      @bogus_termination = false
       @event_responder = e_responder
       @message_tag = m_tag
       @event_xml = e_xml
@@ -33,6 +34,14 @@ module ExternalEvents
       @droppable = true
     end
 
+    def drop_if_bogus_term!
+      return false unless @bogus_termination
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
+    end
+
     def drop_if_marked!
       return false unless @droppable
       event_responder.broadcast_ok_response(
@@ -46,6 +55,17 @@ module ExternalEvents
         instance_variable_set(iv, nil)
       end
       true
+    end
+
+    def check_for_bogus_term_against(others)
+      return unless is_termination?
+      others.each do |other|
+        if (other.hbx_enrollment_id == hbx_enrollment_id) && other.is_coverage_starter?
+          @bogus_termination = false
+          return 
+        end
+      end
+      @bogus_termination = existing_policy.nil?
     end
 
     def check_and_mark_duplication_against(other)
@@ -69,6 +89,10 @@ module ExternalEvents
         "urn:openhbx:terms:v1:enrollment#auto_renew",
         "urn:openhbx:terms:v1:enrollment#active_renew"
       ].include?(enrollment_action)
+    end
+
+    def is_termination?
+      (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end
 
     def is_cancel?
@@ -134,6 +158,10 @@ module ExternalEvents
 
     def self.lookup_ancestors
       [self]
+    end
+
+    def existing_policy
+      @existing_policy ||= Policy.where(eg_id: hbx_enrollment_id).first
     end
 
     private

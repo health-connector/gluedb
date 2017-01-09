@@ -10,6 +10,7 @@ module ExternalEvents
     include Handlers::EnrollmentEventXmlHelper
 
     def initialize(e_responder, m_tag, t_stamp, e_xml, headers)
+      @business_process_history = []
       @errors = ActiveModel::Errors.new(self)
       @headers = headers
       @errors = []
@@ -45,6 +46,13 @@ module ExternalEvents
         instance_variable_set(iv, nil)
       end
       true
+    end
+
+    def check_and_mark_duplication_against(other)
+      if duplicates?(other)
+        self.mark_for_drop!
+        other.mark_for_drop!
+      end
     end
 
     def duplicates?(other)
@@ -108,6 +116,10 @@ module ExternalEvents
 
     def coverage_type
       @coverage_type ||= Maybe.new(policy_cv).policy_enrollment.plan.is_dental_only.value
+    end
+
+    def update_business_process_history(entry)
+      @business_process_history << entry
     end
 
 

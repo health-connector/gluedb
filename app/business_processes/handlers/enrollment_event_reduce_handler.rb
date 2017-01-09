@@ -19,10 +19,7 @@ module Handlers
     def perform_reduction(event_list)
       event_list.combination(2).each do |a, b|
         if a.hash == b.hash
-          if a.duplicates?(b)
-            a.mark_for_drop!
-            b.mark_for_drop!
-          end
+          a.check_and_mark_duplication_against(b)
         end
       end
       dropped, free_of_dupes  = event_list.partition(&:drop_if_marked!)

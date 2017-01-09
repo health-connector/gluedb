@@ -8,6 +8,7 @@ module ExternalEvents
     attr_reader :headers
 
     include Handlers::EnrollmentEventXmlHelper
+    include Comparable
 
     def initialize(e_responder, m_tag, t_stamp, e_xml, headers)
       @business_process_history = []
@@ -89,6 +90,42 @@ module ExternalEvents
         "urn:openhbx:terms:v1:enrollment#auto_renew",
         "urn:openhbx:terms:v1:enrollment#active_renew"
       ].include?(enrollment_action)
+    end
+
+    def <=>(other)
+      if other.hbx_enrollment_id == hbx_enrollment_id
+        case [other.is_termination?, is_termination?]
+        when [true, false]
+          -1
+        when [false, true]
+          1
+        else
+          0
+        end
+      elsif other.active_year != active_year
+        active_year.to_i <=> other.active_year.to_i
+      elsif subscriber_start != other.subscriber_start
+        subscriber_start <=> other.subscriber_start
+      else
+        case [subscriber_end.nil?, other.subscriber_end.nil?]
+        when [true, true]
+          0
+        when [false, true]
+          1
+        when [true, false]
+          -1
+        else
+          subscriber_end <=> other.subscriber_end
+        end
+      end
+    end
+
+    def subscriber_start
+      @subscriber_start ||= extract_enrollee_start(subscriber)
+    end
+
+    def subscriber_end
+      @subscriber_end ||= extract_enrollee_end(subscriber)
     end
 
     def is_termination?

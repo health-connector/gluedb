@@ -6,7 +6,8 @@ module Handlers
     # after us once for each in that set.
     # [::ExternalEvents::EnrollmentEventNotification] -> [::EnrollmentAction::Base]
     def call(context)
-      discard_bogus_terms(enrollments)
+      no_bogus_terms = discard_bogus_terms(enrollments)
+      sorted_actions = no_bogus_terms.sort
     end
 
     def discard_bogus_terms(enrollments)

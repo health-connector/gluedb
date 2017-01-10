@@ -36,6 +36,13 @@ module BusinessProcesses
           end
         end
       end
+      if renewal_candidates.any?
+        renewal_candidates.each do |rc|
+          if plan.carrier_id == rc.plan.carrier_id
+            return "urn:openhbx:terms:v1:enrollment#change_product"
+          end
+        end
+      end
       "urn:openhbx:terms:v1:enrollment#initial"
     end
 
@@ -180,7 +187,6 @@ module BusinessProcesses
     def ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
       return false if pol.is_shop?
       return false unless (pol.plan.year == plan.year - 1)
-      return false unless (pol.plan.carrier_id == plan.carrier_id)
       return false unless (plan.coverage_type == pol.plan.coverage_type)
       return false if pol.canceled?
       return false if pol.terminated?

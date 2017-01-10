@@ -207,7 +207,7 @@ module ExternalEvents
       when [false, true]
         false
       else
-        self.subscriber_end == other.subscriber_start - 1.day
+        (self.subscriber_end == other.subscriber_start - 1.day) || (self.is_cancel? && (subscriber_start == other.subscriber_start))
       end
     end
 

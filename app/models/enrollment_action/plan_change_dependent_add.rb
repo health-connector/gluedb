@@ -14,6 +14,5 @@ module EnrollmentAction
 
     def self.carriers_are_different?(chunk)
     end
-
   end
 end

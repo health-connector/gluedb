@@ -1,8 +1,13 @@
 module EnrollmentAction
   class Base
     attr_reader :action
-    attr_reader :existing_policy
-    attr_reader :terminations
+    attr_reader :termination
+
+    def initialize(term, init)
+      @termination = term
+      @action = init
+    end
+
 
     def self.select_action_for(chunk)
       [
@@ -18,7 +23,14 @@ module EnrollmentAction
         ::EnrollmentAction::PlanChangeDependentDrop,
         ::EnrollmentAction::RenewalDependentAdd,
         ::EnrollmentAction::RenewalDependentDrop
-      ].detect { |kls| kls.qualifies?(chunk) }
+      ].detect { |kls| kls.qualifies?(chunk) }.construct(chunk)
     end
+
+    def self.construct(chunk)
+      term = chun.detect { chunk.is_termination? }
+      action = chun.detect { !chunk.is_termination? }
+      self.class.new(term, init)
+    end
+      
   end
 end

@@ -160,6 +160,10 @@ module ExternalEvents
       @subscriber_end ||= extract_enrollee_end(subscriber)
     end
 
+    def is_passive_renewal?
+      (enrollment_action == "urn:openhbx:terms:v1:enrollment#auto_renew")
+    end
+
     def is_termination?
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end

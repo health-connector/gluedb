@@ -25,7 +25,7 @@ module Handlers
       if item.respond_to?(:update_business_process_history)
         item.update_business_process_history(self.class.name)
       else
-        item = item.business_process_history || []
+        current_process_history = item.business_process_history || []
         item.business_process_history = current_process_history + [self.class.name]
       end
     end

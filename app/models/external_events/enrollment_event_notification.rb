@@ -18,6 +18,7 @@ module ExternalEvents
       @timestamp = t_stamp
       @droppable = false
       @bogus_termination = false
+      @bogus_renewal_termination = false
       @event_responder = e_responder
       @message_tag = m_tag
       @event_xml = e_xml
@@ -37,6 +38,14 @@ module ExternalEvents
 
     def drop_if_bogus_term!
       return false unless @bogus_termination
+      event_responder.broadcast_response(
+        "error",
+        "unmatched_termination",
+        "422",
+        event_xml,
+        headers
+      )
+      event_responder.ack_message(message_tag)
       instance_variables.each do |iv|
         instance_variable_set(iv, nil)
       end
@@ -47,6 +56,29 @@ module ExternalEvents
       return false unless @droppable
       event_responder.broadcast_ok_response(
         "enrollment_reduced",
+        event_xml,
+        headers
+      )
+      event_responder.ack_message(message_tag)
+      # GC hint by nilling out references
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
+    end
+
+    def check_for_bogus_renewal_term_against(other)
+      return nil if other.is_termination?
+      return nil unless is_termination?
+      return nil unless (subscriber_end == (other.subscriber_start - 1.day))
+      return nil unless (other.active_year.to_i == active_year.to_i - 1)
+      @bogus_renewal_termination = true
+    end
+
+    def drop_if_bogus_renewal_term!
+      return false unless @bogus_renewal_termination
+      event_responder.broadcast_ok_response(
+        "renewal_termination_reduced",
         event_xml,
         headers
       )
@@ -163,6 +195,20 @@ module ExternalEvents
 
     def active_year
       @active_year ||= extract_active_year(policy_cv)
+    end
+
+    def is_adjacent_to?(other)
+      return false unless active_year == other.active_year
+      case [is_termination?, other.is_termination?]
+      when [true, true]
+        false
+      when [false, false]
+        false
+      when [false, true]
+        false
+      else
+        self.subscriber_end == other.subscriber_start - 1.day
+      end
     end
 
     def employer_hbx_id

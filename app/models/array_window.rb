@@ -14,4 +14,20 @@ class ArrayWindow
       yield [element, head, tail]
     end
   end
+
+  def chunk_adjacent
+    return([@array]) if @array.length < 2
+    result_array = [[@array.first]]
+    @array.each_cons(2) do |items|
+      a, b = items
+      break_it = yield(a, b)
+      *init, last_item = result_array
+      if break_it
+        result_array = result_array + [[b]]
+      else
+        result_array = init + [(last_item + [b])]
+      end
+    end
+    result_array
+  end
 end

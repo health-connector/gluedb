@@ -42,8 +42,10 @@ end
 group :test do
   gem 'test-unit'
 	gem 'mongoid-rspec'
-  gem 'rspec-rails' #, '~> 3.0.0.beta'
-  gem 'rspec-collection_matchers'
+  gem 'rspec', '3.3.0'
+  gem 'rspec-core', '3.3.2'
+  gem 'rspec-rails', '3.3.3'
+  gem 'rspec-collection_matchers', '1.1.2'
   gem 'capybara'
   gem "capybara-webkit"
   gem 'factory_girl_rails'

@@ -468,8 +468,10 @@ DEPENDENCIES
   rails_best_practices
   roo
   rsec
-  rspec-collection_matchers
-  rspec-rails
+  rspec (= 3.3.0)
+  rspec-collection_matchers (= 1.1.2)
+  rspec-core (= 3.3.2)
+  rspec-rails (= 3.3.3)
   rspec_junit_formatter
   ruby-ole (= 1.2.11.7)
   ruby-progressbar (= 1.6.0)

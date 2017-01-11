@@ -28,18 +28,20 @@ namespace :deploy do
     run "mkdir -p #{release_path}/.bundle"
     run "cp -f #{deploy_to}/shared/.bundle/config #{release_path}/.bundle/config"
     run "cd #{release_path} && bundle install"
-    run "cd #{release_path} && bundle exec rails r -e production script/amqp/configure_amqp_topology.rb"
   end
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"
   task :finalize_update do
     run "rm -f #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
+    run "rm -f #{release_path}/config/exchange.yml"
+    run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
     run "ln -s #{deploy_to}/shared/pids #{release_path}/pids"
     run "rm -rf #{release_path}/log"
     run "ln -s #{deploy_to}/shared/log #{release_path}/log"
     run "ln -s #{deploy_to}/shared/eye #{release_path}/eye"
+    run "cd #{release_path} && bundle exec rails r -e production script/amqp/configure_amqp_topology.rb"
   end
 
   desc "Restart nginx and unicorn"

@@ -28,3 +28,4 @@ db/seedfiles/*.csv
 db/seedfiles/*.yml
 node_modules
 .idea/
+config/exchange.yml

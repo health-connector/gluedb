@@ -31,6 +31,12 @@ module EnrollmentAction
       action = chun.detect { !chunk.is_termination? }
       self.class.new(term, init)
     end
+
+    # When implemented in a subclass, return true on successful persistance of
+    # the action - otherwise return false.
+    def persist
+      raise NotImplementedError, "subclass responsibility"
+    end
       
   end
 end

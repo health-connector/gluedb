@@ -23,6 +23,10 @@ group :development do
 #  gem 'jazz_hands'
 end
 
+group 'development', 'test' do
+  gem 'rspec', '3.3.0'
+end
+
 group :development, :assets, :test do
   gem 'libv8'
   gem 'therubyracer', '0.12.2', :platforms => :ruby
@@ -45,7 +49,6 @@ end
 group :test do
   gem 'test-unit'
 	gem 'mongoid-rspec'
-  gem 'rspec', '3.3.0'
   gem 'rspec-core', '3.3.2'
   gem 'rspec-rails', '3.3.3'
   gem 'rspec-collection_matchers', '1.1.2'

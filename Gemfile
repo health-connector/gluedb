@@ -16,6 +16,7 @@ gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
 gem "interactor", "~> 3.0"
 gem 'interactor-rails', '2.0.2'
 gem "psych", "2.0.5"
+gem 'libv8'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -27,7 +28,6 @@ group :development, :assets do
   gem 'sass-rails',   '~> 3.2.3', :group => :test
   gem 'coffee-rails', '~> 3.2.1', :group => :test
   gem 'uglifier', '>= 1.0.3'
-  gem 'libv8'
   gem 'therubyracer', :platforms => :ruby
   gem 'less-rails-bootstrap', '3.2.0', :group => :test
   gem 'designmodo-flatuipro-rails', git: "git@github.com:dchbx/designmodo-flatuipro-rails.git", :group => :test

@@ -16,7 +16,6 @@ gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
 gem "interactor", "~> 3.0"
 gem 'interactor-rails', '2.0.2'
 gem "psych", "2.0.5"
-gem 'libv8'
 
 group :development do
   gem 'capistrano', '2.15.4'
@@ -24,13 +23,17 @@ group :development do
 #  gem 'jazz_hands'
 end
 
-group :development, :assets do
-  gem 'sass-rails',   '~> 3.2.3', :group => :test
-  gem 'coffee-rails', '~> 3.2.1', :group => :test
-  gem 'uglifier', '>= 1.0.3'
+group :development, :assets, :test do
+  gem 'libv8'
   gem 'therubyracer', :platforms => :ruby
-  gem 'less-rails-bootstrap', '3.2.0', :group => :test
-  gem 'designmodo-flatuipro-rails', git: "git@github.com:dchbx/designmodo-flatuipro-rails.git", :group => :test
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'less-rails-bootstrap', '3.2.0'
+  gem 'designmodo-flatuipro-rails', git: "git@github.com:dchbx/designmodo-flatuipro-rails.git"
+end
+
+group :development, :assets do
+  gem 'uglifier', '>= 1.0.3'
   gem 'font-awesome-rails', '4.2.0.0'
   gem "rails_best_practices"
 end
@@ -52,7 +55,7 @@ group :test do
   gem 'database_cleaner', '1.5.3'
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
-  gem 'simplecov', :require => false, :group => :test
+  gem 'simplecov', :require => false
   gem 'rubycritic', :require => false
   gem 'rspec_junit_formatter'
 end

@@ -1,8 +1,8 @@
 module EnrollmentAction
-  class ActionPersistanceHelper
+  class ActionPublishHelper
     attr_reader :event_xml_doc
 
-    delegate :to_xml, :to => event_xml_doc
+    delegate :to_xml, :to => :event_xml_doc
 
     def initialize(xml_string)
       @event_xml_doc = Nokogiri::XML(xml_string)

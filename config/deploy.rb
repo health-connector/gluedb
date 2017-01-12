@@ -3,7 +3,7 @@ set :application, "DCHBX GlueDB"
 # set :sudo, "sudo -u nginx"
 set :scm, :git
 set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "release-4.0"
+set :branch,      "master"
 set :rails_env,   "production"
 set :deploy_to,   "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -13,9 +13,9 @@ set :user, "nginx"
 set :use_sudo, false
 set :default_shell, "bash -l"
 
-role :web, "10.83.85.128"
-role :app, "10.83.85.128"
-role :db,  "10.83.85.128", :primary => true        # This is where Rails migrations will run
+role :web, "10.83.85.127"
+role :app, "10.83.85.127"
+role :db,  "10.83.85.127", :primary => true        # This is where Rails migrations will run
 
 default_run_options[:pty] = true  # prompt for sudo password, if needed
 after "deploy:restart", "deploy:cleanup_old"  # keep only last 5 releases
@@ -28,6 +28,7 @@ namespace :deploy do
     run "mkdir -p #{release_path}/.bundle"
     run "cp -f #{deploy_to}/shared/.bundle/config #{release_path}/.bundle/config"
     run "cd #{release_path} && bundle install"
+    run "cd #{release_path} && bundle exec rails r -e production script/amqp/configure_amqp_topology.rb"
   end
 
   desc "create symbolic links to project nginx, unicorn and database.yml config and init files"
@@ -35,13 +36,11 @@ namespace :deploy do
     run "rm -f #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
     run "rm -f #{release_path}/config/exchange.yml"
-    run "ln -s #{deploy_to}/shared/config/mongoid.yml #{release_path}/config/mongoid.yml"
     run "ln -s #{deploy_to}/shared/config/exchange.yml #{release_path}/config/exchange.yml"
     run "ln -s #{deploy_to}/shared/pids #{release_path}/pids"
     run "rm -rf #{release_path}/log"
     run "ln -s #{deploy_to}/shared/log #{release_path}/log"
     run "ln -s #{deploy_to}/shared/eye #{release_path}/eye"
-    run "cd #{release_path} && bundle exec rails r -e production script/amqp/configure_amqp_topology.rb"
   end
 
   desc "Restart nginx and unicorn"

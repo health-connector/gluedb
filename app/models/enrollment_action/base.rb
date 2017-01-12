@@ -37,6 +37,11 @@ module EnrollmentAction
     def persist
       raise NotImplementedError, "subclass responsibility"
     end
-      
+
+    # Performing publishing.  On failure, use the enrollment event
+    # notifications to log the errors.
+    def publish
+      raise NotImplementedError, "subclass responsibility"
+    end
   end
 end

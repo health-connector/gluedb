@@ -29,7 +29,7 @@ module Handlers
         cv1 = EdiCodec::Cv1::Cv1Builder.new(context.event_xml)
         v1_xml = cv1.call.to_xml
         pubber = ::Services::NfpPublisher.new
-        pubber.publish(true, "#{context.event_message.hbx_enrollment_id}.xml", cv)
+        pubber.publish(true, "#{context.event_message.hbx_enrollment_id}.xml", v1_xml)
       end
       @app.call(context)
     end

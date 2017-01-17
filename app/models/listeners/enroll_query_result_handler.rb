@@ -20,7 +20,7 @@ module Listeners
       resource_event_broadcast("error", event_key, r_code, body, other_headers)
     end
 
-    def process_retrieved_resource(delivery_info, hbx_enrollment_id, r_code, enrollment_event_resource, m_headers, enrollment_action)
+    def process_retrieved_resource(delivery_info, hbx_enrollment_id, r_code, enrollment_event_resource, m_headers, enrollment_action, reply_to)
       begin
         new_body = enrollment_event_resource.transform_action_to(enrollment_action)
         ::Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |chan|
@@ -28,7 +28,7 @@ module Listeners
           dex.publish(
             new_body,
             {
-              :routing_key => ::Listeners::EnrollmentEventHandler.queue_name
+              :routing_key => reply_to
             }
           )
         end
@@ -49,12 +49,14 @@ module Listeners
 
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
+      reply_to_prop = properties.reply_to.to_s
+      reply_to = reply_to_prop.blank? ? ::Listeners::EnrollmentEventHandler.queue_name : reply_to_prop
       hbx_enrollment_id = m_headers["hbx_enrollment_id"].to_s
       enrollment_action = m_headers["enrollment_action_uri"].to_s
       r_code, resource_or_body = ::RemoteResources::EnrollmentEventResource.retrieve(self, hbx_enrollment_id)
       case r_code.to_s
       when "200"
-        process_retrieved_resource(delivery_info, hbx_enrollment_id, r_code, resource_or_body, m_headers, enrollment_action)
+        process_retrieved_resource(delivery_info, hbx_enrollment_id, r_code, resource_or_body, m_headers, enrollment_action, reply_to)
       when "404"
         resource_error_broadcast("resource_not_found", r_code, m_headers, m_headers)
         channel.ack(delivery_info.delivery_tag, false)

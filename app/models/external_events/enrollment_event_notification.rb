@@ -36,6 +36,17 @@ module ExternalEvents
       @droppable = true
     end
 
+    def store_error_model(err_msg, err_headers)
+      EnrollmentAction::EnrollmentActionIssue.create!({
+        :hbx_enrollment_id => hbx_enrollment_id,
+        :hbx_enrollment_vocabulary => event_xml,
+        :enrollment_action_uri => enrollment_action,
+        :error_message => err_msg,
+        :headers => err_headers,
+        :received_at => timestamp
+      })
+    end
+
     def drop_if_bogus_term!
       return false unless @bogus_termination
       event_responder.broadcast_response(
@@ -44,6 +55,12 @@ module ExternalEvents
         "422",
         event_xml,
         headers
+      )
+      store_error_model(
+        "unmatched_termination",
+        headers.merge({
+          "return_status" => "422"
+        })
       )
       event_responder.ack_message(message_tag)
       instance_variables.each do |iv|
@@ -98,6 +115,13 @@ module ExternalEvents
         event_xml,
         headers.merge({
           :not_implented_action => action_name
+        })
+      )
+      store_error_model(
+        "not_yet_implemented",
+        headers.merge({
+          "return_status" => "422",
+          "not_implemented_action" => action_name
         })
       )
       event_responder.ack_message(message_tag)

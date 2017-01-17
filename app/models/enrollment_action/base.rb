@@ -8,9 +8,17 @@ module EnrollmentAction
       @action = init
     end
 
+    def update_business_process_history(entry)
+      if @termination
+        @termination.update_business_process_history(entry)
+      end
+      if @action
+        @action.update_business_process_history(entry)
+      end
+    end
 
     def self.select_action_for(chunk)
-      [
+      selected_action = [
         ::EnrollmentAction::PassiveRenewal,
         ::EnrollmentAction::ActiveRenewal,
         ::EnrollmentAction::CarrierSwitch,
@@ -22,14 +30,27 @@ module EnrollmentAction
         ::EnrollmentAction::PlanChangeDependentAdd,
         ::EnrollmentAction::PlanChangeDependentDrop,
         ::EnrollmentAction::RenewalDependentAdd,
-        ::EnrollmentAction::RenewalDependentDrop
-      ].detect { |kls| kls.qualifies?(chunk) }.construct(chunk)
+        ::EnrollmentAction::RenewalDependentDrop,
+        ::EnrollmentAction::Termination
+      ].detect { |kls| kls.qualifies?(chunk) }
+      
+      if selected_action
+        selected_action.construct(chunk)
+      else
+        puts "====== NO EVENT FOUND ====="
+        puts "Chunk length: #{chunk.length}"
+        chunk.each do |c|
+          puts c.hbx_enrollment_id
+          puts c.event_xml
+        end
+        raise "NO MATCH EVENT FOUND"
+      end
     end
 
     def self.construct(chunk)
-      term = chun.detect { chunk.is_termination? }
-      action = chun.detect { !chunk.is_termination? }
-      self.class.new(term, init)
+      term = chunk.detect { |c| c.is_termination? }
+      action = chunk.detect { |c| !c.is_termination? }
+      self.new(term, action)
     end
 
     # When implemented in a subclass, return true on successful persistance of

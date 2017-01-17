@@ -29,7 +29,7 @@ module ExternalEvents
     protected
 
     def broadcast_event(props, payload)
-      broadcaster = ::Amqp::EventBroadcaster.new(amqp_response_channel, connection)
+      broadcaster = ::Amqp::EventBroadcaster.new(amqp_response_channel.connection)
       broadcaster.broadcast(props, payload)
     end
 

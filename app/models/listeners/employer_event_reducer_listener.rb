@@ -125,7 +125,7 @@ module Listeners
       q = create_queues(chan)
       create_bindings(chan, q)
       chan.prefetch(1)
-      self.new(chan, q).subscribe(:block => true, :manual_ack => true)
+      self.new(chan, q).subscribe(:block => true, :manual_ack => true, :ack => true)
       conn.close
     end
   end

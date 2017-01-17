@@ -1,5 +1,7 @@
 module EnrollmentAction
   module RenewalComparisonHelper
+    include Handlers::EnrollmentEventXmlHelper
+
     def any_renewal_candidates?(enrollment_event)
       (same_carrier_renewal_candidates(enrollment_event).any? ||
         other_carrier_renewal_candidates(enrollment_event).any?)

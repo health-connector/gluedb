@@ -243,6 +243,10 @@ module ExternalEvents
                          end
     end
 
+    def is_shop?
+      !employer_hbx_id.blank?
+    end
+
     def coverage_type
       @coverage_type ||= Maybe.new(policy_cv).policy_enrollment.plan.is_dental_only.value
     end
@@ -251,6 +255,11 @@ module ExternalEvents
       @business_process_history << entry
     end
 
+    def all_member_ids
+      @all_member_ids ||= policy_cv.enrollees.map do |en|
+        Maybe.new(en.member.id).strip.split("#").last.value
+      end
+    end
 
     # Errors stuff for ActiveModel::Errors
     def read_attribute_for_validation(attr)
@@ -266,7 +275,7 @@ module ExternalEvents
     end
 
     def existing_policy
-      @existing_policy ||= Policy.where(eg_id: hbx_enrollment_id).first
+      @existing_policy ||= Policy.where(hbx_enrollment_ids: hbx_enrollment_id).first
     end
 
     def existing_plan

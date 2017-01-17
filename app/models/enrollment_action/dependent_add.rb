@@ -8,12 +8,8 @@ module EnrollmentAction
       dependents_added?(chunk)
     end
 
-    def persist
-      true
-    end
-
     def added_dependents
-      []
+      action.all_member_ids - termination.all_member_ids
     end
 
     def publish

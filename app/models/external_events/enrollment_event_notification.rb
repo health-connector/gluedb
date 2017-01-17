@@ -83,7 +83,25 @@ module ExternalEvents
         headers
       )
       event_responder.ack_message(message_tag)
-      # GC hint by nilling out references
+      # gc hint by nilling out references
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
+    end
+
+    def drop_not_yet_implemented!(action_name)
+      event_responder.broadcast_response(
+        "error",
+        "not_yet_implemented",
+        "422",
+        event_xml,
+        headers.merge({
+          :not_implented_action => action_name
+        })
+      )
+      event_responder.ack_message(message_tag)
+      # gc hint by nilling out references
       instance_variables.each do |iv|
         instance_variable_set(iv, nil)
       end
@@ -249,6 +267,10 @@ module ExternalEvents
 
     def existing_policy
       @existing_policy ||= Policy.where(eg_id: hbx_enrollment_id).first
+    end
+
+    def existing_plan
+      @existing_plan ||= extract_plan(policy_cv)
     end
 
     private

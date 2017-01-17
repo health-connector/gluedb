@@ -43,5 +43,14 @@ module EnrollmentAction
     def publish
       raise NotImplementedError, "subclass responsibility"
     end
+
+    def drop_not_yet_implemented!
+      if @termination
+        @termination.drop_not_yet_implemented!(self.class.name.to_s)
+      end
+      if @action
+        @action.drop_not_yet_implemented!(self.class.name.to_s)
+      end
+    end
   end
 end

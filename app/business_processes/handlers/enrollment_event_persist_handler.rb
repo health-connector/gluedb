@@ -5,9 +5,14 @@ module Handlers
     # updating the objects in glue accordingly
     # ::EnrollmentAction::Base -> ::EnrollmentAction::Base
     def call(context)
-      persisted_actions = context.select(&:persist)
-      persisted_actions.map do |pa|
-        super(pa)
+      begin
+        if context.persist
+          super(context)
+        else
+          # Log persistence failure
+        end
+      rescue NotImplementedError => e
+        context.drop_not_yet_implemented!
       end
     end
   end

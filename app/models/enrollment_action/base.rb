@@ -76,6 +76,15 @@ module EnrollmentAction
       end
     end
 
+    def flow_successful!
+      if @termination
+        @termination.flow_successful!(self.class.name.to_s)
+      end
+      if @action
+        @action.flow_successful!(self.class.name.to_s)
+      end
+    end
+
     # Errors stuff for ActiveModel::Errors
     def read_attribute_for_validation(attr)
       send(attr)
@@ -87,6 +96,17 @@ module EnrollmentAction
 
     def self.lookup_ancestors
       [self]
+    end
+
+    def publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id)
+      publisher = Publishers::TradingPartnerEdi.new(amqp_connection, event_xml)
+      publish_result = false
+      publish_result = publisher.publish
+      if publish_result
+         publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, event_xml, hbx_enrollment_id, employer_hbx_id)
+         publish_result = publisher2.publish
+      end
+      publish_result
     end
   end
 end

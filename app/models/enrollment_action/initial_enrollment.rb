@@ -23,14 +23,7 @@ module EnrollmentAction
 
     def publish
       amqp_connection = action.event_responder.connection
-      publisher = Publishers::TradingPartnerEdi.new(amqp_connection, action.event_xml)
-      publish_result = false
-      publish_result = publisher.publish
-      if publish_result
-         publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, action.event_xml, action.hbx_enrollment_id, action.employer_hbx_id)
-         publish_result = publisher2.publish
-      end
-      publish_result
+      publish_edi(amqp_connection, action.event_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
   end
 end

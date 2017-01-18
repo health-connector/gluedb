@@ -107,6 +107,25 @@ module ExternalEvents
       true
     end
 
+    def flow_successful!(action_name)
+      event_responder.broadcast_response(
+        "info",
+        "event_processed",
+        "200",
+        event_xml,
+        headers.merge({
+          :enrollment_action => action_name
+        })
+      )
+      event_responder.ack_message(message_tag)
+      # gc hint by nilling out references
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
+    end
+
+
     def drop_not_yet_implemented!(action_name)
       event_responder.broadcast_response(
         "error",

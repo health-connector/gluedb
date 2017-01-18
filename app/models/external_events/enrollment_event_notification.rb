@@ -6,12 +6,13 @@ module ExternalEvents
     attr_reader :errors
     attr_reader :event_responder
     attr_reader :headers
+    attr_reader :business_process_history
 
     include Handlers::EnrollmentEventXmlHelper
     include Comparable
 
     def initialize(e_responder, m_tag, t_stamp, e_xml, headers)
-      @business_process_history = []
+      @business_process_history = Array.new
       @errors = ActiveModel::Errors.new(self)
       @headers = headers
       @errors = []
@@ -63,10 +64,17 @@ module ExternalEvents
         })
       )
       event_responder.ack_message(message_tag)
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
-      end
+      clean_ivars
       true
+    end
+
+    def clean_ivars
+      # GC hint
+      instance_variables.each do |iv|
+        unless iv.to_s == "@business_process_history"
+          instance_variable_set(iv, nil)
+        end
+      end
     end
 
     def drop_if_marked!
@@ -77,10 +85,7 @@ module ExternalEvents
         headers
       )
       event_responder.ack_message(message_tag)
-      # GC hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
-      end
+      clean_ivars
       true
     end
 
@@ -101,9 +106,7 @@ module ExternalEvents
       )
       event_responder.ack_message(message_tag)
       # gc hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
-      end
+      clean_ivars
       true
     end
 
@@ -119,9 +122,7 @@ module ExternalEvents
       )
       event_responder.ack_message(message_tag)
       # gc hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
-      end
+      clean_ivars
       true
     end
 
@@ -145,9 +146,7 @@ module ExternalEvents
       )
       event_responder.ack_message(message_tag)
       # gc hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
-      end
+      clean_ivars
       true
     end
 
@@ -295,7 +294,7 @@ module ExternalEvents
     end
 
     def update_business_process_history(entry)
-      @business_process_history << entry
+      @business_process_history = @business_process_history + [entry]
     end
 
     def all_member_ids
@@ -328,6 +327,7 @@ module ExternalEvents
     private
 
     def initialize_clone(other)
+      @business_process_history = other.business_process_history.clone
       @headers = other.headers.clone
       @timestamp = other.timestamp.clone
       @event_xml = other.event_xml.clone

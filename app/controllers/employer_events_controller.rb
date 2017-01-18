@@ -15,7 +15,7 @@ class EmployerEventsController < ApplicationController
         )
       end
     end
-    conn.close
+    connection.close
     redirect_to employer_events_path
   end
 

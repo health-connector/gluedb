@@ -39,13 +39,11 @@ module EnrollmentAction
       if selected_action
         selected_action.construct(chunk)
       else
-        puts "====== NO EVENT FOUND ====="
-        puts "Chunk length: #{chunk.length}"
-        chunk.each do |c|
-          puts c.hbx_enrollment_id
-          puts c.event_xml
+        batch_id = SecureRandom.uuid
+        chunk.each_with_index do |c,idx|
+          c.no_event_found!(batch_id, idx)
         end
-        raise "NO MATCH EVENT FOUND"
+        nil
       end
     end
 

@@ -1,3 +1,5 @@
+require "securerandom"
+
 module ExternalEvents
   class EnrollmentEventNotification
     attr_reader :timestamp
@@ -142,6 +144,31 @@ module ExternalEvents
         headers.merge({
           "return_status" => "422",
           "not_implemented_action" => action_name
+        })
+      )
+      event_responder.ack_message(message_tag)
+      # gc hint by nilling out references
+      clean_ivars
+      true
+    end
+
+    def no_event_found!(batch_id, index)
+      event_responder.broadcast_response(
+        "error",
+        "unknown_enrollment_action",
+        "422",
+        event_xml,
+        headers.merge({
+          :batch_id => batch_id,
+          :batch_index => index
+        })
+      )
+      store_error_model(
+        "unknown_enrollment_action",
+        headers.merge({
+          :batch_id => batch_id,
+          :batch_index => index,
+          "return_status" => "422"
         })
       )
       event_responder.ack_message(message_tag)

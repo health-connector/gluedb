@@ -51,7 +51,10 @@ module Handlers
       actions = []
       enrollment_set.each do |chunk|
         if !chunk.empty?
-          actions << EnrollmentAction::Base.select_action_for(chunk)
+          action = EnrollmentAction::Base.select_action_for(chunk)
+          if action
+            actions << action
+          end
         end
       end
       actions

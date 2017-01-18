@@ -2,10 +2,12 @@ module EnrollmentAction
   class Base
     attr_reader :action
     attr_reader :termination
+    attr_reader :errors
 
     def initialize(term, init)
       @termination = term
       @action = init
+      @errors = ActiveModel::Errors.new(self)
     end
 
     def update_business_process_history(entry)
@@ -72,6 +74,19 @@ module EnrollmentAction
       if @action
         @action.drop_not_yet_implemented!(self.class.name.to_s)
       end
+    end
+
+    # Errors stuff for ActiveModel::Errors
+    def read_attribute_for_validation(attr)
+      send(attr)
+    end
+
+    def self.human_attribute_name(attr, options = {})
+      attr
+    end
+
+    def self.lookup_ancestors
+      [self]
     end
   end
 end

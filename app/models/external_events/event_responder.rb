@@ -8,6 +8,10 @@ module ExternalEvents
       @amqp_response_channel = amqp_rc
     end
 
+    def connection
+      @amqp_response_channel.connection
+    end
+
     def ack_message(message_tag)
       amqp_response_channel.ack(message_tag, false)
     end

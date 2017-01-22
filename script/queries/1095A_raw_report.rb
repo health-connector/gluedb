@@ -26,7 +26,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan) do
     csv << ["Glue Policy ID", "Enrollment Group ID", 
             "Subscriber First Name", "Subscriber Last Name", "Subscriber HBX ID", "Authority Member Policy?",
             "Metal Level","Carrier", "HIOS ID",
-            "State","Coverage Start","Coverage End","Premium Amount Total","APTC"]
+            "State","Coverage Start","Coverage End","Premium Amount Total","APTC", "Multiple APTC?"]
     policies_2016_filtered.each do |policy|
       count += 1
       puts "#{Time.now} - #{count}/#{total_count}" if (count % 100 == 0 || count == total_count)
@@ -47,7 +47,12 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan) do
       coverage_end = policy.policy_end
       premium_amount_total = policy.pre_amt_tot
       aptc = policy.applied_aptc
-      csv << [policy_id,eg_id,first_name,last_name,hbx_id,authority,metal_level,carrier_name,hios_id,state,coverage_start,coverage_end,premium_amount_total,aptc]
+      if policy.aptc_credits.size > 0
+        aptc_credits = "TRUE"
+      else
+        aptc_credits = "FALSE"
+      end
+      csv << [policy_id,eg_id,first_name,last_name,hbx_id,authority,metal_level,carrier_name,hios_id,state,coverage_start,coverage_end,premium_amount_total,aptc, aptc_credits]
     end
   end
 end

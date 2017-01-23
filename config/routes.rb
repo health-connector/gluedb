@@ -13,6 +13,9 @@ Gluedb::Application.routes.draw do
 
   resources :users
 
+  resources :enrollment_action_issues, only: [:index, :show] do
+  end
+
   # concern :commentable do
   #   resources :comments #, only: [:new, :create]
   # end

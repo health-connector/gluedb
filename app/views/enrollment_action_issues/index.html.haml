@@ -1,0 +1,17 @@
+%h1 Enrollment Action Issues
+
+%table.table.table-condensed
+  %thead
+    %th Received At
+    %th Enrollment ID
+    %th Enrollment Action
+    %th Error Message
+    %th Status
+  %tbody
+    - @enrollment_action_issues.each do |eai|
+      %tr
+        %td= eai.received_at
+        %td= eai.hbx_enrollment_id
+        %td= link_to(eai.enrollment_action_uri, enrollment_action_issue_path(eai)) 
+        %td= eai.error_message
+        %td= eai.aasm_state

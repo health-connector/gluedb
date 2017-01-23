@@ -10,5 +10,31 @@ module EnrollmentAction
       return false if renewal_candidates.empty?
       renewal_dependents_added?([renewal_candidates.first, chunk.first])
     end
+
+    def added_dependents
+      renewal_candidates = self.class.same_carrier_renewal_candidates(action)
+      action.all_member_ids - renewal_candidates.first.enrollees.map(&:m_id) 
+    end
+
+    def persist
+      members = action.policy_cv.enrollees.map(&:member)
+      members_persisted = members.map do |mem|
+        em = ExternalEvents::ExternalMember.new(mem)
+        em.persist
+      end
+      unless members_persisted.all?
+        return false
+      end
+      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv)
+      ep.persist
+    end
+
+    def publish
+      amqp_connection = termination.event_responder.connection
+      action_helper = EnrollmentAction::ActionPublishHandler.new(action.event_xml)
+      action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#active_renew_member_add")
+      action_helper.filter_affected_members(added_dependents)
+      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
+    end
   end
 end

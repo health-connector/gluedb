@@ -1,18 +1,25 @@
-- t '.title', :default => "Enrollment Action Issues"
 .page-header
   = render('shared/breadcrumb', crumbs: [link_to('Enrollment Action Issues', enrollment_action_issues_path), @enrollment_action_issue.id])
 
-%dl.dl-horizontal
-  %dt Received At:
-  %dd= @enrollment_action_issue.received_at
-  %dt Enrollment ID:
-  %dd= @enrollment_action_issue.hbx_enrollment_id
-  %dt Enrollment Action:
-  %dd= @enrollment_action_issue.enrollment_action_uri
-  %dt Status:
-  %dd= @enrollment_action_issue.aasm_state
-  %dt Error Message:
-  %dd= @enrollment_action_issue.error_message
+.row
+  .col-md-12
+    %dl.dl-horizontal
+      %dt Received At:
+      %dd= @enrollment_action_issue.received_at
+      %dt Enrollment ID:
+      %dd= @enrollment_action_issue.hbx_enrollment_id
+      %dt Enrollment Action:
+      %dd= @enrollment_action_issue.enrollment_action_uri
+      %dt Status:
+      %dd= @enrollment_action_issue.aasm_state
+      %dt Error Message:
+      %dd= @enrollment_action_issue.error_message
+      - if !@enrollment_action_issue.headers.blank?
+        %dt Headers:
+        %dd
+          %pre
+            %code.hljs.json= @enrollment_action_issue.headers.to_json
+    
 
 .panel-body
   %pre

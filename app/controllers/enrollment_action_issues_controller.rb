@@ -2,7 +2,7 @@ class EnrollmentActionIssuesController < ApplicationController
   load_and_authorize_resource(class: "EnrollmentAction::EnrollmentActionIssue")
 
   def index
-    @enrollment_action_issues = EnrollmentAction::EnrollmentActionIssue.all
+    @enrollment_action_issues = EnrollmentAction::EnrollmentActionIssue.default_order
   end
 
   def show

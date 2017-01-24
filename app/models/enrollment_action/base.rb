@@ -66,11 +66,14 @@ module EnrollmentAction
     end
 
     def drop_not_yet_implemented!
+      idx = 0
+      batch_id = SecureRandom.uuid
       if @termination
-        @termination.drop_not_yet_implemented!(self.class.name.to_s)
+        idx = idx + 1
+        @termination.drop_not_yet_implemented!(self.class.name.to_s, batch_id, idx)
       end
       if @action
-        @action.drop_not_yet_implemented!(self.class.name.to_s)
+        @action.drop_not_yet_implemented!(self.class.name.to_s, batch_id, idx)
       end
     end
 

@@ -39,7 +39,7 @@ module ExternalEvents
       @droppable = true
     end
 
-    def store_error_model(err_msg, err_headers)
+    def store_error_model(err_msg, err_headers, other_props = {})
       EnrollmentAction::EnrollmentActionIssue.create!({
         :hbx_enrollment_id => hbx_enrollment_id,
         :hbx_enrollment_vocabulary => event_xml,
@@ -47,7 +47,7 @@ module ExternalEvents
         :error_message => err_msg,
         :headers => err_headers,
         :received_at => timestamp
-      })
+      }.merge(other_props))
     end
 
     def drop_if_bogus_term!
@@ -129,7 +129,7 @@ module ExternalEvents
     end
 
 
-    def drop_not_yet_implemented!(action_name)
+    def drop_not_yet_implemented!(action_name, batch_id, batch_index)
       event_responder.broadcast_response(
         "error",
         "not_yet_implemented",
@@ -144,7 +144,11 @@ module ExternalEvents
         headers.merge({
           "return_status" => "422",
           "not_implemented_action" => action_name
-        })
+        }),
+        {
+          :batch_id => batch_id,
+          :batch_index => batch_index
+        }
       )
       event_responder.ack_message(message_tag)
       # gc hint by nilling out references
@@ -166,10 +170,12 @@ module ExternalEvents
       store_error_model(
         "unknown_enrollment_action",
         headers.merge({
-          :batch_id => batch_id,
-          :batch_index => index,
           "return_status" => "422"
-        })
+        }),
+        {
+          :batch_id => batch_id,
+          :batch_index => index
+        }
       )
       event_responder.ack_message(message_tag)
       # gc hint by nilling out references

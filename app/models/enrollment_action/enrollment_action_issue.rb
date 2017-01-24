@@ -11,6 +11,12 @@ module EnrollmentAction
     field :hbx_enrollment_vocabulary, type: String
     field :headers, type: Hash
     field :aasm_state, type: String
+    field :batch_id, type: String, default: ->{ SecureRandom.uuid }
+    field :batch_index, type: String, default: 0
+
+    index({received_at: 1, batch_id: 1, batch_index: 1})
+
+    scope :default_order, ->{ desc(:received_at, :batch_id, :batch_index)  }
 
     aasm do
       state :new, initial: true

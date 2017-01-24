@@ -10,7 +10,7 @@ module EnrollmentAction
 
     # TODO: Terminate members
     def persist
-      policy_to_change = term.existing_policy
+      policy_to_change = termination.existing_policy
       policy_to_change.hbx_enrollment_ids << action.hbx_enrollment_id
       policy_to_change.save
     end

@@ -84,7 +84,10 @@ module ExternalEvents
       event_responder.broadcast_ok_response(
         "enrollment_reduced",
         event_xml,
-        headers
+        headers.merge({
+          hbx_enrollment_id: hbx_enrollment_id,
+          enrollment_action_uri: enrollment_action
+        })
       )
       event_responder.ack_message(message_tag)
       clean_ivars
@@ -202,11 +205,9 @@ module ExternalEvents
     end
 
     def duplicates?(other)
-      return false unless other.bucket_id == bucket_id
-      return false unless other.active_year == active_year
       return false unless other.hbx_enrollment_id == hbx_enrollment_id
-      (other.is_coverage_starter? && self.is_cancel?) ||
-        (other.is_cancel? && self.is_coverage_starter?)
+      ((!other.is_termination?) && self.is_cancel?) ||
+        (other.is_cancel? && (!self.is_termination?))
     end
 
     def is_coverage_starter?

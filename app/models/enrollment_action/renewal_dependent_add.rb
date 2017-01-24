@@ -8,7 +8,7 @@ module EnrollmentAction
       return false if chunk.first.is_passive_renewal?
       renewal_candidates = same_carrier_renewal_candidates(chunk.first)
       return false if renewal_candidates.empty?
-      renewal_dependents_added?([renewal_candidates.first, chunk.first])
+      renewal_dependents_added?(renewal_candidates.first, chunk.first)
     end
 
     def added_dependents

@@ -7,8 +7,10 @@ module EnrollmentAction
 
     # Remember, we only have an @termination, no @action item
     def persist
-      policy_to_term = termination.existing_policy
-      policy_to_term.terminate_as_of(termination.subscriber_end)
+      if termination.existing_policy
+        policy_to_term = termination.existing_policy
+        policy_to_term.terminate_as_of(termination.subscriber_end)
+      end
     end
 
     def publish

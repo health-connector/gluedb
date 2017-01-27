@@ -51,7 +51,7 @@ module ExternalEvents
 
     def extract_rel_from_me(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
-      case simple_relationship of
+      case simple_relationship
       when "spouse", "life_partner", "domestic_partner"
         "spouse"
       when "ward"
@@ -63,7 +63,7 @@ module ExternalEvents
 
     def extract_rel_from_sub(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
-      case simple_relationship of
+      case simple_relationship
       when "spouse", "life_partner", "domestic_partner"
         "spouse"
       when "court_appointed_guardian"
@@ -90,7 +90,7 @@ module ExternalEvents
       end
       return "child" if (me_to_sub.empty? && sub_to_me.empty?)
       return extract_rel_from_me(me_to_sub.first) if me_to_sub.any?
-      return extract_rel_from_sub(sub_to_me.first) if me_to_sub.any?
+      return extract_rel_from_sub(sub_to_me.first) if sub_to_me.any?
       "child"
     end
 
@@ -98,7 +98,7 @@ module ExternalEvents
       member_id = extract_member_id(enrollee_node)
       policy.enrollees << Enrollee.new({
         :m_id => member_id,
-        :rel_code => extract_rel_code(member),
+        :rel_code => extract_rel_code(enrollee_node),
         :ben_stat => "active",
         :emp_state => "active",
         :coverage_start => extract_enrollee_start(enrollee_node),
@@ -127,7 +127,13 @@ module ExternalEvents
       policy.save!
     end
 
+    def policy_exists?
+      eg_id = extract_enrollment_group_id(@policy_node)
+      Policy.where(:hbx_enrollment_ids => eg_id).count > 0
+    end
+
     def persist
+      return true if policy_exists?
       policy = Policy.create!(
         :plan => @plan,
         :eg_id => extract_enrollment_group_id(@policy_node),

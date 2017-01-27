@@ -5,7 +5,8 @@ module ExternalEvents
 
     include Handlers::EnrollmentEventXmlHelper
 
-    # m_node : Openhbx::Cv2::EnrolleeMember
+    # p_node : Openhbx::Cv2::Policy
+    # p_record : Plan
     def initialize(p_node, p_record)
       @policy_node = p_node
       @plan = p_record
@@ -136,6 +137,7 @@ module ExternalEvents
       return true if policy_exists?
       policy = Policy.create!(
         :plan => @plan,
+        :carrier_id => @plan.carrier_id,
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt

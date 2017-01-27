@@ -19,7 +19,7 @@ module EnrollmentAction
       unless members_persisted.all?
         return false
       end
-      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv)
+      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan)
       return false unless ep.persist
       termination_results = other_carrier_renewal_candidates.map do |rc|
         rc.terminate_as_of(action.subscriber_start - 1.day)

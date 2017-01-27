@@ -12,17 +12,41 @@ module ExternalEvents
     end
 
     def extract_pre_amt_tot
-      0.00
+      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+      return 0.00 if p_enrollment.blank?
+      BigDecimal.new(Maybe.new(p_enrollment).premium_total_amount.strip.value)
     end
 
     def extract_tot_res_amt
-      0.00
+      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+      return 0.00 if p_enrollment.blank?
+      BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
     end
 
     def extract_enrollee_premium(enrollee)
       pre_string = Maybe.new(enrollee).benefit.premium_amount.value
       return 0.00 if pre_string.blank?
       BigDecimal.new(pre_string)
+    end
+
+    def extract_other_financials
+      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+      return({}) if p_enrollment.blank?
+      if p_enrollment.shop_market
+        tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
+        employer = find_employer(@policy_node)
+        return({ :employer => employer }) if tot_emp_res_amt.blank?
+        {
+          :employer => employer,
+          :tot_emp_res_amt => BigDecimal.new(tot_emp_res_amt)
+        }
+      else
+        applied_aptc_val = Maybe.new(p_enrollment).individual_market.applied_aptc_amount.strip.value
+        return({}) if applied_aptc_val.blank?
+        {
+          :applied_aptc => BigDecimal.new(applied_aptc_val)
+        }
+      end
     end
 
     def extract_rel_from_me(rel)
@@ -99,7 +123,7 @@ module ExternalEvents
         :emp_state => "active",
         :coverage_start => extract_enrollee_start(sub_node),
         :pre_amt => extract_enrollee_premium(sub_node)
-      })
+      }.merge(extract_other_financials))
       policy.save!
     end
 

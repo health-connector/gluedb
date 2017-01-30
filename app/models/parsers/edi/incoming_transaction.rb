@@ -71,6 +71,10 @@ module Parsers
         @policy = policy
       end
 
+      def termination_with_no_end_date(details)
+        @errors << "File is a termination, but no or invalid end date is provided for a member: Member #{details[:member_id]}, Coverage End: #{details[:coverage_end_string]}"
+      end
+
       def coverage_end_before_coverage_start(details)
         @errors << "Coverage end before coverage start: Member #{details[:member_id]}, coverage_start: #{details[:coverage_start]}, coverage_end: #{details[:coverage_end]}"
       end

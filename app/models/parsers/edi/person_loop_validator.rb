@@ -26,13 +26,23 @@ module Parsers
             if is_stop
                enrollee = policy.enrollee_for_member_id(person_loop.member_id)
                coverage_end_date = Date.strptime(policy_loop.coverage_end,"%Y%m%d") rescue nil
-               if (enrollee.coverage_start > coverage_end_date)
-                 listener.coverage_end_before_coverage_start(
-                   :coverage_end => policy_loop.coverage_end,
-                   :coverage_start => enrollee.coverage_start.strftime("%Y%m%d"),
-                   :member_id => person_loop.member_id
-                 )
-                 valid = false
+               if enrollee
+                 if coverage_end_date.blank?
+                   listener.termination_with_no_end_date({
+                     :member_id => person_loop.member_id,
+                     :coverage_end_string => policy_loop.coverage_end
+                   })
+                   valid = false
+                 else
+                   if (enrollee.coverage_start > coverage_end_date)
+                     listener.coverage_end_before_coverage_start(
+                       :coverage_end => policy_loop.coverage_end,
+                       :coverage_start => enrollee.coverage_start.strftime("%Y%m%d"),
+                       :member_id => person_loop.member_id
+                     )
+                     valid = false
+                   end
+                 end
                end
             end
           end
@@ -50,12 +60,12 @@ module Parsers
           if !is_stop
             enrollee = policy.enrollee_for_member_id(person_loop.member_id)
             if enrollee.coverage_start.present?
-               effectuation_coverage_start = policy_loop.coverage_start
-               policy_coverage_start = enrollee.coverage_start.strftime("%Y%m%d")
-               if effectuation_coverage_start != policy_coverage_start
-                  listener.effectuation_date_mismatch(:policy => policy_coverage_start, :effectuation => effectuation_coverage_start, :member_id => person_loop.member_id)
-                  valid = false
-               end
+              effectuation_coverage_start = policy_loop.coverage_start
+              policy_coverage_start = enrollee.coverage_start.strftime("%Y%m%d")
+              if effectuation_coverage_start != policy_coverage_start
+                listener.effectuation_date_mismatch(:policy => policy_coverage_start, :effectuation => effectuation_coverage_start, :member_id => person_loop.member_id)
+                valid = false
+              end
             end
           end
         end

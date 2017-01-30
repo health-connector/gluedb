@@ -69,8 +69,12 @@ class EmployerEvent
     carrier_file.result
   end
 
-  def self.with_digest_payloads
-    events = self.order_by(event_time: 1)
+  def self.clear_before(boundry_time)
+    self.delete_all(event_time: {"$lt" => boundry_time})
+  end
+
+  def self.with_digest_payloads(boundry_time = Time.now)
+    events = self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
     carrier_files = Carrier.all.map do |car|
       EmployerEvents::CarrierFile.new(car)
     end

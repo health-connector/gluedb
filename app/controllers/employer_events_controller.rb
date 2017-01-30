@@ -6,12 +6,14 @@ class EmployerEventsController < ApplicationController
   end
 
   def publish
+    ec = ExchangeInformation
     connection = AmqpConnectionProvider.start_connection
     EmployerEvent.with_digest_payloads do |payload|
       Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |chan|
-        chan.default_exchange.publish(
+        ex = chan.fanout(ec.event_publish_exchange, {:durable => true})
+        ex.publish(
           payload,
-          {routing_key: drop_queue_name}
+          {routing_key: "info.events.trading_partner.employer_digest.published"}
         )
       end
     end
@@ -27,10 +29,5 @@ class EmployerEventsController < ApplicationController
     ensure
       FileUtils.rm_f(zip_path)
     end
-  end
-
-  def drop_queue_name
-    ec = ExchangeInformation
-    "#{ec.hbx_id}.#{ec.environment}.q.hbx_enterprise.employer_digest_drop_listener"
   end
 end

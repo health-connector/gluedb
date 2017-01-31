@@ -39,35 +39,11 @@ module ExternalEvents
       @droppable = true
     end
 
-    def store_error_model(err_msg, err_headers, other_props = {})
-      EnrollmentAction::EnrollmentActionIssue.create!({
-        :hbx_enrollment_id => hbx_enrollment_id,
-        :hbx_enrollment_vocabulary => event_xml,
-        :enrollment_action_uri => enrollment_action,
-        :error_message => err_msg,
-        :headers => err_headers,
-        :received_at => timestamp
-      }.merge(other_props))
-    end
-
     def drop_if_bogus_term!
       return false unless @bogus_termination
-      event_responder.broadcast_response(
-        "error",
-        "unmatched_termination",
-        "422",
-        event_xml,
-        headers
-      )
-      store_error_model(
-        "unmatched_termination",
-        headers.merge({
-          "return_status" => "422"
-        })
-      )
-      event_responder.ack_message(message_tag)
-      clean_ivars
-      true
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_term!(self)
+      end
     end
 
     def clean_ivars
@@ -81,17 +57,9 @@ module ExternalEvents
 
     def drop_if_marked!
       return false unless @droppable
-      event_responder.broadcast_ok_response(
-        "enrollment_reduced",
-        event_xml,
-        headers.merge({
-          hbx_enrollment_id: hbx_enrollment_id,
-          enrollment_action_uri: enrollment_action
-        })
-      )
-      event_responder.ack_message(message_tag)
-      clean_ivars
-      true
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_reduced_event!(self)
+      end
     end
 
     def check_for_bogus_renewal_term_against(other)
@@ -104,83 +72,34 @@ module ExternalEvents
 
     def drop_if_bogus_renewal_term!
       return false unless @bogus_renewal_termination
-      event_responder.broadcast_ok_response(
-        "renewal_termination_reduced",
-        event_xml,
-        headers
-      )
-      event_responder.ack_message(message_tag)
-      # gc hint by nilling out references
-      clean_ivars
-      true
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_renewal_term!(self)
+      end
     end
 
     def flow_successful!(action_name)
-      event_responder.broadcast_response(
-        "info",
-        "event_processed",
-        "200",
-        event_xml,
-        headers.merge({
-          :enrollment_action => action_name
-        })
-      )
-      event_responder.ack_message(message_tag)
-      # gc hint by nilling out references
-      clean_ivars
-      true
+      response_with_publisher do |result_publisher|
+        result_publisher.flow_successful!(self)
+      end
     end
 
 
     def drop_not_yet_implemented!(action_name, batch_id, batch_index)
-      event_responder.broadcast_response(
-        "error",
-        "not_yet_implemented",
-        "422",
-        event_xml,
-        headers.merge({
-          :not_implented_action => action_name
-        })
-      )
-      store_error_model(
-        "not_yet_implemented",
-        headers.merge({
-          "return_status" => "422",
-          "not_implemented_action" => action_name
-        }),
-        {
-          :batch_id => batch_id,
-          :batch_index => batch_index
-        }
-      )
-      event_responder.ack_message(message_tag)
-      # gc hint by nilling out references
-      clean_ivars
-      true
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_not_yet_implemented!(self, action_name, batch_id, batch_index)
+      end
     end
 
     def no_event_found!(batch_id, index)
-      event_responder.broadcast_response(
-        "error",
-        "unknown_enrollment_action",
-        "422",
-        event_xml,
-        headers.merge({
-          :batch_id => batch_id,
-          :batch_index => index
-        })
-      )
-      store_error_model(
-        "unknown_enrollment_action",
-        headers.merge({
-          "return_status" => "422"
-        }),
-        {
-          :batch_id => batch_id,
-          :batch_index => index
-        }
-      )
-      event_responder.ack_message(message_tag)
+      response_with_publisher do |result_publisher|
+        result_publisher.no_event_found!(self, batch_id, index)
+      end
+    end
+
+    def response_with_publisher
+      result_publisher = Publishers::EnrollmentEventNotificationResult.new(event_responder, event_xml, headers, message_tag)
+
+      yield result_publisher
       # gc hint by nilling out references
       clean_ivars
       true

@@ -59,7 +59,7 @@ benefit_coverage_period_reinstated
       doc.xpath("//cv:broker_agency_profile[not(cv:brokers)]", {:cv => XML_NS}).each do |node|
         node.remove
       end
-      doc.xpath("//cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
+      doc.xpath("//cv:employer_profile/cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
         node.remove
       end
       doc.xpath("//cv:benefit_group[not(cv:elected_plans)]", {:cv => XML_NS}).each do |node|
@@ -76,7 +76,6 @@ benefit_coverage_period_reinstated
                                 <event_name>urn:openhbx:events:v1:employer##{employer_event.event_name}</event_name>
                                 <resource_instance_uri>
                                         <id>urn:openhbx:resource:organization:id##{employer_event.employer_id}</id>
-                                        <id>#{employer_event.employer_id}</id>
                                 </resource_instance_uri>
                                 <body>
       XMLHEADER

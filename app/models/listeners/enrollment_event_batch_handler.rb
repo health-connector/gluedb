@@ -11,7 +11,7 @@ module Listeners
         "application.gluedb.enrollment_event_batch_handler",
         channel
       )
-      di, props, payload = queue.pop({:ack => true})
+      di, props, payload = queue.pop({:ack => true, :manual_ack => true})
       while (di != nil) do
         headers = props.headers || {}
         event_message = ExternalEvents::EnrollmentEventNotification.new(

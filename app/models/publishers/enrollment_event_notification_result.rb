@@ -86,7 +86,7 @@ module Publishers
         }).to_json,
         headers.merge({
           :batch_id => batch_id,
-          :batch_index => index,
+          :batch_index => batch_index,
           :action_name => action_name
         })
       )

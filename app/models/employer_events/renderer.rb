@@ -56,6 +56,9 @@ benefit_coverage_period_reinstated
       doc.xpath("//cv:benefit_group/cv:elected_plans[not(cv:elected_plan)]", {:cv => XML_NS}).each do |node|
         node.remove
       end
+      doc.xpath("//cv:broker_agency_profile[not(cv:brokers)]", {:cv => XML_NS}).each do |node|
+        node.remove
+      end
       doc.xpath("//cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
         node.remove
       end

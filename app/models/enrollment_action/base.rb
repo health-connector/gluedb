@@ -116,7 +116,7 @@ module EnrollmentAction
       publish_result = false
       publish_result = publisher.publish
       if publish_result
-         publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, event_xml, hbx_enrollment_id, employer_hbx_id)
+         publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, event_xml, hbx_enrollment_id, employer_id)
          publish_result = publisher2.publish
       end
       [publish_result, publisher.errors.to_hash]

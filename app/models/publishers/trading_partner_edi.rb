@@ -4,6 +4,7 @@ module Publishers
     include Handlers::EnrollmentEventXmlHelper
 
     attr_reader :event_xml
+    attr_reader :error_message
     attr_reader :amqp_connection
     attr_reader :errors
 
@@ -22,7 +23,8 @@ module Publishers
           x12_xml = edi_builder.call.to_xml
           publish_to_bus(amqp_connection, enrollment_event_cv, x12_xml)
         rescue Exception => e
-          errors.add(:event_xml, e.message)
+          errors.add(:error_message, e.message)
+          errors.add(:event_xml, event_xml)
           return false
         end
       end

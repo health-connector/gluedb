@@ -30,8 +30,8 @@ module EnrollmentAction
     end
 
     def publish
-      amqp_connection = termination.event_responder.connection
-      action_helper = EnrollmentAction::ActionPublishHandler.new(action.event_xml)
+      amqp_connection = action.event_responder.connection
+      action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#active_renew_member_add")
       action_helper.filter_affected_members(added_dependents)
       action_helper.keep_member_ends([])

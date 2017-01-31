@@ -42,7 +42,7 @@ module EnrollmentAction
       termination_helper.keep_member_ends(dropped_dependents)
       publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id)
       publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id)
-      action_helper = EnrollmentAction::ActionPublishHandler.new(action.event_xml)
+      action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#change_product")
       action_helper.keep_member_ends([])
       publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)

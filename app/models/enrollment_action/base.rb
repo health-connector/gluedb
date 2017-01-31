@@ -77,6 +77,18 @@ module EnrollmentAction
       end
     end
 
+    def publish_failed!(publish_errors)
+      idx = 0
+      batch_id = SecureRandom.uuid
+      if @termination
+        idx = idx + 1
+        @termination.publish_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+      end
+      if @action
+        @action.publish_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+      end
+    end
+
     def flow_successful!
       if @termination
         @termination.flow_successful!(self.class.name.to_s)
@@ -107,7 +119,7 @@ module EnrollmentAction
          publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, event_xml, hbx_enrollment_id, employer_hbx_id)
          publish_result = publisher2.publish
       end
-      publish_result
+      [publish_result, publisher.errors.to_hash]
     end
   end
 end

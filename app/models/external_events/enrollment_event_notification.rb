@@ -79,7 +79,7 @@ module ExternalEvents
 
     def flow_successful!(action_name)
       response_with_publisher do |result_publisher|
-        result_publisher.flow_successful!(self)
+        result_publisher.flow_successful!(self, action_name)
       end
     end
 

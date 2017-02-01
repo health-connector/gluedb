@@ -41,7 +41,7 @@ module EmployerEvents
       return nil if @empty
       carrier_abbrev = carrier.abbrev.upcase
       header = <<-XMLHEADER
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <employer_digest_event
         xmlns="http://openhbx.org/api/terms/1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -126,7 +126,7 @@ module ExternalEvents
       }.merge(extract_other_financials))
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|
-        build_enrollee(policy, en)
+        build_enrollee(pol, en)
       end
       true
     end

@@ -27,12 +27,12 @@ module EnrollmentAction
         ::EnrollmentAction::CarrierSwitchRenewal,
         ::EnrollmentAction::DependentAdd,
         ::EnrollmentAction::DependentDrop,
-        ::EnrollmentAction::InitialEnrollment,
         ::EnrollmentAction::PlanChange,
         ::EnrollmentAction::PlanChangeDependentAdd,
         ::EnrollmentAction::PlanChangeDependentDrop,
         ::EnrollmentAction::RenewalDependentAdd,
         ::EnrollmentAction::RenewalDependentDrop,
+        ::EnrollmentAction::InitialEnrollment,
         ::EnrollmentAction::Termination
       ].detect { |kls| kls.qualifies?(chunk) }
       

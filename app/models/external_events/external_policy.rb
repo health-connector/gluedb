@@ -124,7 +124,7 @@ module ExternalEvents
         :emp_state => "active",
         :coverage_start => extract_enrollee_start(sub_node),
         :pre_amt => extract_enrollee_premium(sub_node)
-      }.merge(extract_other_financials))
+      })
       policy.save!
     end
 
@@ -135,13 +135,13 @@ module ExternalEvents
 
     def persist
       return true if policy_exists?
-      policy = Policy.create!(
+      policy = Policy.create!({
         :plan => @plan,
         :carrier_id => @plan.carrier_id,
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt
-      )
+      }.merge(extract_other_financials))
       build_subscriber(policy)
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|

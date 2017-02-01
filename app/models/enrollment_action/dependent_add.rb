@@ -25,7 +25,12 @@ module EnrollmentAction
       # Add new hbx_enrollment_id to policy
       policy_to_change = termination.existing_policy
       policy_to_change.hbx_enrollment_ids << action.hbx_enrollment_id
-      policy_to_change.save
+      policy_to_change.save!
+      pol_updater = ExternalEvents::ExternalPolicyMemberAdd.new(
+                      policy_to_change,
+                      action.policy_cv,
+                      added_dependents)
+      pol_updater.persist
     end
 
     def publish

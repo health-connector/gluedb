@@ -3,12 +3,14 @@ require 'rails_helper'
 describe Parsers::Edi::Etf::PersonLoop do
   subject(:person_loop) { Parsers::Edi::Etf::PersonLoop.new(raw_loop) }
 
+  let(:ssn_qual) { "34" }
+
   let(:raw_loop) do
     {
       'L2100A' => {
         "N3" => ['', street1, street2, ''],
         'N4' => ['', city, state, zip],
-        'NM1' => ['', '', '', name_last, name_first, name_middle, name_prefix, name_suffix, '', ssn],
+        'NM1' => ['', '', '', name_last, name_first, name_middle, name_prefix, name_suffix, ssn_qual, ssn],
         'DMG' => ['', '', dob, gender],
       },
       'REFs' => [['', '17', member_id ]],
@@ -27,7 +29,7 @@ describe Parsers::Edi::Etf::PersonLoop do
   let(:name_middle) { 'X' }
   let(:name_last) { 'Doe' }
   let(:name_suffix) { 'Jr' }
-  let(:ssn) { '11111111111'}
+  let(:ssn) { '111111111'}
   let(:gender) { 'M' }
   let(:dob) { '1970-01-01'}
   let(:change_type) { '001' }
@@ -149,17 +151,63 @@ describe Parsers::Edi::Etf::PersonLoop do
       expect(person_loop.ssn).to eq ssn
     end
 
-    context 'when blank' do
-      let(:ssn) { ' '}
+    context "when qualifier is empty" do
+      let(:ssn_qual) { nil }
       it 'returns nil' do 
         expect(person_loop.ssn).to be_nil
       end
     end
 
-    context 'when too short' do
-      let(:ssn) { '1'}
-      it 'returns nil' do
-        expect(person_loop.ssn).to be_nil
+    context "when qualifier is not 34" do
+      let(:ssn_qual) { "NOT 34" }
+
+      context "when ssn is equal to member_id" do
+        let(:ssn) { member_id }
+        it 'returns nil' do 
+          expect(person_loop.ssn).to be_nil
+        end
+      end
+
+      context "when ssn is NOT equal to member_id" do
+        context "when 9 numbers" do
+          let(:ssn) { "9" * 9 }
+
+          it 'returns ssn' do 
+            expect(person_loop.ssn).to eq ssn
+          end
+        end
+
+        context 'when blank' do
+          let(:ssn) { ' '}
+          it 'returns nil' do 
+            expect(person_loop.ssn).to be_nil
+          end
+        end
+      end
+    end
+
+    context "when qualifier is 34" do
+      let(:ssn_qual) { "34" }
+
+      context 'when blank' do
+        let(:ssn) { ' '}
+        it 'returns nil' do 
+          expect(person_loop.ssn).to be_nil
+        end
+      end
+
+      context 'when too short' do
+        let(:ssn) { '1'}
+        it 'returns nil' do
+          expect(person_loop.ssn).to be_nil
+        end
+      end
+
+      context 'when too long' do
+        let(:ssn) { '1' * 10 }
+        it 'returns nil' do
+          expect(person_loop.ssn).to be_nil
+        end
       end
     end
   end

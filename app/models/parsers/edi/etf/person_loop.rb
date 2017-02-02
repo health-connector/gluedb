@@ -135,8 +135,15 @@ module Parsers
         end
 
         def ssn
+          qualifier = @loop["L2100A"]["NM1"][8]
+          return nil if qualifier.blank?
           result = @loop["L2100A"]["NM1"][9]
-          return nil if result.blank? || result.length < 9
+          return nil if result.blank?
+          if qualifier.strip == "34"
+            return nil if (result.length != 9)
+          else
+            return nil if (result == member_id)
+          end
           result
         end
 

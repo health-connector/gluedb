@@ -9,7 +9,6 @@ module EnrollmentAction
 
     def same_carrier_renewal_candidates(enrollment_event)
       if enrollment_event.is_shop?
-        raise enrollment_event.hbx_enrollment_id.inspect
         shop_renewal_candidates(enrollment_event.policy_cv, true)
       else
         plan, subscriber_person, subscriber_id, subscriber_start = extract_ivl_policy_details(enrollment_event.policy_cv)

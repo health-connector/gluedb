@@ -13,7 +13,7 @@ module EnrollmentAction
       policy_to_change = termination.existing_policy
       policy_to_change.hbx_enrollment_ids << action.hbx_enrollment_id
       policy_to_change.save
-      pol_updater = ExternalEvents::ExternalPolicyMemberDrop.new(policy_to_change, action.policy_cv, dropped_dependents)
+      pol_updater = ExternalEvents::ExternalPolicyMemberDrop.new(policy_to_change, termination.policy_cv, dropped_dependents)
       pol_updater.persist
     end
 

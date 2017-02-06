@@ -48,7 +48,7 @@ module Handlers
         a, b = perm
         a.edge_for(order_graph, b)
       end
-      iter = events.topsort_iterator
+      iter = order_graph.topsort_iterator
       results = []
       iter.each do |ev|
         results << ev

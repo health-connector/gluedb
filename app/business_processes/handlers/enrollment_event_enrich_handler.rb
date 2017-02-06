@@ -7,7 +7,7 @@ module Handlers
     # [::ExternalEvents::EnrollmentEventNotification] -> [::EnrollmentAction::Base]
     def call(context)
       no_bogus_terms = discard_bogus_terms(context)
-      sorted_actions = no_bogus_terms.sort
+      sorted_actions = sort_enrollment_events(no_bogus_terms)
       clean_sorted_list = discard_bogus_renewal_terms(sorted_actions)
       enrollment_sets = chunk_enrollments(clean_sorted_list)
       resolve_actions(enrollment_sets).each do |action|
@@ -38,6 +38,20 @@ module Handlers
       _dropped, keep = enrollments.partition { |en| en.drop_if_bogus_renewal_term! } 
       _droppped = nil
       keep
+    end
+
+    def sort_enrollment_events(events)
+      order_graph = RGL::DirectedAdjacencyGraph.new
+      events.permutation(2).each do |perm|
+        a, b = perm
+        a.edge_for(order_graph, b)
+      end
+      iter = events.topsort_iterator
+      results = []
+      iter.each do |ev|
+        results << ev
+      end
+      results
     end
 
     def chunk_enrollments(enrollments)

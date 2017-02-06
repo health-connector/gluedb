@@ -11,7 +11,6 @@ module ExternalEvents
     attr_reader :business_process_history
 
     include Handlers::EnrollmentEventXmlHelper
-    include Comparable
 
     def initialize(e_responder, m_tag, t_stamp, e_xml, headers)
       @business_process_history = Array.new
@@ -143,30 +142,45 @@ module ExternalEvents
       ].include?(enrollment_action)
     end
 
-    def <=>(other)
+    def edge_for(graph, other)
       if other.hbx_enrollment_id == hbx_enrollment_id
         case [other.is_termination?, is_termination?]
         when [true, false]
-          -1
+          graph.add_edge(self, other)
         when [false, true]
-          1
+          graph.add_edge(other, self)
         else
-          0
+          :ok
         end
       elsif other.active_year != active_year
-        active_year.to_i <=> other.active_year.to_i
+        comp = active_year.to_i <=> other.active_year.to_i
+        if comp == -1
+          graph.add_edge(self, other)
+        elsif comp == 1
+          graph.add_edge(other, self)
+        end
       elsif subscriber_start != other.subscriber_start
-        subscriber_start <=> other.subscriber_start
+        comp = subscriber_start <=> other.subscriber_start
+        if comp == -1
+          graph.add_edge(self, other)
+        elsif comp == 1
+          graph.add_edge(other, self)
+        end
       else
         case [subscriber_end.nil?, other.subscriber_end.nil?]
         when [true, true]
-          0
+          :ok
         when [false, true]
-          1
+          graph.add_edge(other, self)
         when [true, false]
-          -1
+          graph.add_edge(self, other)
         else
-          subscriber_end <=> other.subscriber_end
+          comp = subscriber_end <=> other.subscriber_end
+          if comp == -1
+            graph.add_edge(self, other)
+          elsif comp == 1
+            graph.add_edge(other, self)
+          end
         end
       end
     end

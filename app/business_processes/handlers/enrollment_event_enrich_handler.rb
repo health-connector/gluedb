@@ -1,4 +1,5 @@
 require 'rgl/adjacency'
+require 'rgl/topsort'
 
 module Handlers
   class EnrollmentEventEnrichHandler < ::Handlers::Base

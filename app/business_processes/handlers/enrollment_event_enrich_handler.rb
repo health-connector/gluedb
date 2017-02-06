@@ -1,3 +1,5 @@
+require 'rgl/adjacency'
+
 module Handlers
   class EnrollmentEventEnrichHandler < ::Handlers::Base
 

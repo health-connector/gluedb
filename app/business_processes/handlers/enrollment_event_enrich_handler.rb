@@ -45,6 +45,9 @@ module Handlers
 
     def sort_enrollment_events(events)
       order_graph = RGL::DirectedAdjacencyGraph.new
+      events.each do |ev|
+        order_graph.add_vertex(ev)
+      end
       events.permutation(2).each do |perm|
         a, b = perm
         a.edge_for(order_graph, b)

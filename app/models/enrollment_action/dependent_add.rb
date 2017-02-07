@@ -12,7 +12,6 @@ module EnrollmentAction
       action.all_member_ids - termination.all_member_ids
     end
 
-    # TODO: Create new members, add to policy
     def persist
       members = action.policy_cv.enrollees.map(&:member)
       members_persisted = members.map do |mem|

@@ -171,9 +171,9 @@ module ExternalEvents
         when [true, true]
           :ok
         when [false, true]
-          graph.add_edge(other, self)
-        when [true, false]
           graph.add_edge(self, other)
+        when [true, false]
+          graph.add_edge(other, self)
         else
           comp = subscriber_end <=> other.subscriber_end
           if comp == -1

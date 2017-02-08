@@ -10,7 +10,7 @@ module Handlers
     # [::ExternalEvents::EnrollmentEventNotification] -> [::EnrollmentAction::Base]
     def call(context)
       no_bogus_terms = discard_bogus_terms(context)
-      no_bogus_plan_years = discard_bogus_plan_years(context)
+      no_bogus_plan_years = discard_bogus_plan_years(no_bogus_terms)
       sorted_actions = sort_enrollment_events(no_bogus_plan_years)
       clean_sorted_list = discard_bogus_renewal_terms(sorted_actions)
       enrollment_sets = chunk_enrollments(clean_sorted_list)

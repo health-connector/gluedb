@@ -20,7 +20,7 @@ module Handlers
     end
 
     def discard_bogus_plan_years(enrollments)
-      [_dropped, keep] = enrollments.partition { |en| en.drop_if_bogus_plan_year! }
+      _dropped, keep = enrollments.partition { |en| en.drop_if_bogus_plan_year! }
       _dropped = nil
       keep
     end

@@ -15,6 +15,7 @@ CSV.open("all_glue_users_#{timestamp}_by_role.csv","w") do |csv|
 		user_role = user.role
     user_status = user_state(user.approved, user.last_sign_in_at)
     deactivation_date = (user_status == "disabled") ? user.last_sign_in_at.strftime("%Y-%m-%dT%l:%M:%S%z"): nil 
-		csv << [user_email,user_role,user_status,nil,deactivation_date]
+    creation_date = user.created_at
+		csv << [user_email,user_role,user_status,creation_date,deactivation_date]
 	end
 end

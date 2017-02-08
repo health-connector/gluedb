@@ -10,12 +10,19 @@ module Handlers
     # [::ExternalEvents::EnrollmentEventNotification] -> [::EnrollmentAction::Base]
     def call(context)
       no_bogus_terms = discard_bogus_terms(context)
-      sorted_actions = sort_enrollment_events(no_bogus_terms)
+      no_bogus_plan_years = discard_bogus_plan_years(context)
+      sorted_actions = sort_enrollment_events(no_bogus_plan_years)
       clean_sorted_list = discard_bogus_renewal_terms(sorted_actions)
       enrollment_sets = chunk_enrollments(clean_sorted_list)
       resolve_actions(enrollment_sets).each do |action|
         super(action)
       end
+    end
+
+    def discard_bogus_plan_years(enrollments)
+      [_dropped, keep] = enrollments.partition { |en| en.drop_if_bogus_plan_year! }
+      _dropped = nil
+      keep
     end
 
     def discard_bogus_terms(enrollments)

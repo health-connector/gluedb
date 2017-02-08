@@ -45,6 +45,20 @@ module ExternalEvents
       end
     end
 
+    def drop_if_bogus_plan_year!
+      return false unless has_bogus_plan_year?
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_plan_year!(self)
+      end
+      true
+    end
+
+    def has_bogus_plan_year?
+      return false unless is_shop?
+      plan_year = find_employer_plan_year(policy_cv)
+      plan_year.blank?
+    end
+
     def clean_ivars
       # GC hint
       instance_variables.each do |iv|

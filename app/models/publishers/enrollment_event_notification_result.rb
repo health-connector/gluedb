@@ -12,6 +12,24 @@ module Publishers
       @message_tag = message_tag
     end
 
+    def drop_bogus_plan_year!(event_notification)
+      event_responder.broadcast_response(
+        "error",
+        "invalid_plan_year",
+        "422",
+        event_xml,
+        headers
+      )
+      store_error_model(
+        event_notification,
+        "invalid_plan_year",
+        headers.merge({
+          "return_status" => "422"
+        })
+      )
+      event_responder.ack_message(message_tag)
+    end
+
     def drop_bogus_term!(event_notification)
       event_responder.broadcast_response(
         "error",

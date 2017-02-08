@@ -77,6 +77,18 @@ module EnrollmentAction
       end
     end
 
+    def persist_failed!(persist_errors)
+      idx = 0
+      batch_id = SecureRandom.uuid
+      if @termination
+        idx = idx + 1
+        @termination.persist_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+      end
+      if @action
+        @action.persist_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+      end
+    end
+
     def publish_failed!(publish_errors)
       idx = 0
       batch_id = SecureRandom.uuid

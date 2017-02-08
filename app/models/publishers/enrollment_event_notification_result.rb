@@ -94,6 +94,35 @@ module Publishers
       event_responder.ack_message(message_tag)
     end
 
+    def persist_failed!(event_notification, action_name, publish_errors, batch_id, batch_index)
+      event_responder.broadcast_response(
+        "error",
+        "persist_failed",
+        "500",
+        publish_errors.merge({
+          :original_xml => event_xml
+        }).to_json,
+        headers.merge({
+          :batch_id => batch_id,
+          :batch_index => batch_index,
+          :action_name => action_name
+        })
+      )
+      store_error_model(
+        event_notification,
+        "persist_failed",
+        headers.merge({
+          "return_status" => "500",
+          "action" => action_name
+        }).merge(publish_errors),
+        {
+          :batch_id => batch_id,
+          :batch_index => batch_index
+        }
+      )
+      event_responder.ack_message(message_tag)
+    end
+
     def publish_failed!(event_notification, action_name, publish_errors, batch_id, batch_index)
       event_responder.broadcast_response(
         "error",

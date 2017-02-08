@@ -109,6 +109,12 @@ module ExternalEvents
       end
     end
 
+    def persist_failed!(action_name, publish_errors, batch_id, batch_index)
+      response_with_publisher do |result_publisher|
+        result_publisher.persist_failed!(self, action_name, publish_errors, batch_id, batch_index)
+      end
+    end
+
     def publish_failed!(action_name, publish_errors, batch_id, batch_index)
       response_with_publisher do |result_publisher|
         result_publisher.publish_failed!(self, action_name, publish_errors, batch_id, batch_index)

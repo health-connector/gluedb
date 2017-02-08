@@ -9,7 +9,7 @@ module Handlers
         if context.persist
           super(context)
         else
-          # Log persistence failure
+          context.persist_failed!({})
         end
       rescue NotImplementedError => e
         context.drop_not_yet_implemented!

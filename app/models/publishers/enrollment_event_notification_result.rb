@@ -48,6 +48,18 @@ module Publishers
       event_responder.ack_message(message_tag)
     end
 
+    def drop_payload_duplicate!(event_notification)
+      event_responder.broadcast_ok_response(
+        "duplicate_event_payload",
+        event_xml,
+        headers.merge({
+          hbx_enrollment_id: event_notification.hbx_enrollment_id,
+          enrollment_action_uri: event_notification.enrollment_action
+        })
+      )
+      event_responder.ack_message(message_tag)
+    end
+
     def drop_reduced_event!(event_notification)
       event_responder.broadcast_ok_response(
         "enrollment_reduced",

@@ -38,6 +38,12 @@ module ExternalEvents
       @droppable = true
     end
 
+    def drop_payload_duplicate!
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_payload_duplicate!(self)
+      end
+    end
+
     def drop_if_bogus_term!
       return false unless @bogus_termination
       response_with_publisher do |result_publisher|
@@ -50,13 +56,12 @@ module ExternalEvents
       response_with_publisher do |result_publisher|
         result_publisher.drop_bogus_plan_year!(self)
       end
-      true
     end
 
     def has_bogus_plan_year?
       return false unless is_shop?
       plan_year = find_employer_plan_year(policy_cv)
-      plan_year.blank?
+      plan_year.nil?
     end
 
     def clean_ivars
@@ -223,7 +228,7 @@ module ExternalEvents
 
     def is_cancel?
       return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-      extract_enrollee_start(subscriber) == extract_enrollee_end(subscriber)
+      extract_enrollee_start(subscriber) >= extract_enrollee_end(subscriber)
     end
 
     def enrollment_action

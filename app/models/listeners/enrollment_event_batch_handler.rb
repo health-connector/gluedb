@@ -22,7 +22,7 @@ module Listeners
           headers
         )
         events << event_message
-        di, props, payload = queue.pop({:ack => true})
+        di, props, payload = queue.pop({:ack => true, :manual_ack => true})
       end
       results = EnrollmentEventProcessingClient.new.call(events)
     end

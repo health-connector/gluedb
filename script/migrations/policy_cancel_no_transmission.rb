@@ -1,9 +1,23 @@
 ## Cancels policies without transmitting a file. 
 require 'csv'
 
-enrollment_group_ids = %w()
+filename = 'cf_ivl_passive renewal silent cancels.csv'
 
-policies_to_cancel = Policy.where(:eg_id => {"$in" => enrollment_group_ids})
+enrollment_group_ids = []
+
+policy_ids = []
+
+CSV.foreach(filename, headers: true) do |row|
+	policy_ids << row["Policy ID"]
+end
+
+policies_to_cancel_by_eg_id = Policy.where(:eg_id => {"$in" => enrollment_group_ids})
+
+policies_to_cancel_by_policy_id = Policy.where(:id => {"$in" => policy_ids})
+
+policies_to_cancel = (policies_to_cancel_by_eg_id + policies_to_cancel_by_policy_id).uniq
+
+binding.pry
 
 policies_to_cancel.each do |policy|
 	initial_state = policy.aasm_state.to_s

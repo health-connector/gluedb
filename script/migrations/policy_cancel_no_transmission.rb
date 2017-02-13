@@ -17,8 +17,6 @@ policies_to_cancel_by_policy_id = Policy.where(:id => {"$in" => policy_ids})
 
 policies_to_cancel = (policies_to_cancel_by_eg_id + policies_to_cancel_by_policy_id).uniq
 
-binding.pry
-
 policies_to_cancel.each do |policy|
 	initial_state = policy.aasm_state.to_s
 	subscriber_name = policy.subscriber.person.full_name

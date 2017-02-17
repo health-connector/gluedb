@@ -48,7 +48,7 @@ class EmployerEvent
           yield old_record
       end
     else
-      create_new_event_and_remove_old(
+      event_created =create_new_event_and_remove_old(
         new_employer_id,
         new_event_name,
         new_event_time,
@@ -56,6 +56,7 @@ class EmployerEvent
         {:employer_id => new_employer_id, :event_name => new_event_name}) do |old_record|
           yield old_record
       end
+      logger.info "In store_and_yield_deleted = #{event_created}"
     end
   end
 
@@ -70,6 +71,7 @@ class EmployerEvent
   end
 
   def self.clear_before(boundry_time)
+    logger.info "clear_before = #{self.inspect}"
     self.delete_all(event_time: {"$lt" => boundry_time})
   end
 

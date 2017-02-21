@@ -37,9 +37,11 @@ class EmployerEvent
   end
 
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
+
     if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == FIRST_TIME_EMPLOYER_EVENT_NAME)
       latest_time = ([new_event_time] + self.where(:employer_id => new_employer_id).map(&:event_time)).max
       create_new_event_and_remove_old(
+
         new_employer_id,
         FIRST_TIME_EMPLOYER_EVENT_NAME,
         latest_time,
@@ -48,7 +50,7 @@ class EmployerEvent
           yield old_record
       end
     else
-      event_created =create_new_event_and_remove_old(
+      create_new_event_and_remove_old(
         new_employer_id,
         new_event_name,
         new_event_time,
@@ -56,7 +58,6 @@ class EmployerEvent
         {:employer_id => new_employer_id, :event_name => new_event_name}) do |old_record|
           yield old_record
       end
-      logger.info "In store_and_yield_deleted = #{event_created}"
     end
   end
 
@@ -71,7 +72,6 @@ class EmployerEvent
   end
 
   def self.clear_before(boundry_time)
-    logger.info "clear_before = #{self.inspect}"
     self.delete_all(event_time: {"$lt" => boundry_time})
   end
 

@@ -21,18 +21,15 @@ module Listeners
     end
 
     def process_retrieved_resource(delivery_info, employer_id, event_resource, m_headers, event_name, event_time)
-      event_stored = resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s}))
-      logger.info "event_stored = #{event_stored}"
-      event_reduced = EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource) do |destroyed_event|
+      resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s}))
+
+      EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource) do |destroyed_event|
         resource_event_broadcast("info", "event_reduced", "200", destroyed_event.resource_body, {
           :employer_id => destroyed_event.employer_id,
           :event_name => destroyed_event.event_name,
           :event_time => destroyed_event.event_time.to_i.to_s
         })
-        logger.info "event_reduced_event_name =  #{event_name}"
-        logger.info "event_reduced_employer_id = #{employer_id}"
       end
-      logger.info "event_reduced = #{event_reduced}"
       channel.ack(delivery_info.delivery_tag, false)
     end
 
@@ -56,19 +53,8 @@ module Listeners
       employer_id = m_headers["employer_id"].to_s
       event_name = delivery_info.routing_key.split("employer.").last
       event_time = get_timestamp(properties)
-
-      logger.info "is_newest_event = #{event_name} = #{EmployerEvent.newest_event?(employer_id, event_name, event_time)}"
-
       if EmployerEvent.newest_event?(employer_id, event_name, event_time)
         r_code, resource_or_body = request_resource(employer_id)
-
-        logger.info "event_time = #{event_name} = #{event_time}"
-        logger.info "event_header = #{event_name} = #{m_headers}"
-        logger.info "event_employer = #{event_name} = #{employer_id}"
-        logger.info "event_code = #{event_name} = #{r_code}"
-        logger.info "event_resource_body = #{event_name} = #{resource_or_body}"
-        logger.info "event_delivery_info = #{event_name} = #{delivery_info}"
-
         case r_code.to_s
         when "200"
           process_retrieved_resource(delivery_info, employer_id, resource_or_body, m_headers, event_name, event_time)

@@ -3,12 +3,12 @@
 no_members = []
 
 def find_matches(dob,ssn,first_name,last_name)
-	dob_ssn_matches = Person.where("members.dob" => dob, "members.ssn" => ssn)
-	unless ssn.blank?
+	if ssn.present?
 		ssn_matches = Person.where("members.ssn" => ssn)
-		matches = (dob_ssn_matches+ssn_matches).uniq!
+		dob_name_matches = Person.where("members.dob" => dob, :name_first => /#{first_name}/i, :name_last => /#{last_name}/i)
+		matches = (ssn_matches + dob_name_matches).uniq
 	else
-		matches = dob_ssn_matches
+		matches = Person.where("members.dob" => dob, :name_first => /#{first_name}/i, :name_last => /#{last_name}/i)
 	end
 	return matches
 end

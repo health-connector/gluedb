@@ -1,0 +1,58 @@
+%ul.breadcrumb
+  Generate 1095A Document for Policy:
+  = @policy.id
+  = form_tag generate_tax_document_policy_path(@policy, {person_id:@person.id}), :method => "post" do
+    .panel.panel-default
+      .panel-body
+        .row
+          .col-md-12
+            .control-group
+              Type
+            .control-group
+              = radio_button_tag :type, "original", checked: true
+              = label_tag "Original"
+              = radio_button_tag :type, "void"
+              = label_tag "Void"
+              = radio_button_tag :type, "corrected"
+              = label_tag "Corrected"
+        .row{id:"void-policy-ids"}
+          .col-md-12
+            .control-group
+              = label_tag "Policy IDs (comma separated list)"
+              = text_field_tag :void_policy_ids, nil, maxlength:200
+        - if @policy.responsible_party
+          %br
+          .row
+            .col-md-12
+              .control-group
+                Responsible Party
+            .col-md-12
+              .control-group
+                .ul
+                  .li
+                    = label_tag "SSN"
+                  .li
+                    = text_field_tag :ssn, nil, maxlength: 9
+                .ul
+                  .li
+                    = label_tag "DOB"
+                    .col-md-2.offset-1.input-group
+                      %span.input-group-btn
+                        %button.btn.disabled
+                          %span.fui-calendar
+                      = text_field_tag :dob, nil, class: 'form-control date_picker'
+        %br
+        .row
+          .col-md-12
+            .control-group
+              = label_tag "Non-Payment Termination?"
+              = check_box_tag :npt
+        .row
+          .col-md-12
+            .control-group
+              = label_tag "Show preview? "
+              = check_box_tag :preview
+        .row
+          .col-md-2
+            .form_actions
+              = submit_tag 'Submit', class: 'btn btn-inverse'

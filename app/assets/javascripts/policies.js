@@ -28,6 +28,15 @@ $(document).ready(function() {
     }
   });
 
+  $("#void-policy-ids").hide();
+    $("input:radio[name='type']").change(function(){
+      if(this.value == 'void' && this.checked){
+        $("#void-policy-ids").show();
+      }else{
+        $("#void-policy-ids").hide();
+      }
+  });
+
   if(typeof autocomplete_items === 'undefined')
     return;
 

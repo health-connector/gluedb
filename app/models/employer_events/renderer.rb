@@ -5,7 +5,7 @@ module EmployerEvents
     EVENT_WHITELIST = %w(
 address_changed
 contact_changed
-fein_corrected
+fein_changed
 name_changed
 broker_added
 broker_terminated

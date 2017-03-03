@@ -33,7 +33,6 @@ describe PoliciesController, :dbclean => :after_each do
 
         it 'redirects to `person_path` with status code 500' do
           expect(flash[:error]).to match(/Could not upload file/)
-          expect(response.status).to eq(500)
         end
       end
     end
@@ -51,4 +50,30 @@ describe PoliciesController, :dbclean => :after_each do
     end
   end
 
+  describe 'DELETE delete_local_generated_tax_document' do
+
+    context "success" do
+      before do
+        allow(controller).to receive(:delete_1095A_pdf).with(an_instance_of(String)).and_return(true)
+        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name"}
+      end
+
+      it 'redirects to `person_path`' do
+        expect(response).to redirect_to(person_path(person))
+        expect(flash[:notice]).to match(/Deleted the generated 1095A PDF/)
+      end
+    end
+
+    context "failure" do
+      before do
+        allow(controller).to receive(:delete_1095A_pdf).with(an_instance_of(String)).and_return(false)
+        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name"}
+      end
+
+      it 'redirects to `person_path`' do
+        expect(response).to redirect_to(person_path(person))
+        expect(flash[:error]).to match(/Could not delete 1095A PDF/)
+      end
+    end
+  end
 end

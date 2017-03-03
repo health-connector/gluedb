@@ -129,7 +129,6 @@ class PoliciesController < ApplicationController
   end
 
   def delete_local_generated_tax_document
-    binding.pry
     person = Person.find(params[:person_id])
 
     if params[:file_name].blank?

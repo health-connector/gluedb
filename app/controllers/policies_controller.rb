@@ -89,7 +89,7 @@ class PoliciesController < ApplicationController
           raise("File upload failed")
         end
       rescue Exception => e
-        redirect_to person_path(@person), :flash => { :error=> "Could not upload file. #{e.message}" }, :status => 500
+          redirect_to person_path(@person), :flash => { :error=> "Could not upload file. #{e.message}" }
       end
     end
   end
@@ -132,7 +132,6 @@ class PoliciesController < ApplicationController
     person = Person.find(params[:person_id])
 
     if params[:file_name].blank?
-
       redirect_to person_path(person), :flash => { :notice=> "Could not delete 1095A PDF. Request parameter missing." }
       return
     end
@@ -140,6 +139,7 @@ class PoliciesController < ApplicationController
     begin
       if delete_1095A_pdf(params[:file_name])
         redirect_to person_path(person), :flash => { :notice=> "Deleted the generated 1095A PDF." }
+        return
       else
         raise
       end

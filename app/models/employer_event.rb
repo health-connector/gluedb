@@ -37,9 +37,11 @@ class EmployerEvent
   end
 
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
+
     if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == FIRST_TIME_EMPLOYER_EVENT_NAME)
       latest_time = ([new_event_time] + self.where(:employer_id => new_employer_id).map(&:event_time)).max
       create_new_event_and_remove_old(
+
         new_employer_id,
         FIRST_TIME_EMPLOYER_EVENT_NAME,
         latest_time,
@@ -69,8 +71,12 @@ class EmployerEvent
     carrier_file.result
   end
 
-  def self.with_digest_payloads
-    events = self.order_by(event_time: 1)
+  def self.clear_before(boundry_time)
+    self.delete_all(event_time: {"$lt" => boundry_time})
+  end
+
+  def self.with_digest_payloads(boundry_time = Time.now)
+    events = self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
     carrier_files = Carrier.all.map do |car|
       EmployerEvents::CarrierFile.new(car)
     end

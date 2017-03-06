@@ -41,11 +41,11 @@ module EmployerEvents
       return nil if @empty
       carrier_abbrev = carrier.abbrev.upcase
       header = <<-XMLHEADER
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <employer_digest_event
         xmlns="http://openhbx.org/api/terms/1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://openhbx.org/api/terms/1.0 organization.xsd">
+        xsi:schemaLocation="http://openhbx.org/api/terms/1.0 organization.xsd http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <event_name>urn:openhbx:events:v1:employer#digest_period_ended</event_name>
         <resource_instance_uri>
                 <id>urn:openhbx:resources:v1:carrier:abbreviation##{carrier_abbrev}</id>

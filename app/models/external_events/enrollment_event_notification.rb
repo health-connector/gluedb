@@ -1,3 +1,5 @@
+require "securerandom"
+
 module ExternalEvents
   class EnrollmentEventNotification
     attr_reader :timestamp
@@ -6,12 +8,12 @@ module ExternalEvents
     attr_reader :errors
     attr_reader :event_responder
     attr_reader :headers
+    attr_reader :business_process_history
 
     include Handlers::EnrollmentEventXmlHelper
-    include Comparable
 
     def initialize(e_responder, m_tag, t_stamp, e_xml, headers)
-      @business_process_history = []
+      @business_process_history = Array.new
       @errors = ActiveModel::Errors.new(self)
       @headers = headers
       @errors = []
@@ -36,35 +38,46 @@ module ExternalEvents
       @droppable = true
     end
 
+    def drop_payload_duplicate!
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_payload_duplicate!(self)
+      end
+    end
+
     def drop_if_bogus_term!
       return false unless @bogus_termination
-      event_responder.broadcast_response(
-        "error",
-        "unmatched_termination",
-        "422",
-        event_xml,
-        headers
-      )
-      event_responder.ack_message(message_tag)
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_term!(self)
       end
-      true
+    end
+
+    def drop_if_bogus_plan_year!
+      return false unless has_bogus_plan_year?
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_plan_year!(self)
+      end
+    end
+
+    def has_bogus_plan_year?
+      return false unless is_shop?
+      plan_year = find_employer_plan_year(policy_cv)
+      plan_year.nil?
+    end
+
+    def clean_ivars
+      # GC hint
+      instance_variables.each do |iv|
+        unless iv.to_s == "@business_process_history"
+          instance_variable_set(iv, nil)
+        end
+      end
     end
 
     def drop_if_marked!
       return false unless @droppable
-      event_responder.broadcast_ok_response(
-        "enrollment_reduced",
-        event_xml,
-        headers
-      )
-      event_responder.ack_message(message_tag)
-      # GC hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_reduced_event!(self)
       end
-      true
     end
 
     def check_for_bogus_renewal_term_against(other)
@@ -77,16 +90,48 @@ module ExternalEvents
 
     def drop_if_bogus_renewal_term!
       return false unless @bogus_renewal_termination
-      event_responder.broadcast_ok_response(
-        "renewal_termination_reduced",
-        event_xml,
-        headers
-      )
-      event_responder.ack_message(message_tag)
-      # GC hint by nilling out references
-      instance_variables.each do |iv|
-        instance_variable_set(iv, nil)
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_bogus_renewal_term!(self)
       end
+    end
+
+    def flow_successful!(action_name)
+      response_with_publisher do |result_publisher|
+        result_publisher.flow_successful!(self, action_name)
+      end
+    end
+
+
+    def drop_not_yet_implemented!(action_name, batch_id, batch_index)
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_not_yet_implemented!(self, action_name, batch_id, batch_index)
+      end
+    end
+
+    def no_event_found!(batch_id, index)
+      response_with_publisher do |result_publisher|
+        result_publisher.no_event_found!(self, batch_id, index)
+      end
+    end
+
+    def persist_failed!(action_name, publish_errors, batch_id, batch_index)
+      response_with_publisher do |result_publisher|
+        result_publisher.persist_failed!(self, action_name, publish_errors, batch_id, batch_index)
+      end
+    end
+
+    def publish_failed!(action_name, publish_errors, batch_id, batch_index)
+      response_with_publisher do |result_publisher|
+        result_publisher.publish_failed!(self, action_name, publish_errors, batch_id, batch_index)
+      end
+    end
+
+    def response_with_publisher
+      result_publisher = Publishers::EnrollmentEventNotificationResult.new(event_responder, event_xml, headers, message_tag)
+
+      yield result_publisher
+      # gc hint by nilling out references
+      clean_ivars
       true
     end
 
@@ -109,11 +154,9 @@ module ExternalEvents
     end
 
     def duplicates?(other)
-      return false unless other.bucket_id == bucket_id
-      return false unless other.active_year == active_year
       return false unless other.hbx_enrollment_id == hbx_enrollment_id
-      (other.is_coverage_starter? && self.is_cancel?) ||
-        (other.is_cancel? && self.is_coverage_starter?)
+      ((!other.is_termination?) && self.is_cancel?) ||
+        (other.is_cancel? && (!self.is_termination?))
     end
 
     def is_coverage_starter?
@@ -124,30 +167,45 @@ module ExternalEvents
       ].include?(enrollment_action)
     end
 
-    def <=>(other)
+    def edge_for(graph, other)
       if other.hbx_enrollment_id == hbx_enrollment_id
         case [other.is_termination?, is_termination?]
         when [true, false]
-          -1
+          graph.add_edge(self, other)
         when [false, true]
-          1
+          graph.add_edge(other, self)
         else
-          0
+          :ok
         end
       elsif other.active_year != active_year
-        active_year.to_i <=> other.active_year.to_i
+        comp = active_year.to_i <=> other.active_year.to_i
+        if comp == -1
+          graph.add_edge(self, other)
+        elsif comp == 1
+          graph.add_edge(other, self)
+        end
       elsif subscriber_start != other.subscriber_start
-        subscriber_start <=> other.subscriber_start
+        comp = subscriber_start <=> other.subscriber_start
+        if comp == -1
+          graph.add_edge(self, other)
+        elsif comp == 1
+          graph.add_edge(other, self)
+        end
       else
         case [subscriber_end.nil?, other.subscriber_end.nil?]
         when [true, true]
-          0
+          :ok
         when [false, true]
-          1
+          graph.add_edge(self, other)
         when [true, false]
-          -1
+          graph.add_edge(other, self)
         else
-          subscriber_end <=> other.subscriber_end
+          comp = subscriber_end <=> other.subscriber_end
+          if comp == -1
+            graph.add_edge(self, other)
+          elsif comp == 1
+            graph.add_edge(other, self)
+          end
         end
       end
     end
@@ -170,7 +228,7 @@ module ExternalEvents
 
     def is_cancel?
       return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-      extract_enrollee_start(subscriber) == extract_enrollee_end(subscriber)
+      extract_enrollee_start(subscriber) >= extract_enrollee_end(subscriber)
     end
 
     def enrollment_action
@@ -225,14 +283,23 @@ module ExternalEvents
                          end
     end
 
+    def is_shop?
+      !employer_hbx_id.blank?
+    end
+
     def coverage_type
       @coverage_type ||= Maybe.new(policy_cv).policy_enrollment.plan.is_dental_only.value
     end
 
     def update_business_process_history(entry)
-      @business_process_history << entry
+      @business_process_history = @business_process_history + [entry]
     end
 
+    def all_member_ids
+      @all_member_ids ||= policy_cv.enrollees.map do |en|
+        Maybe.new(en.member.id).strip.split("#").last.value
+      end
+    end
 
     # Errors stuff for ActiveModel::Errors
     def read_attribute_for_validation(attr)
@@ -248,12 +315,17 @@ module ExternalEvents
     end
 
     def existing_policy
-      @existing_policy ||= Policy.where(eg_id: hbx_enrollment_id).first
+      @existing_policy ||= Policy.where(hbx_enrollment_ids: hbx_enrollment_id).first
+    end
+
+    def existing_plan
+      @existing_plan ||= extract_plan(policy_cv)
     end
 
     private
 
     def initialize_clone(other)
+      @business_process_history = other.business_process_history.clone
       @headers = other.headers.clone
       @timestamp = other.timestamp.clone
       @event_xml = other.event_xml.clone

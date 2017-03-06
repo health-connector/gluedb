@@ -1,0 +1,7 @@
+pre code.hljs {
+  font-size: 12px;
+}
+
+pre code.hljs * {
+  font-size: 12px;
+}

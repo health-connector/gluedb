@@ -1,0 +1,22 @@
+.page-header
+  = render 'shared/breadcrumb', crumbs: ['Enrollment Action Issues']
+
+%table.table.table-condensed
+  %thead
+    %th Received At
+    %th Batch ID
+    %th Batch Index
+    %th Enrollment ID
+    %th Enrollment Action
+    %th Error Message
+    %th Status
+  %tbody
+    - @enrollment_action_issues.each do |eai|
+      %tr
+        %td= eai.received_at
+        %td= eai.batch_id
+        %td= eai.batch_index
+        %td= eai.hbx_enrollment_id
+        %td= link_to(short_enrollment_action_uri(eai.enrollment_action_uri), enrollment_action_issue_path(eai)) 
+        %td= eai.error_message
+        %td= eai.aasm_state

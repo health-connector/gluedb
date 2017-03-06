@@ -8,6 +8,10 @@ module ExternalEvents
       @amqp_response_channel = amqp_rc
     end
 
+    def connection
+      @amqp_response_channel.connection
+    end
+
     def ack_message(message_tag)
       amqp_response_channel.ack(message_tag, false)
     end
@@ -29,7 +33,7 @@ module ExternalEvents
     protected
 
     def broadcast_event(props, payload)
-      broadcaster = ::Amqp::EventBroadcaster.new(amqp_response_channel, connection)
+      broadcaster = ::Amqp::EventBroadcaster.new(amqp_response_channel.connection)
       broadcaster.broadcast(props, payload)
     end
 

@@ -4,9 +4,9 @@ describe Handlers::EnrollmentEventReduceHandler, "given:
 - 3 notifications
 - 2 of which should reduce"  do
   
-  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5) }
-  let(:duplicate_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true) }
-  let(:duplicate_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true) }
+  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a") }
+  let(:duplicate_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 2, :enrollment_action => "b") }
+  let(:duplicate_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 3, :enrollment_action => "c") }
   let(:notifications) { [duplicate_notification_1, duplicate_notification_2, non_duplicate_notification] }
 
   let(:next_step) { double("The next step in the pipeline") }
@@ -35,9 +35,9 @@ describe Handlers::EnrollmentEventReduceHandler, "given:
 - 3 notifications
 - 2 of which should be bucketed together"  do
   
-  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5) }
-  let(:same_bucket_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4) }
-  let(:same_bucket_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4) }
+  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a") }
+  let(:same_bucket_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 2, :enrollment_action => "b") }
+  let(:same_bucket_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 3, :enrollment_action => "c") }
   let(:notifications) { [same_bucket_notification_1, same_bucket_notification_2, non_duplicate_notification] }
 
   let(:next_step) { double("The next step in the pipeline") }

@@ -16,7 +16,18 @@ module Handlers
 
     protected
 
-    def perform_reduction(event_list)
+    def perform_reduction(full_event_list)
+      event_list = full_event_list.inject([]) do |acc, event|
+        duplicate_found = acc.any? do |item|
+          [event.hbx_enrollment_id, event.enrollment_action] == [item.hbx_enrollment_id, item.enrollment_action]
+        end
+        if duplicate_found 
+          event.drop_payload_duplicate!
+          acc
+        else
+          acc + [event]
+        end
+      end
       event_list.combination(2).each do |a, b|
         if a.hash == b.hash
           a.check_and_mark_duplication_against(b)

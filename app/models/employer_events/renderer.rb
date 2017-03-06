@@ -5,12 +5,15 @@ module EmployerEvents
     EVENT_WHITELIST = %w(
 address_changed
 contact_changed
-fein_corrected
+fein_changed
 name_changed
 broker_added
 broker_terminated
 general_agent_added
 general_agent_terminated
+    )
+
+    EXCLUDED_FOR_NOW = %w(
 benefit_coverage_initial_application_eligible
 benefit_coverage_period_terminated_voluntary
 benefit_coverage_period_terminated_nonpayment
@@ -56,7 +59,10 @@ benefit_coverage_period_reinstated
       doc.xpath("//cv:benefit_group/cv:elected_plans[not(cv:elected_plan)]", {:cv => XML_NS}).each do |node|
         node.remove
       end
-      doc.xpath("//cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
+      doc.xpath("//cv:broker_agency_profile[not(cv:brokers)]", {:cv => XML_NS}).each do |node|
+        node.remove
+      end
+      doc.xpath("//cv:employer_profile/cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
         node.remove
       end
       doc.xpath("//cv:benefit_group[not(cv:elected_plans)]", {:cv => XML_NS}).each do |node|
@@ -72,7 +78,7 @@ benefit_coverage_period_reinstated
                         <employer_event>
                                 <event_name>urn:openhbx:events:v1:employer##{employer_event.event_name}</event_name>
                                 <resource_instance_uri>
-                                        <id>#{employer_event.employer_id}</id>
+                                        <id>urn:openhbx:resource:organization:id##{employer_event.employer_id}</id>
                                 </resource_instance_uri>
                                 <body>
       XMLHEADER

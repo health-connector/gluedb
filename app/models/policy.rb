@@ -577,6 +577,18 @@ class Policy
     currently_active?
   end
 
+  def terminate_as_of(term_date)
+    self.aasm_state = "hbx_terminated"
+    self.enrollees.each do |en|
+      if en.coverage_end.blank? || (!en.coverage_end.blank? && (en.coverage_end > term_date))
+        en.coverage_end = term_date
+        en.coverage_status = "inactive"
+        en.employment_status_code = "terminated"
+      end
+    end
+    self.save
+  end
+
   def cancel_via_hbx!
     self.aasm_state = "hbx_canceled"
     self.enrollees.each do |en|

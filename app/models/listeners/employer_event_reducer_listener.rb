@@ -22,6 +22,7 @@ module Listeners
 
     def process_retrieved_resource(delivery_info, employer_id, event_resource, m_headers, event_name, event_time)
       resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s}))
+
       EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource) do |destroyed_event|
         resource_event_broadcast("info", "event_reduced", "200", destroyed_event.resource_body, {
           :employer_id => destroyed_event.employer_id,
@@ -125,7 +126,7 @@ module Listeners
       q = create_queues(chan)
       create_bindings(chan, q)
       chan.prefetch(1)
-      self.new(chan, q).subscribe(:block => true, :manual_ack => true)
+      self.new(chan, q).subscribe(:block => true, :manual_ack => true, :ack => true)
       conn.close
     end
   end

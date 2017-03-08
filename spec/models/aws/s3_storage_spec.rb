@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Aws::S3Storage do
 
-  let(:subject) { Aws::S3Storage.new }
+  let(:subject) { allow_any_instance_of(Aws::S3Storage).to receive(:setup); Aws::S3Storage.new }
   let(:aws_env) { ENV['AWS_ENV'] || "local" }
   let(:object) { double }
   let(:bucket_name) { "bucket1" }
@@ -38,10 +38,12 @@ describe Aws::S3Storage do
     end
 
     context "failed upload with exception" do
+      let(:exception) {StandardError.new}
+
       it 'raises exception' do
-        allow(object).to receive(:upload_file).with(file_path, :server_side_encryption => 'AES256').and_raise()
+        allow(object).to receive(:upload_file).with(file_path, :server_side_encryption => 'AES256').and_raise(exception)
         allow_any_instance_of(Aws::S3Storage).to receive(:get_object).and_return(object)
-        expect { subject.save(file_path, bucket_name) }.to raise_error
+        expect { subject.save(file_path, bucket_name) }.to raise_error(exception)
       end
     end
 

@@ -64,6 +64,7 @@ module Handlers
 
     def find_employer_plan_year(policy_cv)
       employer = find_employer(policy_cv)
+      return nil unless employer
       subscriber_enrollee = extract_subscriber(policy_cv)
       subscriber_start = extract_enrollee_start(subscriber_enrollee)
       employer.plan_year_of(subscriber_start)

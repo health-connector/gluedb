@@ -26,6 +26,7 @@ end
 
 group 'development', 'test' do
   gem 'rspec', '3.3.0'
+  gem 'rspec-core', '3.3.2'
 end
 
 group :development, :assets, :test do
@@ -50,7 +51,6 @@ end
 group :test do
   gem 'test-unit'
 	gem 'mongoid-rspec'
-  gem 'rspec-core', '3.3.2'
   gem 'rspec-rails', '3.3.3'
   gem 'rspec-collection_matchers', '1.1.2'
   gem 'capybara', '2.4.4'

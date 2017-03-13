@@ -6,8 +6,55 @@ module BusinessProcesses
 
     include Handlers::EnrollmentEventXmlHelper
 
+    def initialize
+      @droppable = false
+    end
+
     def hash
-      [subscriber_id, coverage_type, employer_fein, plan_active_year].hash
+      bucket_id.hash
+    end
+
+    def bucket_id 
+      [subscriber_id, coverage_type, employer_hbx_id]
+    end
+
+    def mark_for_drop!
+      @droppable = true
+    end
+
+    def drop_if_marked!
+      return false unless @droppable
+      amqp_response_channel.acknowledge(message_tag, false)
+      # GC hint by nilling out references
+      instance_variables.each do |iv|
+        instance_variable_set(iv, nil)
+      end
+      true
+    end
+
+    def duplicates?(other)
+      return false unless other.bucket_id == bucket_id
+      return false unless other.active_year == active_year
+      return false unless other.hbx_enrollment_id == hbx_enrollment_id
+      (other.is_coverage_starter? && self.is_cancel?) ||
+        (other.is_cancel? && self.is_coverage_starter?)
+    end
+
+    def is_coverage_starter?
+      [
+        "urn:openhbx:terms:v1:enrollment#initial",
+        "urn:openhbx:terms:v1:enrollment#auto_renew",
+        "urn:openhbx:terms:v1:enrollment#active_renew"
+      ].include?(enrollment_action)
+    end
+
+    def is_cancel?
+      return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
+      extract_enrollee_start(subscriber) == extract_enrollee_end(subscriber)
+    end
+
+    def enrollment_action
+      @enrollment_action ||= extract_enrollment_action(enrollment_event_xml)
     end
 
     def enrollment_event_xml
@@ -34,12 +81,12 @@ module BusinessProcesses
       @active_year ||= extract_active_year(policy_cv)
     end
 
-    def employer_fein
-      @employer_fein ||= begin
+    def employer_hbx_id
+      @employer_hbx_id ||= begin
                            if determine_market(enrollment_event_xml) == "individual"
                              nil
                            else
-                             Maybe.new(policy_cv).policy.policy_enrollment.shop_market.employer_link.id.strip.split("#").last.value
+                             Maybe.new(policy_cv).policy_enrollment.shop_market.employer_link.id.strip.split("#").last.value
                            end
                          end
     end

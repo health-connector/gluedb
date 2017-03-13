@@ -1,3 +1,5 @@
+require 'zip'
+
 class EmployerEvent
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -11,55 +13,108 @@ class EmployerEvent
 
   index({event_time: 1, event_name: 1, employer_id: 1})
 
+  FIRST_TIME_EMPLOYER_EVENT_NAME = "benefit_coverage_initial_application_eligible"
+
   def self.newest_event?(new_employer_id, new_event_name, new_event_time)
     !self.where(:employer_id => new_employer_id, :event_name => new_event_name, :event_time => {"$gte" => new_event_time}).any?
   end
 
-  def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
+  def self.not_yet_seen_by_carrier?(new_employer_id)
+    self.where(:event_name => FIRST_TIME_EMPLOYER_EVENT_NAME, :employer_id => new_employer_id).any?
+  end
+
+  def self.create_new_event_and_remove_old(new_employer_id, new_event_name, new_event_time, new_payload, match_criteria)
     new_event = self.create!({
       employer_id: new_employer_id,
       event_name: new_event_name,
       event_time: new_event_time,
       resource_body: new_payload
     })
-    self.where(:employer_id => new_employer_id, :event_name => new_event_name, :_id => {"$ne" => new_event._id}).each do |old_record|
+    self.where(match_criteria.merge({:_id => {"$ne" => new_event._id}})).each do |old_record|
       yield old_record
       old_record.destroy
     end
   end
 
-  def remove_other_carrier_nodes(xml, carrier_hbx_id)
-    doc = Nokogiri::XML(xml)
+  def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
 
-    data_for_carrier = doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[contains(., '#{carrier_hbx_id}')]", {:cv => XML_NS}).any?
+    if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == FIRST_TIME_EMPLOYER_EVENT_NAME)
+      latest_time = ([new_event_time] + self.where(:employer_id => new_employer_id).map(&:event_time)).max
+      create_new_event_and_remove_old(
 
-    doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
-      carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content
-      if carrier_id != carrier_hbx_id
-        node.remove
+        new_employer_id,
+        FIRST_TIME_EMPLOYER_EVENT_NAME,
+        latest_time,
+        new_payload,
+        {:employer_id => new_employer_id}) do |old_record|
+          yield old_record
+      end
+    else
+      create_new_event_and_remove_old(
+        new_employer_id,
+        new_event_name,
+        new_event_time,
+        new_payload,
+        {:employer_id => new_employer_id, :event_name => new_event_name}) do |old_record|
+          yield old_record
       end
     end
-    doc.xpath("//cv:employer_census_families", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group/cv:reference_plan", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group/cv:elected_plans[not(cv:elected_plan)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:brokers[not(cv:broker_account)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:benefit_group[not(cv:elected_plans)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:plan_year/cv:benefit_groups[not(cv:benefit_group)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.xpath("//cv:plan_year[not(cv:benefit_groups)]", {:cv => XML_NS}).each do |node|
-      node.remove
-    end
-    doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION, :indent => 2)
   end
+
+  def self.get_digest_for(carrier)
+    events = self.order_by(event_time: 1)
+    carrier_file = EmployerEvents::CarrierFile.new(carrier)
+    events.each do |ev|
+      event_renderer = EmployerEvents::Renderer.new(ev)
+      carrier_file.render_event_using(event_renderer)
+    end
+    carrier_file.result
+  end
+
+  def self.clear_before(boundry_time)
+    self.delete_all(event_time: {"$lt" => boundry_time})
+  end
+
+  def self.with_digest_payloads(boundry_time = Time.now)
+    events = self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
+    carrier_files = Carrier.all.map do |car|
+      EmployerEvents::CarrierFile.new(car)
+    end
+    events.each do |ev|
+      event_renderer = EmployerEvents::Renderer.new(ev)
+      carrier_files.each do |car|
+        car.render_event_using(event_renderer)
+      end
+    end
+    carrier_files.each do |cf|
+      unless cf.empty?
+        f_name, data = cf.result
+        yield data
+      end
+    end
+  end
+
+  def self.get_all_digests
+    events = self.order_by(event_time: 1)
+    carrier_files = Carrier.all.map do |car|
+      EmployerEvents::CarrierFile.new(car)
+    end
+    events.each do |ev|
+      event_renderer = EmployerEvents::Renderer.new(ev)
+      carrier_files.each do |car|
+        car.render_event_using(event_renderer)
+      end
+    end
+    z_file = Tempfile.new("employer_events_digest")
+    zip_path = z_file.path + ".zip"
+    z_file.close
+    z_file.unlink
+    ::Zip::File.open(zip_path, ::Zip::File::CREATE) do |zip|
+      carrier_files.each do |car|
+        car.write_to_zip(zip)
+      end
+    end
+    zip_path
+  end
+
 end

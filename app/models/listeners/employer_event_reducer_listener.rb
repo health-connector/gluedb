@@ -1,5 +1,5 @@
 module Listeners
-  class EmployerEventReducerListener < Amqp::Client
+  class EmployerEventReducerListener < Amqp::RetryClient
     def self.queue_name
       ec = ExchangeInformation
       "#{ec.hbx_id}.#{ec.environment}.q.glue.employer_event_reducer"
@@ -22,6 +22,7 @@ module Listeners
 
     def process_retrieved_resource(delivery_info, employer_id, event_resource, m_headers, event_name, event_time)
       resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s}))
+
       EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource) do |destroyed_event|
         resource_event_broadcast("info", "event_reduced", "200", destroyed_event.resource_body, {
           :employer_id => destroyed_event.employer_id,
@@ -50,7 +51,7 @@ module Listeners
     def on_message(delivery_info, properties, body)
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       employer_id = m_headers["employer_id"].to_s
-      event_name = m_headers["event_name"].to_s
+      event_name = delivery_info.routing_key.split("employer.").last
       event_time = get_timestamp(properties)
       if EmployerEvent.newest_event?(employer_id, event_name, event_time)
         r_code, resource_or_body = request_resource(employer_id)
@@ -62,7 +63,7 @@ module Listeners
           channel.ack(delivery_info.delivery_tag, false)
         when "503"
           resource_error_broadcast("resource_timeout", r_code, m_headers, m_headers)
-          channel.reject(delivery_info.delivery_tag, true)
+          channel.reject(delivery_info.delivery_tag, false)
         else
           resource_error_broadcast("unknown_error", r_code, resource_or_body, m_headers)
           channel.ack(delivery_info.delivery_tag, false)
@@ -87,14 +88,45 @@ module Listeners
       q.bind(event_topic_exchange, {:routing_key => "info.events.employer.#"})
     end
 
+    def self.create_queues(chan)
+      q = chan.queue(
+        self.queue_name,
+        {
+          :durable => true,
+          :arguments => {
+            "x-dead-letter-exchange" => (self.queue_name + "-retry")
+          }
+        }
+      )
+      retry_q = chan.queue(
+        (self.queue_name + "-retry"),
+        {
+          :durable => true,
+          :arguments => {
+            "x-dead-letter-exchange" => (self.queue_name + "-requeue"),
+            "x-message-ttl" => 1000
+          }
+        }
+      )
+      retry_exchange = chan.fanout(
+        (self.queue_name + "-retry")
+      )
+      requeue_exchange = chan.fanout(
+        (self.queue_name + "-requeue")
+      )
+      retry_q.bind(retry_exchange, {:routing_key => ""})
+      q.bind(requeue_exchange, {:routing_key => ""})
+      q
+    end
+
     def self.run
       Process.setproctitle("%s - %s" % [self.name , $$])
       conn = AmqpConnectionProvider.start_connection
       chan = conn.create_channel
-      chan.prefetch(1)
-      q = chan.queue(self.queue_name, :durable => true)
+      q = create_queues(chan)
       create_bindings(chan, q)
-      self.new(chan, q).subscribe(:block => true, :manual_ack => true)
+      chan.prefetch(1)
+      self.new(chan, q).subscribe(:block => true, :manual_ack => true, :ack => true)
       conn.close
     end
   end

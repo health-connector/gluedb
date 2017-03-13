@@ -71,9 +71,9 @@ module Handlers
 
     def find_employer(policy_cv)
       employer_link = extract_employer_link(policy_cv)
-      employer_fein = Maybe.new(employer_link).id.strip.split("#").last.value
-      return nil if employer_fein.blank?
-      Employer.where(fein: employer_fein).first
+      employer_hbx_id = Maybe.new(employer_link).id.strip.split("#").last.value
+      return nil if employer_hbx_id.blank?
+      Employer.where(hbx_id: employer_hbx_id).first
     end
 
     def extract_enrollment_action(enrollment_event_cv)

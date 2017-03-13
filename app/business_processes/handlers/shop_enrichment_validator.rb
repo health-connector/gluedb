@@ -18,7 +18,7 @@ module Handlers
         return false
       end
       employer_link = extract_employer_link(policy_cv)
-      if shop_enrollment.nil?
+      if employer_link.nil?
         errors.add(:employer, "Could not locate employer_link element")
         errors.add(:employer, last_event)
         return false

@@ -24,8 +24,8 @@ module BusinessProcesses
 
     def policy_action
       current_action = extract_enrollment_action(enrollment_event_cv)
-      # If they say it's a renewal, it's a renewal
-      return current_action if is_ivl_active_renewal? || is_ivl_passive_renewal?
+      # If they say it's a passive renewal, it's a passive renewal
+      return current_action if is_ivl_passive_renewal?
       plan, subscriber_person, subscriber_id, subscriber_start = extract_policy_details
       return "urn:openhbx:terms:v1:enrollment#initial" if subscriber_person.nil?
       # Determine and provide correct action here
@@ -33,6 +33,13 @@ module BusinessProcesses
         competing_policies.each do |c_pol|
           if c_pol.plan.carrier_id == plan.carrier_id
             return "urn:openhbx:terms:v1:enrollment#change_product"
+          end
+        end
+      end
+      if renewal_candidates.any?
+        renewal_candidates.each do |rc|
+          if plan.carrier_id == rc.plan.carrier_id
+            return "urn:openhbx:terms:v1:enrollment#active_renew"
           end
         end
       end
@@ -79,7 +86,7 @@ module BusinessProcesses
         renewal_candidates.each do |rc|
           # Add a termination for the old carrier for each switch
           if plan.carrier_id != rc.plan.carrier_id
-            terms << BusinessProcess::EnrollmentTermination.new(rc.eg_id, subscriber_start - 1.day, c_pol.active_member_ids)
+            terms << ::BusinessProcesses::EnrollmentTermination.new(rc.eg_id, subscriber_start - 1.day, rc.active_member_ids)
           end  
         end
       end
@@ -180,7 +187,6 @@ module BusinessProcesses
     def ivl_renewal_candidate?(pol, plan, subscriber_id, subscriber_start)
       return false if pol.is_shop?
       return false unless (pol.plan.year == plan.year - 1)
-      return false unless (pol.plan.carrier_id == plan.carrier_id)
       return false unless (plan.coverage_type == pol.plan.coverage_type)
       return false if pol.canceled?
       return false if pol.terminated?

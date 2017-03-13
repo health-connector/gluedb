@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Policy do
+describe Policy, :dbclean => :after_each do
   subject(:policy) { build(:policy) }
 
   [
@@ -26,6 +26,14 @@ describe Policy do
     :premium_payments
   ].each do |attribute|
     it { should respond_to attribute }
+  end
+
+  describe "created with a factory" do
+    subject { create(:policy) }
+
+    it "has the correct default hbx_enrollment_ids" do
+      expect(subject.hbx_enrollment_ids).to eq [subject.eg_id]
+    end
   end
 
   describe '#subscriber' do
@@ -339,7 +347,7 @@ describe Policy do
   end
 end
 
-describe Policy do
+describe Policy, :dbclean => :after_each do
   let(:eg_id) { "1234" }
   let(:subscriber) { Enrollee.new(:coverage_end => nil, :coverage_start => Date.new(Date.today.year, 1, 1), :rel_code => "self") }
   let(:enrollees) { [subscriber]}
@@ -464,7 +472,7 @@ describe Policy do
 end
 
 
-describe Policy do
+describe Policy, :dbclean => :after_each do
 
   let(:aptc_credits) { [aptc_credit1, aptc_credit2] }
   let(:aptc_credit1) { AptcCredit.new(start_on: Date.new(2014, 1, 1), end_on: Date.new(2014, 5, 31), aptc: 100.0, pre_amt_tot: 200.0, tot_res_amt: 100.0) }
@@ -556,4 +564,5 @@ describe Policy do
       end
     end
   end
+
 end

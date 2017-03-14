@@ -1,5 +1,4 @@
 require "rails_helper"
-require "byebug"
 
 describe EnrollmentAction::PlanChangeDependentAdd, "given an enrollment event set that:
 - has two enrollments
@@ -138,7 +137,7 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product_member_add")
     subject.publish
   end
-  
+
   it "clears all member end dates before publishing" do
     expect(action_publish_helper).to receive(:keep_member_ends).with([])
     subject.publish

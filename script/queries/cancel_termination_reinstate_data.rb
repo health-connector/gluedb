@@ -1,6 +1,8 @@
 require 'csv'
 
-policies = Policy.where(:employer_id => nil)
+health_plans = Plan.where(:coverage_type => "health").map(&:id)
+
+policies = Policy.where(:employer_id => nil, :plan_id => {"$in" => health_plans})
 
 apr_term = 0
 may_term = 0

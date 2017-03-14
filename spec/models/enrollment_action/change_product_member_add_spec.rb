@@ -81,10 +81,71 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(termination_event.existing_policy).to receive(:terminate_as_of).and_return(true)
-    allow(termination_event).to receive(:subscriber_end).and_return(true)
+    allow(termination_event).to receive(:subscriber_end).and_return(false)
   end
 
   it "successfully creates the new policy" do
     expect(subject.persist).to be_truthy
+  end
+end
+
+
+describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment set, being published" do
+  let(:amqp_connection) { double }
+  let(:event_xml) { double }
+  let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
+  let(:enrollee_primary) { double(:m_id => 1, :coverage_start => :one_month_ago) }
+  let(:enrollee_new) { double(:m_id => 2, :coverage_start => :one_month_ago) }
+
+  let(:plan) { instance_double(Plan, :id => 1) }
+  let(:policy) { instance_double(Policy, :enrollees => [enrollee_primary, enrollee_new], :eg_id => 1) }
+
+  let(:dependent_add_event) { instance_double(
+    ::ExternalEvents::EnrollmentEventNotification,
+    :event_xml => event_xml,
+    :all_member_ids => [1,2],
+    :hbx_enrollment_id => 2,
+    :employer_hbx_id => 1
+  ) }
+  let(:termination_event) { instance_double(
+    ::ExternalEvents::EnrollmentEventNotification,
+    :existing_policy => policy,
+    :all_member_ids => [1],
+    :event_responder => event_responder,
+    :hbx_enrollment_id => 1,
+    :employer_hbx_id => 1
+  ) }
+  let(:action_helper_result_xml) { double }
+
+  let(:action_publish_helper) { instance_double(
+    EnrollmentAction::ActionPublishHelper,
+    :to_xml => action_helper_result_xml
+  ) }
+
+  before :each do
+    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
+    allow(action_publish_helper).to receive(:filter_affected_members).with([2]).and_return(true)
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product_member_add")
+    allow(action_publish_helper).to receive(:keep_member_ends).with([])
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+  end
+
+  subject do
+    EnrollmentAction::PlanChangeDependentAdd.new(termination_event, dependent_add_event)
+  end
+
+  it "publishes an event of type add dependents" do
+    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product_member_add")
+    subject.publish
+  end
+  
+  it "clears all member end dates before publishing" do
+    expect(action_publish_helper).to receive(:keep_member_ends).with([])
+    subject.publish
+  end
+
+  it "publishes resulting xml to edi" do
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, dependent_add_event.employer_hbx_id)
+    subject.publish
   end
 end

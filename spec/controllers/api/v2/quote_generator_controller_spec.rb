@@ -18,13 +18,13 @@ describe Api::V2::QuoteGeneratorController do
       Nokogiri::XML(request_xml)
     }
 
+    let(:quote_validator) { double(:valid? => true, :check_against_schema => nil) }
+
     context "successful response" do
 
       it 'should respond with premiums' do
         allow(Nokogiri).to receive(:XML).with(anything()).and_return(xml_doc)
-        allow_any_instance_of(QuoteValidator).to receive(:initialize).with(anything()).and_return(double())
-        allow_any_instance_of(QuoteValidator).to receive(:check_against_schema)
-        allow_any_instance_of(QuoteValidator).to receive(:valid?).and_return(true)
+        allow(QuoteValidator).to receive(:new).with(anything()).and_return(quote_validator)
         allow_any_instance_of(Premiums::PolicyCalculator).to receive(:apply_calculations).with(policy).and_return(response_xml)
         allow_any_instance_of(QuoteCvProxy).to receive(:response_xml).and_return(response_xml)
         allow_any_instance_of(QuoteCvProxy).to receive(:invalid?).and_return(false)

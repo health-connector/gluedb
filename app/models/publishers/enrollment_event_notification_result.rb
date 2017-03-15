@@ -72,6 +72,15 @@ module Publishers
       event_responder.ack_message(message_tag)
     end
 
+    def drop_already_processed!(event_notification)
+      event_responder.broadcast_ok_response(
+        "event_already_processed",
+        event_xml,
+        headers
+      )
+      event_responder.ack_message(message_tag)
+    end
+
     def drop_bogus_renewal_term!(event_notification)
       event_responder.broadcast_ok_response(
         "renewal_termination_reduced",
@@ -189,7 +198,7 @@ module Publishers
       event_responder.ack_message(message_tag)
     end
 
-    def flow_successful!(event_notification, action_name)
+    def flow_successful!(event_notification, action_name, batch_id, batch_index)
       event_responder.broadcast_response(
         "info",
         "event_processed",
@@ -198,6 +207,18 @@ module Publishers
         headers.merge({
           :enrollment_action => action_name
         })
+      )
+      store_error_model(
+        event_notification,
+        "processed_successfully",
+        headers.merge({
+          "return_status" => "200",
+          "action_name" => action_name
+        }),
+        {
+          :batch_id => batch_id,
+          :batch_index => batch_index
+        }
       )
       event_responder.ack_message(message_tag)
     end

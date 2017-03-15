@@ -9,7 +9,8 @@ module Handlers
     # after us once for each in that set.
     # [::ExternalEvents::EnrollmentEventNotification] -> [::EnrollmentAction::Base]
     def call(context)
-      no_bogus_terms = discard_bogus_terms(context)
+      no_dupe_events = discard_already_processed_events(context)
+      no_bogus_terms = discard_bogus_terms(no_dupe_events)
       no_bogus_plan_years = discard_bogus_plan_years(no_bogus_terms)
       sorted_actions = sort_enrollment_events(no_bogus_plan_years)
       clean_sorted_list = discard_bogus_renewal_terms(sorted_actions)
@@ -17,6 +18,11 @@ module Handlers
       resolve_actions(enrollment_sets).each do |action|
         super(action)
       end
+    end
+
+    def discard_already_processed_events(enrollments)
+      filter = ::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent.new
+      filter.filter(enrollments)
     end
 
     def discard_bogus_plan_years(enrollments)

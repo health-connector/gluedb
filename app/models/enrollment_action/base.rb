@@ -103,11 +103,13 @@ module EnrollmentAction
     end
 
     def flow_successful!
+      idx = 0
+      batch_id = SecureRandom.uuid
       if @termination
-        @termination.flow_successful!(self.class.name.to_s)
+        @termination.flow_successful!(self.class.name.to_s, batch_id, idx)
       end
       if @action
-        @action.flow_successful!(self.class.name.to_s)
+        @action.flow_successful!(self.class.name.to_s, batch_id, idx)
       end
     end
 

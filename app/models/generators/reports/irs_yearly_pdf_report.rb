@@ -2,21 +2,52 @@ module Generators::Reports
   class IrsYearlyPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
-    def initialize(notice, multiple = false)
+    attr_accessor :responsible_party_data
+
+    def initialize(notice, multiple = false, void = false)
       @multiple = multiple
-      template = "#{Rails.root}/1095a_template.pdf"
+      @void = void
+      @notice_2014 = false
+      @void = false
+      @void_2015 = false
+      @catastrophic = false
+      @catastrophic_corrected = false
+      @catastrophic_aptc = false
+      @catastrophic_confirmation =  false
+      @notice_2016 = false
+      @void_2016 = true
+
+      template = "#{Rails.root}/1095a_template_2015.pdf"
+      template = "#{Rails.root}/2016-1095A-NEW-UQHP-Terms.pdf" if @notice_2016
+      template = "#{Rails.root}/1095a_template.pdf" if @notice_2014
+      template = "#{Rails.root}/1095a_template_void.pdf" if @void
+      template = "#{Rails.root}/1095a_template_void_2015.pdf" if @void_2015
+      template = "#{Rails.root}/2016-1095A-VOID.pdf" if @void_2016
+      template = "#{Rails.root}/1095a_template_catastrophic.pdf" if @catastrophic
+      template = "#{Rails.root}/1095a_template_corrected_2.pdf" if @catastrophic_corrected
+      template = "#{Rails.root}/1095a_template_2015_catastrophic_aptc.pdf" if @catastrophic_aptc
+      template = "#{Rails.root}/final_2015_catastrophic_coverage_confirmation.pdf" if @catastrophic_confirmation
 
       super({:template => template, :margin => [30, 55]})
       font_size 11
 
       @notice = notice
       @margin = [30, 70]
+    end
 
+    def process
       fill_envelope
       fill_coverletter
-      go_to_page(5)
+      return if @catastrophic_confirmation
+      if @catastrophic_corrected
+        go_to_page(3)
+      elsif @notice_2016 || @void_2016
+        go_to_page(9)
+      else
+        go_to_page(5)
+      end
       fill_subscriber_details
-      fill_household_details
+      fill_household_details unless (@void || @void_2016)
       fill_preimum_details
     end
 
@@ -30,18 +61,79 @@ module Generators::Reports
     end
 
     def fill_coverletter
-      go_to_page(3)
+      # go_to_page(3) # 2015
+      go_to_page(5)
 
-      bounding_box([15, 553], :width => 200) do
+      padding = 31
+      padding = 10
+
+      padding = 26 if @void
+
+      bounding_box([15, 553+padding], :width => 200) do
         text "#{Date.today.strftime('%m/%d/%Y')}"
       end
 
-      bounding_box([15, 525], :width => 300) do
+      bounding_box([15, 525+padding], :width => 300) do
         fill_recipient_contact
       end
 
-      bounding_box([44, 430], :width => 200) do
+      y_pos = if @catastrophic
+        405
+      elsif @catastrophic_corrected
+        444
+      else
+        if @notice_2014 # 2014
+          418
+        else
+          # 430 # 2014 void
+          430 # 2015
+        end
+      end
+
+      x_pos = 44
+
+      x_pos = 42 if @catastrophic_corrected
+
+      padding = 12 unless @void
+      padding = 20 if @void_2016
+      y_pos = 408 if @void_2016
+      y_pos = 444 if @void_2015
+
+      bounding_box([x_pos, y_pos+padding], :width => 200) do
         text "#{@notice.recipient.name}:"
+      end
+
+      padding = -20 if @void_2016
+
+
+      if @void_2016
+        bounding_box([93, 241+padding], :width => 200) do
+          text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
+        end
+
+        bounding_box([100, 131+padding], :width => 200) do
+          text @notice.active_policies.blank? ? 'None' : @notice.active_policies
+        end
+      end
+
+      if @void_2015
+        bounding_box([133, 237+padding], :width => 200) do
+          text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
+        end
+
+        bounding_box([120, 141+padding], :width => 200) do
+          text @notice.active_policies.blank? ? 'None' : @notice.active_policies
+        end
+      end
+
+      if @void
+        bounding_box([133, 292+padding], :width => 200) do
+          text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
+        end
+
+        bounding_box([120, 223+padding], :width => 200) do
+          text @notice.active_policies.blank? ? 'None' : @notice.active_policies
+        end
       end
     end
 
@@ -53,6 +145,7 @@ module Generators::Reports
     end
 
     def fill_subscriber_details
+
       col1 = mm2pt(-2)
       col2 = mm2pt(51.50)
       col3 = mm2pt(102.50)
@@ -61,48 +154,52 @@ module Generators::Reports
 
       x_pos_corrected = mm2pt(128.50)
       y_pos_corrected = 790.86 - mm2pt(31.80)
+      y_pos_corrected = 790.86 - mm2pt(23.80) if @void_2015 || @void_2016
 
-      # bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
-      #   font "/Library/Fonts/Arial Unicode.ttf"
-      #   text "\u2714"
-      # end
+      bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
+        font "/Library/Fonts/Arial Unicode.ttf"
+        text "\u2714"
+      end
 
-      # font "Times-Roman"
+      font "Times-Roman"
 
       bounding_box([col1, y_pos], :width => 100) do
         text 'DC'
       end
 
-      bounding_box([col2, y_pos], :width => 150) do
-        text @notice.policy_id
-      end
 
-      bounding_box([col3, y_pos], :width => 200) do
-        text @notice.issuer_name
+      if !@void
+        bounding_box([col2, y_pos], :width => 150) do
+          text @notice.policy_id
+        end
+
+        bounding_box([col3, y_pos], :width => 200) do
+          text @notice.issuer_name
+        end
       end
 
       move_down(12)
       if @notice.recipient.blank?
         raise "no subscriber!!"
       end
-      fill_enrollee(@notice.recipient)
+
+      fill_enrollee(@notice.recipient, @responsible_party_data)
 
       move_down(12)
-      if @notice.spouse && @notice.has_aptc
+      if @notice.spouse && @notice.has_aptc && !@void
         fill_enrollee(@notice.spouse)
       else
         move_down(13)
       end
-
       move_down(11)
       y_pos = cursor
 
       bounding_box([col1, y_pos], :width => 100) do
-        text @notice.recipient.coverage_start_date
+        text @notice.recipient.coverage_start_date unless @void
       end
 
       bounding_box([col2, y_pos], :width => 100) do
-        text @notice.recipient.coverage_termination_date.to_s
+        text @notice.recipient.coverage_termination_date.to_s unless @void
       end
 
       bounding_box([col3, y_pos], :width => 250) do
@@ -115,7 +212,6 @@ module Generators::Reports
 
       move_down(12)
       y_pos = cursor
-
       bounding_box([col1, y_pos], :width => 120) do
         text @notice.recipient_address.city
       end
@@ -129,7 +225,7 @@ module Generators::Reports
       end
     end
 
-    def fill_enrollee(enrollee)
+    def fill_enrollee(enrollee, responsible_party_data = {})
       col1 = mm2pt(-2)
       col3 = mm2pt(102.50)
       col4 = mm2pt(145.50)
@@ -138,16 +234,19 @@ module Generators::Reports
       bounding_box([col1, y_pos], :width => 240) do
         text enrollee.name
       end
+      
+      enrollee_ssn = responsible_party_data.blank? ? enrollee.ssn : responsible_party_data[0]
+      enrollee_dob = responsible_party_data.blank? ? enrollee.dob : responsible_party_data[1].strftime("%m/%d/%Y")
 
-      puts enrollee.ssn.inspect
+      puts enrollee_ssn.inspect
 
-      if !enrollee.ssn.blank?
+      if !enrollee_ssn.blank?
         bounding_box([col3, y_pos], :width => 100) do
-          text mask_ssn(enrollee.ssn)
+          text mask_ssn(enrollee_ssn)
         end
       else
         bounding_box([col4, y_pos], :width => 100) do
-          text enrollee.dob
+          text enrollee_dob || ''
         end
       end
     end
@@ -188,25 +287,28 @@ module Generators::Reports
     end
 
     def fill_preimum_details
+
       col1 = mm2pt(36.50)
       col2 = mm2pt(76.50)
       col3 = mm2pt(125.50)
       y_pos = 304
-
+      
       (1..12).each do |index|
         monthly_premium = @notice.monthly_premiums.detect{|p| p.serial == index}
-        if monthly_premium
+        monthly_premium = nil if monthly_premium.present? && monthly_premium.premium_amount.nil?
+
+        if monthly_premium || @void
           bounding_box([col1, y_pos], :width => 100) do
-            text number_to_currency(monthly_premium.premium_amount), :align => :right
+            text number_to_currency((@void || @catastrophic_corrected) ? 0.0 : monthly_premium.premium_amount), :align => :right
           end
 
-          if @notice.has_aptc
+          if @void || (monthly_premium.monthly_aptc.present? && monthly_premium.monthly_aptc.to_f > 0)
             bounding_box([col2, y_pos], :width => 130) do
-              text number_to_currency(monthly_premium.premium_amount_slcsp), :align => :right
+              text number_to_currency((@void || @catastrophic_corrected) ? 0.0 : monthly_premium.premium_amount_slcsp), :align => :right
             end
 
             bounding_box([col3, y_pos], :width => 120) do
-              text number_to_currency(monthly_premium.monthly_aptc), :align => :right
+              text number_to_currency(@void ? 0.0 : monthly_premium.monthly_aptc), :align => :right
             end
           end
         end
@@ -214,16 +316,16 @@ module Generators::Reports
       end
 
       bounding_box([col1, y_pos], :width => 100) do
-        text number_to_currency(@notice.yearly_premium.premium_amount), :align => :right
+        text number_to_currency((@void || @catastrophic_corrected) ? 0.0 : @notice.yearly_premium.premium_amount), :align => :right
       end
 
-      if @notice.has_aptc
+      if @void || @notice.yearly_premium.aptc_amount.present?
         bounding_box([col2, y_pos], :width => 130) do
-          text number_to_currency(@notice.yearly_premium.slcsp_premium_amount), :align => :right
+          text number_to_currency((@void || @catastrophic_corrected) ? 0.0 : @notice.yearly_premium.slcsp_premium_amount), :align => :right
         end
   
         bounding_box([col3, y_pos], :width => 120) do
-          text number_to_currency(@notice.yearly_premium.aptc_amount), :align => :right
+          text number_to_currency(@void ? 0.0 : @notice.yearly_premium.aptc_amount), :align => :right
         end
       end
     end

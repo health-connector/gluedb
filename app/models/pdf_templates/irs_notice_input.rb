@@ -20,7 +20,7 @@ module PdfTemplates
       month_end = month_begin.end_of_month
 
       covered_household.select do |member|
-        (member.coverage_begin <= month_end) && (member.coverage_end > month_begin)
+        (member.coverage_begin <= month_end) && (member.coverage_end >= month_begin)
       end
     end
 
@@ -40,14 +40,29 @@ module PdfTemplates
       carrier_feins = {
         'Aetna' =>  '066033492',
         'CareFirst' => '530078070',
-        'Kaiser' => '943299123',
+        'Kaiser' => '520954463',
         'United Health Care' => '362739571',
         'Dominion Dental' => '541808292',
+        'Dominion' => '541808292',
         'Dentegra Dental' => '751233841',
-        'Delta Dental' => '942761537'
+        'Dentegra' => '751233841',
+        'Delta Dental' => '942761537',
+        'CareFirst BlueChoice' => '521358219'
       }
 
       carrier_feins[self.issuer_name]
+    end
+
+
+    def issuer_dc_name
+      carrier_names = {
+        "Aetna" => "Aetna Life Insurance Company",
+        "CareFirst" => "Group Hospitalization and Medical Services, Inc.",
+        "Kaiser" => "Kaiser Foundation Health Plan of the Mid-Atlantic States, Inc.",
+        "United Health Care" => "United Healthcare Insurance Company",
+        "CareFirst BlueChoice" => "CareFirst BlueChoice, Inc."
+      }
+      carrier_names[self.issuer_name]
     end
   end
 end

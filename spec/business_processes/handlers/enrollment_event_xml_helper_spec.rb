@@ -42,4 +42,23 @@ describe Handlers::EnrollmentEventXmlHelper do
       expect(subject.extract_enrollee_end(enrollee)).to eq(Date.new(2017,1,1))
     end
   end
+
+  describe "#extract_enrollment_group_id" do
+    let(:policy_cv) { double(:id => "SOMEGRP#1234") }
+    it "returns the parsed id" do
+      expect(subject.extract_enrollment_group_id(policy_cv)).to eq("1234")
+    end
+  end
+
+  describe "#extract_policy_member_ids" do
+    let(:subscriber) { instance_double(Member, id: 1) }
+    let(:dependent) { instance_double(Member, id: 2) }
+    let(:enrollee_sub) { double(:member => subscriber) }
+    let(:enrollee_dep) { double(:member => dependent) }
+    let(:policy_cv) { double(:enrollees => [enrollee_sub,enrollee_dep]) }
+
+    it "returns the ids" do
+      expect(subject.extract_policy_member_ids(policy_cv)).to eq([1,2])
+    end
+  end
 end

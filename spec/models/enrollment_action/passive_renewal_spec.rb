@@ -4,41 +4,31 @@ describe EnrollmentAction::PassiveRenewal, "enrollment set for passive renewal e
   let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
   let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 2) }
 
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
-  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => new_plan, :all_member_ids => [1,2]) }
+  let(:event_1) { 
+    instance_double(ExternalEvents::EnrollmentEventNotification, 
+                    :existing_plan => plan, 
+                    :is_termination? => "urn:openhbx:terms:v1:enrollment#terminate_enrollment",
+                    :all_member_ids => [1,2]) }
+  let(:event_2) { 
+    instance_double(ExternalEvents::EnrollmentEventNotification, 
+                    :existing_plan => new_plan,
+                    :is_termination? => false,
+                    :is_passive_renewal? => "urn:openhbx:terms:v1:enrollment#auto_renew",
+                    :all_member_ids => [1,2]) }
   let(:event_set) { [event_1, event_2] }
 
   subject { EnrollmentAction::PassiveRenewal }
+  
+  it "does not qualify with termiantion event" do
+    expect(subject.qualifies?([event_1])).to be_falsey
+  end
 
-  it "qualifies" do
+  it "qualify with passive renewal" do
+    expect(subject.qualifies?([event_2])).to be_truthy
+  end
+
+  it "does not qualifies with two events" do
     expect(subject.qualifies?(event_set)).to be_falsey
-  end
-end
-
-describe EnrollmentAction::PassiveRenewal, "given an enrollment event set with invalid data" do
-  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
-  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 2) }
-  let(:different_carrier_plan) { instance_double(Plan, :id => 3, carrier_id: 3) }
-
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
-  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => new_plan, :all_member_ids => [1,2]) }
-  let(:new_carrier_event) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => different_carrier_plan, :all_member_ids => [1,2]) }
-  let(:event_set) { [event_1, event_2] }
-  let(:invalid_event_set) { [event_1, event_2] }
-  let(:carrier_change_set) { [event_1, new_carrier_event] }
-
-  subject { EnrollmentAction::PassiveRenewal }
-
-  it "does not qualify with changed dependents" do
-    expect(subject.qualifies?(event_set)).to be_falsey
-  end
-
-  it "does not qualify with active renewal" do
-    expect(subject.qualifies?(invalid_event_set)).to be_falsey
-  end
-
-  it "does not qualify with changed carrier" do
-    expect(subject.qualifies?(carrier_change_set)).to be_falsey
   end
 end
 
@@ -57,13 +47,10 @@ describe EnrollmentAction::PassiveRenewal, "persists enrollment set for passive 
     :policy_cv => new_policy_cv,
     :existing_plan => new_plan,
     ) }
-  let(:termination_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification
-    ) }
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
 
 
-  subject { EnrollmentAction::PassiveRenewal.new(termination_event, passive_renewal_event) }
+  subject { EnrollmentAction::PassiveRenewal.new(nil, passive_renewal_event) }
 
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).
@@ -99,11 +86,8 @@ describe EnrollmentAction::PassiveRenewal, "publish enrollment set for passive r
   subject { EnrollmentAction::PassiveRenewal.new(nil, passive_renewal_event) }
 
   before :each do
-    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).
-      and_return(action_publish_helper)
-    allow(action_publish_helper).to receive(:set_event_action).
-      with("urn:openhbx:terms:v1:enrollment#auto_renew").
-      and_return(true)
+    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#auto_renew").and_return(true)
     allow(action_publish_helper).to receive(:keep_member_ends).with([]).and_return(true)
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, passive_renewal_event.hbx_enrollment_id, passive_renewal_event.employer_hbx_id)
   end

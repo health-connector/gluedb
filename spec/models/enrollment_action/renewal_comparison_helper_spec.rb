@@ -103,17 +103,60 @@ describe EnrollmentAction::RenewalComparisonHelper do
   end
 
   describe "#renewal_dependents_added?" do
-    ## receives EnrollmentEvent and a renewal candidate
+    let(:all_member_ids) { [1,2,3] }
+    let(:enrollment_event) { instance_double(ExternalEvents::EnrollmentEventNotification,
+                              :all_member_ids => all_member_ids
+                              )
+                           }
+    let(:renewal_candidate) { double(:active_member_ids => [1,2,3]) }
 
+    it "returns false if there are no added ids" do
+      expect(subject.renewal_dependents_added?(renewal_candidate, enrollment_event)).to be_falsey
+    end
+
+    context "if there are added members" do
+      let(:all_member_ids) { [1,2,3,4] }
+      it "returns true" do
+        expect(subject.renewal_dependents_added?(renewal_candidate, enrollment_event)).to be_truthy
+      end
+    end
+
+    context "if there are dropped members" do
+      let(:all_member_ids) { [1,2] }
+      it "returns false" do
+        expect(subject.renewal_dependents_added?(renewal_candidate, enrollment_event)).to be_falsey
+      end
+    end
   end
 
   describe "#renewal_dependents_dropped?" do
-    ## receives EnrollmentEvent and a renewal candidate
+    let(:all_member_ids) { [1,2,3] }
+    let(:enrollment_event) { instance_double(ExternalEvents::EnrollmentEventNotification,
+                              :all_member_ids => all_member_ids
+                              )
+                           }
+    let(:renewal_candidate) { double(:active_member_ids => [1,2,3]) }
 
+    it "returns false if there are no dropped ids" do
+      expect(subject.renewal_dependents_dropped?(renewal_candidate, enrollment_event)).to be_falsey
+    end
+
+    context "if there are added members" do
+      let(:all_member_ids) { [1,2,3,4] }
+      it "returns false" do
+        expect(subject.renewal_dependents_dropped?(renewal_candidate, enrollment_event)).to be_falsey
+      end
+    end
+
+    context "if there are dropped members" do
+      let(:all_member_ids) { [1,2] }
+      it "returns true" do
+        expect(subject.renewal_dependents_dropped?(renewal_candidate, enrollment_event)).to be_truthy
+      end
+    end
   end
 
   describe "ivl_renewal_candidate?" do
-    ## receives a policy, plan, subscriber_id, subscriber_start date, and a boolean if same carrier
     let(:subscriber) { double(:m_id => 1)}
     let(:subscriber_id) { 1 }
     let(:is_shop?) { false }

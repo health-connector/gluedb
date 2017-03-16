@@ -130,7 +130,7 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
     EnrollmentAction::DependentDrop.new(termination_event, dependent_drop_event)
   end
 
-  it "publishes an event of type add dependents" do
+  it "publishes an event of type drop dependents" do
     expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_member_terminate")
     subject.publish
   end

@@ -61,4 +61,26 @@ describe Handlers::EnrollmentEventXmlHelper do
       expect(subject.extract_policy_member_ids(policy_cv)).to eq([1,2])
     end
   end
+
+  describe '#extract_employer_link' do
+    let(:shop_market) { double(:employer_link => :employer_link)}
+    let(:policy) { double(:policy, :shop_market => shop_market) }
+    let(:policy_cv) { double(:policy_enrollment => policy)}
+
+    it "returns the employer link" do
+      expect(subject.extract_employer_link(policy_cv)).to eq(:employer_link)
+    end
+  end
+
+  describe "#find_employer" do
+
+  end
+
+  describe "#find_employer_plan_year" do
+
+  end
+
+  describe "#extract_plan" do
+
+  end
 end

@@ -22,7 +22,7 @@ puts "#{Time.now} - 0/#{total_count}"
 count = 0
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan) do
-  CSV.open("all_2016_policies_for_reporting_#{Time.now.stftime('%Y%m%d%H%M%S')}.csv","w") do |csv|
+  CSV.open("all_2016_policies_for_reporting_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv","w") do |csv|
     csv << ["Glue Policy ID", "Enrollment Group ID", 
             "Subscriber First Name", "Subscriber Last Name", "Subscriber HBX ID", "Authority Member Policy?",
             "Metal Level","Carrier", "HIOS ID",

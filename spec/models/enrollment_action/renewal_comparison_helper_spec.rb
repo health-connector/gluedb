@@ -331,6 +331,23 @@ describe EnrollmentAction::RenewalComparisonHelper do
   end
 
   describe "shop_renewal_candidates" do
+    let(:policy_cv) { double }
+    let(:subscriber_enrollee) { double }
+    let(:subscriber_start) { DateTime.new(2017,1,1) }
+    let(:subscriber_id) { 1 }
+    let(:subscriber_person) { instance_double(Person) }
+    let(:employer) { double }
+    let(:plan_year) { double() }
+
+    before do
+      allow(subject).to receive(:extract_subscriber).with(policy_cv).and_return(subscriber_enrollee)
+      allow(subject).to receive(:extract_enrollee_start).with(policy_cv).and_return(subscriber_start)
+      allow(subject).to receive(:extract_member_id).with(subscriber_enrollee).and_return(subscriber_id)
+      allow(subject).to receive(:find_employer).with(policy_cv).and_return(:employer)
+      allow(subject).to receive(:find_employer_plan_year).with(policy_cv).and_return(plan_year)
+      allow(subject).to receive(:extract_enrollee_end).with(subscriber_enrollee).and_return('')
+      allow(Person).to receive(:find_by_member_id).with(subscriber_id).and_return(subscriber_person)
+    end
     ## receives a policy_cv and boolean if same carrier
   end
 

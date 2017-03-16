@@ -17,16 +17,21 @@ module Generators::Reports
       @notice_2016 = false
       @void_2016 = true
 
-      template = "#{Rails.root}/1095a_template_2015.pdf"
-      template = "#{Rails.root}/2016-1095A-NEW-UQHP-Terms.pdf" if @notice_2016
-      template = "#{Rails.root}/1095a_template.pdf" if @notice_2014
-      template = "#{Rails.root}/1095a_template_void.pdf" if @void
-      template = "#{Rails.root}/1095a_template_void_2015.pdf" if @void_2015
-      template = "#{Rails.root}/2016-1095A-VOID.pdf" if @void_2016
-      template = "#{Rails.root}/1095a_template_catastrophic.pdf" if @catastrophic
-      template = "#{Rails.root}/1095a_template_corrected_2.pdf" if @catastrophic_corrected
-      template = "#{Rails.root}/1095a_template_2015_catastrophic_aptc.pdf" if @catastrophic_aptc
-      template = "#{Rails.root}/final_2015_catastrophic_coverage_confirmation.pdf" if @catastrophic_confirmation
+      settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
+
+      template_name = settings['tax_document'][year][notice_kind][template]
+      template = "#{Rails.root}/lib/pdf_templates/#{template_name}"
+
+      # template = "#{Rails.root}/1095a_template_2015.pdf"
+      # template = "#{Rails.root}/2016-1095A-NEW-UQHP-Terms.pdf" if @notice_2016
+      # template = "#{Rails.root}/1095a_template.pdf" if @notice_2014
+      # template = "#{Rails.root}/1095a_template_void.pdf" if @void
+      # template = "#{Rails.root}/1095a_template_void_2015.pdf" if @void_2015
+      # template = "#{Rails.root}/2016-1095A-VOID.pdf" if @void_2016
+      # template = "#{Rails.root}/1095a_template_catastrophic.pdf" if @catastrophic
+      # template = "#{Rails.root}/1095a_template_corrected_2.pdf" if @catastrophic_corrected
+      # template = "#{Rails.root}/1095a_template_2015_catastrophic_aptc.pdf" if @catastrophic_aptc
+      # template = "#{Rails.root}/final_2015_catastrophic_coverage_confirmation.pdf" if @catastrophic_confirmation
 
       super({:template => template, :margin => [30, 55]})
       font_size 11

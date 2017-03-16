@@ -1,0 +1,35 @@
+tax_document:
+
+  2014:
+    slcsp: "94506DC0390006-01"
+    new:
+      template: "1095a_template.pdf"
+    corrected:
+      template: "1095a_template.pdf"
+    void:
+      template: "1095a_template_void.pdf"
+    catastrophic:
+      new: "1095a_template_catastrophic.pdf"
+      corrected: "1095a_template_corrected_2.pdf"
+  2015:
+    slcsp: "94506DC0390006-01"
+    new:
+      template: "1095a_template_2015.pdf"
+    corrected:
+      template: "1095a_template_2015.pdf"
+    void:
+      void: "1095a_template_void_2015.pdf"
+    catastrophic:
+      new: "1095a_template_2015_catastrophic_aptc.pdf"
+  2016:
+    slcsp: "94506DC0390006-01"
+    new:
+      template:
+        unassisted: "2016-1095A-NEW-UQHP-Terms.pdf"
+        assisted: "2016-1095A-NEW-AQHP-Terms.pdf"
+    corrected:
+      template:
+    void:
+      template: "2016-1095A-VOID.pdf"
+  2017:
+    slcsp: "86052DC0400001-01"

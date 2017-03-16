@@ -4,17 +4,102 @@ describe EnrollmentAction::RenewalComparisonHelper do
   subject { Class.new { extend EnrollmentAction::RenewalComparisonHelper } }
 
   describe "#any_renewal_candidates?" do
-    ## receives an EnrollmentEvent
+    let(:enrollment_event) { double }
+    let(:same_carrier_candidates) { [] }
+    let(:other_carrier_candidates) { [] }
 
+    before do
+      allow(subject).to receive(:same_carrier_renewal_candidates).with(enrollment_event).and_return(same_carrier_candidates)
+      allow(subject).to receive(:other_carrier_renewal_candidates).with(enrollment_event).and_return(other_carrier_candidates)
+    end
+
+    it "returns false" do
+      expect(subject.any_renewal_candidates?(enrollment_event)).to be_falsey
+    end
+
+    context "with same carrier candidates" do
+      let(:same_carrier_candidates) { [:candidate] }
+      it "returns true" do
+        expect(subject.any_renewal_candidates?(enrollment_event)).to be_truthy
+      end
+    end
+
+    context "with other carrier candidates" do
+      let(:other_carrier_candidates) { [:candidate] }
+      it "returns true" do
+        expect(subject.any_renewal_candidates?(enrollment_event)).to be_truthy
+      end
+    end
   end
 
   describe "#same_carrier_renewal_candidates" do
-    let(:enrollment_event) { instance_double(ExternalEvents::EnrollmentEventNotification)}
-    ## receives an EnrollmentEvent
+    let(:is_shop?) { false }
+    let(:policy_cv) { double()}
+    let(:enrollment_event) { instance_double(ExternalEvents::EnrollmentEventNotification,
+                              :is_shop? => is_shop?,
+                              :policy_cv => policy_cv
+                               )}
+    let(:plan) { instance_double(Plan) }
+    let(:policy) { instance_double(Policy) }
+    let(:subscriber_person) { double(:policies => [policy]) }
+    before do
+      allow(subject).to receive(:extract_ivl_policy_details).with(policy_cv).
+        and_return([plan, subscriber_person, :subscriber_id, :subscriber_start])
+      allow(subject).to receive(:ivl_renewal_candidate?).with(policy, plan, :subscriber_id, :subscriber_start, true).
+        and_return(true)
+    end
+    it "returns true" do
+      expect(subject.same_carrier_renewal_candidates(enrollment_event)).to eq([policy])
+    end
+
+    context "with an empty subscriber_person" do
+      let(:subscriber_person) { nil }
+      it "returns an empty array" do
+        expect(subject.same_carrier_renewal_candidates(enrollment_event)).to eq([])
+      end
+    end
+    context "if the enrollment event is SHOP" do
+      let(:is_shop?) { true }
+      before do
+        allow(subject).to receive(:shop_renewal_candidates).with(policy_cv, true).and_return([:policy])
+      end
+      it "checks the shop_renewal_candidates" do
+        expect(subject.same_carrier_renewal_candidates(enrollment_event)).to eq([:policy])
+      end
+    end
   end
 
   describe "#renewal_dependents_changed?" do
-    ## receives EnrollmentEvent and a renewal candidate
+    let(:enrollment_event) { instance_double(ExternalEvents::EnrollmentEventNotification) }
+    let(:renewal_candidate) { double }
+    let(:dropped) { false }
+    let(:added) { false }
+
+    before do
+      allow(subject).to receive(:renewal_dependents_added?).
+        with(renewal_candidate, enrollment_event).
+        and_return(added)
+      allow(subject).to receive(:renewal_dependents_dropped?).
+        with(renewal_candidate, enrollment_event).
+        and_return(dropped)
+    end
+
+    it "returns false" do
+      expect(subject.renewal_dependents_changed?(renewal_candidate, enrollment_event))
+    end
+
+    context "if dependends have been added" do
+      let(:added) { true }
+      it "returns true" do
+        expect(subject.renewal_dependents_changed?(renewal_candidate, enrollment_event))
+      end
+    end
+    context "if dependends have been dropped" do
+      let(:dropped) { true }
+      it "returns true" do
+        expect(subject.renewal_dependents_changed?(renewal_candidate, enrollment_event))
+      end
+    end
   end
 
   describe "#renewal_dependents_added?" do

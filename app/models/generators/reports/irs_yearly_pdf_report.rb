@@ -2,7 +2,7 @@ module Generators::Reports
   class IrsYearlyPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
-    attr_accessor :responsible_party_data, :settings
+    attr_accessor :responsible_party_data, :settings, :calender_year
 
     def initialize(notice, options={})
       @settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
@@ -28,6 +28,7 @@ module Generators::Reports
     end
 
     def initialize_variables(options)
+      @calender_year = options[:calender_year]
       @multiple = options[:multiple]
       @void = (options[:notice_type] == 'void') ? true : false
       @corrected = options[:notice_type] == 'corrected'
@@ -77,8 +78,7 @@ module Generators::Reports
     end
 
     def fill_coverletter
-      # go_to_page(3) # 2015
-      go_to_page(5)
+      go_to_page(settings[:tax_document][calender_year][:coverage_page_no])
 
       padding = 31
       padding = 10

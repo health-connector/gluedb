@@ -164,9 +164,9 @@ module Generators::Reports
           ssn = prepend_zeros(notice_params[:responsible_party_ssn].gsub('-','').to_i.to_s, 9)
         end
 
+
         @responsible_party_data = { 
-          policy.id => [ssn, notice_params[:responsible_party_dob]
-          ]
+          policy.id => [ssn, notice_params[:responsible_party_dob]]
         }
       end
 

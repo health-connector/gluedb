@@ -14,10 +14,10 @@ describe "policies/generate_tax_document_form.html.haml", :dbclean => :after_eac
       render :template => "policies/generate_tax_document_form"
     end
 
-    it "should have SSN and DOB fields" do
-      expect(rendered).to have_content("Responsible Party")
-      expect(rendered).to have_content(/SSN/i)
-      expect(rendered).to have_content(/Dob/i)
-    end
+    # it "should have SSN and DOB fields" do
+    #   expect(rendered).to have_content("Responsible Party")
+    #   expect(rendered).to have_content(/SSN/i)
+    #   expect(rendered).to have_content(/Dob/i)
+    # end
   end
 end

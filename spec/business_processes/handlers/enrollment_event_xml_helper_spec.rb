@@ -73,14 +73,42 @@ describe Handlers::EnrollmentEventXmlHelper do
   end
 
   describe "#find_employer" do
+    let(:policy_cv) { double }
+    let(:employer_link) { double(:id => "SOMELINK#VALUE")}
+    before do
+      allow(subject).to receive(:extract_employer_link).with(policy_cv).and_return(employer_link)
+      allow(Employer).to receive(:where).with(hbx_id: 'VALUE').and_return([:employer])
+    end
 
+    it "finds the employer" do
+      expect(subject.find_employer(policy_cv)).to eq(:employer)
+    end
   end
 
   describe "#find_employer_plan_year" do
-
+    let(:policy_cv) { double }
+    let(:employer) { double }
+    let(:subscriber) { double }
+    before do
+      allow(subject).to receive(:find_employer).with(policy_cv).and_return(employer)
+      allow(subject).to receive(:extract_subscriber).with(policy_cv).and_return(subscriber)
+      allow(subject).to receive(:extract_enrollee_start).with(subscriber).and_return(:start_date)
+      allow(employer).to receive(:plan_year_of).with(:start_date).and_return(:start_year)
+    end
+    it "returns the plan year" do
+      expect(subject.find_employer_plan_year(policy_cv)).to eq(:start_year)
+    end
   end
 
   describe "#extract_plan" do
-
+    let(:policy_cv) { double }
+    before do
+      allow(subject).to receive(:extract_hios_id).with(policy_cv).and_return(:hios_id)
+      allow(subject).to receive(:extract_active_year).with(policy_cv).and_return("2016")
+      allow(Plan).to receive(:where).with(:hios_plan_id => :hios_id, :year => 2016).and_return([:plan])
+    end
+    it "extracts the plan" do
+      expect(subject.extract_plan(policy_cv)).to eq(:plan)
+    end
   end
 end

@@ -157,7 +157,7 @@ describe EnrollmentAction::RenewalComparisonHelper do
   end
 
   describe "ivl_renewal_candidate?" do
-    let(:subscriber) { double(:m_id => 1)}
+    let(:subscriber) { instance_double(Enrollee, :m_id => 1)}
     let(:subscriber_id) { 1 }
     let(:is_shop?) { false }
     let(:canceled?) { false }
@@ -282,7 +282,7 @@ describe EnrollmentAction::RenewalComparisonHelper do
     end
 
     context "the policy's subscriber member id does not match the new subscriber_id" do
-      let(:subscriber) { double(:m_id => 4) }
+      let(:subscriber) { instance_double(Enrollee, :m_id => 4) }
       it "returns false" do
         expect(subject.shop_renewal_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, same_carrier)).to be_falsey
       end
@@ -332,11 +332,11 @@ describe EnrollmentAction::RenewalComparisonHelper do
 
   describe "shop_renewal_candidates" do
     let(:policy_cv) { double }
-    let(:subscriber_enrollee) { double }
+    let(:subscriber_enrollee) { instance_double(Enrollee) }
     let(:subscriber_start) { DateTime.new(2017,1,1) }
     let(:subscriber_id) { 1 }
     let(:subscriber_person) { instance_double(Person, :policies => [:policy, :non_eligible_policy]) }
-    let(:employer) { double }
+    let(:employer) { instance_double(Employer) }
     let(:plan_year) { double(:end_date => subscriber_start + 1.month) }
 
     before do

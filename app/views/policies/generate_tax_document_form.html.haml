@@ -1,7 +1,7 @@
 %ul.breadcrumb
   Generate 1095A Document for Policy:
   = @policy.id
-= form_tag generate_tax_document_policy_path(@policy, {person_id:@person.id}), :method => "post" do
+= form_tag generate_tax_document_policy_path(@policy, {person_id:@person.id}), :method => "post"  do
   .panel.panel-default
     .panel-body
       .row
@@ -11,19 +11,21 @@
           .control-group
             = radio_button_tag :type, "new", checked: true
             = label_tag "Original"
+          .control-group
             = radio_button_tag :type, "void"
             = label_tag "Void"
+            .row{id:"void-policy-ids"}
+              .col-md-12
+                .control-group
+                  = label_tag "Active Policy IDs (comma separated list)"
+                  = text_field_tag :void_active_policy_ids, nil, maxlength:200
+              .col-md-12
+                .control-group
+                  = label_tag "Cancelled Policy IDs (comma separated list)"
+                  = text_field_tag :void_cancelled_policy_ids, nil, maxlength:200
+          .control-group
             = radio_button_tag :type, "corrected"
             = label_tag "Corrected"
-      .row{id:"void-policy-ids"}
-        .col-md-12
-          .control-group
-            = label_tag "Active Policy IDs (comma separated list)"
-            = text_field_tag :void_active_policy_ids, nil, maxlength:200
-        .col-md-12
-          .control-group
-            = label_tag "Cancelled Policy IDs (comma separated list)"
-            = text_field_tag :void_cancelled_policy_ids, nil, maxlength:200
       - if @policy.has_responsible_person?
         %br
         .row
@@ -55,7 +57,7 @@
         .col-md-12
           .control-group
             = label_tag "Show preview? "
-            = check_box_tag :preview
+            = check_box_tag :preview, 1, true
       .row
         .col-md-2
           .form_actions

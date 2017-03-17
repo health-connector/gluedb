@@ -76,15 +76,25 @@ class PoliciesController < ApplicationController
   def generate_tax_document
     @policy = Policy.find(params[:id])
     @person = Person.find(params[:person_id])
-    request_params = {policy_id: params[:id],
+
+    tax_doc_params = {policy_id: params[:id],
                       type:params[:type],
-                      void_policy_ids: void_policy_ids(params[:void_policy_ids]),
+                      void_active_policy_ids: void_policy_ids(params[:void_active_policy_ids]),
+                      void_cancelled_policy_ids: void_policy_ids(params[:void_cancelled_policy_ids]),
                       npt: params[:npt] == "1" ? true : false}
 
-    request_params.merge!({responsible_party_ssn:params[:ssn],
-                           responsible_party_dob:Date.strptime(params[:dob], "%m/%d/%Y")}) if @policy.responsible_party
+    if @policy.has_responsible_person?
+      if params[:responsible_person_ssn].present?
+        tax_doc_params[:ssn] = params[:responsible_person_ssn]
+      end
 
-    @file_name = generate_1095A_pdf(request_params)  #call doc generation service
+      if params[:responsible_person_dob].present?
+        tax_doc_params[:dob] = params[:responsible_person_dob]
+      end
+    end
+
+
+    @file_name = generate_1095A_pdf(tax_doc_params)  #call doc generation service
 
     if params[:preview] != "1"
       begin

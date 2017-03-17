@@ -18,8 +18,12 @@
       .row{id:"void-policy-ids"}
         .col-md-12
           .control-group
-            = label_tag "Policy IDs (comma separated list)"
-            = text_field_tag :void_policy_ids, nil, maxlength:200
+            = label_tag "Active Policy IDs (comma separated list)"
+            = text_field_tag :void_active_policy_ids, nil, maxlength:200
+        .col-md-12
+          .control-group
+            = label_tag "Cancelled Policy IDs (comma separated list)"
+            = text_field_tag :void_cancelled_policy_ids, nil, maxlength:200
       - if @policy.has_responsible_person?
         %br
         .row
@@ -32,7 +36,7 @@
                 .li
                   = label_tag "SSN"
                 .li
-                  = text_field_tag :ssn, nil, maxlength: 9
+                  = text_field_tag :responsible_person_ssn, nil, maxlength: 9
               .ul
                 .li
                   = label_tag "DOB"
@@ -40,7 +44,7 @@
                     %span.input-group-btn
                       %button.btn.disabled
                         %span.fui-calendar
-                    = text_field_tag :dob, nil, class: 'form-control date_picker'
+                    = text_field_tag :responsible_person_dob, nil, class: 'form-control date_picker'
       %br
       .row
         .col-md-12

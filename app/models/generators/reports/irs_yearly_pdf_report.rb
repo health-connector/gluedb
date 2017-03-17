@@ -16,10 +16,12 @@ module Generators::Reports
     end
 
     def get_template(options)
+      notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
+
       if options[:calender_year] == 2016
-        template_name = settings[:tax_document][options[:calender_year]][options[:notice_type]][:template][options[:qhp_type]]
+        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
       else
-        template_name = settings[:tax_document][options[:calender_year]][options[:notice_type]][:template]
+        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
       end
 
       "#{Rails.root}/lib/pdf_templates/#{template_name}"
@@ -28,6 +30,7 @@ module Generators::Reports
     def initialize_variables(options)
       @multiple = options[:multiple]
       @void = (options[:notice_type] == 'void') ? true : false
+      @corrected = options[:notice_type] == 'corrected'
 
       settings[:tax_document].keys.each do |year|
         instance_variable_set("@notice_#{year}", false)
@@ -169,9 +172,11 @@ module Generators::Reports
       y_pos_corrected = 790.86 - mm2pt(31.80)
       y_pos_corrected = 790.86 - mm2pt(23.80) if @void_2015 || @void_2016
 
-      bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
-        font "/Library/Fonts/Arial Unicode.ttf"
-        text "\u2714"
+      if @corrected || @void
+        bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
+          font "/Library/Fonts/Arial Unicode.ttf"
+          text "\u2714"
+        end
       end
 
       font "Times-Roman"

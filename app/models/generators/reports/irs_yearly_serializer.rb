@@ -76,7 +76,6 @@ module Generators::Reports
         policies.each do |policy|
 
           # begin
-          # next if [52428, 52918, 55598, 53303, 55577].include?(policy.id)
           # next unless  policy.plan.metal_level =~ /catastrophic/i
 
             count += 1
@@ -86,9 +85,7 @@ module Generators::Reports
 
             # next unless inclusion_list.include?(policy.id)
 
-            # next if [92293, 106028, 116523, 123827].include?(policy.id)
-            # next if [87304,88728,90935,91652,106554,94912,95359,115920,116733].include?(policy.id)
-            # next if [95373,142271].include?(policy.id)
+
             # next if skip_list.include?(policy.id)
 
             # if policy.responsible_party_id.present?
@@ -156,7 +153,6 @@ module Generators::Reports
     end
 
     # Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
-
 
     def generate_notice
       create_new_pdf_folder
@@ -252,11 +248,8 @@ module Generators::Reports
     def process_canceled_pols
       create_new_pdf_folder
       create_new_irs_folder
-      # CSV.foreach("#{Rails.root}/INCLUSION_REDMINE_2015_20160314_VOID_Request_5379.csv") do |row|
 
-      # CSV.foreach("#{Rails.root}/INCLUSION_REDMINE_2015_20160324_VOID_Request_5808-5942-6023-6109-6190.csv") do |row|
       # CSV.foreach("#{Rails.root}/INCLUSION_REDMINE_2014_20160324_VOID_Request_5843-6232.csv") do |row|
-
 
       # book = Spreadsheet.open "#{Rails.root}/Responsible_Party_8_18_16_SSN_Added.xls"
       # # book = Spreadsheet.open "#{Rails.root}/Responsible_Party_3_10_16_SSN_Added_2_2014.xls"
@@ -268,13 +261,7 @@ module Generators::Reports
       #   data
       # end
 
-
       CSV.foreach("#{Rails.root}/CF_1095_Revisions_February_20170223_VOID.csv") do |row|
-
-      # [['45570', '45570', '68155']].each  do |row|
-
-      puts row[0].inspect
-
         policy_id = row[0].strip
 
         puts "processing #{policy_id}"
@@ -362,6 +349,7 @@ module Generators::Reports
       @count += 1
       sequential_number = @count.to_s
       sequential_number = prepend_zeros(sequential_number, 6)
+
       @report_names = {
         pdf: "IRS1095ACorrected_2016_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "IRS1095A_2016_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
@@ -387,8 +375,7 @@ module Generators::Reports
       end
 
       if notice_params.present?
-        notice_type = (['new', 'corrected'].include?(notice_params[:type]) ? 'new' : notice_params[:type])
-        options = { multiple: multiple, calender_year: calender_year, qhp_type: qhp_type, notice_type: notice_type}
+        options = { multiple: multiple, calender_year: calender_year, qhp_type: qhp_type, notice_type: notice_params[:type]}
       end
 
       pdf_notice = Generators::Reports::IrsYearlyPdfReport.new(notice, options)

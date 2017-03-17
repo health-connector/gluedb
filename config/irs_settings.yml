@@ -7,17 +7,19 @@ tax_document:
     void:
       template: "1095a_template_void.pdf"
     catastrophic:
-      new: "1095a_template_catastrophic.pdf"
-      corrected: "1095a_template_corrected_2.pdf"
+      new: 
+        template: "1095a_template_catastrophic.pdf"
+      corrected: 
+        template: "1095a_template_corrected_2.pdf"
     coverage_page_no: 3
   2015:
     slcsp: "94506DC0390006-01"
     new:
       template: "1095a_template_2015.pdf"
     void:
-      void: "1095a_template_void_2015.pdf"
+      template: "1095a_template_void_2015.pdf"
     catastrophic:
-      new: "1095a_template_2015_catastrophic_aptc.pdf"
+      template: "1095a_template_2015_catastrophic_aptc.pdf"
     coverage_page_no: 3
   2016:
     slcsp: "94506DC0390006-01"

@@ -153,6 +153,7 @@ module Generators::Reports
     end
 
     # Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
+
     def generate_notice
       set_default_directory
       policy = Policy.find(notice_params[:policy_id])
@@ -164,13 +165,15 @@ module Generators::Reports
           ssn = prepend_zeros(notice_params[:responsible_party_ssn].gsub('-','').to_i.to_s, 9)
         end
 
-
         @responsible_party_data = { 
           policy.id => [ssn, notice_params[:responsible_party_dob]]
         }
       end
-
-      process_policy(policy)
+      if notice_params[:type] == 'void'
+        process_canceled_policy(policy, notice_params[:void_cancelled_policy_ids].join(','), notice_params[:void_active_policy_ids].join(','))
+      else
+        process_policy(policy)
+      end
       notice_absolute_path
     end
 
@@ -294,28 +297,7 @@ module Generators::Reports
           next
         end
 
-        @calender_year = policy.subscriber.coverage_start.year
-        @policy_id = policy.id
-        @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
-
-        irs_input = Generators::Reports::IrsInputBuilder.new(policy, {void: true})
-
-        irs_input.carrier_hash = @carriers
-        irs_input.process
-
-        if policy.responsible_party_id.present?
-          if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(policy.responsible_party_id)).first
-            puts "responsible party address attached"          
-            irs_input.append_recipient_address(responsible_party)
-          end  
-        end
-
-        notice = irs_input.notice
-        notice.canceled_policies = convert_to_policy_identifiers(row[1])
-        notice.active_policies = convert_to_policy_identifiers(row[2])
-
-        create_report_names
-        render_pdf(notice, false, true)
+        process_canceled_policy(policy, convert_to_policy_identifiers(row[1]), convert_to_policy_identifiers(row[2]))
 
         if @count !=0
           if (@count % 250 == 0)
@@ -328,6 +310,31 @@ module Generators::Reports
         notice = nil
         policy = nil
       end
+    end
+
+    def process_canceled_policy(policy, canceled_policies, active_policies)
+      @calender_year = policy.subscriber.coverage_start.year
+      @policy_id = policy.id
+      @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
+
+      irs_input = Generators::Reports::IrsInputBuilder.new(policy, {void: true})
+
+      irs_input.carrier_hash = @carriers
+      irs_input.process
+
+      if policy.responsible_party_id.present?
+        if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(policy.responsible_party_id)).first
+          puts "responsible party address attached"          
+          irs_input.append_recipient_address(responsible_party)
+        end  
+      end
+
+      notice = irs_input.notice
+      notice.canceled_policies = canceled_policies
+      notice.active_policies = active_policies
+
+      create_report_names
+      render_pdf(notice, false, true)
     end
 
     def convert_to_policy_identifiers(row)

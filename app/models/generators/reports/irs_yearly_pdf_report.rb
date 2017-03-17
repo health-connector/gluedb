@@ -18,7 +18,7 @@ module Generators::Reports
     def get_template(options)
       notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
 
-      if options[:calender_year] == 2016
+      if options[:calender_year] == 2016 && !@void
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
       else
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
@@ -83,7 +83,7 @@ module Generators::Reports
       padding = 31
       padding = 10
 
-      padding = 26 if @void
+      padding = 26 if @void_2014 || @void_2016
 
       bounding_box([15, 553+padding], :width => 200) do
         text "#{Date.today.strftime('%m/%d/%Y')}"
@@ -113,7 +113,7 @@ module Generators::Reports
       padding = 12 unless @void
       padding = 20 if @void_2016
       y_pos = 408 if @void_2016
-      y_pos = 444 if @void_2015
+      y_pos = 446 if @void_2015
 
       bounding_box([x_pos, y_pos+padding], :width => 200) do
         text "#{@notice.recipient.name}:"
@@ -133,16 +133,16 @@ module Generators::Reports
       end
 
       if @void_2015
-        bounding_box([133, 237+padding], :width => 200) do
+        bounding_box([133, 238+padding], :width => 200) do
           text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
         end
 
-        bounding_box([120, 141+padding], :width => 200) do
+        bounding_box([120, 142+padding], :width => 200) do
           text @notice.active_policies.blank? ? 'None' : @notice.active_policies
         end
       end
 
-      if @void
+      if @void_2014
         bounding_box([133, 292+padding], :width => 200) do
           text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
         end

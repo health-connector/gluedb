@@ -318,8 +318,8 @@ module Generators::Reports
       @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
 
       irs_input = Generators::Reports::IrsInputBuilder.new(policy, {void: true})
-
       irs_input.carrier_hash = @carriers
+      irs_input.settings = @settings
       irs_input.process
 
       if policy.responsible_party_id.present?

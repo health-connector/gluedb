@@ -4,8 +4,6 @@ tax_document:
     slcsp: "94506DC0390006-01"
     new:
       template: "1095a_template.pdf"
-    corrected:
-      template: "1095a_template.pdf"
     void:
       template: "1095a_template_void.pdf"
     catastrophic:
@@ -15,8 +13,6 @@ tax_document:
     slcsp: "94506DC0390006-01"
     new:
       template: "1095a_template_2015.pdf"
-    corrected:
-      template: "1095a_template_2015.pdf"
     void:
       void: "1095a_template_void_2015.pdf"
     catastrophic:
@@ -25,10 +21,8 @@ tax_document:
     slcsp: "94506DC0390006-01"
     new:
       template:
-        unassisted: "2016-1095A-NEW-UQHP-Terms.pdf"
-        assisted: "2016-1095A-NEW-AQHP-Terms.pdf"
-    corrected:
-      template:
+        unassisted: "2016-1095A-NEW-UQHP.pdf"
+        assisted: "2016-1095A-NEW-AQHP.pdf"
     void:
       template: "2016-1095A-VOID.pdf"
   2017:

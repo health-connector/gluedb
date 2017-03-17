@@ -8,7 +8,7 @@ describe "policies/generate_tax_document_form.html.haml", :dbclean => :after_eac
     let(:person) { FactoryGirl.create(:person) }
 
     before do
-      allow(policy).to receive(:responsible_party).and_return(true)
+      allow(policy).to receive(:has_responsible_person?).and_return(true)
       view.instance_variable_set(:@policy, policy)
       view.instance_variable_set(:@person, person)
       render :template => "policies/generate_tax_document_form"

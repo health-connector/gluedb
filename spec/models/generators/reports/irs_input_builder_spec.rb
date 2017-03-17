@@ -31,6 +31,7 @@ module Generators::Reports
     let(:mock_policy) { double(pre_amt_tot: 0.0, ehb_premium: 100.17, applied_aptc: 55.45)}
 
     let(:carrier_hash) { {'221212312' => 'Carefirst'} }
+    let(:settings) { YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access }
 
     before(:each) do
       allow(PolicyDisposition).to receive(:new).with(policy).and_return(mock_disposition)
@@ -46,6 +47,7 @@ module Generators::Reports
       allow(mock_disposition).to receive(:as_of).and_return(mock_policy)
 
       subject.carrier_hash = carrier_hash
+      subject.settings = settings
     end
 
     it 'should append recipient address' do

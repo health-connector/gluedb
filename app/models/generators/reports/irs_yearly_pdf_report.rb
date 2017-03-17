@@ -254,13 +254,13 @@ module Generators::Reports
       end
       
       enrollee_ssn = responsible_party_data.blank? ? enrollee.ssn : responsible_party_data[0]
-      enrollee_dob = responsible_party_data.blank? ? enrollee.dob : responsible_party_data[1].strftime("%m/%d/%Y")
 
       if !enrollee_ssn.blank?
         bounding_box([col3, y_pos], :width => 100) do
           text mask_ssn(enrollee_ssn)
         end
       else
+        enrollee_dob = responsible_party_data.blank? ? enrollee.dob : responsible_party_data[1].strftime("%m/%d/%Y")
         bounding_box([col4, y_pos], :width => 100) do
           text enrollee_dob || ''
         end

@@ -153,6 +153,23 @@ module Generators::Reports
     end
 
     # Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
+    def generate_notice
+      set_default_directory
+      policy = Policy.find(notice_params[:policy_id])
+
+      if policy.responsible_party_id.present?
+        return if notice_params[:responsible_party_ssn].blank? && notice_params[:responsible_party_dob].blank?
+        @responsible_party_data = { 
+          policy.id => [ 
+            prepend_zeros(notice_params[:responsible_party_ssn].gsub('-','').to_i.to_s, 9), 
+            notice_params[:responsible_party_dob]
+          ]
+        }
+      end
+
+      process_policy(policy)
+      notice_absolute_path
+    end
 
     def set_default_directory
       @irs_pdf_path = Rails.root.to_s + @settings[:tax_document][:documents_root_path]
@@ -162,13 +179,6 @@ module Generators::Reports
       if !Dir.exists?(notices_path)
         Dir.mkdir notices_path
       end
-    end
-
-    def generate_notice
-      set_default_directory
-      policy = Policy.find(notice_params[:policy_id])
-      process_policy(policy)
-      notice_absolute_path
     end
 
     def valid_policy?(policy)
@@ -360,7 +370,7 @@ module Generators::Reports
       sequential_number = prepend_zeros(sequential_number, 6)
 
       @report_names = {
-        pdf: "IRS1095ACorrected_2016_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
+        pdf: "IRS1095ACorrected_#{calender_year}_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "IRS1095A_2016_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "IRS1095A_2015_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "#{sequential_number}_HBX_01_#{@hbx_member_id}_#{@policy_id}_IRS1095A_Corrected",

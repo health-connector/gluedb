@@ -6,6 +6,7 @@ describe PoliciesController, :dbclean => :after_each do
   let(:person) { FactoryGirl.create(:person) }
 
   before(:each) do
+    allow(controller).to receive(:generate_1095A_pdf).and_return("")
     @user = create :user, :admin
     sign_in @user
   end

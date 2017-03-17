@@ -85,11 +85,11 @@ class PoliciesController < ApplicationController
 
     if @policy.has_responsible_person?
       if params[:responsible_person_ssn].present?
-        tax_doc_params[:ssn] = params[:responsible_person_ssn]
+        tax_doc_params[:responsible_party_ssn] = params[:responsible_person_ssn]
       end
 
       if params[:responsible_person_dob].present?
-        tax_doc_params[:dob] = params[:responsible_person_dob]
+        tax_doc_params[:responsible_party_dob] = params[:responsible_person_dob]
       end
     end
 

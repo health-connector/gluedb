@@ -9,7 +9,7 @@
           .control-group
             Type
           .control-group
-            = radio_button_tag :type, "original", checked: true
+            = radio_button_tag :type, "new", checked: true
             = label_tag "Original"
             = radio_button_tag :type, "void"
             = label_tag "Void"
@@ -20,7 +20,7 @@
           .control-group
             = label_tag "Policy IDs (comma separated list)"
             = text_field_tag :void_policy_ids, nil, maxlength:200
-      - if @policy.responsible_party
+      - if @policy.has_responsible_person?
         %br
         .row
           .col-md-12

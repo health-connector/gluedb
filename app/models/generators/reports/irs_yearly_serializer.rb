@@ -6,7 +6,7 @@ module Generators::Reports
     IRS_XML_PATH = "#{@irs_path}/h41/"
     IRS_PDF_PATH = "#{@irs_path}/irs1095a/"
 
-    attr_accessor :notice_params
+    attr_accessor :notice_params, :calender_year, :qhp_type
 
     def initialize(options = {})
       @count = 0
@@ -159,6 +159,9 @@ module Generators::Reports
 
 
     def generate_notice
+      create_new_pdf_folder
+      create_new_irs_folder
+
       policy = Policy.find(notice_params[:policy_id])
       process_policy(policy)
     end
@@ -191,7 +194,8 @@ module Generators::Reports
 
     def process_policy(policy)
       return unless valid_policy?(policy)
-
+      @calender_year = policy.subscriber.coverage_start.year
+      @qhp_type = ((policy.applied_aptc > 0 || policy.multi_aptc?) ? 'assisted' : 'unassisted')
       @policy_id = policy.id
       @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
 
@@ -281,6 +285,7 @@ module Generators::Reports
           next
         end
 
+        @calender_year = policy.subscriber.coverage_start.year
         @policy_id = policy.id
         @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
 
@@ -375,7 +380,19 @@ module Generators::Reports
     end
 
     def render_pdf(notice, multiple = false, void = false)
-      pdf_notice = Generators::Reports::IrsYearlyPdfReport.new(notice, multiple, void)
+      options = {multiple: multiple, calender_year: calender_year, qhp_type: qhp_type, notice_type: 'new'}
+
+      if void
+        options.merge({notice_type: 'void'})
+      end
+
+      if notice_params.present?
+        notice_type = (['new', 'corrected'].include?(notice_params[:type]) ? 'new' : notice_params[:type])
+        options = { multiple: multiple, calender_year: calender_year, qhp_type: qhp_type, notice_type: notice_type}
+      end
+
+      pdf_notice = Generators::Reports::IrsYearlyPdfReport.new(notice, options)
+      pdf_notice.settings = @settings
       pdf_notice.responsible_party_data = @responsible_party_data[notice.policy_id.to_i] if @responsible_party_data.present? # && ![87085,87244,87653,88495,88566,89129,89702,89922,95250,115487].include?(notice.policy_id.to_i)
       pdf_notice.process
       pdf_notice.render_file("#{@irs_pdf_path + @irs1095_folder_name}/#{@report_names[:pdf]}.pdf")

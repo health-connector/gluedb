@@ -159,10 +159,13 @@ module Generators::Reports
 
       if policy.responsible_party_id.present?
         return if notice_params[:responsible_party_ssn].blank? && notice_params[:responsible_party_dob].blank?
+
+        if notice_params[:responsible_party_ssn].present?
+          ssn = prepend_zeros(notice_params[:responsible_party_ssn].gsub('-','').to_i.to_s, 9)
+        end
+
         @responsible_party_data = { 
-          policy.id => [ 
-            prepend_zeros(notice_params[:responsible_party_ssn].gsub('-','').to_i.to_s, 9), 
-            notice_params[:responsible_party_dob]
+          policy.id => [ssn, notice_params[:responsible_party_dob]
           ]
         }
       end

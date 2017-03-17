@@ -2,42 +2,50 @@ module Generators::Reports
   class IrsYearlyPdfReport < PdfReport
     include ActionView::Helpers::NumberHelper
 
-    attr_accessor :responsible_party_data
+    attr_accessor :responsible_party_data, :settings
 
-    def initialize(notice, multiple = false, void = false)
-      @multiple = multiple
-      @void = void
-      @notice_2014 = false
-      @void = false
-      @void_2015 = false
-      @catastrophic = false
-      @catastrophic_corrected = false
-      @catastrophic_aptc = false
-      @catastrophic_confirmation =  false
-      @notice_2016 = false
-      @void_2016 = true
+    def initialize(notice, options={})
+      @settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
+      initialize_variables(options)
 
-      settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
-
-      template_name = settings['tax_document'][year][notice_kind][template]
-      template = "#{Rails.root}/lib/pdf_templates/#{template_name}"
-
-      # template = "#{Rails.root}/1095a_template_2015.pdf"
-      # template = "#{Rails.root}/2016-1095A-NEW-UQHP-Terms.pdf" if @notice_2016
-      # template = "#{Rails.root}/1095a_template.pdf" if @notice_2014
-      # template = "#{Rails.root}/1095a_template_void.pdf" if @void
-      # template = "#{Rails.root}/1095a_template_void_2015.pdf" if @void_2015
-      # template = "#{Rails.root}/2016-1095A-VOID.pdf" if @void_2016
-      # template = "#{Rails.root}/1095a_template_catastrophic.pdf" if @catastrophic
-      # template = "#{Rails.root}/1095a_template_corrected_2.pdf" if @catastrophic_corrected
-      # template = "#{Rails.root}/1095a_template_2015_catastrophic_aptc.pdf" if @catastrophic_aptc
-      # template = "#{Rails.root}/final_2015_catastrophic_coverage_confirmation.pdf" if @catastrophic_confirmation
-
-      super({:template => template, :margin => [30, 55]})
+      super({:template => get_template(options), :margin => [30, 55]})
       font_size 11
 
       @notice = notice
       @margin = [30, 70]
+    end
+
+    def get_template(options)
+      if options[:calender_year] == 2016
+        template_name = settings[:tax_document][options[:calender_year]][options[:notice_type]][:template][options[:qhp_type]]
+      else
+        template_name = settings[:tax_document][options[:calender_year]][options[:notice_type]][:template]
+      end
+
+      "#{Rails.root}/lib/pdf_templates/#{template_name}"
+    end
+
+    def initialize_variables(options)
+      @multiple = options[:multiple]
+      @void = (options[:notice_type] == 'void') ? true : false
+
+      settings[:tax_document].keys.each do |year|
+        instance_variable_set("@notice_#{year}", false)
+        instance_variable_set("@void_#{year}", false)
+      end
+
+      if ['new', 'corrected'].include?(options[:notice_type])
+        instance_variable_set("@notice_#{options[:calender_year]}", true)
+      end
+
+      if options[:notice_type] == 'void'
+        instance_variable_set("@void_#{options[:calender_year]}", true)
+      end
+
+      @catastrophic = false
+      @catastrophic_corrected = false
+      @catastrophic_aptc = false
+      @catastrophic_confirmation =  false
     end
 
     def process
@@ -243,8 +251,6 @@ module Generators::Reports
       enrollee_ssn = responsible_party_data.blank? ? enrollee.ssn : responsible_party_data[0]
       enrollee_dob = responsible_party_data.blank? ? enrollee.dob : responsible_party_data[1].strftime("%m/%d/%Y")
 
-      puts enrollee_ssn.inspect
-
       if !enrollee_ssn.blank?
         bounding_box([col3, y_pos], :width => 100) do
           text mask_ssn(enrollee_ssn)
@@ -292,7 +298,6 @@ module Generators::Reports
     end
 
     def fill_preimum_details
-
       col1 = mm2pt(36.50)
       col2 = mm2pt(76.50)
       col3 = mm2pt(125.50)

@@ -24,8 +24,8 @@ describe Handlers::EnrollmentEventXmlHelper do
   end
 
   describe "#extract_enrollee_start" do
-    let(:benefit) { double(:begin_date => "20170101") }
-    let(:enrollee) { double(:benefit => benefit)}
+    let(:benefit) { instance_double(EnrolleeBenefit, :begin_date => "20170101") }
+    let(:enrollee) { instance_double(Enrollee, :benefit => benefit)}
     it "returns the parsed date" do
       expect(subject.extract_enrollee_start(enrollee)).to eq(Date.new(2017,1,1))
     end

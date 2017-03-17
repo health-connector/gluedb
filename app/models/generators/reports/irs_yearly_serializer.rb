@@ -6,7 +6,7 @@ module Generators::Reports
     IRS_XML_PATH = "#{@irs_path}/h41/"
     IRS_PDF_PATH = "#{@irs_path}/irs1095a/"
 
-    attr_accessor :notice_params, :calender_year, :qhp_type
+    attr_accessor :notice_params, :calender_year, :qhp_type, :notice_absolute_path
 
     def initialize(options = {})
       @count = 0
@@ -24,13 +24,13 @@ module Generators::Reports
 
       @notice_params = options
 
-      irs_path = "#{Rails.root.to_s}/irs/irs_EOY_#{Time.now.strftime('%m_%d_%Y_%H_%M')}"
-      @irs_pdf_path = irs_path + "/irs1095a/"
-
-      create_directory irs_path
-      create_directory @irs_pdf_path
-
       unless options.empty?
+        irs_path = "#{Rails.root.to_s}/irs/irs_EOY_#{Time.now.strftime('%m_%d_%Y_%H_%M')}"
+        @irs_pdf_path = irs_path + "/irs1095a/"
+
+        create_directory irs_path
+        create_directory @irs_pdf_path
+
         @irs_xml_path = irs_path + "/h41/"
         create_directory @irs_xml_path
         create_directory @irs_xml_path + "/transmission"
@@ -154,12 +154,21 @@ module Generators::Reports
 
     # Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
 
-    def generate_notice
-      create_new_pdf_folder
-      create_new_irs_folder
+    def set_default_directory
+      @irs_pdf_path = Rails.root.to_s + @settings[:tax_document][:documents_root_path]
+      @irs1095_folder_name = @settings[:tax_document][:documents_folder]
+      notices_path = @irs_pdf_path + @irs1095_folder_name
 
+      if !Dir.exists?(notices_path)
+        Dir.mkdir notices_path
+      end
+    end
+
+    def generate_notice
+      set_default_directory
       policy = Policy.find(notice_params[:policy_id])
       process_policy(policy)
+      notice_absolute_path
     end
 
     def valid_policy?(policy)
@@ -189,60 +198,60 @@ module Generators::Reports
     end
 
     def process_policy(policy)
-      return unless valid_policy?(policy)
-      @calender_year = policy.subscriber.coverage_start.year
-      @qhp_type = ((policy.applied_aptc > 0 || policy.multi_aptc?) ? 'assisted' : 'unassisted')
-      @policy_id = policy.id
-      @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
+      if valid_policy?(policy)
+        @calender_year = policy.subscriber.coverage_start.year
+        @qhp_type = ((policy.applied_aptc > 0 || policy.multi_aptc?) ? 'assisted' : 'unassisted')
+        @policy_id = policy.id
+        @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
 
-      irs_input = build_notice_input(policy)
+        irs_input = build_notice_input(policy)
 
-      if policy.responsible_party_id.present?
-        if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(policy.responsible_party_id)).first
-          puts "responsible party address attached"          
-          irs_input.append_recipient_address(responsible_party)
-          # irs_input.append_recipient(responsible_party)
+        if policy.responsible_party_id.present?
+          if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(policy.responsible_party_id)).first
+            puts "responsible party address attached"          
+            irs_input.append_recipient_address(responsible_party)
+            # irs_input.append_recipient(responsible_party)
+          end
+          puts "----responsible party"
+          # return
         end
-        puts "----responsible party"
-        # return
-      end
 
-      notice = irs_input.notice
+        notice = irs_input.notice
+        if (notice.recipient_address.to_s.match(/609 H St NE/i).present? || notice.recipient_address.to_s.match(/1225 Eye St NW/i).present?)
+          puts notice.recipient_address.to_s
+          return
+        end
 
-      if (notice.recipient_address.to_s.match(/609 H St NE/i).present? || notice.recipient_address.to_s.match(/1225 Eye St NW/i).present?)
-        puts notice.recipient_address.to_s
-        return
-      end
+        notice.active_policies = []
+        notice.canceled_policies = []
 
-      notice.active_policies = []
-      notice.canceled_policies = []
-
-      create_report_names
-      # render_xml(notice)
-
-      render_pdf(notice)
-
-      if notice.covered_household.size > 5
         create_report_names
-        render_pdf(notice, true)          
-      end
+        # render_xml(notice)
 
-      if @count !=0
-        if (@count % 250 == 0)
-          create_new_pdf_folder
-        elsif (@count % 4000 == 0)
+        render_pdf(notice)
+
+        if notice.covered_household.size > 5
+          create_report_names
+          render_pdf(notice, true)          
+        end
+
+        if @count !=0
+          if (@count % 250 == 0)
+            create_new_pdf_folder
+          elsif (@count % 4000 == 0)
+            create_new_irs_folder
+          end
+        end
+
+        if @count % 4000 == 0
+          merge_and_validate_xmls(@folder_count)
+          @folder_count += 1
           create_new_irs_folder
         end
-      end
 
-      if @count % 4000 == 0
-        merge_and_validate_xmls(@folder_count)
-        @folder_count += 1
-        create_new_irs_folder
+        notice = nil
+        policy = nil
       end
-
-      notice = nil
-      policy = nil
     end
 
     def process_canceled_pols
@@ -382,7 +391,9 @@ module Generators::Reports
       pdf_notice.settings = @settings
       pdf_notice.responsible_party_data = @responsible_party_data[notice.policy_id.to_i] if @responsible_party_data.present? # && ![87085,87244,87653,88495,88566,89129,89702,89922,95250,115487].include?(notice.policy_id.to_i)
       pdf_notice.process
-      pdf_notice.render_file("#{@irs_pdf_path + @irs1095_folder_name}/#{@report_names[:pdf]}.pdf")
+
+      @notice_absolute_path = "#{@irs_pdf_path + @irs1095_folder_name}/#{@report_names[:pdf]}.pdf"
+      pdf_notice.render_file(@notice_absolute_path)
     end
 
     def create_new_pdf_folder

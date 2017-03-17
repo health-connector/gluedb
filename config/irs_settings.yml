@@ -27,3 +27,7 @@ tax_document:
       template: "2016-1095A-VOID.pdf"
   2017:
     slcsp: "86052DC0400001-01"
+
+  documents_root_path: '/tmp/'
+  documents_folder: 'irs_notices' 
+

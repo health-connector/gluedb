@@ -89,7 +89,7 @@ class PoliciesController < ApplicationController
       end
 
       if params[:responsible_person_dob].present?
-        tax_doc_params[:responsible_party_dob] = params[:responsible_person_dob]
+        tax_doc_params[:responsible_party_dob] = Date.strptime(params[:responsible_person_dob], "%m/%d/%Y")
       end
     end
 

@@ -335,23 +335,28 @@ describe EnrollmentAction::RenewalComparisonHelper do
     let(:subscriber_enrollee) { double }
     let(:subscriber_start) { DateTime.new(2017,1,1) }
     let(:subscriber_id) { 1 }
-    let(:subscriber_person) { instance_double(Person) }
+    let(:subscriber_person) { instance_double(Person, :policies => [:policy, :non_eligible_policy]) }
     let(:employer) { double }
-    let(:plan_year) { double() }
+    let(:plan_year) { double(:end_date => subscriber_start + 1.month) }
 
     before do
       allow(subject).to receive(:extract_subscriber).with(policy_cv).and_return(subscriber_enrollee)
-      allow(subject).to receive(:extract_enrollee_start).with(policy_cv).and_return(subscriber_start)
+      allow(subject).to receive(:extract_enrollee_start).with(subscriber_enrollee).and_return(subscriber_start)
       allow(subject).to receive(:extract_member_id).with(subscriber_enrollee).and_return(subscriber_id)
       allow(subject).to receive(:find_employer).with(policy_cv).and_return(:employer)
       allow(subject).to receive(:find_employer_plan_year).with(policy_cv).and_return(plan_year)
       allow(subject).to receive(:extract_enrollee_end).with(subscriber_enrollee).and_return('')
       allow(Person).to receive(:find_by_member_id).with(subscriber_id).and_return(subscriber_person)
+      allow(subject).to receive(:extract_plan).with(policy_cv).and_return(:plan)
+      allow(subject).to receive(:shop_renewal_candidate?).
+        with(:policy, :plan, :employer, 1, subscriber_start, true).and_return(true)
+      allow(subject).to receive(:shop_renewal_candidate?).
+        with(:non_eligible_policy, :plan, :employer, 1, subscriber_start, true).and_return(false)
     end
-    ## receives a policy_cv and boolean if same carrier
-  end
-
-  describe "extract_ivl_policy_details" do
-    ## receives policy_cv
+    it "sends :shop_renewal_candidate? for each policy and returns a candidate if true" do
+      expect(subject).to receive(:shop_renewal_candidate?).
+        with(:policy, :plan, :employer, 1, subscriber_start, true).once
+      expect(subject.shop_renewal_candidates(policy_cv, true)).to eq([:policy])
+    end
   end
 end

@@ -18,7 +18,7 @@ module Generators::Reports
     def get_template(options)
       notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
 
-      if options[:calender_year] == 2016 && !@void
+      if options[:calender_year] == 2016 && options[:notice_type] != 'void'
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
       else
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
@@ -30,7 +30,6 @@ module Generators::Reports
     def initialize_variables(options)
       @calender_year = options[:calender_year]
       @multiple = options[:multiple]
-      @void = (options[:notice_type] == 'void') ? true : false
       @corrected = options[:notice_type] == 'corrected'
 
       settings[:tax_document].keys.each do |year|
@@ -50,6 +49,7 @@ module Generators::Reports
       @catastrophic_corrected = false
       @catastrophic_aptc = false
       @catastrophic_confirmation =  false
+      @void = @void_2014
     end
 
     def process
@@ -112,8 +112,8 @@ module Generators::Reports
 
       padding = 12 unless @void
       padding = 20 if @void_2016
-      y_pos = 408 if @void_2016
-      y_pos = 446 if @void_2015
+      y_pos = 409 if @void_2016
+      y_pos = 444 if @void_2015
 
       bounding_box([x_pos, y_pos+padding], :width => 200) do
         text "#{@notice.recipient.name}:"
@@ -123,21 +123,21 @@ module Generators::Reports
 
 
       if @void_2016
-        bounding_box([93, 241+padding], :width => 200) do
+        bounding_box([93, 242+padding], :width => 200) do
           text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
         end
 
-        bounding_box([100, 131+padding], :width => 200) do
+        bounding_box([100, 132+padding], :width => 200) do
           text @notice.active_policies.blank? ? 'None' : @notice.active_policies
         end
       end
 
       if @void_2015
-        bounding_box([133, 238+padding], :width => 200) do
+        bounding_box([133, 237+padding], :width => 200) do
           text @notice.canceled_policies.blank? ? 'None' : @notice.canceled_policies
         end
 
-        bounding_box([120, 142+padding], :width => 200) do
+        bounding_box([120, 141+padding], :width => 200) do
           text @notice.active_policies.blank? ? 'None' : @notice.active_policies
         end
       end
@@ -172,7 +172,7 @@ module Generators::Reports
       y_pos_corrected = 790.86 - mm2pt(31.80)
       y_pos_corrected = 790.86 - mm2pt(23.80) if @void_2015 || @void_2016
 
-      if @corrected || @void
+      if @corrected || @void || @void_2015 || @void_2016
         bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
           font "/Library/Fonts/Arial Unicode.ttf"
           text "\u2714"

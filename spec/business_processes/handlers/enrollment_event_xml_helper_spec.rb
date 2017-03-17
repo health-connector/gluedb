@@ -24,16 +24,16 @@ describe Handlers::EnrollmentEventXmlHelper do
   end
 
   describe "#extract_enrollee_start" do
-    let(:benefit) { instance_double(EnrolleeBenefit, :begin_date => "20170101") }
-    let(:enrollee) { instance_double(Enrollee, :benefit => benefit)}
+    let(:benefit) { instance_double(::Openhbx::Cv2::EnrolleeBenefit, :begin_date => "20170101") }
+    let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :benefit => benefit)}
     it "returns the parsed date" do
       expect(subject.extract_enrollee_start(enrollee)).to eq(Date.new(2017,1,1))
     end
   end
 
   describe "#extract_enrollee_end" do
-    let(:benefit) { double(:end_date => "20170101") }
-    let(:enrollee) { double(:benefit => benefit)}
+    let(:benefit) { instance_double(::Openhbx::Cv2::EnrolleeBenefit, :end_date => "20170101") }
+    let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :benefit => benefit)}
     it "returns the parsed date" do
       expect(subject.extract_enrollee_end(enrollee)).to eq(Date.new(2017,1,1))
     end
@@ -49,8 +49,8 @@ describe Handlers::EnrollmentEventXmlHelper do
   describe "#extract_policy_member_ids" do
     let(:subscriber) { instance_double(Member, id: 1) }
     let(:dependent) { instance_double(Member, id: 2) }
-    let(:enrollee_sub) { double(:member => subscriber) }
-    let(:enrollee_dep) { double(:member => dependent) }
+    let(:enrollee_sub) { instance_double(::Openhbx::Cv2::Enrollee, :member => subscriber) }
+    let(:enrollee_dep) { instance_double(::Openhbx::Cv2::Enrollee, :member => dependent) }
     let(:policy_cv) { double(:enrollees => [enrollee_sub,enrollee_dep]) }
 
     it "returns the ids" do
@@ -59,8 +59,8 @@ describe Handlers::EnrollmentEventXmlHelper do
   end
 
   describe '#extract_employer_link' do
-    let(:shop_market) { double(:employer_link => :employer_link)}
-    let(:policy) { double(:policy, :shop_market => shop_market) }
+    let(:shop_market) { instance_double(::Openhbx::Cv2::PolicyEnrollmentShopMarket, :employer_link => :employer_link)}
+    let(:policy) { instance_double(::Openhbx::Cv2::PolicyEnrollment, :shop_market => shop_market) }
     let(:policy_cv) { double(:policy_enrollment => policy)}
 
     it "returns the employer link" do
@@ -70,7 +70,7 @@ describe Handlers::EnrollmentEventXmlHelper do
 
   describe "#find_employer" do
     let(:policy_cv) { double }
-    let(:employer_link) { double(:id => "SOMELINK#VALUE")}
+    let(:employer_link) { instance_double(::Openhbx::Cv2::EmployerLink, :id => "SOMELINK#VALUE")}
     before do
       allow(subject).to receive(:extract_employer_link).with(policy_cv).and_return(employer_link)
       allow(Employer).to receive(:where).with(hbx_id: 'VALUE').and_return([:employer])
@@ -83,8 +83,8 @@ describe Handlers::EnrollmentEventXmlHelper do
 
   describe "#find_employer_plan_year" do
     let(:policy_cv) { double }
-    let(:employer) { double }
-    let(:subscriber) { double }
+    let(:employer) { instance_double(Employer) }
+    let(:subscriber) { instance_double(::Openhbx::Cv2::Enrollee) }
     before do
       allow(subject).to receive(:find_employer).with(policy_cv).and_return(employer)
       allow(subject).to receive(:extract_subscriber).with(policy_cv).and_return(subscriber)

@@ -4,23 +4,19 @@ describe Handlers::EnrollmentEventXmlHelper do
   subject { Class.new { extend Handlers::EnrollmentEventXmlHelper } }
 
   describe "#extract_subscriber" do
-    let(:subscriber) { instance_double(Enrollee) }
-    let(:dependent) { instance_double(Enrollee) }
+    let(:subscriber) { instance_double(::Openhbx::Cv2::Enrollee, :subscriber? => true) }
+    let(:dependent) { instance_double(::Openhbx::Cv2::Enrollee, :subscriber? => false) }
 
-    let(:policy_cv) { double(:enrollees => [subscriber, dependent]) }
+    let(:policy_cv) { instance_double(::Openhbx::Cv2::Policy, :enrollees => [subscriber, dependent]) }
 
-    before do
-      allow(subscriber).to receive(:subscriber?).and_return(true)
-      allow(dependent).to receive(:subscriber?).and_return(false)
-    end
     it "returns the subscriber only" do
       expect(subject.extract_subscriber(policy_cv)).to eq(subscriber)
     end
   end
 
   describe "#extract_member_id" do
-    let(:enrollee) { double('Enrollee', :member => member, :value => self) }
-    let(:member) { instance_double(Member, id: "ABC#54")}
+    let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :member => member) }
+    let(:member) { instance_double(::Openhbx::Cv2::EnrolleeMember, id: "ABC#54")}
 
     it "returns the numeric id" do
       expect(subject.extract_member_id(enrollee)).to eq("54")

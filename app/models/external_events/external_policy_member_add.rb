@@ -120,10 +120,11 @@ module ExternalEvents
 
     def persist
       pol = policy_to_update
-      pol.update_attributes({
+      pol.update_attributes!({
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt
       }.merge(extract_other_financials))
+      pol = Policy.find(pol._id)
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|
         build_enrollee(pol, en)

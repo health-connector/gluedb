@@ -6,7 +6,9 @@ module Generators::Reports
     IRS_XML_PATH = "#{@irs_path}/h41/"
     IRS_PDF_PATH = "#{@irs_path}/irs1095a/"
 
-    def initialize
+    attr_accessor :notice_params
+
+    def initialize(options = {})
       @count = 0
       @policy_id = nil
       @hbx_member_id = nil
@@ -20,16 +22,22 @@ module Generators::Reports
       @irs_set  = 0
       @aptc_versions = []
 
+      @notice_params = options
+
       irs_path = "#{Rails.root.to_s}/irs/irs_EOY_#{Time.now.strftime('%m_%d_%Y_%H_%M')}"
-      @irs_xml_path = irs_path + "/h41/"
       @irs_pdf_path = irs_path + "/irs1095a/"
 
       create_directory irs_path
-      create_directory @irs_xml_path
       create_directory @irs_pdf_path
-      create_directory @irs_xml_path + "/transmission"
+
+      unless options.empty?
+        @irs_xml_path = irs_path + "/h41/"
+        create_directory @irs_xml_path
+        create_directory @irs_xml_path + "/transmission"
+      end
 
       @carriers = Carrier.all.inject({}){|hash, carrier| hash[carrier.id] = carrier.name; hash}
+      @settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
     end
 
 
@@ -147,22 +155,47 @@ module Generators::Reports
       end
     end
 
-    def process_policy(policy)
-      # policy = Policy.find(policy)
+    # Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
+
+
+    def generate_notice
+      policy = Policy.find(notice_params[:policy_id])
+      process_policy(policy)
+    end
+
+    def valid_policy?(policy)
       active_enrollees = policy.enrollees.reject{|en| en.canceled?}
-      return if active_enrollees.empty?
-      return if rejected_policy?(policy)
-      return if policy.canceled?
-      return if policy.subscriber.coverage_end.present? && (policy.subscriber.coverage_end < policy.subscriber.coverage_start)
-      return unless policy.belong_to_authority_member?
+
+      if active_enrollees.empty?
+        return false
+      end
+
+      if rejected_policy?(policy) || policy.canceled? || !policy.belong_to_authority_member?
+        return false 
+      end
+
+      if policy.subscriber.coverage_end.present? && (policy.subscriber.coverage_end < policy.subscriber.coverage_start)
+        return false
+      end
+
+      true
+    end
+
+    def build_notice_input(policy)
+      irs_input = Generators::Reports::IrsInputBuilder.new(policy, { notice_type: notice_params[:type], npt_policy: notice_params[:npt] })
+      irs_input.carrier_hash = @carriers
+      irs_input.settings = @settings
+      irs_input.process
+      irs_input
+    end
+
+    def process_policy(policy)
+      return unless valid_policy?(policy)
 
       @policy_id = policy.id
       @hbx_member_id = policy.subscriber.person.authority_member.hbx_member_id
 
-      irs_input = Generators::Reports::IrsInputBuilder.new(policy)
-      irs_input.carrier_hash = @carriers
-      irs_input.npt_policy = false
-      irs_input.process
+      irs_input = build_notice_input(policy)
 
       if policy.responsible_party_id.present?
         if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(policy.responsible_party_id)).first

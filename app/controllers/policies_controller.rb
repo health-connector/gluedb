@@ -172,6 +172,7 @@ class PoliciesController < ApplicationController
   end
 
   def generate_1095A_pdf(params)
-    #Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
+    params[:type] = 'new' if params[:type] == 'original'
+    Generators::Reports::IrsYearlySerializer.new(params).generate_notice
   end
 end

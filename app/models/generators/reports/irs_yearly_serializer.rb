@@ -369,8 +369,10 @@ module Generators::Reports
       sequential_number = @count.to_s
       sequential_number = prepend_zeros(sequential_number, 6)
 
+      name_prefix = (notice_params[:type] == 'new' ? "IRS1095A" : "IRS1095ACorrected")
+     
       @report_names = {
-        pdf: "IRS1095ACorrected_#{calender_year}_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
+        pdf: "#{name_prefix}_#{calender_year}_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "IRS1095A_2016_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "IRS1095A_2015_#{Time.now.strftime('%Y%m%d')}_#{@hbx_member_id}_#{@policy_id}_#{sequential_number}",
         # pdf: "#{sequential_number}_HBX_01_#{@hbx_member_id}_#{@policy_id}_IRS1095A_Corrected",

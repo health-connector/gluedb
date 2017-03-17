@@ -18,7 +18,7 @@ module Generators::Reports
 
     def initialize(policy, options = {})
       @notice_type = options[:notice_type] || false
-      @npt_policy = options[:npt] || false
+      @npt_policy = options[:npt_policy] || false
       @policy = policy
       @policy_disposition = PolicyDisposition.new(policy)
       @subscriber = @policy.subscriber.person

@@ -76,8 +76,15 @@ class PoliciesController < ApplicationController
   def generate_tax_document
     @policy = Policy.find(params[:id])
     @person = Person.find(params[:person_id])
-    #call doc generation service
-    @file_name = generate_1095A_pdf
+    request_params = {policy_id: params[:id],
+                      type:params[:type],
+                      void_policy_ids: void_policy_ids(params[:void_policy_ids]),
+                      npt: params[:npt] == "1" ? true : false}
+
+    request_params.merge!({responsible_party_ssn:params[:ssn],
+                           responsible_party_dob:Date.strptime(params[:dob], "%m/%d/%Y")}) if @policy.responsible_party
+
+    @file_name = generate_1095A_pdf(request_params)  #call doc generation service
 
     if params[:preview] != "1"
       begin
@@ -164,7 +171,7 @@ class PoliciesController < ApplicationController
     File.delete(file_name)
   end
 
-  def generate_1095A_pdf
-
+  def generate_1095A_pdf(params)
+    #Generators::Reports::IrsYearlySerializer.new({policy_id: 123584, type: 'new', npt: false}).generate_notice
   end
 end

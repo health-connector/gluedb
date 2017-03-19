@@ -96,5 +96,19 @@ module EnrollmentAction
       end
       event_xml_doc
     end
+
+    def replace_premium_totals(other_event_xml)
+      other_event_doc = Nokogiri::XML(other_event_xml)
+      other_event_doc.xpath("//cv:policy/cv:enrollment/cv:premium_total_amount", XML_NS).each do |other_node|
+        event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:premium_total_amount", XML_NS).each do |node|
+          node.content = other_node.content
+        end
+      end
+      other_event_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |other_node|
+        event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |node|
+          node.content = other_node.content
+        end
+      end
+    end
   end
 end

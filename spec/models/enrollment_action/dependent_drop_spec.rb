@@ -85,6 +85,7 @@ end
 
 describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, being published" do
   let(:amqp_connection) { double }
+  let(:termination_event_xml) { double }
   let(:event_xml) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
   let(:enrollee_primary) { double(:m_id => 1, :coverage_start => :one_month_ago) }
@@ -103,7 +104,7 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :existing_policy => policy,
-    :event_xml => event_xml,
+    :event_xml => termination_event_xml,
     :all_member_ids => [1,2,3],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
@@ -117,13 +118,14 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
   ) }
 
   before :each do
-    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
+    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(termination_event_xml).and_return(action_publish_helper)
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_member_terminate")
     allow(action_publish_helper).to receive(:set_policy_id).with(1).and_return(true)
     allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(action_publish_helper).to receive(:filter_affected_members).with([3]).and_return(true)
     allow(action_publish_helper).to receive(:keep_member_ends).with([3])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+    allow(action_publish_helper).to receive(:replace_premium_totals).with(event_xml)
   end
 
   subject do
@@ -137,6 +139,11 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
 
   it "sets member start dates" do
     expect(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
+    subject.publish
+  end
+
+  it "corrects premium totals on the dependent drop" do
+    expect(action_publish_helper).to receive(:replace_premium_totals).with(event_xml)
     subject.publish
   end
 

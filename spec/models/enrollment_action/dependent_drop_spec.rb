@@ -126,6 +126,7 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
     allow(action_publish_helper).to receive(:replace_premium_totals).with(event_xml)
     allow(action_publish_helper).to receive(:keep_member_ends).with([3])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+    allow(action_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
   end
 
   subject do
@@ -154,6 +155,11 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
 
   it "keep dropped member end dates before publishing" do
     expect(action_publish_helper).to receive(:keep_member_ends).with([3])
+    subject.publish
+  end
+
+  it "copies the correct qualifying event" do
+    expect(action_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
     subject.publish
   end
 

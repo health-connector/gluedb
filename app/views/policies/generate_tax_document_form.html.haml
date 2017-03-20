@@ -1,9 +1,13 @@
 %ul.breadcrumb
   Generate 1095A Document for Policy:
   = @policy.id
-= form_tag generate_tax_document_policy_path(@policy, {person_id:@person.id}), :method => "post"  do
+= form_tag generate_tax_document_policy_path(@policy, {person_id:@person.id}), :method => "post", :id => '1095A_generation_form', :onsubmit => "return validate_1095A_form()"  do
   .panel.panel-default
     .panel-body
+      .row{id:"1095A_generation_form_error", class:"alert alert-danger"}
+        .col-md-12
+          .control-group
+          = label_tag "For Responsible Party either SSN or DOB HAS to be provided."
       .row
         .col-md-12
           .control-group
@@ -62,3 +66,18 @@
         .col-md-2
           .form_actions
             = submit_tag 'Submit', class: 'btn btn-inverse'
+
+:javascript
+  function validate_1095A_form() {
+    var return_value = false;
+
+    if ($("#responsible_person_ssn").val() == "" && $("#responsible_person_dob").val() == ""){
+        $("#1095A_generation_form_error").show();
+        return_value = false;
+    }else {
+        $("#1095A_generation_form_error").hide();
+        return_value = true;
+    }
+
+    return return_value
+  }

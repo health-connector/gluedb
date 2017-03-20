@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe EnrollmentAction::ActionPublishHelper do
+describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals from another event XML" do
   let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
   let(:event_xml) { double }
   let(:event_doc) { double }
@@ -10,7 +10,6 @@ describe EnrollmentAction::ActionPublishHelper do
     allow(Nokogiri).to receive(:XML).with(event_xml).and_return(event_doc)
   end
 
-  describe "told to swap premium totals from another event XML" do
     let(:premium_total_xpath) {
       "//cv:policy/cv:enrollment/cv:premium_total_amount"
     }
@@ -78,5 +77,57 @@ describe EnrollmentAction::ActionPublishHelper do
       expect(target_xml_ivl_assistance_node).to receive(:content=).with(other_ivl_assistance_amount)
       subject.replace_premium_totals(source_event_xml)
     end
+end
+
+describe EnrollmentAction::ActionPublishHelper, "told to swap the qualifying event from another event XML" do
+  let(:source_event_type) { "urn:dc0:terms:v1:qualifying_life_event#new_eligibility_member" }
+  let(:source_event_date) { "20170309" }
+
+  let(:source_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <eligibility_event>
+  <event_kind>#{source_event_type}</event_kind>
+  <event_date>#{source_event_date}</event_date>
+  </eligibility_event>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+  let(:target_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <eligibility_event>
+  <event_kind>urn:dc0:terms:v1:qualifying_life_event#new_hire</event_kind>
+  <event_date>20140201</event_date>
+  </eligibility_event>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+
+  let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(target_event_xml) }
+
+  let(:target_xml_doc) {
+    publish_helper.swap_qualifying_event(source_event_xml)
+    Nokogiri::XML(publish_helper.to_xml)
+  }
+
+  let(:qualifying_event_type_node) {
+    target_xml_doc.xpath("//cv:enrollment/cv:policy/cv:eligibility_event/cv:event_kind", xml_namespace).first
+  }
+
+  let(:qualifying_event_date_node) {
+    target_xml_doc.xpath("//cv:enrollment/cv:policy/cv:eligibility_event/cv:event_date", xml_namespace).first
+  }
+
+  it "sets the qualifying event type" do
+    expect(qualifying_event_type_node.content).to eq(source_event_type)
+  end
+
+  it "sets the qualifying event date" do
+    expect(qualifying_event_date_node.content).to eq(source_event_date)
   end
 end

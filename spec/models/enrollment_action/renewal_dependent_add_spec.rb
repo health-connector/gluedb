@@ -23,27 +23,6 @@ describe EnrollmentAction::RenewalDependentAdd, "given an enrollment event set t
   end
 end
 
-describe EnrollmentAction::RenewalDependentAdd, "given an enrollment event set that:
--- is not a termination
--- is not a passive renewal
--- has no dependent renewal candidates ##REJECT
--- dependents added" do
-  let(:member) { double() }
-  let(:event) { instance_double(ExternalEvents::EnrollmentEventNotification,
-                                  :is_termination? => false,
-                                  :is_passive_renewal? => false
-                                ) }
-
-  subject { EnrollmentAction::RenewalDependentAdd }
-
-  before do
-    allow(subject).to receive(:same_carrier_renewal_candidates).with(event).and_return([])
-    allow(subject).to receive(:renewal_dependents_added?).with(member, event).and_return(true)
-  end
-  it "does not qualify" do
-    expect(subject.qualifies?([event])).to be_falsey
-  end
-end
 
 describe EnrollmentAction::RenewalDependentAdd, "given an enrollment event set that:
 -- is not a termination
@@ -165,7 +144,6 @@ describe EnrollmentAction::RenewalDependentAdd, "#publish" do
     :all_member_ids => [1,2],
     :event_responder => event_responder,
     :event_xml => event_xml,
-    :is_shop? => true,
     :policy_cv => new_policy_cv,
     :hbx_enrollment_id => 1,
     :employer_hbx_id => 1

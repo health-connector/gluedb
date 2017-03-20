@@ -35,6 +35,7 @@ module EnrollmentAction
       termination_helper.filter_affected_members(dropped_dependents)
       termination_helper.replace_premium_totals(action.event_xml)
       termination_helper.keep_member_ends(dropped_dependents)
+      termination_helper.swap_qualifying_event(action.event_xml)
       publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id)
     end
   end

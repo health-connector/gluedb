@@ -104,6 +104,17 @@ module EnrollmentAction
           node.content = other_node.content
         end
       end
+      
+      other_event_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |other_node|
+        event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |node|
+          node.content = other_node.content
+        end
+      end
+      other_event_doc.xpath("//cv:policy/cv:enrollment/cv:shop_market/cv:total_employer_responsible_amount", XML_NS).each do |other_node|
+        event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:shop_market/cv:total_employer_responsible_amount", XML_NS).each do |node|
+          node.content = other_node.content
+        end
+      end
       other_event_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |other_node|
         event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |node|
           node.content = other_node.content

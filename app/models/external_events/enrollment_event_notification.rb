@@ -30,7 +30,7 @@ module ExternalEvents
       bucket_id.hash
     end
 
-    def bucket_id 
+    def bucket_id
       [subscriber_id, coverage_type, employer_hbx_id]
     end
 
@@ -154,7 +154,7 @@ module ExternalEvents
       others.each do |other|
         if (other.hbx_enrollment_id == hbx_enrollment_id) && other.is_coverage_starter?
           @bogus_termination = false
-          return 
+          return
         end
       end
       @bogus_termination = existing_policy.nil?

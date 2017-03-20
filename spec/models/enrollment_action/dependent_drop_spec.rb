@@ -123,9 +123,9 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
     allow(action_publish_helper).to receive(:set_policy_id).with(1).and_return(true)
     allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(action_publish_helper).to receive(:filter_affected_members).with([3]).and_return(true)
+    allow(action_publish_helper).to receive(:replace_premium_totals).with([3]).and_return(event_xml)
     allow(action_publish_helper).to receive(:keep_member_ends).with([3])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
-    allow(action_publish_helper).to receive(:replace_premium_totals).with(event_xml)
   end
 
   subject do
@@ -142,8 +142,13 @@ describe EnrollmentAction::DependentDrop, "given a qualified enrollment set, bei
     subject.publish
   end
 
+  it "filter affected members on the dependent drop" do
+    expect(action_publish_helper).to receive(:filter_affected_members).with([3]).and_return(true)
+    subject.publish
+  end
+
   it "corrects premium totals on the dependent drop" do
-    expect(action_publish_helper).to receive(:replace_premium_totals).with(event_xml)
+    expect(action_publish_helper).to receive(:replace_premium_totals).with([3]).and_return(event_xml)
     subject.publish
   end
 

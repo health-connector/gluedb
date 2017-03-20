@@ -62,15 +62,10 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment se
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyMemberDrop) }
 
   subject { EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event) }
-  # def no_dropped_dependent; EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event_2); end
 
   it "returns an array containing the dropped dependents" do
     expect(subject.dropped_dependents).to eq([2])
   end
-
-  # it "return an empty array" do
-  #   expect(no_dropped_dependent.dropped_dependents).to eq([])
-  # end
 end
 
 describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set with no dropped dependents" do

@@ -2,13 +2,52 @@ require "rails_helper"
 
 describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals from another event XML" do
   let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
-  let(:event_xml) { double }
-  let(:event_doc) { double }
-  subject { ::EnrollmentAction::ActionPublishHelper.new(event_xml) }
+  let(:source_premium_total) { "56.78" } 
+  let(:source_tot_res_amt) { "123.45" }
+  let(:source_emp_res_amt) { "98.76" }
+  let(:source_ivl_assistance_amount) { "34.21" }
 
-  before :each do
-    allow(Nokogiri).to receive(:XML).with(event_xml).and_return(event_doc)
-  end
+  let(:source_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <enrollment>
+  <individual_market>
+    <applied_aptc_amount>#{source_ivl_assistance_amount}</applied_aptc_amount>
+  </individual_market>
+  <shop_market>
+    <total_employer_responsible_amount>#{source_emp_res_amt}</total_employer_responsible_amount>
+  </shop_market>
+  <premium_total_amount>#{source_premium_total}</premium_total_amount>
+  <total_responsible_amount>#{source_tot_res_amt}</total_responsible_amount>
+  </enrollment>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+  let(:target_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <enrollment>
+  <individual_market>
+    <applied_aptc_amount>0.00</applied_aptc_amount>
+  </individual_market>
+  <shop_market>
+    <total_employer_responsible_amount>0.00</total_employer_responsible_amount>
+  </shop_market>
+  <premium_total_amount>0.00</premium_total_amount>
+  <total_responsible_amount>0.00</total_responsible_amount>
+  </enrollment>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:action_publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(target_event_xml) }
+
+  let(:transformed_target_xml) { 
+    action_publish_helper.replace_premium_totals(source_event_xml)
+    Nokogiri::XML(action_publish_helper.to_xml)
+  }
 
     let(:premium_total_xpath) {
       "//cv:policy/cv:enrollment/cv:premium_total_amount"
@@ -25,57 +64,25 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
       "//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount"
     }
 
-    let(:source_event_xml) { double }
-    let(:source_event_doc) { double }
-
-    let(:other_pre_amt_tot) { double }
-    let(:other_tot_res_amt) { double }
-    let(:other_emp_res_amt) { double }
-    let(:other_ivl_assistance_amount) { double }
-
-    let(:target_xml_premium_total_node) { double }
-    let(:source_xml_premium_total_node) { double(:content => other_pre_amt_tot) }
-    let(:target_xml_tot_res_amount_node) { double }
-    let(:source_xml_tot_res_amount_node) { double(:content => other_tot_res_amt) }
-    let(:target_xml_emp_res_node) { double }
-    let(:source_xml_emp_res_node) { double(:content => other_emp_res_amt) }
-    let(:target_xml_ivl_assistance_node) { double }
-    let(:source_xml_ivl_assistance_node) { double(:content => other_ivl_assistance_amount) }
-
-    before :each do
-      allow(Nokogiri).to receive(:XML).with(source_event_xml).and_return(source_event_doc)
-      allow(event_doc).to receive(:xpath).with(premium_total_xpath, xml_namespace).and_return([target_xml_premium_total_node])
-      allow(event_doc).to receive(:xpath).with(tot_res_amount_xpath, xml_namespace).and_return([target_xml_tot_res_amount_node])
-      allow(event_doc).to receive(:xpath).with(employer_contribution_xpath, xml_namespace).and_return([target_xml_emp_res_node])
-      allow(event_doc).to receive(:xpath).with(ivl_assistance_xpath, xml_namespace).and_return([target_xml_ivl_assistance_node])
-      allow(source_event_doc).to receive(:xpath).with(premium_total_xpath, xml_namespace).and_return([source_xml_premium_total_node])
-      allow(source_event_doc).to receive(:xpath).with(tot_res_amount_xpath, xml_namespace).and_return([source_xml_tot_res_amount_node])
-      allow(source_event_doc).to receive(:xpath).with(employer_contribution_xpath, xml_namespace).and_return([source_xml_emp_res_node])
-      allow(source_event_doc).to receive(:xpath).with(ivl_assistance_xpath, xml_namespace).and_return([source_xml_ivl_assistance_node])
-      allow(target_xml_premium_total_node).to receive(:content=).with(other_pre_amt_tot)
-      allow(target_xml_tot_res_amount_node).to receive(:content=).with(other_tot_res_amt)
-      allow(target_xml_emp_res_node).to receive(:content=).with(other_emp_res_amt)
-      allow(target_xml_ivl_assistance_node).to receive(:content=).with(other_ivl_assistance_amount)
-    end
+    let(:target_xml_premium_total_node) { transformed_target_xml.xpath(premium_total_xpath, xml_namespace).first }
+    let(:target_xml_tot_res_amount_node) { transformed_target_xml.xpath(tot_res_amount_xpath, xml_namespace).first }
+    let(:target_xml_emp_res_node) { transformed_target_xml.xpath(employer_contribution_xpath, xml_namespace).first }
+    let(:target_xml_ivl_assistance_node) { transformed_target_xml.xpath(ivl_assistance_xpath, xml_namespace).first }
 
     it "sets the premium_total_amount correctly" do
-      expect(target_xml_premium_total_node).to receive(:content=).with(other_pre_amt_tot)
-      subject.replace_premium_totals(source_event_xml)
+      expect(target_xml_premium_total_node.content).to eql(source_premium_total)
     end
 
     it "sets the total_responsible_amount correctly" do
-      expect(target_xml_tot_res_amount_node).to receive(:content=).with(other_tot_res_amt)
-      subject.replace_premium_totals(source_event_xml)
+      expect(target_xml_tot_res_amount_node.content).to eq(source_tot_res_amt)
     end
 
     it "sets the employer_responsible_amount correctly" do
-      expect(target_xml_emp_res_node).to receive(:content=).with(other_emp_res_amt)
-      subject.replace_premium_totals(source_event_xml)
+      expect(target_xml_emp_res_node.content).to eq(source_emp_res_amt)
     end
 
     it "sets the ivl assistance amount correctly" do
-      expect(target_xml_ivl_assistance_node).to receive(:content=).with(other_ivl_assistance_amount)
-      subject.replace_premium_totals(source_event_xml)
+      expect(target_xml_ivl_assistance_node.content).to eq(source_ivl_assistance_amount)
     end
 end
 

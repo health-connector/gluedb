@@ -9,79 +9,91 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given an EnrollmentAction a
 
   let(:plan_1) { instance_double(Plan, id: 1, carrier_id: 1) }
   let(:plan_2) { instance_double(Plan, id: 2, carrier_id: 2) }
-  let(:plan_3) { instance_double(Plan, id: 3, carrier_id: 2) }
-  let(:plan_4) { instance_double(Plan, id: 1, carrier_id: 1) }
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_1, all_member_ids: [1, 2, 3]) }
-  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_4, all_member_ids: [1, 2]) }
-  let(:event_3) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_2, all_member_ids: [1, 2]) }
-  let(:event_4) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_3, all_member_ids: [1, 2, 3]) }
-  let(:event_5) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_3, all_member_ids: [1, 2]) }
+  let(:plan_3) { instance_double(Plan, id: 3, carrier_id: 1) }
+  let(:main_event) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_1, all_member_ids: [1, 2, 3]) }
+  let(:fails_plan_id_is_the_same) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_1, all_member_ids: [1, 2]) }
+  let(:fails_carrier_ids_are_different) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_2, all_member_ids: [1, 2]) }
+  let(:fails_no_dropped_dependents) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_2, all_member_ids: [1, 2, 3]) }
+  let(:succeeds) { instance_double(ExternalEvents::EnrollmentEventNotification, existing_plan: plan_3, all_member_ids: [1, 2]) }
 
   subject { EnrollmentAction::PlanChangeDependentDrop }
 
   it "does not qualify because it has less than two elements" do
-    expect(subject.qualifies?([event_1])).to be_false
+    expect(subject.qualifies?([main_event])).to be_false
   end
 
   it "does not qualify because both elements are the same plan" do
-    expect(subject.qualifies?([event_1, event_2])).to be_false
+    expect(subject.qualifies?([main_event, fails_plan_id_is_the_same])).to be_false
   end
 
   it "does not qualify because the carrier IDs are different" do
-    expect(subject.qualifies?([event_1, event_3])).to be_false
+    expect(subject.qualifies?([main_event, fails_carrier_ids_are_different])).to be_false
   end
 
   it "does not qualify because there are no dropped dependents" do
-    expect(subject.qualifies?([event_1, event_4])).to be_false
+    expect(subject.qualifies?([main_event, fails_no_dropped_dependents])).to be_false
   end
 
   it "qualifies" do
-    expect(subject.qualifies?([event_4, event_3])).to be_truthy
+    expect(subject.qualifies?([main_event, succeeds])).to be_truthy
   end
 end
 
-describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set
-  - with dropped dependents
-  - with no dropped dependents, return an empty array" do
-
+describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set with dropped dependents" do
   let(:primary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
-  let(:secondary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
-  let(:dropped_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 3) }
-  let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, secondary_member, dropped_member])}
-  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, secondary_member]) }
+  let(:dropped_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
+  let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member])}
+  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member]) }
   let(:plan) { instance_double(Plan, id: 1) }
-  let(:policy) { instance_double(Policy, hbx_enrollment_ids: [1, 2, 3]) }
-  let(:dependent_drop_event_1) { instance_double(
+  let(:policy) { instance_double(Policy, hbx_enrollment_ids: [1, 2]) }
+  let(:dependent_drop_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     policy_cv: new_policy_cv,
     existing_plan: plan,
-    all_member_ids: [1, 2],
-    hbx_enrollment_id: 1
-  ) }
-  let(:dependent_drop_event_2) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    policy_cv: new_policy_cv,
-    existing_plan: plan,
-    all_member_ids: [1, 2, 3],
+    all_member_ids: [1],
     hbx_enrollment_id: 1
   ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     policy_cv: terminated_policy_cv,
     existing_policy: policy,
-    all_member_ids: [1, 2, 3]
+    all_member_ids: [1, 2]
   ) }
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyMemberDrop) }
 
-  def has_dropped_dependent; EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event_1); end
-  def no_dropped_dependent; EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event_2); end
+  subject { EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event) }
 
-  it "return an array containing the dropped dependents" do
-    expect(has_dropped_dependent.dropped_dependents).to eq([3])
+  it "returns an array containing the dropped dependents" do
+    expect(subject.dropped_dependents).to eq([2])
   end
+end
 
-  it "return an empty array" do
-    expect(no_dropped_dependent.dropped_dependents).to eq([])
+describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set with no dropped dependents" do
+  let(:primary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
+  let(:dropped_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
+  let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member])}
+  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member]) }
+  let(:plan) { instance_double(Plan, id: 1) }
+  let(:policy) { instance_double(Policy, hbx_enrollment_ids: [1, 2]) }
+  let(:dependent_drop_event) { instance_double(
+    ::ExternalEvents::EnrollmentEventNotification,
+    policy_cv: new_policy_cv,
+    existing_plan: plan,
+    all_member_ids: [1, 2],
+    hbx_enrollment_id: 1
+  ) }
+  let(:termination_event) { instance_double(
+    ::ExternalEvents::EnrollmentEventNotification,
+    policy_cv: terminated_policy_cv,
+    existing_policy: policy,
+    all_member_ids: [1, 2]
+  ) }
+  let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyMemberDrop) }
+
+  subject { EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event) }
+
+  it "returns an empty array" do
+    expect(subject.dropped_dependents).to eq([])
   end
 end
 

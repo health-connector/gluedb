@@ -41,7 +41,7 @@ module EnrollmentAction
       termination_helper.filter_affected_members(dropped_dependents)
       termination_helper.keep_member_ends(dropped_dependents)
       termination_helper.swap_qualifying_event(action.event_xml)
-      ### TODO: Update the correct premium and assistance amounts
+      termination_helper.recalculate_premium_totals(action.all_member_ids)
       publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id)
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#change_product")

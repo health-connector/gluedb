@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals from another event XML" do
   let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
-  let(:source_premium_total) { "56.78" } 
+  let(:source_premium_total) { "56.78" }
   let(:source_tot_res_amt) { "123.45" }
   let(:source_emp_res_amt) { "98.76" }
   let(:source_ivl_assistance_amount) { "34.21" }
@@ -44,7 +44,7 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
 
   let(:action_publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(target_event_xml) }
 
-  let(:transformed_target_xml) { 
+  let(:transformed_target_xml) {
     action_publish_helper.replace_premium_totals(source_event_xml)
     Nokogiri::XML(action_publish_helper.to_xml)
   }
@@ -137,4 +137,72 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap the qualifying eve
   it "sets the qualifying event date" do
     expect(qualifying_event_date_node.content).to eq(source_event_date)
   end
+end
+
+describe EnrollmentAction::ActionPublishHelper, "recalculating premium totals after a dependent drop" do
+  let(:primary_member_id) { "1000" }
+  let(:secondary_member_id) { "1001" }
+  let(:dropped_member_id) { "1002" }
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+
+  let(:dependent_drop_event) { <<-EVENTXML
+    <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+      <policy>
+        <enrollees>
+          <enrollee>
+            <member>
+              <id>
+                <id>urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{primary_member_id}</id>
+              </id>
+            </member>
+            <benefit>
+              <premium_amount>100.00</premium_amount>
+            </benefit>
+          </enrollee>
+          <enrollee>
+            <member>
+              <id>
+                <id>urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{secondary_member_id}</id>
+              </id>
+            </member>
+            <benefit>
+              <premium_amount>100.00</premium_amount>
+            </benefit>
+          </enrollee>
+          <enrollee>
+            <member>
+              <id>
+                <id>urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{dropped_member_id}</id>
+              </id>
+            </member>
+            <benefit>
+              <premium_amount>100.00</premium_amount>
+            </benefit>
+          </enrollee>
+        </enrollees>
+      <enrollment>
+        <shop_market>
+          <total_employer_responsible_amount>185.00</total_employer_responsible_amount>
+        </shop_market>
+        <premium_total_amount>400</premium_total_amount>
+        <total_responsible_amount>86.16</total_responsible_amount>
+      </enrollment>
+    </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(dependent_drop_event) }
+
+  let(:target_xml_doc) {
+    publish_helper.recalculate_premium_totals([primary_member_id, secondary_member_id])
+    Nokogiri::XML(publish_helper.to_xml)
+  }
+
+  let(:premium_total_xpath) { target_xml_doc.xpath("//cv:enrollment/cv:policy/cv:enrollment/cv:premium_total_amount", xml_namespace).first }
+
+  it "recalculates the correct total excluding the dropped member" do
+    expect(premium_total_xpath.content).to eq("200.0")
+  end
+
 end

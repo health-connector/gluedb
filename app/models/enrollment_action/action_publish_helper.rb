@@ -51,8 +51,24 @@ module EnrollmentAction
       event_xml_doc
     end
 
-    def recalculate_premium_totals(enrollees)
+    def recalculate_premium_totals(enrollee_ids)
+      ## loop through existing enrollees
+      premium_total = 0
+      event_xml_doc.xpath("//cv:enrollment/cv:policy/cv:enrollees/cv:enrollee", XML_NS).each do |node|
+        node.xpath("cv:member/cv:id/cv:id", XML_NS).each do |c_node|
+          node_member_id = Maybe.new(c_node).content.strip.split("#").last.value
+          if enrollee_ids.include? node_member_id
+            enrollee_premium = node.xpath("cv:benefit/cv:premium_amount", XML_NS).first.content
+            premium_total = premium_total + enrollee_premium.to_f
+          end
+        end
+      end
 
+      ## copy new total into totals value
+      event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:premium_total_amount", XML_NS).each do |node|
+        node.content = premium_total
+      end
+      event_xml_doc
     end
 
     def set_member_starts(member_start_hash)

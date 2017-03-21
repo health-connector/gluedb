@@ -51,6 +51,10 @@ module EnrollmentAction
       event_xml_doc
     end
 
+    def recalculate_premium_totals(enrollees)
+
+    end
+
     def set_member_starts(member_start_hash)
       event_xml_doc.xpath("//cv:enrollment_event_body/cv:affected_members/cv:affected_member", XML_NS).each do |node|
         found_matching_id = false

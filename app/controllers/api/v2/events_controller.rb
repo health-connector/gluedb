@@ -1,7 +1,7 @@
 module Api::V2
   class EventsController < ApplicationController
-  skip_before_filter :authenticate_user_from_token!
-  skip_before_filter :authenticate_me!
+#  skip_before_filter :authenticate_user_from_token!
+#  skip_before_filter :authenticate_me!
   protect_from_forgery :except => [:create]
 
 

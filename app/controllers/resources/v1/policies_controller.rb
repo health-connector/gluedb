@@ -1,7 +1,7 @@
 module Resources
   module V1
     class PoliciesController < ApplicationController
-      skip_before_filter :authenticate_me!
+#      skip_before_filter :authenticate_me!
 
       def show
         @policy = Policy.where("eg_id" => params[:id]).first

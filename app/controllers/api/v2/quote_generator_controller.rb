@@ -1,9 +1,9 @@
 require File.join(Rails.root, "app", "models", "premiums", "quote_cv_proxy.rb")
 
 class Api::V2::QuoteGeneratorController < ApplicationController
-  skip_before_filter :authenticate_user_from_token!
-  skip_before_filter :authenticate_me!
-  skip_before_filter :verify_authenticity_token
+#  skip_before_filter :authenticate_user_from_token!
+#  skip_before_filter :authenticate_me!
+#  skip_before_filter :verify_authenticity_token
 
   def generate
 

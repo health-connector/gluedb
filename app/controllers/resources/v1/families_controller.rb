@@ -1,7 +1,7 @@
 module Resources
   module V1
     class FamiliesController < ApplicationController
-      skip_before_filter :authenticate_me!
+#      skip_before_filter :authenticate_me!
 
       def show
         @family = Family.where(hbx_assigned_id: params[:id]).first

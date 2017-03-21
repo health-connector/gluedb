@@ -1,6 +1,6 @@
 class Soap::SoapController < ApplicationController
-  skip_before_filter :authenticate_user_from_token!
-  skip_before_filter :authenticate_me!
+#  skip_before_filter :authenticate_user_from_token!
+#  skip_before_filter :authenticate_me!
   SOAP_NS = {
     :soap => 'http://www.w3.org/2001/12/soap-envelope',
     :cv_soap => 'http://openhbx.org/api/transports/soap/1.0'

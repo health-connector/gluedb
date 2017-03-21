@@ -8,7 +8,7 @@ module EnrollmentAction
     def initialize(xml_string)
       @event_xml_doc = Nokogiri::XML(xml_string)
     end
-      
+
     def filter_affected_members(affected_member_ids)
       event_xml_doc.xpath("//cv:enrollment_event_body/cv:affected_members/cv:affected_member", XML_NS).each do |node|
         found_matching_id = false
@@ -104,7 +104,7 @@ module EnrollmentAction
           node.content = other_node.content
         end
       end
-      
+
       other_event_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |other_node|
         event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |node|
           node.content = other_node.content
@@ -118,6 +118,16 @@ module EnrollmentAction
       other_event_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |other_node|
         event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount", XML_NS).each do |node|
           node.content = other_node.content
+        end
+      end
+      event_xml_doc
+    end
+
+    def swap_qualifying_event(source_event_xml)
+      source_event_doc = Nokogiri::XML(source_event_xml)
+      source_event_doc.xpath("//cv:enrollment/cv:policy/cv:eligibility_event", XML_NS).each do |source_node|
+        event_xml_doc.xpath("//cv:enrollment/cv:policy/cv:eligibility_event", XML_NS).each do |target_node|
+          target_node.replace(source_node.dup)
         end
       end
     end

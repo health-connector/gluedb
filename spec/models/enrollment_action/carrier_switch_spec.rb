@@ -72,9 +72,10 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
   end
 end
 
-describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for terminate, being published" do
+describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for terminate, and a new enrollment, being published" do
   let(:amqp_connection) { double }
   let(:event_xml) { double }
+  let(:termination_event_xml) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
   let(:enrollee_primary) { double(:m_id => 1, :coverage_start => :one_month_ago) }
   let(:enrollee_new) { double(:m_id => 2, :coverage_start => :one_month_ago) }
@@ -85,7 +86,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :existing_policy => policy,
-    :event_xml => event_xml,
+    :event_xml => termination_event_xml,
     :all_member_ids => [1,2],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
@@ -108,16 +109,29 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     :to_xml => termination_helper_result_xml
   ) }
 
+  let(:action_helper_result_xml) { double }
+
+  let(:action_publish_helper) { instance_double(
+    EnrollmentAction::ActionPublishHelper,
+    :to_xml => action_helper_result_xml
+  ) }
+
   subject do
     EnrollmentAction::CarrierSwitch.new(termination_event, action_event)
   end
 
   before :each do
-    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(termination_publish_helper)
+    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(termination_event_xml).and_return(termination_publish_helper)
+    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
     allow(termination_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-    allow(termination_publish_helper).to receive(:set_policy_id).with(1).and_return(true)
+    allow(termination_publish_helper).to receive(:set_policy_id).with(1)
     allow(termination_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
-    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id).and_return([true, {}])
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
+    allow(action_publish_helper).to receive(:keep_member_ends).with([])
+    allow(action_publish_helper).to receive(:set_policy_id).with(1)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
+    allow(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
   end
 
   it "publishes an event of enrollment termination" do
@@ -134,60 +148,10 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     expect(termination_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     subject.publish
   end
+
   it "publishes termination resulting xml to edi" do
     expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id)
     subject.publish
-  end
-end
-
-describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment for initial, being published" do
-  let(:amqp_connection) { double }
-  let(:event_xml) { double }
-  let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
-  let(:enrollee_primary) { double(:m_id => 1, :coverage_start => :one_month_ago) }
-  let(:enrollee_new) { double(:m_id => 2, :coverage_start => :one_month_ago) }
-
-  let(:plan) { instance_double(Plan, :id => 1) }
-  let(:policy) { instance_double(Policy, :enrollees => [enrollee_primary, enrollee_new], :eg_id => 1) }
-
-  let(:action_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    :existing_policy => policy,
-    :event_xml => event_xml,
-    :all_member_ids => [1,2],
-    :event_responder => event_responder,
-    :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
-  ) }
-  let(:termination_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    :existing_policy => policy,
-    :event_xml => event_xml,
-    :all_member_ids => [1,2],
-    :event_responder => event_responder,
-    :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
-  ) }
-
-  let(:action_helper_result_xml) { double }
-
-  let(:action_publish_helper) { instance_double(
-    EnrollmentAction::ActionPublishHelper,
-    :to_xml => action_helper_result_xml
-  ) }
-
-  subject do
-    EnrollmentAction::CarrierSwitch.new(action_event, termination_event)
-  end
-
-  before :each do
-    allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-    allow(action_publish_helper).to receive(:set_policy_id).with(1).and_return(true)
-    allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id).and_return(true)
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
-    allow(action_publish_helper).to receive(:keep_member_ends).with([])
   end
 
   it "publishes an event of enrollment initialization" do
@@ -204,5 +168,9 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment for init
     expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
     subject.publish
   end
-end
 
+  it "corrects the qualifying event type on the termination" do
+    expect(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
+    subject.publish
+  end
+end

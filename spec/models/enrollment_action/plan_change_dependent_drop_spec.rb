@@ -39,20 +39,14 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given an EnrollmentAction a
   end
 end
 
-describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set with dropped dependents" do
+describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set" do
   let(:primary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
   let(:dropped_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
   let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member])}
   let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member]) }
   let(:plan) { instance_double(Plan, id: 1) }
   let(:policy) { instance_double(Policy, hbx_enrollment_ids: [1, 2]) }
-  let(:dependent_drop_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    policy_cv: new_policy_cv,
-    existing_plan: plan,
-    all_member_ids: [1],
-    hbx_enrollment_id: 1
-  ) }
+
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     policy_cv: terminated_policy_cv,
@@ -63,39 +57,34 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment se
 
   subject { EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event) }
 
-  it "returns an array containing the dropped dependents" do
-    expect(subject.dropped_dependents).to eq([2])
+  context "with dropped dependents" do
+    let(:dependent_drop_event) { instance_double(
+      ::ExternalEvents::EnrollmentEventNotification,
+      policy_cv: new_policy_cv,
+      existing_plan: plan,
+      all_member_ids: [1],
+      hbx_enrollment_id: 1
+    ) }
+    it "returns an array containing the dropped dependents" do
+      expect(subject.dropped_dependents).to eq([2])
+    end
+  end
+
+  context "with no dropped dependents" do
+    let(:dependent_drop_event) { instance_double(
+      ::ExternalEvents::EnrollmentEventNotification,
+      policy_cv: new_policy_cv,
+      existing_plan: plan,
+      all_member_ids: [1, 2],
+      hbx_enrollment_id: 1
+    ) }
+
+    it "returns an empty array" do
+      expect(subject.dropped_dependents).to eq([])
+    end
   end
 end
 
-describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set with no dropped dependents" do
-  let(:primary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
-  let(:dropped_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
-  let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member])}
-  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, enrollees: [primary_member, dropped_member]) }
-  let(:plan) { instance_double(Plan, id: 1) }
-  let(:policy) { instance_double(Policy, hbx_enrollment_ids: [1, 2]) }
-  let(:dependent_drop_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    policy_cv: new_policy_cv,
-    existing_plan: plan,
-    all_member_ids: [1, 2],
-    hbx_enrollment_id: 1
-  ) }
-  let(:termination_event) { instance_double(
-    ::ExternalEvents::EnrollmentEventNotification,
-    policy_cv: terminated_policy_cv,
-    existing_policy: policy,
-    all_member_ids: [1, 2]
-  ) }
-  let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyMemberDrop) }
-
-  subject { EnrollmentAction::PlanChangeDependentDrop.new(termination_event, dependent_drop_event) }
-
-  it "returns an empty array" do
-    expect(subject.dropped_dependents).to eq([])
-  end
-end
 
 describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment set" do
   let(:primary_member) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }

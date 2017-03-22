@@ -72,13 +72,23 @@ module EnrollmentAction
       ## SHOP: check if there is an employer contribution... do nothing if not SHOP
       employer_contribution = 0
       event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:shop_market", XML_NS).each do |node|
-        employer_contribution = node.xpath("cv:total_employer_responsible_amount", XML_NS).first.content.to_f
+        employer_contribution_path = node.xpath("cv:total_employer_responsible_amount", XML_NS).first
+        employer_contribution = employer_contribution_path.content.to_f
+        if (employer_contribution > premium_total)
+          employer_contribution = premium_total
+          employer_contribution_path.content = employer_contribution
+        end
       end
 
       ## IVL: check if there is an applied_aptc_amount... do nothing if not IVL
       assistance_contribution = 0
       event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market", XML_NS).each do |node|
-        assistance_contribution = node.xpath("cv:applied_aptc_amount", XML_NS).first.content.to_f
+        assistance_contribution_path = node.xpath("cv:applied_aptc_amount", XML_NS).first
+        assistance_contribution = assistance_contribution_path.content.to_f
+        if (assistance_contribution > premium_total)
+          assistance_contribution = premium_total
+          assistance_contribution_path.content = assistance_contribution
+        end
       end
 
       ## adjust the individual responsible total accordingly

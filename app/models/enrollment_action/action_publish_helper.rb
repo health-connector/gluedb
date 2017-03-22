@@ -51,13 +51,13 @@ module EnrollmentAction
       event_xml_doc
     end
 
-    def recalculate_premium_totals(enrollee_ids)
+    def recalculate_premium_totals_excluding_dropped_dependents(remaining_enrollees)
       ## loop through existing enrollees
       premium_total = 0
       event_xml_doc.xpath("//cv:enrollment/cv:policy/cv:enrollees/cv:enrollee", XML_NS).each do |node|
         node.xpath("cv:member/cv:id/cv:id", XML_NS).each do |c_node|
           node_member_id = Maybe.new(c_node).content.strip.split("#").last.value
-          if enrollee_ids.include? node_member_id
+          if remaining_enrollees.include? node_member_id
             enrollee_premium = node.xpath("cv:benefit/cv:premium_amount", XML_NS).first.content.to_f
             premium_total = premium_total + enrollee_premium
           end

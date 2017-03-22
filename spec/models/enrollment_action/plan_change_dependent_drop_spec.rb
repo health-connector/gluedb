@@ -177,7 +177,7 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
     allow(termination_publish_helper).to receive(:keep_member_ends).with([3])
     allow(termination_publish_helper).to receive(:set_member_starts).with({1 => enrollee.coverage_start, 2 => new_enrollee.coverage_start, 3 => dropped_enrollee.coverage_start})
     allow(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
-    allow(termination_publish_helper).to receive(:recalculate_premium_totals).with([1,2])
+    allow(termination_publish_helper).to receive(:recalculate_premium_totals_excluding_dropped_dependents).with([1,2])
     allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
     allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_helper)
     allow(action_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product")
@@ -221,7 +221,7 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
   end
 
   it "updates the premium total to only include the remaining members" do
-    expect(termination_publish_helper).to receive(:recalculate_premium_totals).with([1,2])
+    expect(termination_publish_helper).to receive(:recalculate_premium_totals_excluding_dropped_dependents).with([1,2])
     subject.publish
   end
 

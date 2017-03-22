@@ -195,7 +195,7 @@ describe EnrollmentAction::ActionPublishHelper, "SHOP: recalculating premium tot
   let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(dependent_drop_event) }
 
   let(:target_xml_doc) {
-    publish_helper.recalculate_premium_totals([primary_member_id, secondary_member_id])
+    publish_helper.recalculate_premium_totals_excluding_dropped_dependents([primary_member_id, secondary_member_id])
     Nokogiri::XML(publish_helper.to_xml)
   }
 
@@ -267,7 +267,7 @@ describe EnrollmentAction::ActionPublishHelper, "IVL: recalculating premium tota
   let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(dependent_drop_event) }
 
   let(:target_xml_doc) {
-    publish_helper.recalculate_premium_totals([primary_member_id, secondary_member_id])
+    publish_helper.recalculate_premium_totals_excluding_dropped_dependents([primary_member_id, secondary_member_id])
     Nokogiri::XML(publish_helper.to_xml)
   }
 

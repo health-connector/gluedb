@@ -34,9 +34,9 @@ $(document).ready(function() {
 
   $("#1095A_generation_form input:radio[name='type']").change(function(){
     if(this.value == 'void' && this.checked){
-      $("#void-policy-ids").show();
+      $("#1095A_generation_form #void-policy-ids").show();
     }else{
-      $("#void-policy-ids").hide();
+      $("#1095A_generation_form #void-policy-ids").hide();
     }
   });
 

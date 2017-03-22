@@ -58,8 +58,8 @@ module EnrollmentAction
         node.xpath("cv:member/cv:id/cv:id", XML_NS).each do |c_node|
           node_member_id = Maybe.new(c_node).content.strip.split("#").last.value
           if enrollee_ids.include? node_member_id
-            enrollee_premium = node.xpath("cv:benefit/cv:premium_amount", XML_NS).first.content
-            premium_total = premium_total + enrollee_premium.to_f
+            enrollee_premium = node.xpath("cv:benefit/cv:premium_amount", XML_NS).first.content.to_f
+            premium_total = premium_total + enrollee_premium
           end
         end
       end
@@ -67,6 +67,17 @@ module EnrollmentAction
       ## copy new total into totals value
       event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:premium_total_amount", XML_NS).each do |node|
         node.content = premium_total
+      end
+
+      ## check if there is an employer contribution
+      employer_contribution = 0
+      event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:shop_market", XML_NS).each do |node|
+        employer_contribution = node.xpath("cv:total_employer_responsible_amount", XML_NS).first.content.to_f
+      end
+
+      ## adjust the individual responsible total accordingly
+      event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |node|
+        node.content = premium_total - employer_contribution
       end
       event_xml_doc
     end

@@ -184,8 +184,8 @@ describe EnrollmentAction::ActionPublishHelper, "recalculating premium totals af
         <shop_market>
           <total_employer_responsible_amount>185.00</total_employer_responsible_amount>
         </shop_market>
-        <premium_total_amount>400</premium_total_amount>
-        <total_responsible_amount>86.16</total_responsible_amount>
+        <premium_total_amount>300.00</premium_total_amount>
+        <total_responsible_amount>125.00</total_responsible_amount>
       </enrollment>
     </policy>
   </enrollment>
@@ -200,9 +200,13 @@ describe EnrollmentAction::ActionPublishHelper, "recalculating premium totals af
   }
 
   let(:premium_total_xpath) { target_xml_doc.xpath("//cv:enrollment/cv:policy/cv:enrollment/cv:premium_total_amount", xml_namespace).first }
-
+  let(:total_responsible_amount_xpath) { target_xml_doc.xpath("//cv:enrollment/cv:policy/cv:enrollment/cv:total_responsible_amount", xml_namespace).first }
   it "recalculates the correct total excluding the dropped member" do
     expect(premium_total_xpath.content).to eq("200.0")
+  end
+
+  it "recalculates the correct total_responsible_amount" do
+    expect(total_responsible_amount_xpath.content).to eq("15.0")
   end
 
 end

@@ -71,8 +71,8 @@
   function validate_1095A_form() {
     var return_value = false;
 
-    if ($("#1095A_generation_form #responsible_person_ssn").val() == "" && $("#responsible_person_dob").val() == ""){
-        $("#1095A_generation_form_error").show();
+    if ($("#1095A_generation_form #responsible_person_ssn").val() == "" && $("#1095A_generation_form #responsible_person_dob").val() == ""){
+        $("#1095A_generation_form #1095A_generation_form_error").show();
         return_value = false;
     }else {
         $("#1095A_generation_form #1095A_generation_form_error").hide();

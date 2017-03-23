@@ -5,7 +5,6 @@ class Api::V2::PremiumCalculatorController < ApplicationController
 #  skip_before_filter :authenticate_me!
   protect_from_forgery :except => [:create]
 
-
   def calculate
 
     enrollment_xml = request.body.read

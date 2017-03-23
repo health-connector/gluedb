@@ -24,7 +24,7 @@ module Generators::Reports
 
       @notice_params = options
 
-      unless options.empty?
+      if options.empty?
         irs_path = "#{Rails.root.to_s}/irs/irs_EOY_#{Time.now.strftime('%m_%d_%Y_%H_%M')}"
         @irs_pdf_path = irs_path + "/irs1095a/"
 

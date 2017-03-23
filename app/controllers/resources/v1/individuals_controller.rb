@@ -1,7 +1,7 @@
 module Resources
   module V1
     class IndividualsController < ApplicationController
-      skip_before_filter :authenticate_me!
+#      skip_before_filter :authenticate_me!
 
       def show
         @person = Person.where("members.hbx_member_id" => params[:id]).first

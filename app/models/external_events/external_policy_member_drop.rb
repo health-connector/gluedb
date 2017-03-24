@@ -13,16 +13,61 @@ module ExternalEvents
       @policy_to_update = pol_to_change
     end
 
+    # Assign totals from another event.  This is used in the rare case where
+    # we want to update glue with the totals from one XML, but otherwise
+    # use the data from another. (Really only occurs in the dependent drop
+    # scenario)
+    def use_totals_from(other_policy_cv)
+      @pre_amt_tot_val = begin
+                             p_enrollment = Maybe.new(other_policy_cv).policy_enrollment.value
+                             return 0.00 if p_enrollment.blank?
+                             BigDecimal.new(Maybe.new(p_enrollment).premium_total_amount.strip.value)
+                         end
+      @tot_res_amt_val ||= begin
+                             p_enrollment = Maybe.new(other_policy_cv).policy_enrollment.value
+                             return 0.00 if p_enrollment.blank?
+                             BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
+                           end
+      @aptc_amt_val ||= begin
+                          p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+                          applied_aptc_val = Maybe.new(other_policy_cv).individual_market.applied_aptc_amount.strip.value
+                          applied_aptc_val.blank? ? nil : BigDecimal.new(applied_aptc_val)
+                        end
+      @tot_emp_res_amt_val ||= begin
+                                 tot_emp_res_amt = Maybe.new(other_policy_cv).shop_market.total_employer_responsible_amount.strip.value
+                                 tot_emp_res_amt.blank? ? nil : BigDecimal.new(tot_emp_res_amt)
+                               end
+    end
+
     def extract_pre_amt_tot
-      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
-      return 0.00 if p_enrollment.blank?
-      BigDecimal.new(Maybe.new(p_enrollment).premium_total_amount.strip.value)
+      @pre_amt_tot_val ||= begin
+                             p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+                             return 0.00 if p_enrollment.blank?
+                             BigDecimal.new(Maybe.new(p_enrollment).premium_total_amount.strip.value)
+                           end
     end
 
     def extract_tot_res_amt
-      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
-      return 0.00 if p_enrollment.blank?
-      BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
+      @tot_res_amt_val ||= begin
+                             p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+                             return 0.00 if p_enrollment.blank?
+                             BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
+                           end
+    end
+
+    def extract_aptc_amount
+      @aptc_amt_val ||= begin
+                          p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+                          applied_aptc_val = Maybe.new(p_enrollment).individual_market.applied_aptc_amount.strip.value
+                          applied_aptc_val.blank? ? nil : BigDecimal.new(applied_aptc_val)
+                        end
+    end
+
+    def extract_employer_contribution
+      @tot_emp_res_amt_val ||= begin
+                                 tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
+                                 tot_emp_res_amt.blank? ? nil : BigDecimal.new(tot_emp_res_amt)
+                               end
     end
 
     def extract_enrollee_premium(enrollee)
@@ -35,18 +80,18 @@ module ExternalEvents
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return({}) if p_enrollment.blank?
       if p_enrollment.shop_market
-        tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
+        tot_emp_res_amt = extract_employer_contribution
         employer = find_employer(@policy_node)
         return({ :employer => employer }) if tot_emp_res_amt.blank?
         {
           :employer => employer,
-          :tot_emp_res_amt => BigDecimal.new(tot_emp_res_amt)
+          :tot_emp_res_amt => tot_emp_res_amt
         }
       else
-        applied_aptc_val = Maybe.new(p_enrollment).individual_market.applied_aptc_amount.strip.value
-        return({}) if applied_aptc_val.blank?
+        aptc_val = extract_aptc_amount
+        return({}) if aptc_val.blank?
         {
-          :applied_aptc => BigDecimal.new(applied_aptc_val)
+          :applied_aptc => aptc_val
         }
       end
     end
@@ -110,9 +155,9 @@ module ExternalEvents
 
     def subscriber_id
       @subscriber_id ||= begin
-        sub_node = extract_subscriber(@policy_node)
-        extract_member_id(sub_node)
-      end
+                           sub_node = extract_subscriber(@policy_node)
+                           extract_member_id(sub_node)
+                         end
     end
 
     def persist

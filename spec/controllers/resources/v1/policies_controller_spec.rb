@@ -1,5 +1,6 @@
 require "rails_helper"
 
+=begin
 describe Resources::V1::PoliciesController do
   describe "show.xml" do
     let(:policy_id) { "policy_id" }
@@ -35,3 +36,4 @@ describe Resources::V1::PoliciesController do
     end
   end
 end
+=end

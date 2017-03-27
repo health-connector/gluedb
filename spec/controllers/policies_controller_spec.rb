@@ -56,7 +56,7 @@ describe PoliciesController, :dbclean => :after_each do
     context "success" do
       before do
         allow(controller).to receive(:delete_1095A_pdf).with(an_instance_of(String)).and_return(true)
-        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name"}
+        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name.pdf"}
       end
 
       it 'redirects to `person_path`' do
@@ -68,7 +68,7 @@ describe PoliciesController, :dbclean => :after_each do
     context "failure" do
       before do
         allow(controller).to receive(:delete_1095A_pdf).with(an_instance_of(String)).and_return(false)
-        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name"}
+        delete :delete_local_generated_tax_document, {id: policy.id, person_id: person.id, file_name: "file_name.pdf"}
       end
 
       it 'redirects to `person_path`' do
@@ -77,4 +77,52 @@ describe PoliciesController, :dbclean => :after_each do
       end
     end
   end
+
+  describe "POST upload_tax_document_to_S3" do
+
+    context "success" do
+      let(:file_name) {'file-name.pdf'}
+      let(:bucket_name) {'tax-documents'}
+
+      before do
+        allow(controller).to receive(:upload_to_s3).with(file_name, bucket_name).and_return(true)
+        allow(controller).to receive(:delete_1095A_pdf).with(file_name).and_return(true)
+        post :upload_tax_document_to_S3, {id: policy.id, person_id: person.id, file_name: file_name}
+      end
+
+      it 'redirects to `person_path`' do
+        expect(response).to redirect_to(person_path(person.id))
+        expect(flash[:notice]).to match(/1095A PDF queued for upload and storage./)
+      end
+    end
+
+
+    context "failure" do
+      let(:file_name) {'file-name.pdf'}
+      let(:bucket_name) {'tax-documents'}
+
+      before do
+        allow(controller).to receive(:upload_to_s3).with(file_name, bucket_name).and_return(false)
+        allow(controller).to receive(:delete_1095A_pdf).with(file_name).and_return(true)
+        post :upload_tax_document_to_S3, {id: policy.id, person_id: person.id, file_name: file_name}
+      end
+
+      it 'redirects to `person_path`' do
+        expect(response).to redirect_to(person_path(person.id))
+        expect(flash[:error]).to match(/Could not upload file. File upload failed./)
+      end
+
+      context "Invalid params: file_name param missing" do
+        before do
+          post :upload_tax_document_to_S3, {id: policy.id, person_id: person.id}
+        end
+
+        it 'fails and redirects to `generate_tax_document_form_policy_path`' do
+          expect(response).to redirect_to(generate_tax_document_form_policy_path(policy.id, {person_id: person.id}))
+          expect(flash[:error]).to match(/Could not upload document. Request missing essential parameter/)
+        end
+      end
+    end
+  end
+
 end

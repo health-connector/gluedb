@@ -82,7 +82,6 @@ class PoliciesController < ApplicationController
                       void_active_policy_ids: void_policy_ids(params[:void_active_policy_ids]),
                       void_cancelled_policy_ids: void_policy_ids(params[:void_cancelled_policy_ids]),
                       npt: params[:npt] == "1" ? true : false}
-
     if @policy.has_responsible_person?
       if params[:responsible_person_ssn].present?
         tax_doc_params[:responsible_party_ssn] = params[:responsible_person_ssn]
@@ -93,14 +92,13 @@ class PoliciesController < ApplicationController
       end
     end
 
-
     @file_name = generate_1095A_pdf(tax_doc_params)  #call doc generation service
 
     if params[:preview] != "1"
       begin
-        if upload_to_s3(params[:file_name], "bucket_name")
-          delete_1095A_pdf(params[:file_name])
-          redirect_to person_path(@person), :flash => { :notice=> "1095A pdf uploaded." }
+        if upload_to_s3(@file_name, "tax-documents")
+          delete_1095A_pdf(@file_name)
+          redirect_to person_path(@person), :flash => { :notice=> "1095A PDF queued for upload and storage." }
           return
         else
           raise("File upload failed")
@@ -120,20 +118,20 @@ class PoliciesController < ApplicationController
   end
 
   def upload_tax_document_to_S3
-    if params[:file_name].blank? || params[:id].blank? || params[:person_id].blank?
-      redirect_to generate_tax_document_form_policy_path(Policy.find(params[:id]), {person_id: Person.find(params[:person_id])}), :flash => { :error=> "Could not upload document. Request missing essential parameters. Please try again." }
+    if params[:file_name].blank?
+      redirect_to generate_tax_document_form_policy_path(Policy.find(params[:id]), {person_id: Person.find(params[:person_id])}), :flash => { :error=> "Could not upload document. Request missing essential parameter. Please try again." }
       return
     end
 
     person = Person.find(params[:person_id])
 
     begin
-      if upload_to_s3(params[:file_name], "bucket_name")
+      if upload_to_s3(params[:file_name], "tax-documents")
         delete_1095A_pdf(params[:file_name])
         redirect_to person_path(person), :flash => { :notice=> "1095A PDF queued for upload and storage." }
         return
       else
-        raise("File upload failed")
+        raise("File upload failed.")
       end
     rescue Exception => e
       redirect_to person_path(person), :flash => { :error=> "Could not upload file. #{e.message}" }
@@ -165,7 +163,6 @@ class PoliciesController < ApplicationController
     end
   end
 
-
   private
 
   def void_policy_ids(policy_ids_string)
@@ -174,7 +171,7 @@ class PoliciesController < ApplicationController
   end
 
   def upload_to_s3(file_name, bucket_name)
-      true
+    Aws::S3Storage.save(file_name, bucket_name)
   end
 
   def delete_1095A_pdf(file_name)

@@ -97,7 +97,7 @@ module CanonicalVocabulary
         if !person.name_sfx.blank?
           xml['con'].name_suffix(person.name_sfx.strip)
         end
-        if !person.home_phone.nil?
+        if !person.home_phone.nil? && person.home_phone.phone_number != "0"
           xml['con'].phone do |xml|
             xml['con'].phone_type("home")
             xml['con'].phone_number(person.home_phone.phone_number)

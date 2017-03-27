@@ -84,8 +84,8 @@ module Policies
         listener.no_enrollees
         fail = true
       end
-      bad_premiums = %w(0 0.00 0.0)
-      if bad_premiums.include?(request[:pre_amt_tot])
+      zero_premiums = %w(0 0.00 0.0)
+      if zero_premiums.include?(request[:pre_amt_tot])
         listener.zero_premium_total
         fail = true
       end

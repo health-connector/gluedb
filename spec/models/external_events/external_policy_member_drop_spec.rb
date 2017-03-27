@@ -78,7 +78,7 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
       expect(subject.extract_enrollee_premium(subscriber)).to eq(other_source_subscriber_premium_bigdecimal_value)
     end
 
-    it "falls when it can't locate the dependent premium amount" do
+    it "falls back to the source document when it can't locate the dependent premium amount" do
       expect(subject.extract_enrollee_premium(dependent)).to eq(dependent_premium_bigdecimal_value)
     end
 

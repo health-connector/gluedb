@@ -81,6 +81,10 @@ module Listeners
       add_policy_error(:employer, "has no contribution data: fein #{details[:employer_fein]}, date #{details[:coverage_start]}")
     end
 
+    def zero_premium_total
+      add_policy_error(:policy, "premium total is $0.00")
+    end
+
     def invalid_policy(details)
       details.each_pair do |k, v|
         add_policy_error(k, v)

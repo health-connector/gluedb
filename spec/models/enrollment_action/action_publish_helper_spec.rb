@@ -10,6 +10,24 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
   let(:source_event_xml) { <<-EVENTXML
   <enrollment xmlns="http://openhbx.org/api/terms/1.0">
   <policy>
+  <enrollees>
+    <enrollee>
+      <member>
+        <id><id>1</id></id>
+      </member>
+      <benefit>
+        <premium_amount>111.11</premium_amount>
+      </benefit>
+    </enrollee>
+    <enrollee>
+      <member>
+        <id><id>2</id></id>
+      </member>
+      <benefit>
+        <premium_amount>222.22</premium_amount>
+      </benefit>
+    </enrollee>
+  </enrollees>
   <enrollment>
   <individual_market>
     <applied_aptc_amount>#{source_ivl_assistance_amount}</applied_aptc_amount>
@@ -27,6 +45,24 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
   let(:target_event_xml) { <<-EVENTXML
   <enrollment xmlns="http://openhbx.org/api/terms/1.0">
   <policy>
+  <enrollees>
+    <enrollee>
+      <member>
+        <id><id>1</id></id>
+      </member>
+      <benefit>
+        <premium_amount>0.0</premium_amount>
+      </benefit>
+    </enrollee>
+    <enrollee>
+      <member>
+        <id><id>3</id></id>
+      </member>
+      <benefit>
+        <premium_amount>333.33</premium_amount>
+      </benefit>
+    </enrollee>
+  </enrollees>
   <enrollment>
   <individual_market>
     <applied_aptc_amount>0.00</applied_aptc_amount>
@@ -49,6 +85,14 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
     Nokogiri::XML(action_publish_helper.to_xml)
   }
 
+    let(:member_premium_xpath) {
+      "//cv:policy/cv:enrollees/cv:enrollee/cv:member/cv:id/cv:id[contains(., '1')]/../../../cv:benefit/cv:premium_amount"
+    }
+
+    let(:dependent_premium_xpath) {
+      "//cv:policy/cv:enrollees/cv:enrollee/cv:member/cv:id/cv:id[contains(., '3')]/../../../cv:benefit/cv:premium_amount"
+    }
+
     let(:premium_total_xpath) {
       "//cv:policy/cv:enrollment/cv:premium_total_amount"
     }
@@ -64,6 +108,8 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
       "//cv:policy/cv:enrollment/cv:individual_market/cv:applied_aptc_amount"
     }
 
+    let(:first_member_premium_xml_node) { transformed_target_xml.xpath(member_premium_xpath, xml_namespace).first }
+    let(:dependent_premium_xml_node) { transformed_target_xml.xpath(dependent_premium_xpath, xml_namespace).first }
     let(:target_xml_premium_total_node) { transformed_target_xml.xpath(premium_total_xpath, xml_namespace).first }
     let(:target_xml_tot_res_amount_node) { transformed_target_xml.xpath(tot_res_amount_xpath, xml_namespace).first }
     let(:target_xml_emp_res_node) { transformed_target_xml.xpath(employer_contribution_xpath, xml_namespace).first }
@@ -83,6 +129,14 @@ describe EnrollmentAction::ActionPublishHelper, "told to swap premium totals fro
 
     it "sets the ivl assistance amount correctly" do
       expect(target_xml_ivl_assistance_node.content).to eq(source_ivl_assistance_amount)
+    end
+
+    it "sets the replaced individual premium correctly" do
+      expect(first_member_premium_xml_node.content).to eq("111.11")
+    end
+
+    it "does not replace the other individual premium" do
+      expect(dependent_premium_xml_node.content).to eq("333.33")
     end
 end
 

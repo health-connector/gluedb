@@ -48,8 +48,21 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
                                               premium_total_amount: other_premium_total_string_value,
                                               total_responsible_amount: other_tot_res_amt_string_value
                                              ) }
-    let(:other_policy_cv) { instance_double(::Openhbx::Cv2::Policy, :policy_enrollment => other_policy_enrollment) }
+    let(:other_policy_cv) { instance_double(::Openhbx::Cv2::Policy, :policy_enrollment => other_policy_enrollment, :enrollees => other_enrollees) }
+    let(:other_enrollees) { [other_subscriber] }
+    let(:subscriber_member) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => "1") }
+    let(:other_subscriber_member) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => "1") }
+    let(:dependent_member) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => "2") }
+    let(:subscriber) { instance_double(::Openhbx::Cv2::Enrollee, :member => subscriber_member) }
+    let(:dependent) { instance_double(::Openhbx::Cv2::Enrollee, :member => dependent_member, :benefit => dependent_benefit) }
+    let(:other_subscriber) { instance_double(::Openhbx::Cv2::Enrollee, :member => other_subscriber_member, :benefit => other_subscriber_benefit) }
+    let(:other_subscriber_benefit) { instance_double(::Openhbx::Cv2::EnrolleeBenefit, :premium_amount => other_source_subscriber_premium_string_value) }
+    let(:dependent_benefit) { instance_double(::Openhbx::Cv2::EnrolleeBenefit, :premium_amount => dependent_premium_string_value) }
 
+    let(:other_source_subscriber_premium_string_value) { "123.37" }
+    let(:other_source_subscriber_premium_bigdecimal_value) { BigDecimal.new(other_source_subscriber_premium_string_value) }
+    let(:dependent_premium_string_value) { "23.37" }
+    let(:dependent_premium_bigdecimal_value) { BigDecimal.new(dependent_premium_string_value) }
     let(:other_premium_total_string_value) { "756.78" }
     let(:other_premium_total_bigdecimal_value) { BigDecimal.new(other_premium_total_string_value) }
     let(:other_aptc_string_value) { "223.45" }
@@ -59,6 +72,14 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
 
     before :each do
       subject.use_totals_from(other_policy_cv)
+    end
+
+    it "gets the member premium from the other policy_cv" do
+      expect(subject.extract_enrollee_premium(subscriber)).to eq(other_source_subscriber_premium_bigdecimal_value)
+    end
+
+    it "falls when it can't locate the dependent premium amount" do
+      expect(subject.extract_enrollee_premium(dependent)).to eq(dependent_premium_bigdecimal_value)
     end
 
     it "gets the aptc from the other policy_cv" do

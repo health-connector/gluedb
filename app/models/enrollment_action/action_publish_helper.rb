@@ -167,6 +167,29 @@ module EnrollmentAction
           node.content = other_node.content
         end
       end
+      event_xml_doc.xpath("//cv:policy/cv:enrollees/cv:enrollee", XML_NS).each do |event_enrollee|
+        member_id_node = event_enrollee.xpath("cv:member/cv:id/cv:id", XML_NS).first 
+        if member_id_node
+          member_id_value = member_id_node.content
+          premium_node = event_enrollee.xpath("cv:benefit/cv:premium_amount", XML_NS).first
+          if premium_node
+            matching_enrollee_node = other_event_doc.xpath("//cv:policy/cv:enrollees/cv:enrollee", XML_NS).detect do |other_event_enrollee|
+                other_member_id_node = other_event_enrollee.xpath("cv:member/cv:id/cv:id", XML_NS).first
+                if other_member_id_node
+                  (other_member_id_node.content == member_id_value)
+                else
+                  false
+                end
+            end
+            if matching_enrollee_node
+              matching_premium_node = matching_enrollee_node.xpath("cv:benefit/cv:premium_amount", XML_NS).first
+              if matching_premium_node
+                premium_node.content = matching_premium_node.content
+              end
+            end
+          end
+        end
+      end
       event_xml_doc
     end
 

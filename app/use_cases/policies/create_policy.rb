@@ -84,6 +84,11 @@ module Policies
         listener.no_enrollees
         fail = true
       end
+      bad_premiums = %w(0 0.00 0.0)
+      if bad_premiums.include?(request[:pre_amt_tot])
+        listener.zero_premium_total
+        fail = true
+      end
       return false if fail
       !fail
 #      @premium_validator.validate(request, listener)

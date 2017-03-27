@@ -118,7 +118,11 @@ module CanonicalVocabulary
       person = member.person
       serialize_contact(person, xml)
       xml['ins'].exchange_member_id(en.m_id)
-      xml['ins'].individual_relationship_code(en.rel_code.capitalize)
+      if en.rel_code == "Life Partner"
+        xml['ins'].individual_relationship_code(en.rel_code)
+      else
+        xml['ins'].individual_relationship_code(en.rel_code.capitalize)
+      end
       if !member.dob.blank?
         xml['ins'].DOB(member.dob.strftime("%Y%m%d"))
       end

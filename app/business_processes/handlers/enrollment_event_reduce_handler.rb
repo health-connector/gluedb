@@ -4,7 +4,8 @@ module Handlers
     # call :: [::ExternalEvents::EnrollmentEventNotification]-> [[::ExternalEvents::EnrollmentEventNotification]]
     # We split out and collate the events into buckets.  Then we call the step after us once for each bucket.
     def call(context)
-      reduced_list = perform_reduction(context)
+      no_dupe_events = discard_already_processed_events(context)
+      reduced_list = perform_reduction(no_dupe_events)
       reduced_list.map do |element|
 #        begin
           super(element)
@@ -15,6 +16,11 @@ module Handlers
     end
 
     protected
+
+    def discard_already_processed_events(enrollments)
+      filter = ::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent.new
+      filter.filter(enrollments)
+    end
 
     def perform_reduction(full_event_list)
       event_list = full_event_list.inject([]) do |acc, event|

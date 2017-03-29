@@ -1,12 +1,30 @@
 require "rails_helper"
 
+describe Handlers::EnrollmentEventReduceHandler, "given an event that has already been processed" do
+  let(:next_step) { double }
+  let(:filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent) }
+  let(:event) { instance_double(::ExternalEvents::EnrollmentEventNotification) }
+
+  subject { Handlers::EnrollmentEventReduceHandler.new(next_step) }
+
+  before :each do
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent).to receive(:new).and_return(filter)
+    allow(filter).to receive(:filter).with([event]).and_return([])
+  end
+
+  it "does not go on to the next step" do
+    expect(next_step).not_to receive(:call)
+    subject.call([event])
+  end
+end
+
 describe Handlers::EnrollmentEventReduceHandler, "given:
 - 3 notifications
 - 2 of which should reduce"  do
   
-  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a") }
-  let(:duplicate_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 2, :enrollment_action => "b") }
-  let(:duplicate_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 3, :enrollment_action => "c") }
+  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a", :drop_if_already_processed! => false) }
+  let(:duplicate_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 2, :enrollment_action => "b", :drop_if_already_processed! => false) }
+  let(:duplicate_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 3, :enrollment_action => "c", :drop_if_already_processed! => false) }
   let(:notifications) { [duplicate_notification_1, duplicate_notification_2, non_duplicate_notification] }
 
   let(:next_step) { double("The next step in the pipeline") }
@@ -35,9 +53,9 @@ describe Handlers::EnrollmentEventReduceHandler, "given:
 - 3 notifications
 - 2 of which should be bucketed together"  do
   
-  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a") }
-  let(:same_bucket_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 2, :enrollment_action => "b") }
-  let(:same_bucket_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 3, :enrollment_action => "c") }
+  let(:non_duplicate_notification) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 1, :drop_if_marked! => false, :bucket_id => 5, :hbx_enrollment_id => 1, :enrollment_action => "a", :drop_if_already_processed! => false) }
+  let(:same_bucket_notification_1) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 2, :enrollment_action => "b", :drop_if_already_processed! => false) }
+  let(:same_bucket_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 3, :enrollment_action => "c", :drop_if_already_processed! => false) }
   let(:notifications) { [same_bucket_notification_1, same_bucket_notification_2, non_duplicate_notification] }
 
   let(:next_step) { double("The next step in the pipeline") }

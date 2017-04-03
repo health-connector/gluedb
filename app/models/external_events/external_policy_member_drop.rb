@@ -140,11 +140,14 @@ module ExternalEvents
 
     def term_enrollee(policy, enrollee_node)
       member_id = extract_member_id(enrollee_node)
-      if @dropped_member_ids.include?(member_id)
-        enrollee = policy.enrollees.detect { |en| en.m_id == member_id }
-        enrollee.coverage_end = extract_enrollee_end(enrollee_node)
-        enrollee.coverage_status = "inactive"
-        enrollee.employment_status_code = "terminated"
+      enrollee = policy.enrollees.detect { |en| en.m_id == member_id }
+      if enrollee 
+        if @dropped_member_ids.include?(member_id)
+          enrollee.coverage_end = extract_enrollee_end(enrollee_node)
+          enrollee.coverage_status = "inactive"
+          enrollee.employment_status_code = "terminated"
+        end
+        enrollee.pre_amt = extract_enrollee_premium(enrollee_node)
         enrollee.save!
         policy.save!
       end
@@ -164,8 +167,7 @@ module ExternalEvents
         :tot_res_amt => extract_tot_res_amt
       }.merge(extract_other_financials))
       pol = Policy.find(pol._id)
-      other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
-      other_enrollees.each do |en|
+      @policy_node.enrollees.each do |en|
         term_enrollee(pol, en)
       end
       true

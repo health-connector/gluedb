@@ -23,7 +23,7 @@ describe RemoteResources::IndividualResource do
 
     describe "when the remote resource does not respond" do
       before :each do
-        allow(requestable).to receive(:request).with(request_properties, "", 15).and_raise(Timeout::Error)
+        allow(requestable).to receive(:request).with(request_properties, "", 30).and_raise(Timeout::Error)
       end
       it "should return a 503" do
         rcode, body = RemoteResources::IndividualResource.retrieve(requestable, individual_id)
@@ -39,7 +39,7 @@ describe RemoteResources::IndividualResource do
       }
 
       before :each do
-        allow(requestable).to receive(:request).with(request_properties, "", 15).and_return([nil, response_props, ""])
+        allow(requestable).to receive(:request).with(request_properties, "", 30).and_return([nil, response_props, ""])
       end
 
       it "should return a 404" do
@@ -63,7 +63,7 @@ describe RemoteResources::IndividualResource do
       }
 
       before :each do
-        allow(requestable).to receive(:request).with(request_properties, "", 15).and_return([nil, response_props, example_data]) 
+        allow(requestable).to receive(:request).with(request_properties, "", 30).and_return([nil, response_props, example_data]) 
       end
 
       it "should have a response code of 200" do

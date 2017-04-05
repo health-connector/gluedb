@@ -17,7 +17,12 @@ module Amqp
               $stderr.puts "=== Redelivery Attempts Exceeded ==="
               $stderr.puts properties.to_hash.inspect
               $stderr.puts payload
-              publish_processing_failed(delivery_info, properties, payload, e)
+              error = OpenStruct.new({
+                :message => "Retry attempts exceeded",
+                :inspected => "Retry attempts exceeded",
+                :backtrace => [self.class.name.to_s]
+              })
+              publish_processing_failed(delivery_info, properties, payload, error)
             else
               on_message(delivery_info, properties, payload)
             end

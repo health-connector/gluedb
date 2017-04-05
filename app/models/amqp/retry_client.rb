@@ -10,7 +10,22 @@ module Amqp
         start_running
         begin
           if passes_validation?(delivery_info, properties, payload)
-            on_message(delivery_info, properties, payload)
+            p_headers = properties.headers || {}
+            existing_retry_count = extract_retry_count(p_headers)
+            # Because of the way this works '10' actually equates to 5 retries
+            if existing_retry_count > 10
+              $stderr.puts "=== Redelivery Attempts Exceeded ==="
+              $stderr.puts properties.to_hash.inspect
+              $stderr.puts payload
+              error = OpenStruct.new({
+                :message => "Retry attempts exceeded",
+                :inspected => "Retry attempts exceeded",
+                :backtrace => [self.class.name.to_s]
+              })
+              publish_processing_failed(delivery_info, properties, payload, error)
+            else
+              on_message(delivery_info, properties, payload)
+            end
           else
             publish_argument_errors(delivery_info, properties, payload)
           end

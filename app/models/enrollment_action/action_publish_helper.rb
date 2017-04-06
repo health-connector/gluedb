@@ -5,6 +5,8 @@ module EnrollmentAction
 
     delegate :to_xml, :to => :event_xml_doc
 
+    include MoneyMath
+
     def initialize(xml_string)
       @event_xml_doc = Nokogiri::XML(xml_string)
     end
@@ -66,7 +68,7 @@ module EnrollmentAction
 
       ## copy new total into totals value
       event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:premium_total_amount", XML_NS).each do |node|
-        node.content = premium_total
+        node.content = as_dollars(premium_total)
       end
 
       ## SHOP: check if there is an employer contribution... do nothing if not SHOP
@@ -76,7 +78,7 @@ module EnrollmentAction
         employer_contribution = employer_contribution_path.content.to_f
         if (employer_contribution > premium_total)
           employer_contribution = premium_total
-          employer_contribution_path.content = employer_contribution
+          employer_contribution_path.content = as_dollars(employer_contribution)
         end
       end
 
@@ -87,13 +89,13 @@ module EnrollmentAction
         assistance_contribution = assistance_contribution_path.content.to_f
         if (assistance_contribution > premium_total)
           assistance_contribution = premium_total
-          assistance_contribution_path.content = assistance_contribution
+          assistance_contribution_path.content = as_dollars(assistance_contribution)
         end
       end
 
       ## adjust the individual responsible total accordingly
       event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:total_responsible_amount", XML_NS).each do |node|
-        node.content = premium_total - employer_contribution - assistance_contribution
+        node.content = as_dollars(premium_total - employer_contribution - assistance_contribution)
       end
       event_xml_doc
     end

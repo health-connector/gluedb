@@ -46,11 +46,30 @@ Employer.each do |employer|
       #check whether the person has non_terminated policy in current plan year
       #check whether the person has non_active policy in the next plan year
       #out put the person
-      non_terminated_current_health_policy=
-      active_renew_health_policy=
 
-      non_terminated_current_dental_policy=
-      active_renew_dental_policy=
+      current_plan_year_effective_dates = (current_plan_year.start_date..current_plan_year.end_date)
+      renewal_plan_year_effective_dates = (renewal_plan_year.start_date..renewal_plan_year.end_date)
+      non_terminated_current_health_policy= person.policies.to_a.select{|pol| current_plan_year_effective_dates.include?(pol.policy_start) && 
+                                                                         pol.employer_id == employer._id &&
+                                                                         pol.coverage_type == 'health' &&
+                                                                         !pol.canceled? &&
+                                                                         !pol.terminated? 
+                                                                         }.sort_by{|pol| pol.policy_start}.last
+      active_renew_health_policy= person.policies.select{|pol| renewal_plan_year_effective_dates.include?(pol.policy_start) && 
+                                                               pol.employer_id == employer._id &&
+                                                               pol.coverage_type == 'health' && 
+                                                               !pol.canceled? 
+                                                                }.sort_by{|pol| pol.policy_start}.last
+
+      non_terminated_current_dental_policy= person.policies.select{|pol| current_plan_year_effective_dates.include?(pol.policy_start) && 
+                                                                         pol.employer_id == employer._id &&
+                                                                         pol.coverage_type == 'dental' &&
+                                                                         !pol.canceled? && 
+                                                                         !pol.terminated?}.sort_by{|pol| pol.policy_start}.last
+      active_renew_dental_policy= person.policies.select{|pol| renewal_plan_year_effective_dates.include?(pol.policy_start) && 
+                                                               pol.employer_id == employer._id &&
+                                                               pol.coverage_type == 'dental' &&
+                                                               !pol.canceled?}.sort_by{|pol| pol.policy_start}.last
 
       if non_terminated_current_dental_policy && active_renew_dental_policy.nil? &&non_terminated_current_health_policy && active_renew_health_policy.nil?
         csv << [

@@ -1,6 +1,9 @@
 module EnrollmentAction
   class CarrierSwitchRenewal < Base
     extend RenewalComparisonHelper
+
+    attr_accessor :terminated_policy_information
+
     def self.qualifies?(chunk)
       return false if chunk.length > 1
       return false if chunk.first.is_termination?
@@ -8,8 +11,16 @@ module EnrollmentAction
       renewal_candidates = other_carrier_renewal_candidates(chunk.first)
       !renewal_candidates.empty?
     end
-=begin
+
     def persist
+      termination_candidates = self.class.other_carrier_renewal_candidates(action)
+      @terminated_policy_information = termination_candidates.map do |t_pol|
+        [t_pol, t_pol.active_member_ids]
+      end
+      termination_results = termination_candidates.map do |rc|
+        rc.terminate_as_of(action.subscriber_start - 1.day)
+      end
+      return false unless termination_results.all?
       other_carrier_renewal_candidates = self.class.other_carrier_renewal_candidates(action)
       members = action.policy_cv.enrollees.map(&:member)
       members_persisted = members.map do |mem|
@@ -20,21 +31,24 @@ module EnrollmentAction
         return false
       end
       ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan)
-      return false unless ep.persist
-      termination_results = other_carrier_renewal_candidates.map do |rc|
-        rc.terminate_as_of(action.subscriber_start - 1.day)
-      end 
-      termination_results.all?
+      ep.persist
     end
 
     def publish
-      # TODO: Publish current carrier term
-      amqp_connection = termination.event_responder.connection
-      action_helper = EnrollmentAction::ActionPublishHandler.new(action.event_xml)
+      amqp_connection = action.event_responder.connection
+      @terminated_policy_information.each do |tpi|
+        pol, a_member_ids = tpi
+        writer = ::EnrollmentAction::EnrollmentTerminationEventWriter.new(pol, a_member_ids)
+        term_event_xml = writer.write("transaction_id_placeholder", "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
+        employer = pol.employer 
+        employer_hbx_id = employer.blank? ? nil : employer.hbx_id
+        term_action_helper = EnrollmentAction::ActionPublishHelper.new(term_event_xml)
+        publish_edi(amqp_connection, term_action_helper.to_xml, pol.eg_id, employer_hbx_id)
+      end
+      action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#initial")
       action_helper.keep_member_ends([])
       publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
-=end
   end
 end

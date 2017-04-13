@@ -70,6 +70,7 @@ module Listeners
     end
 
     def self.create_queues(chan)
+      ec = ExchangeInformation
       event_topic_exchange_name = "#{ec.hbx_id}.#{ec.environment}.e.topic.events"
       event_ex = chan.topic(event_topic_exchange_name, { :durable => true })
       q = chan.queue(

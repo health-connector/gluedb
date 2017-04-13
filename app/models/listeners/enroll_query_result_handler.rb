@@ -70,6 +70,8 @@ module Listeners
     end
 
     def self.create_queues(chan)
+      event_topic_exchange_name = "#{ec.hbx_id}.#{ec.environment}.e.topic.events"
+      event_ex = chan.topic(event_topic_exchange_name, { :durable => true })
       q = chan.queue(
         self.queue_name,
         {
@@ -79,6 +81,8 @@ module Listeners
           }
         }
       )
+      q.bind(event_ex, {:routing_key => "info.events.hbx_enrollment.coverage_selected"})
+      q.bind(event_ex, {:routing_key => "info.events.hbx_enrollment.terminated"})
       retry_q = chan.queue(
         (self.queue_name + "-retry"),
         {

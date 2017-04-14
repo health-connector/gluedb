@@ -22,7 +22,7 @@ def renewal_plan_year(employer)
   employer.plan_years.where(:start_date => current_date).first
 end
 
-def current_plan_year_policy(current_plan_year_effective_dates,policy_type)
+def current_plan_year_policy(person,current_plan_year_effective_dates,policy_type)
        person.policies.to_a.select{|pol| current_plan_year_effective_dates.include?(pol.policy_start) &&
        pol.employer_id == employer._id &&
        pol.coverage_type == policy_type &&
@@ -31,7 +31,7 @@ def current_plan_year_policy(current_plan_year_effective_dates,policy_type)
       }.sort_by{|pol| pol.policy_start}.last
 end
 
-def active_renew_policy(renewal_plan_year_effective_dates,policy_type)
+def active_renew_policy(person,renewal_plan_year_effective_dates,policy_type)
   person.policies.select{|pol| renewal_plan_year_effective_dates.include?(pol.policy_start) &&
       pol.employer_id == employer._id &&
       pol.coverage_type == policy_type &&
@@ -53,11 +53,11 @@ Employer.each do |employer|
     people.each do |person|
       current_plan_year_effective_dates = (current_plan_year.start_date..current_plan_year.end_date)
       renewal_plan_year_effective_dates = (renewal_plan_year.start_date..renewal_plan_year.end_date)
-      non_terminated_current_health_policy= current_plan_year_policy(current_plan_year_effective_dates,'health')
-      active_renew_health_policy= active_renew_policy(renewal_plan_year_effective_dates,'health')
-      non_terminated_current_dental_policy= current_plan_year_policy(current_plan_year_effective_dates,'dental')
-      active_renew_dental_policy= active_renew_policy(renewal_plan_year_effective_dates,'dental')
-      if non_terminated_current_health_policy && active_renew_health_policy.empty?
+      non_terminated_current_health_policy= current_plan_year_policy(person,current_plan_year_effective_dates,'health')
+      active_renew_health_policy= active_renew_policy(person,renewal_plan_year_effective_dates,'health')
+      non_terminated_current_dental_policy= current_plan_year_policy(person,current_plan_year_effective_dates,'dental')
+      active_renew_dental_policy= active_renew_policy(person,renewal_plan_year_effective_dates,'dental')
+      if non_terminated_current_health_policy && active_renew_health_policy.blank?
         csv << [person.full_name,
                 non_terminated_current_health_policy.eg_id,
                 non_terminated_current_health_policy.policy_start,
@@ -68,7 +68,7 @@ Employer.each do |employer|
                 employer.plan_year.end_on
                 ]
       end
-      if non_terminated_current_dental_policy && active_renew_dental_policy.empty?
+      if non_terminated_current_dental_policy && active_renew_dental_policy.blank?
         csv << [person.full_name,
                 non_terminated_current_dental_policy.eg_id,
                 non_terminated_current_dental_policy.policy_start,

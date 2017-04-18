@@ -10,9 +10,8 @@ field_names= %w(
                 Employer_next_plan_year_end
                )
 
-CSV.open('report_of_ees_not_renewing.csv', 'w') do |csv|
-  csv << field_names
-end
+@csv=CSV.open('report_of_ees_not_renewing.csv', 'w')
+@csv << field_names
 
 def current_plan_year(employer)
   current_date = Date.today
@@ -55,12 +54,11 @@ Employer.each do |employer|
     people.each do |person|
       current_plan_year_effective_dates = (current_plan_year.start_date..current_plan_year.end_date)
       renewal_plan_year_effective_dates = (renewal_plan_year.start_date..renewal_plan_year.end_date)
-      non_terminated_current_health_policy= current_plan_year_policy(person, current_plan_year_effective_dates, 'health')
+      non_terminated_current_health_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'health')
       active_renew_health_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'health')
-      non_terminated_current_dental_policy= current_plan_year_policy(person, current_plan_year_effective_dates, 'dental')
+      non_terminated_current_dental_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'dental')
       active_renew_dental_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'dental')
       if non_terminated_current_health_policy && active_renew_health_policy.blank?
-        @csv = CSV.open('report_of_ees_not_renewing.csv','w')
         @csv << [person.full_name,
                 non_terminated_current_health_policy.eg_id,
                 non_terminated_current_health_policy.policy_start,
@@ -72,7 +70,6 @@ Employer.each do |employer|
         ]
       end
       if non_terminated_current_dental_policy && active_renew_dental_policy.blank?
-        @csv = CSV.open('report_of_ees_not_renewing.csv','w')
         @csv << [person.full_name,
                 non_terminated_current_dental_policy.eg_id,
                 non_terminated_current_dental_policy.policy_start,

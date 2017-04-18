@@ -60,7 +60,8 @@ Employer.each do |employer|
       non_terminated_current_dental_policy= current_plan_year_policy(person, current_plan_year_effective_dates, 'dental')
       active_renew_dental_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'dental')
       if non_terminated_current_health_policy && active_renew_health_policy.blank?
-        csv << [person.full_name,
+        @csv = CSV.open('report_of_ees_not_renewing.csv','w')
+        @csv << [person.full_name,
                 non_terminated_current_health_policy.eg_id,
                 non_terminated_current_health_policy.policy_start,
                 non_terminated_current_health_policy.policy_end,
@@ -71,7 +72,8 @@ Employer.each do |employer|
         ]
       end
       if non_terminated_current_dental_policy && active_renew_dental_policy.blank?
-        csv << [person.full_name,
+        @csv = CSV.open('report_of_ees_not_renewing.csv','w')
+        @csv << [person.full_name,
                 non_terminated_current_dental_policy.eg_id,
                 non_terminated_current_dental_policy.policy_start,
                 non_terminated_current_dental_policy.policy_end,

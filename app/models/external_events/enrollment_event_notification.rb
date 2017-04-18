@@ -44,6 +44,14 @@ module ExternalEvents
       end
     end
 
+    def drop_if_term_with_no_end!
+      return false unless is_termination?
+      return false unless subscriber_end.blank?
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_no_end_date_termination!(self)
+      end
+    end
+
     def drop_if_already_processed!
       found_event = ::EnrollmentAction::EnrollmentActionIssue.where(
         :hbx_enrollment_id => hbx_enrollment_id,

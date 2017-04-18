@@ -48,6 +48,24 @@ module Publishers
       event_responder.ack_message(message_tag)
     end
 
+    def drop_no_end_date_termination!(event_notification)
+      event_responder.broadcast_response(
+        "error",
+        "termination_without_end_date",
+        "422",
+        event_xml,
+        headers
+      )
+      store_error_model(
+        event_notification,
+        "termination_without_end_date",
+        headers.merge({
+          "return_status" => "422"
+        })
+      )
+      event_responder.ack_message(message_tag)
+    end
+
     def drop_payload_duplicate!(event_notification)
       event_responder.broadcast_ok_response(
         "duplicate_event_payload",

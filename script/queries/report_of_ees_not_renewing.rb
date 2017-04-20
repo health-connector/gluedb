@@ -15,7 +15,7 @@ field_names= %w(
 
 def current_plan_year(employer)
   current_date = Date.today
-  employer.plan_years.where(:start_date => {"$lte" => current_date}, :end_date => {"$gte" => current_date})
+  employer.plan_years.where(:start_date => {"$lte" => current_date}, :end_date => {"$gte" => current_date}).first
 end
 
 def renewal_plan_year(employer)

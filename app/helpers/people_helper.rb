@@ -58,7 +58,7 @@ module PeopleHelper
   def relationship_code_to_human(str)
     if str == "self"
       "Subscriber"
-    elsif str == "life_partner"
+    elsif str == "life partner"
       "Life Partner"
     else
       str.capitalize

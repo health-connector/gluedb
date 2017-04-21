@@ -82,6 +82,7 @@ module EnrollmentAction
     def shop_renewal_candidate?(pol, plan, employer, subscriber_id, subscriber_start, same_carrier)
       return false if pol.employer_id.blank?
       return false if pol.canceled?
+      return false if pol.terminated?
       return false if pol.subscriber.blank?
       return false if (pol.subscriber.m_id != subscriber_id)
       return false unless (plan.coverage_type == pol.plan.coverage_type)

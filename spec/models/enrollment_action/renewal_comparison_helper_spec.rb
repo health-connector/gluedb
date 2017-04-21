@@ -244,11 +244,13 @@ describe EnrollmentAction::RenewalComparisonHelper do
     let(:new_plan) { instance_double(Plan, :year => 2017, :carrier_id => 1, :coverage_type => :some_type) }
     let(:same_carrier) { true }
     let(:canceled?) { false }
+    let(:terminated?) { false }
     let(:subscriber_id) { 1 }
     let(:subscriber_start) { DateTime.new(2017,1,1) }
     let(:old_coverage_period) { double(:end => subscriber_start - 1.day) }
 
     let(:policy) { instance_double(Policy,
+                    :terminated? => terminated?,
                     :canceled? => canceled?,
                     :subscriber => subscriber,
                     :employer_id => policy_employer_id,
@@ -269,6 +271,13 @@ describe EnrollmentAction::RenewalComparisonHelper do
 
     context "the policy is cancelled" do
       let(:canceled?) { true }
+      it "returns false" do
+        expect(subject.shop_renewal_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, same_carrier)).to be_falsey
+      end
+    end
+
+    context "the policy is terminated" do
+      let(:terminated?) { true }
       it "returns false" do
         expect(subject.shop_renewal_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, same_carrier)).to be_falsey
       end

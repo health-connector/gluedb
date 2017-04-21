@@ -118,8 +118,8 @@ module CanonicalVocabulary
       person = member.person
       serialize_contact(person, xml)
       xml['ins'].exchange_member_id(en.m_id)
-      if en.rel_code == "Life Partner"
-        xml['ins'].individual_relationship_code(en.rel_code)
+      if en.rel_code == "life_partner"
+        xml['ins'].individual_relationship_code("Life Partner")
       else
         xml['ins'].individual_relationship_code(en.rel_code.capitalize)
       end

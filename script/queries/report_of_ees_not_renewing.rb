@@ -32,17 +32,13 @@ def current_plan_year_policy(person, current_plan_year_effective_dates, policy_t
   }.sort_by { |pol| pol.policy_start }.last
 end
 
-def active_renew_policy(person, renewal_plan_year_effective_dates, policy_type,employer)
+def active_renew_policy(person, renewal_plan_year_effective_dates, policy_type, employer)
   person.policies.select { |pol| renewal_plan_year_effective_dates.include?(pol.policy_start) &&
       pol.employer_id == employer._id &&
       pol.coverage_type == policy_type &&
       !pol.canceled?
   }.sort_by { |pol| pol.policy_start }.last
 end
-
-current_plan_year_size = 0
-
-missing_current_plan_year = 0
 
 Employer.each do |employer|
   current_plan_year = current_plan_year(employer)
@@ -61,10 +57,10 @@ Employer.each do |employer|
     people.each do |person|
       current_plan_year_effective_dates = (current_plan_year.start_date..current_plan_year.end_date)
       renewal_plan_year_effective_dates = (renewal_plan_year.start_date..renewal_plan_year.end_date)
-      non_terminated_current_health_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'health',employer)
-      active_renew_health_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'health',employer)
-      non_terminated_current_dental_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'dental',employer)
-      active_renew_dental_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'dental',employer)
+      non_terminated_current_health_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'health', employer)
+      active_renew_health_policy = active_renew_policy(person, renewal_plan_year_effective_dates, 'health', employer)
+      non_terminated_current_dental_policy = current_plan_year_policy(person, current_plan_year_effective_dates, 'dental', employer)
+      active_renew_dental_policy= active_renew_policy(person, renewal_plan_year_effective_dates, 'dental', employer)
       if non_terminated_current_health_policy && active_renew_health_policy.blank?
         @csv << [person.full_name,
                 non_terminated_current_health_policy.eg_id,

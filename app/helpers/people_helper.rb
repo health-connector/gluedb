@@ -56,13 +56,7 @@ module PeopleHelper
 
   # Formats a relationship code into display string
   def relationship_code_to_human(str)
-    if str == "self"
-      "Subscriber"
-    elsif str == "life partner"
-      "Life Partner"
-    else
-      str.capitalize
-    end
+    (str == "self" ? "Subscriber" : str.titleize) unless str.nil? || str.empty?
   end
 
   def trans_aasm_state(trans)

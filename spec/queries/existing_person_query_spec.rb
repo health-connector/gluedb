@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Queries::ExistingPersonQuery do
+describe Queries::ExistingPersonQuery, :dbclean => :after_each do
   let(:existing_person) { Person.new(name_first: 'John', name_last: 'Doe') }
   let(:existing_member) { Member.new(ssn: '111111111', gender: 'male', dob: DateTime.new(2001,2,3) ) }
   let(:new_member) { existing_member.clone }

@@ -46,7 +46,7 @@ describe ::RemoteResources::EnrollmentEventResource, "with an enrollment event c
         expect(xml_document_value).to eq "true"
       end
 
-      it "has is_trading_partner_publishable as false in the event_body" do
+      it "has is_trading_partner_publishable as true in the event_body" do
         xml_doc = Nokogiri::XML(subject.body)
         xml_document_value = xml_doc.xpath("//cv:enrollment_event_body/cv:is_trading_partner_publishable", XML_NS).first.content
         expect(xml_document_value).to eq "true"

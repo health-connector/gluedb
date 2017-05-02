@@ -16,7 +16,18 @@ module RemoteResources
         node.content = action_uri
       end
       raise "Could not find enrollment action to correct it" unless found_action
-      event_doc.to_xml(:indent => 2)
+      @body = event_doc.to_xml(:indent => 2)
+    end
+
+    def set_trading_partner_publishable(publishable_value)
+      event_doc = Nokogiri::XML(@body)
+      found_publishable_tag = false
+      event_doc.xpath("//cv:enrollment_event_body/cv:is_trading_partner_publishable", XML_NS).each do |node|
+        found_publishable_tag = true
+        node.content = publishable_value
+      end
+      raise "Could not find publishible setting to change it" unless found_publishable_tag
+      @body = event_doc.to_xml(:indent => 2)
     end
 
     def to_s

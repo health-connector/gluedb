@@ -33,7 +33,8 @@ module EnrollmentAction
         ::EnrollmentAction::RenewalDependentAdd,
         ::EnrollmentAction::RenewalDependentDrop,
         ::EnrollmentAction::InitialEnrollment,
-        ::EnrollmentAction::Termination
+        ::EnrollmentAction::Termination,
+        ::EnrollmentAction::ReselectionOfExistingCoverage
       ].detect { |kls| kls.qualifies?(chunk) }
       
       if selected_action

@@ -100,11 +100,16 @@ describe EnrollmentAction::ReselectionOfExistingCoverage, "given a qualified enr
 
   before :each do
     allow(policy).to receive(:save).and_return(true)
+    allow(existing_hbx_enrollment_ids).to receive(:<<).with(3)
   end
 
   it "adds the new hbx_enrollment_id to the existing policy" do
     expect(existing_hbx_enrollment_ids).to receive(:<<).with(3)
     subject.persist
+  end
+
+  it "persists successfully" do
+    expect(subject.persist).to be_truthy
   end
 end
 
@@ -124,7 +129,11 @@ describe EnrollmentAction::ReselectionOfExistingCoverage, "given a qualified enr
     EnrollmentAction::ReselectionOfExistingCoverage.new(termination_event, new_purchase_event)
   end
 
-  it "is a no-op" do
-    subject.publish
+  it "has no errors" do
+    expect(subject.publish.last).to eq({})
+  end
+
+  it "always completes successfully" do
+    expect(subject.publish.first).to be_truthy
   end
 end

@@ -15,6 +15,7 @@ module EnrollmentAction
     end
 
     def publish
+      [true, {}]
     end
   end
 end

@@ -1,5 +1,23 @@
+#Usage
+#rails r script/migrations/family_from_policy_subscriber_script.rb BEGIN-DATE END-DATE
+#BEGIN-DATE, END-DATE  format = MMDDYYYY
+#E.g. rails r script/migrations/family_from_policy_subscriber_script.rb 01012017 01122017
+
 require File.join(Rails.root, "script", "migrations", "family_from_policy_subscriber")
 require File.join(Rails.root, "app", "models", "queries", "policies_with_no_families")
+
+begin
+  @begin_date = Date.strptime(ARGV[0], "%m%d%Y")
+  @end_date = Date.strptime(ARGV[1], "%m%d%Y")
+  puts "begin_date #{@begin_date} end_date #{@end_date}"
+rescue Exception => e
+  puts "Error #{e.message}"
+  puts "Usage:"
+  puts "rails r script/migrations/family_from_policy_subscriber_script.rb BEGIN-DATE END-DATE"
+  puts "rails r script/migrations/family_from_policy_subscriber_script.rb 01012017 01122017"
+  exit
+end
+
 
 def add_hbx_enrollment(family, policy)
 
@@ -43,7 +61,7 @@ policies_with_no_families = all_policies_with_no_families.select do |policy_id|
   policy = Policy.find(policy_id)
   next if policy.subscriber.nil?
   next if policy.plan.nil?
-  policy.subscriber.coverage_start > Date.new(2016, 12, 31) && policy.subscriber.coverage_start < Date.new(2017, 12, 31)
+  policy.subscriber.coverage_start >= @begin_date && policy.subscriber.coverage_start <= @end_date
 end
 
 puts "In given daterange: policies_with_no_families: #{policies_with_no_families.length}"

@@ -4,7 +4,7 @@ class Enrollee
 
   BENEFIT_STATUS_CODE_LIST      = ["active", "cobra", "surviving insured", "tefra"]
   EMPLOYMENT_STATUS_CODE_LIST   = ["active", "full-time", "part-time", "retired", "terminated"]
-  RELATIONSHIP_STATUS_CODE_LIST = ["self", "spouse", "child", "ward"]
+  RELATIONSHIP_STATUS_CODE_LIST = ["self", "spouse", "child", "ward", "life partner"]
 
   include MergingModel
 

@@ -13,6 +13,7 @@ class Ability
       cannot :modify, User
     elsif user.role == "user"
       can :read, :all
+      can :manage, Carrier
       can :premium_calc, :all
     elsif user.role == "service"
       can :read, Person

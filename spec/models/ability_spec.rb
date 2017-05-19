@@ -24,6 +24,7 @@ describe "User" do
 
       it{ should be_able_to(:read, :all) }
       it{ should be_able_to(:premium_calc, :all)}
+      it{ should be_able_to(:manage, Carrier)}
       it{ should should_not be_able_to(:manage, :all)}
     end
 

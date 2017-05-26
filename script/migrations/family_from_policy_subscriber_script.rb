@@ -1,7 +1,31 @@
+#Usage
+#rails r script/migrations/family_from_policy_subscriber_script.rb BEGIN-DATE END-DATE
+#BEGIN-DATE, END-DATE  format = MMDDYYYY
+#E.g. rails r script/migrations/family_from_policy_subscriber_script.rb 01012017 01122017
+
 require File.join(Rails.root, "script", "migrations", "family_from_policy_subscriber")
 require File.join(Rails.root, "app", "models", "queries", "policies_with_no_families")
 
-$logger = Logger.new("#{Rails.root}/log/family_for_orphan_policies_#{Time.now.to_s.gsub(' ', '')}.log")
+log_path = "#{Rails.root}/log/family_from_policy_subscriber_script.log"
+@logger = Logger.new(log_path)
+
+puts "Logs written to #{log_path}"
+
+begin
+  @begin_date = Date.strptime(ARGV[0], "%m%d%Y")
+  @end_date = Date.strptime(ARGV[1], "%m%d%Y")
+  puts "begin_date #{@begin_date} end_date #{@end_date}"
+rescue Exception => e
+  puts "Error #{e.message}"
+  puts "Usage:"
+  puts "rails r script/migrations/family_from_policy_subscriber_script.rb BEGIN-DATE END-DATE"
+  puts "rails r script/migrations/family_from_policy_subscriber_script.rb 01012017 01122017"
+  exit
+end
+
+@logger.info "#{Time.now} script/migrations/family_from_policy_subscriber_script.rb"
+@logger.info "Begin_date #{@begin_date} end_date #{@end_date}"
+
 
 def add_hbx_enrollment(family, policy)
 
@@ -32,34 +56,37 @@ def add_hbx_enrollment(family, policy)
   end
 end
 
+@logger.info "Starting to attach non primary-applicant's policies to families"
+@logger.info "Total Families at start: #{Family.count}"
+@logger.info "Total policies count: #{Policy.count}"
+@logger.info "Persons count: #{Person.count}"
 
-$logger.info "Starting to attach non primary-applicants' policies to families"
-$logger.info "Family_count_start: #{Family.count}"
-$logger.info "Total policies count: #{Policy.count}"
-$logger.info "Persons count: #{Person.count}"
+all_policies_with_no_families = Queries::PoliciesWithNoFamilies.new.execute
 
-policies_with_no_families = Queries::PoliciesWithNoFamilies.new.execute
+@logger.info "Total policies_with_no_families: #{all_policies_with_no_families.length}"
 
-$logger.info "policies_with_no_families: #{policies_with_no_families.length}"
-
-policies_2014_with_no_families = policies_with_no_families.select do |policy|
+policies_with_no_families = all_policies_with_no_families.select do |policy_id|
+  policy = Policy.find(policy_id)
   next if policy.subscriber.nil?
-  policy.subscriber.coverage_start > Date.new(2014, 12, 31) && policy.subscriber.coverage_start < Date.new(2016, 12, 31)
+  next if policy.plan.nil?
+  policy.subscriber.coverage_start >= @begin_date && policy.subscriber.coverage_start <= @end_date
 end
 
-$logger.info "policies_2014_with_no_families: #{policies_2014_with_no_families.length}"
+@logger.info "In given daterange: policies_with_no_families: #{policies_with_no_families.length}"
 
-policy_groups = policies_2014_with_no_families.group_by do |policy|
+
+policy_groups = policies_with_no_families.group_by do |policy_id|
+  policy = Policy.find(policy_id)
   next if policy.subscriber.person.nil?
   policy.subscriber.person.id
 end
 
 people_with_multiple_families = []
-$logger.info "policy_groups: #{policy_groups.length}"
+@logger.info "policy_groups: #{policy_groups.length}"
 
 
-policy_groups.each do |person_id, policies|
-  policies.uniq!
+policy_groups.each do |person_id, policy_ids|
+  policy_ids.uniq!
   begin
     person = Person.find(person_id)
     families = Family.where({:family_members => {"$elemMatch" => {:person_id => Moped::BSON::ObjectId(person_id)}}})
@@ -67,43 +94,45 @@ policy_groups.each do |person_id, policies|
 
     if families.length > 1
       people_with_multiple_families << person_id
-      raise("Person belongs to multiple families. Person id #{person.id} Family e_case_ids: #{families.map(&:e_case_id)}")
+      raise("Person belongs to multiple families. Person.authority_member_id #{person.authority_member_id} Family e_case_ids: #{families.map(&:e_case_id)}")
     end
 
     family = families.first
-    policies.each do |policy|
+    policy_ids.each do |policy_id|
+      policy = Policy.find(policy_id)
       add_hbx_enrollment(family, policy)
       family.save!
       policy_groups[person_id].delete(policy) #delete the policy as it is processed
-      $logger.info "Saved family : #{family.e_case_id}"
+      #@logger.info "Saved family : #{family.e_case_id}"
     end
 
     policy_groups.delete(person_id) #delete the subscriber as we have processed him/her
-  rescue Exception=>e
-    $logger.info "ERROR: #{e.message}"
+  rescue Exception => e
+    @logger.info "ERROR: #{e.message}"
   end
 end
 
-$logger.info "people_with_multiple_families #{people_with_multiple_families.inspect}"
-$logger.info "family_count after attaching non primary applicant policies: #{Family.count}"
-$logger.info "people_with_multiple_families: #{people_with_multiple_families.length}"
+@logger.info "people_with_multiple_families #{people_with_multiple_families.inspect}"
+@logger.info "family_count after attaching non primary applicant policies: #{Family.count}"
+@logger.info "people_with_multiple_families: #{people_with_multiple_families.length}"
 
 
-$logger.info "Starting to create families for policies without families"
+@logger.info "Starting to create families for policies without families"
 
 
-policy_groups.each do |person_id, policies|
+policy_groups.each do |person_id, policy_ids|
   next if people_with_multiple_families.include?(person_id)
   begin
-  person = Person.find(person_id)
-  family_from_policy_subscriber = FamilyFromPolicySubscriber.new(person, policies)
-  family_from_policy_subscriber.create
-  family_from_policy_subscriber.save
-  rescue Exception=>e
-    $logger.info "ERROR: #{e.message}"
+    person = Person.find(person_id)
+    policies = Policy.find(policy_ids).to_a
+    family_from_policy_subscriber = FamilyFromPolicySubscriber.new(person, policies)
+    family_from_policy_subscriber.create
+    family_from_policy_subscriber.save
+  rescue Exception => e
+    @logger.info "ERROR: #{e.message} " + e.backtrace.join(' ')
   end
 end
 
-$logger.info "Family_count_start: #{Family.count}"
-$logger.info "Total policies count: #{Policy.count}"
-$logger.info "Persons count: #{Person.count}"
+@logger.info "Total Families at end: #{Family.count}"
+@logger.info "Total policies count: #{Policy.count}"
+@logger.info "Persons count: #{Person.count}"

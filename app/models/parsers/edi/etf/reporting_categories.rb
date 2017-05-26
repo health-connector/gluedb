@@ -7,6 +7,7 @@ module Parsers
           @categories = @loops.map { |l| Category.new(l.fetch('L2750')) }
         end
 
+        # FIXME: 15769 - Return 0 in case of composite rating
         def pre_amt
           category_by_name('PRE AMT 1').value
         end

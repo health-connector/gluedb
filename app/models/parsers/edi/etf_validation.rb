@@ -93,6 +93,7 @@ module Parsers
         end
       end
 
+      # FIXME: 15769 - Require premiums only if not composite-rated
       def has_all_premium_amounts
         if right_subscriber_count
           unless (@etf_loop["L2000s"].all?{ |l| tsf_exists?(l, "PRE AMT 1") })

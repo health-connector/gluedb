@@ -19,6 +19,8 @@ end
 
 pols.compact.uniq!
 
+all_glue_policies = File.new("all_glue_policies.txt","w")
+
 pols.each do |pol|
-  puts pol
+  puts all_glue_policies.puts(pol)
 end

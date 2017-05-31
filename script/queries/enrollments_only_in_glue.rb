@@ -41,7 +41,7 @@ timestamp = Time.now.strftime('%Y%m%d%H%M')
 count = 0
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
-  CSV.open("enrollments_in_glue_but_not_in_enroll.csv","w") do |csv|
+  CSV.open("enrollments_in_glue_but_not_in_enroll_#{timestamp}.csv","w") do |csv|
     csv << ["Subscriber HBX ID", "Enrollee HBX ID", "Enrollment HBX ID", "First Name","Last Name","SSN","DOB","Gender","Relationship to Subscriber",
             "Plan Name", "Plan HIOS ID", "Plan Metal Level", "Carrier Name",
             "Premium for Enrollee", "Premium Total for Policy","APTC/Employer Contribution",

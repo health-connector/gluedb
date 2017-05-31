@@ -8,21 +8,27 @@ policies = Policy.no_timeout.where(
 
 policies = policies.reject{|pol| pol.market == 'individual' && !pol.subscriber.nil? &&(pol.subscriber.coverage_start.year == 2014||pol.subscriber.coverage_start.year == 2015) }
 
-enroll_list = File.read("all_enroll_policies.txt").split("\n").map(&:strip)
+policies_list = []
 
-missing = []
-
-policies.each do |policy|
-  next if policy.hbx_enrollment_ids.blank?
-  if policy.hbx_enrollment_ids.all?{|id| enroll_list.include?(id)} 
-    next
+policies.each do |pol|
+  if pol.hbx_enrollment_ids.blank?
+    id_list = [pol.eg_id]
   else
-    missing << policy
+    id_list = ([pol.eg_id]+pol.hbx_enrollment_ids).uniq
+  end
+  id_list.each do |id|
+    policies_list << id
   end
 end
 
-puts "Glue Total: #{policies.size}"
-puts "Enroll Total: #{enroll_list.size}"
+enroll_list = File.read("all_enroll_policies.txt").split("\n").map(&:strip)
+
+missing_ids = (policies_list-enroll_list)
+
+missing = Policy.or({:hbx_enrollment_ids => {"$in" => missing_ids}},{:eg_id => {"$in" => missing_ids}})
+
+puts "Glue Total: #{policies_list.uniq.size}"
+puts "Enroll Total: #{enroll_list.uniq.size}"
 puts "Total Missing: #{missing.size}"
 
 
@@ -44,3 +50,5 @@ end
 #             "AASM State"]
 #   end
 # end
+
+puts "Report finished at #{Time.now}"

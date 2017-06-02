@@ -36,6 +36,7 @@ Caches::MongoidCache.allocate(Carrier)
 active_end = Date.new(2017,5,31)
 
 eligible_pols.each do |pol|
+  begin
   if !pol.canceled?
     if !(pol.subscriber.coverage_start > active_end)
       subscriber_id = pol.subscriber.m_id
@@ -58,5 +59,9 @@ eligible_pols.each do |pol|
         out_f.close
       end
     end
+  end
+  rescue Exception=>e
+    puts "#{pol._id} - #{e.inspect}"
+    next
   end
 end

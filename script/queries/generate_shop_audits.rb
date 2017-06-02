@@ -69,6 +69,7 @@ Caches::MongoidCache.allocate(Carrier)
 Caches::MongoidCache.allocate(Employer)
 
 eligible_pols.each do |pol|
+  begin
   if !pol.canceled?
     if !(pol.subscriber.coverage_start > active_end)
       employer = Caches::MongoidCache.lookup(Employer, pol.employer_id) {pol.employer}
@@ -98,4 +99,7 @@ eligible_pols.each do |pol|
       end
     end
   end
+  rescue Exception=>e
+    puts "#{pol._id} - #{e.inspect}"
+    next
 end

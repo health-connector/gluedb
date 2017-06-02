@@ -9,13 +9,13 @@ plan_ids = Plan.where(:carrier_id => {"$in" => carrier_ids}).map(&:id)
 eligible_m_pols = pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
-    :coverage_start => {"$gt" => Date.new(2015,12,31)}
+    :coverage_start => {"$gt" => Date.new(2016,12,31)}
   }}, :employer_id => nil, :plan_id => {"$in" => plan_ids}}).no_timeout
 
 eligible_pols = pols = Policy.where({
   :enrollees => {"$elemMatch" => {
     :rel_code => "self",
-    :coverage_start => {"$gt" => Date.new(2015,12,31)}
+    :coverage_start => {"$gt" => Date.new(2016,12,31)}
   }}, :employer_id => nil, :plan_id => {"$in" => plan_ids}}).no_timeout
 
 m_ids = []
@@ -33,7 +33,7 @@ m_cache = Caches::MemberCache.new(m_ids)
 Caches::MongoidCache.allocate(Plan)
 Caches::MongoidCache.allocate(Carrier)
 
-active_end = Date.new(2016,7,31)
+active_end = Date.new(2017,5,31)
 
 eligible_pols.each do |pol|
   if !pol.canceled?

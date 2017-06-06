@@ -100,7 +100,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
           work_phone = person.work_phone.try(:phone_number)
           mobile_phone = person.mobile_phone.try(:phone_number)
           csv << [subscriber_hbx_id, enrollee_hbx_id, enrollment_id, first_name, last_name, ssn, dob, gender, relationship, plan_name, plan_hios, plan_metal, carrier_name, 
-                  enr_premium, premium_total, external_contribution, employer_name, employer_dba, employer_fein, employer_hbx_id, 
+                  enr_premium, premium_total, external_contribution, enr_coverage_start, enr_coverage_end, employer_name, employer_dba, employer_fein, employer_hbx_id, 
                   home_address, mailing_address, home_email, work_email, home_phone, work_phone, mobile_phone, broker_name, broker_npn, aasm_state]
         end
       end

@@ -137,7 +137,11 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     commonjs (0.2.7)
+    config (1.0.0)
+      activesupport (>= 3.0)
+      deep_merge (~> 1.0.0)
     database_cleaner (1.5.3)
+    deep_merge (1.0.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     devise (3.3.0)
@@ -446,6 +450,7 @@ DEPENDENCIES
   celluloid (= 0.15.2)
   ci_reporter (= 2.0.0)
   coffee-rails (~> 3.2.1)
+  config (~> 1.0.0)
   database_cleaner (= 1.5.3)
   designmodo-flatuipro-rails!
   devise (= 3.3.0)
@@ -502,4 +507,4 @@ DEPENDENCIES
   virtus
 
 BUNDLED WITH
-   1.11.2
+   1.15.1

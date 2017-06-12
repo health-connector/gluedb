@@ -93,3 +93,6 @@ gem 'edi_codec', git: "git@github.com:dchbx/edi_codec.git"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'
+
+# configuration support
+gem "config", '~> 1.0.0'

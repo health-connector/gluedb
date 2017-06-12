@@ -80,11 +80,11 @@ module Generators::Reports
       end
     end
     
-    def dchbx_address
-      text "DC Health Link"
-      text "Department of Human Services"
-      text "P.O. Box 91560"
-      text "Washington, DC 20090"
+     def dchbx_address
+      text "#{Settings.site.short_name}"
+      text "#{Settings.contact_center.name}"
+      text "#{Settings.contact_center.address}"
+      text "#{Settings.contact_center.city}, #{Settings.contact_center.state_abbreviation} #{Settings.contact_center.postal_code}"
     end
     
     def list_display(data)      

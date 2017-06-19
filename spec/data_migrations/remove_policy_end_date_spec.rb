@@ -5,7 +5,7 @@ describe RemovePolicyEndDate, dbclean: :after_each do
   let(:given_task_name) { "remove_policy_end_date" }
   let(:policy) { FactoryGirl.create(:terminated_policy) }
   let (:enrollees) { policy.enrollees }
-  subject { RemoveCarrier.new(given_task_name, double(:current_scope => nil)) }
+  subject { RemovePolicyEndDate.new(given_task_name, double(:current_scope => nil)) }
 
   describe "given a task name" do 
     it "has the given task name" do 
@@ -14,15 +14,20 @@ describe RemovePolicyEndDate, dbclean: :after_each do
   end
 
   describe "removing the end dates" do 
-    before { subject.remove_end_dates }
+    before(:each) do 
+      allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id)
+    end
 
-    it "should not have any end dates" do 
+    it "should not have any end dates" do
+      subject.remove_end_dates
+      policy.reload
       expect(policy.enrollees.map(&:coverage_end).uniq[0]).to be_nil
     end
   end
 
   describe "altering the aasm state" do 
-    before(:each) do 
+    before(:each) do
+      allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id) 
       allow(ENV).to receive(:[]).with("aasm_state").and_return(policy.aasm_state)
     end
 

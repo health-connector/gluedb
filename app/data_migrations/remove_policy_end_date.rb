@@ -21,5 +21,6 @@ class RemovePolicyEndDate < MongoidMigrationTask
   def migrate
     remove_end_dates
     change_aasm_state
+    puts "Removed end date from policy #{ENV['eg_id']}" unless Rails.env.test?
   end
 end

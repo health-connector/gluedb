@@ -1,15 +1,15 @@
 site:
-  short_name: "DC HealthLink"
-  long_name: "DC HealthLink Glue DB"
-  copyright_period_start: "2014"
+  short_name: "Health Connector"
+  long_name: "Health Connector Glue DB"
+  copyright_period_start: "2017"
 
   
   social_media:
     facebook_url: ""
 
 contact_center:
-  name: "Department of Human Services"
-  address: "P.O. Box 91560"
-  city: "Washington"
-  state_abbreviation: "DC"
-  postal_code: "20090"
+  name: "Massachusetts Health Connector"
+  address: "133 Portland Street"
+  city: "Boston"
+  state_abbreviation: "MA"
+  postal_code: "02114"

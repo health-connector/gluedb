@@ -30,7 +30,6 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:member_database_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
   let(:policy_database_record) { instance_double(ExternalEvents::ExternalPolicy, :persist => true) }
 
-
   subject do
     EnrollmentAction::InitialEnrollment.new(nil, enrollment_event)
   end

@@ -11,10 +11,10 @@ broker_added
 broker_terminated
 general_agent_added
 general_agent_terminated
+benefit_coverage_initial_application_eligible
     )
 
     EXCLUDED_FOR_NOW = %w(
-benefit_coverage_initial_application_eligible
 benefit_coverage_period_terminated_voluntary
 benefit_coverage_period_terminated_nonpayment
 benefit_coverage_period_terminated_relocated

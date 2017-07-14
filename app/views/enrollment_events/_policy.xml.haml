@@ -75,6 +75,8 @@
       %applied_aptc_amount= (policy.applied_aptc).round(2)
   %premium_total_amount= policy.pre_amt_tot.round(2)
   %total_responsible_amount= policy.tot_res_amt.round(2)
+  - unless policy.rating_area.blank?
+    %rating_area= policy.rating_area
 %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?

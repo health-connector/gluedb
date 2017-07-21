@@ -21,7 +21,7 @@ describe ChangePolicyEndDate, dbclean: :after_each do
     end
 
     it "should have an end date" do
-      subject.change_end_date
+      subject.deactivate_enrollees
       policy.reload
       expect(policy.policy_end).to eq ENV['end_date'].to_date
     end

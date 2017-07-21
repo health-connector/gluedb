@@ -2,7 +2,7 @@
 require File.join(Rails.root, "lib/mongoid_migration_task")
 
 class ChangePolicyEndDate < MongoidMigrationTask
-  def change_end_date
+  def deactivate_enrollees
     policy = Policy.where(eg_id: ENV['eg_id']).first
     policy.enrollees.each do |enrollee|
       enrollee.emp_stat = "terminated"
@@ -23,7 +23,7 @@ class ChangePolicyEndDate < MongoidMigrationTask
   end
 
   def migrate
-    change_end_date
+    deactivate_enrollees
     change_aasm_state
     puts "Changed end date for policy #{ENV['eg_id']} to #{ENV['end_date']}" unless Rails.env.test?
   end

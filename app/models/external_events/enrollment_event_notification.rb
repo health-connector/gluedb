@@ -344,6 +344,10 @@ module ExternalEvents
       @existing_plan ||= extract_plan(policy_cv)
     end
 
+    def is_publishable?
+      Maybe.new(enrollment_event_xml).event.body.publishable?.value
+    end
+
     private
 
     def initialize_clone(other)

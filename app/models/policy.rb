@@ -31,6 +31,10 @@ class Policy
   field :is_active, type: Boolean, default: true
   field :hbx_enrollment_ids, type: Array
 
+# Adding field values Carrier specific
+  field :carrier_specific_plan_id, type: String
+  field :rating_area, type: String
+  field :composite_rating_tier, type: String
 
   validates_presence_of :eg_id
   validates_presence_of :pre_amt_tot

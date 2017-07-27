@@ -20,6 +20,9 @@ describe Policy, :dbclean => :after_each do
     :carrier,
     :broker,
     :plan,
+    :carrier_specific_plan_id,
+    :rating_area,
+    :composite_rating_tier,
     :employer,
     :responsible_party,
     :transaction_set_enrollments,
@@ -33,6 +36,12 @@ describe Policy, :dbclean => :after_each do
 
     it "has the correct default hbx_enrollment_ids" do
       expect(subject.hbx_enrollment_ids).to eq [subject.eg_id]
+    end
+
+    it "has the correct rating_area value" do
+      expect(subject.rating_area).to eq "100"
+      subject.update_attributes(rating_area: "101")
+      expect(subject.rating_area).to eq "101"
     end
   end
 

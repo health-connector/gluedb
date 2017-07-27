@@ -51,6 +51,19 @@
 	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
 	  	<dt>Updated</dt>
 	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
+
+      <% if p.rating_area %>
+        <dt>CarrierPlanID</dt>
+         <dd>p.carrier_specific_plan_id</dd>
+      <% end %>
+      <% if p.carrier_specific_plan_id %>
+        <dt>Rating Area</dt>
+         <dd>p.rating_area </dd>
+      <% end %>
+      <% if p.composite_rating_tier %>
+        <dt>Composite Rating Tier </dt>
+          <dd>p.composite_rating_tier </dd>
+      <% end %>
 		</dl>
 	</div>
 	<% if can? :edit, @people%>

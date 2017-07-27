@@ -74,8 +74,8 @@
                 %ns1:street= adr.address_2
               - if adr.address_3.present?
                 %ns1:street= adr.address_3
-              %ns1:locality= "Washington"
-              %ns1:region= "DC"
+              %ns1:locality= Settings.contact_center.city
+              %ns1:region= Settings.contact_center.state_abbreviation
               %ns1:code= adr.zip
               -if false
                 %ns1:country

@@ -156,4 +156,16 @@ module ApplicationHelper
     return nil if date_time.blank?
     date_time.iso8601
   end
+
+  def copyright_notice
+     "#{Settings.site.short_name} #{Settings.site.copyright_period_start}"
+   end
+ 
+   def site_short_name
+     Settings.site.short_name
+   end
+ 
+   def site_full_name
+     Settings.site.long_name
+   end
 end

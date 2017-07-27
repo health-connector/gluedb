@@ -10,6 +10,9 @@ FactoryGirl.define do
     applied_aptc '3.33'
     broker
     plan
+    carrier_specific_plan_id 'rspec-mock'
+    rating_area  "100"
+    composite_rating_tier 'rspec-mock'
 
     after(:create) do |p, evaluator|
       create_list(:enrollee, 2, policy: p)

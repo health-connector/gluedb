@@ -20,7 +20,6 @@ gem "psych", "2.0.5"
 
 group :development do
   gem 'capistrano', '2.15.4'
-  gem 'ruby-progressbar', '1.6.0'
 #  gem 'jazz_hands'
 end
 
@@ -73,6 +72,7 @@ group :production do
   gem 'nio4r', '1.1.1'
 end
 
+gem 'ruby-progressbar', '1.6.0'
 gem "haml"
 gem 'kaminari', '0.16.3'
 gem 'bootstrap-kaminari-views', '0.0.5'

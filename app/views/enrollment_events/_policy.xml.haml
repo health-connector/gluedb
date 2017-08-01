@@ -79,3 +79,5 @@
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?
   %modified_at= policy.updated_at.iso8601
+  %assistance_effective_date= policy.assistance_effective_date if policy.assistance_effective_date
+

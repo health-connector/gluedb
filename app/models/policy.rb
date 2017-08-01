@@ -700,8 +700,12 @@ class Policy
   end
 
   def assistance_effective_date
-    dates = self.enrollees.map(&:coverage_start) + self.enrollees.map(&:coverage_end)
-    assistance_effective_date = dates.compact.sort.last
+    if self.aptc_credits > 0
+      self.latest_aptc_record
+    else
+      dates = self.enrollees.map(&:coverage_start) + self.enrollees.map(&:coverage_end)
+      assistance_effective_date = dates.compact.sort.last
+    end
   end
 
   protected

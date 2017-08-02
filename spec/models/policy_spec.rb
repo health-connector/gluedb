@@ -487,7 +487,13 @@ describe Policy, :dbclean => :after_each do
   let(:aptc_credit1) { AptcCredit.new(start_on: Date.new(2014, 1, 1), end_on: Date.new(2014, 5, 31), aptc: 100.0, pre_amt_tot: 200.0, tot_res_amt: 100.0) }
   let(:aptc_credit2) { AptcCredit.new(start_on: Date.new(2014, 6, 1), end_on: Date.new(2014, 12, 31), aptc: 125.0, pre_amt_tot: 300.0, tot_res_amt: 175.0) }
 
-  subject { Policy.new(applied_aptc: 0.0, pre_amt_tot: 250.0, tot_res_amt: 0.0, aptc_credits: aptc_credits) }
+  let(:coverage_start) { Date.new(2014, 1, 1) }
+  let(:coverage_end) { Date.new(2014, 1, 31) }
+
+  let(:enrollee) { build(:subscriber_enrollee, coverage_start: coverage_start, coverage_end: coverage_end) }
+  let(:enrollee2) { build(:subscriber_enrollee, coverage_start: Date.new(2014, 3, 1), coverage_end: Date.new(2014, 3, 31)) }
+
+  subject { Policy.new(applied_aptc: 0.0, pre_amt_tot: 250.0, tot_res_amt: 0.0, aptc_credits: aptc_credits, enrollees: [ enrollee, enrollee2 ]) }
 
   context ".check_multi_aptc" do
     it "should set premium, responsible amount, aptc from latest aptc credit" do
@@ -496,6 +502,20 @@ describe Policy, :dbclean => :after_each do
       expect(subject.applied_aptc).to eq(125.0)
       expect(subject.pre_amt_tot).to eq(300.0) 
       expect(subject.tot_res_amt).to eq(175.0)
+    end
+  end
+
+  context ".assistance_effective_date" do
+    it "with aptc_credits" do
+      expect(subject.assistance_effective_date).to eq aptc_credit2.start_on
+    end
+  end
+
+  context ".assistance_effective_date with out aptc credits" do
+    let(:aptc_credits) { [] }
+    
+    it "with out aptc_credits" do
+      expect(subject.assistance_effective_date).to eq enrollee2.coverage_end 
     end
   end
 

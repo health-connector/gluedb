@@ -506,15 +506,15 @@ describe Policy, :dbclean => :after_each do
   end
 
   context ".assistance_effective_date" do
-    it "with aptc_credits" do
+    it "should return latest aptc_record start_on date" do
       expect(subject.assistance_effective_date).to eq aptc_credit2.start_on
     end
   end
 
   context ".assistance_effective_date with out aptc credits" do
     let(:aptc_credits) { [] }
-    
-    it "with out aptc_credits" do
+
+    it "should return latest date from enrollees coverage_start and coverage_end on policy" do
       expect(subject.assistance_effective_date).to eq enrollee2.coverage_end 
     end
   end

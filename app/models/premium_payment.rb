@@ -16,7 +16,7 @@ class PremiumPayment
 
   validates_presence_of :payment_amount_in_cents, :paid_at, :coverage_period, :policy_id, :carrier_id
   validates_inclusion_of :hbx_payment_type, in: ["BAL", "INTPREM", "PREM", "MISC", "NONPAYADJ", "PREMADJ",
-"REFUND"]
+"REFUND", "COMM", "COMMADJ"]
 
   index({paid_at: 1})
   index({paid_at: 1, policy_id: 1})

@@ -12,18 +12,18 @@ class ChangePolicyStartDate < MongoidMigrationTask
 
   def migrate
     if Policy.where(eg_id: ENV['eg_id']).size > 1
-      puts "There are multiple policies for policy #{ENV['eg_id']}. Please resolve before changing effective dates."
+      puts "There are multiple policies for policy #{ENV['eg_id']}. Please resolve before changing effective dates." unless Rails.env.test?
     elsif Policy.where(eg_id: ENV['eg_id']).size == 0
-      puts "Policy #{ENV['eg_id']} not found."
+      puts "Policy #{ENV['eg_id']} not found." unless Rails.env.test?
     else
       policy = Policy.where(eg_id: ENV['eg_id']).first
       if policy.enrollees.map(&:coverage_start).uniq.size > 1
-        puts "There are enrollees with different effective dates. Are you certain you want to continue? Doing so will give all enrollees the same effective date. y/n?"
+        puts "There are enrollees with different effective dates. Are you certain you want to continue? Doing so will give all enrollees the same effective date. y/n?" unless Rails.env.test?
         response = gets.chomp.to_s
         if response.downcase == "y"
           move_effective_date(policy,ENV['new_start_date'])
         else
-          "Effective date for policy #{ENV['eg_id']} was not moved."
+          "Effective date for policy #{ENV['eg_id']} was not moved." unless Rails.env.test?
         end
       else
         move_effective_date(policy,ENV['new_start_date'])

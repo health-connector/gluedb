@@ -699,6 +699,15 @@ class Policy
     self.aptc_credits.detect { |aptc_rec| aptc_rec.start_on <= date && aptc_rec.end_on >= date }
   end
 
+  def assistance_effective_date
+    if self.aptc_credits.present?
+      self.latest_aptc_record.start_on
+    else
+      dates = self.enrollees.map(&:coverage_start) + self.enrollees.map(&:coverage_end)
+      assistance_effective_date = dates.compact.sort.last
+    end
+  end
+
   protected
   def generate_enrollment_group_id
     self.eg_id = self.eg_id || self._id.to_s

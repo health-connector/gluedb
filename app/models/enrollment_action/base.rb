@@ -56,6 +56,15 @@ module EnrollmentAction
       self.new(term, action)
     end
 
+    # Check if an enrollment already exists - if it does and you don't want to send out a new transaction, call this method. 
+    def check_already_exists
+      if @action && action.existing_policy
+        errors.add(:action, "enrollment already exists")
+        true
+      end
+      false
+    end
+
     # When implemented in a subclass, return true on successful persistance of
     # the action - otherwise return false.
     def persist

@@ -10,6 +10,43 @@ module EmployerEvents
       @timestamp = e_event.event_time
     end
 
+    def carrier_plan_years(carrier)
+      doc = Nokogiri::XML(employer_event.resource_body)
+      doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']/../../../../../../..", {:cv => XML_NS})
+    end
+
+    def renewal_and_no_future_plan_year?(carrier)
+      return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
+      found_future_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value > Date.today
+              found_future_plan_year = true
+            end
+          end
+        end
+      end
+      !found_future_plan_year
+    end
+
+    def drop_and_has_future_plan_year?(carrier)
+      return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
+      found_future_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value > Date.today
+              found_future_plan_year = true
+            end
+          end
+        end
+      end
+      found_future_plan_year
+    end
+
     # Return true if we rendered anything
     def render_for(carrier, out)
       unless ::EmployerEvents::EventNames::EVENT_WHITELIST.include?(@employer_event.event_name)
@@ -17,9 +54,13 @@ module EmployerEvents
       end
 
       doc = Nokogiri::XML(employer_event.resource_body)
-      unless doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']", {:cv => XML_NS}).any?
+
+      unless carrier_plan_years(doc, carrier).any?
         return false
       end
+
+      return false if drop_and_has_future_plan_year?(carrier)
+      return false if renewal_and_no_future_plan_year?(carrier)
 
       doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
         carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content

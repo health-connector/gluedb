@@ -29,8 +29,8 @@ describe EmployerEvents::EnrollmentEventTrigger, "given:
   it "includes employer 2 in the list of renewal employer ids" do
     expect(subject.renewal_employer_ids).to include(employer_2_id)
   end
-  it "includes employer 3 in the list of renewal employer ids" do
-    expect(subject.renewal_employer_ids).to include(employer_3_id)
+  it "does not include employer 3 in the list of renewal employer ids" do
+    expect(subject.renewal_employer_ids).not_to include(employer_3_id)
   end
 end
 

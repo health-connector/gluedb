@@ -15,6 +15,29 @@ module EmployerEvents
       doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']/../../../../../../..", {:cv => XML_NS})
     end
 
+    def has_current_or_future_plan_year?(carrier)
+      found_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value >= Date.today
+              found_plan_year = true
+            end
+          end
+        end
+        node.xpath("cv:plan_year_end", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value >= Date.today
+              found_plan_year = true
+            end
+          end
+        end
+      end
+      found_plan_year
+    end
+
     def renewal_and_no_future_plan_year?(carrier)
       return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
       found_future_plan_year = false
@@ -59,6 +82,7 @@ module EmployerEvents
         return false
       end
 
+      return false unless has_current_or_future_plan_year?(carrier)
       return false if drop_and_has_future_plan_year?(carrier)
       return false if renewal_and_no_future_plan_year?(carrier)
 

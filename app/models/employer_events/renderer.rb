@@ -78,7 +78,7 @@ module EmployerEvents
 
       doc = Nokogiri::XML(employer_event.resource_body)
 
-      unless carrier_plan_years(doc, carrier).any?
+      unless carrier_plan_years(carrier).any?
         return false
       end
 

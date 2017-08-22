@@ -7,7 +7,7 @@ describe DuplicateEmployerCleanup, dbclean: :after_each do
   let(:bad_employer) { FactoryGirl.create(:employer_with_plan_year) }
   let(:bad_employer_plan_year) { bad_employer.plan_years.first }
   let(:policy) { FactoryGirl.create(:shop_policy, employer: bad_employer) }
-  let(:bad_employer_premium_payment) { bad_employer.premium_payments.first }
+  let(:bad_employer_premium_payment) { policy.premium_payments.first }
   subject { DuplicateEmployerCleanup.new(given_task_name, double(:current_scope => nil)) }
 
   it 'should have variables' do 
@@ -36,6 +36,7 @@ describe DuplicateEmployerCleanup, dbclean: :after_each do
     end
 
     it 'should move the premium payments on the bad employer to the good employer' do
+      bad_employer_premium_payment.reload
       subject.move_premium_payments
       bad_employer_premium_payment.reload
       expect(bad_employer_premium_payment.employer).to eql good_employer
@@ -48,7 +49,8 @@ describe DuplicateEmployerCleanup, dbclean: :after_each do
       expect(bad_employer.name).to eql "OLD DO NOT USE " + bad_name
     end
 
-    it 'should move the policies' do 
+    it 'should move the policies' do
+      policy.reload 
       subject.move_policies
       policy.reload
       expect(policy.employer).to eql good_employer

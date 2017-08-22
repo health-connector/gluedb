@@ -10,10 +10,6 @@ describe DuplicateEmployerCleanup, dbclean: :after_each do
   let(:bad_employer_premium_payment) { policy.premium_payments.first }
   subject { DuplicateEmployerCleanup.new(given_task_name, double(:current_scope => nil)) }
 
-  it 'should have variables' do 
-    #binding.pry
-  end
-
   describe "given a task name" do 
     it "has the given task name" do 
       expect(subject.name).to eql given_task_name

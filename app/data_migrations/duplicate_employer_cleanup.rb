@@ -18,7 +18,7 @@ class DuplicateEmployerCleanup < MongoidMigrationTask
     bad_employer = Employer.find(ENV['bad_employer_id'])
     good_employer = Employer.find(ENV['good_employer_id'])
 
-    raise "One of the employers was not found" if (bad_employer.blank? || good_employer.blank?)
+    raise "One of the employers was not found. Please check your mongo IDs." if (bad_employer.blank? || good_employer.blank?)
 
     bad_employer.premium_payments.each do |pp|
       pp.employer = good_employer

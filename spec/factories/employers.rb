@@ -15,6 +15,22 @@ FactoryGirl.define do
       fein '1'
     end
 
+    trait :with_plan_year do
+      after(:create) do |employer|
+        create :plan_year, employer: employer
+      end
+    end
+
+    trait :with_contact_info do 
+      after(:create) do |emp, evaluator|
+        create_list(:address, 1, employer: emp)
+        create_list(:phone, 1, employer: emp)
+        create_list(:email, 1, employer: emp)
+      end
+    end
+
     factory :invalid_employer, traits: [:fein_too_short]
+    factory :employer_with_plan_year, traits: [:with_plan_year, :with_contact_info]
+    factory :employer_with_multiple_plan_years, traits: [:with_plan_year,:with_renewal_plan_year]
   end
 end

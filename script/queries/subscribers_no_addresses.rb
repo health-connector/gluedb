@@ -1,5 +1,5 @@
 # Finds all subscribers with no home address.
-puts "Started at #{Time.now}"
+puts "Started at #{Time.now}" unless Rails.env.test?
 
 subscriber_ids = []
 
@@ -12,7 +12,7 @@ subscriber_ids.uniq!
 
 subscribers = Person.where("members.hbx_member_id" => {"$in" => subscriber_ids})
 
-puts "Subscribers collected at #{Time.now}"
+puts "Subscribers collected at #{Time.now}" unless Rails.env.test?
 
 def find_previous_home_addresses(person)
 	return [] if person.versions.blank?
@@ -36,4 +36,4 @@ CSV.open("people_missing_addresses_#{Time.now.strftime('%Y%m%d%H%M')}.csv", "w")
 	end
 end
 
-puts "Finished at #{Time.now}"
+puts "Finished at #{Time.now}" unless Rails.env.test?

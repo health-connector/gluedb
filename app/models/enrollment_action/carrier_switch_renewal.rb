@@ -13,6 +13,7 @@ module EnrollmentAction
     end
 
     def persist
+      return false if check_already_exists
       termination_candidates = self.class.other_carrier_renewal_candidates(action)
       @terminated_policy_information = termination_candidates.map do |t_pol|
         [t_pol, t_pol.active_member_ids]

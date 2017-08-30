@@ -81,6 +81,7 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(termination_event.existing_policy).to receive(:terminate_as_of).and_return(true)
     allow(termination_event).to receive(:subscriber_end).and_return(false)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "successfully creates the new policy" do
@@ -127,6 +128,7 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product_member_add")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   subject do

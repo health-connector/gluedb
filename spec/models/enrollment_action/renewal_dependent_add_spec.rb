@@ -110,6 +110,7 @@ describe EnrollmentAction::RenewalDependentAdd, "#persist" do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member).and_return(db_record)
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, plan).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   context "successfuly persisted" do

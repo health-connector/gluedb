@@ -13,6 +13,7 @@ module EnrollmentAction
     end
 
     def persist
+      return false if check_already_exists
       members = action.policy_cv.enrollees.map(&:member)
       members_persisted = members.map do |mem|
         em = ExternalEvents::ExternalMember.new(mem)

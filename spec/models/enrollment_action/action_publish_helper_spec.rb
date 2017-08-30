@@ -366,3 +366,116 @@ describe EnrollmentAction::ActionPublishHelper, "IVL: recalculating premium tota
     end
   end
 end
+
+describe EnrollmentAction::ActionPublishHelper, "told to assign an assistance effective date, when no node exists" do
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+  let(:source_premium_total) { "56.78" }
+  let(:source_tot_res_amt) { "123.45" }
+  let(:source_emp_res_amt) { "98.76" }
+  let(:source_ivl_assistance_amount) { "34.21" }
+  let(:assistance_effective_date) { Date.new(2008, 10, 24) }
+
+  let(:target_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <enrollees>
+    <enrollee>
+      <member>
+        <id><id>1</id></id>
+      </member>
+      <benefit>
+        <premium_amount>111.11</premium_amount>
+      </benefit>
+    </enrollee>
+    <enrollee>
+      <member>
+        <id><id>2</id></id>
+      </member>
+      <benefit>
+        <premium_amount>222.22</premium_amount>
+      </benefit>
+    </enrollee>
+  </enrollees>
+  <enrollment>
+  <individual_market>
+    <applied_aptc_amount>#{source_ivl_assistance_amount}</applied_aptc_amount>
+  </individual_market>
+  <shop_market>
+    <total_employer_responsible_amount>#{source_emp_res_amt}</total_employer_responsible_amount>
+  </shop_market>
+  <premium_total_amount>#{source_premium_total}</premium_total_amount>
+  <total_responsible_amount>#{source_tot_res_amt}</total_responsible_amount>
+  </enrollment>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:transformed_target_xml) {
+    action_publish_helper.assign_assistance_date(assistance_effective_date)
+    Nokogiri::XML(action_publish_helper.to_xml)
+  }
+  let(:assistance_date_result) { transformed_target_xml.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:assistance_effective_date", xml_namespace).first }
+  let(:action_publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(target_event_xml) }
+
+  it "sets the correct date" do
+    expect(assistance_date_result.content).to eq "20081024"
+  end
+end
+
+describe EnrollmentAction::ActionPublishHelper, "told to assign an assistance effective date, when node already exists" do
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+  let(:source_premium_total) { "56.78" }
+  let(:source_tot_res_amt) { "123.45" }
+  let(:source_emp_res_amt) { "98.76" }
+  let(:source_ivl_assistance_amount) { "34.21" }
+  let(:assistance_effective_date) { Date.new(2008, 10, 24) }
+
+  let(:target_event_xml) { <<-EVENTXML
+  <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+  <policy>
+  <enrollees>
+    <enrollee>
+      <member>
+        <id><id>1</id></id>
+      </member>
+      <benefit>
+        <premium_amount>111.11</premium_amount>
+      </benefit>
+    </enrollee>
+    <enrollee>
+      <member>
+        <id><id>2</id></id>
+      </member>
+      <benefit>
+        <premium_amount>222.22</premium_amount>
+      </benefit>
+    </enrollee>
+  </enrollees>
+  <enrollment>
+  <individual_market>
+    <applied_aptc_amount>#{source_ivl_assistance_amount}</applied_aptc_amount>
+    <assistance_effective_date>TOTALLY BOGUS</assistance_effective_date>
+  </individual_market>
+  <shop_market>
+    <total_employer_responsible_amount>#{source_emp_res_amt}</total_employer_responsible_amount>
+  </shop_market>
+  <premium_total_amount>#{source_premium_total}</premium_total_amount>
+  <total_responsible_amount>#{source_tot_res_amt}</total_responsible_amount>
+  </enrollment>
+  </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:transformed_target_xml) {
+    action_publish_helper.assign_assistance_date(assistance_effective_date)
+    Nokogiri::XML(action_publish_helper.to_xml)
+  }
+  let(:assistance_date_result) { transformed_target_xml.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:assistance_effective_date", xml_namespace).first }
+  let(:action_publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(target_event_xml) }
+
+  it "sets the correct date" do
+    expect(assistance_date_result.content).to eq "20081024"
+  end
+end

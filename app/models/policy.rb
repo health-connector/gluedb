@@ -542,6 +542,58 @@ class Policy
     Policy.where({:id => the_id}).first
   end
 
+  def set_aptc_effective_on(aptc_date, aptc_amount, pre_total_amount, remaining_owed_by_consumer)
+    if self.aptc_credits.empty?
+      if aptc_date == policy_start
+        self.aptc_credits << AptcCredit.new(
+          start_on: aptc_date,
+          end_on: coverage_period_end,
+          pre_amt_tot: pre_total_amount,
+          aptc: aptc_amount,
+          tot_res_amt: remaining_owed_by_consumer
+        )
+      else
+        self.aptc_credits << AptcCredit.new(
+          start_on: policy_start,
+          end_on: aptc_date - 1.day,
+          pre_amt_tot: self.pre_amt_tot,
+          aptc: self.applied_aptc,
+          tot_res_amt: self.tot_res_amt
+        )
+        self.aptc_credits << AptcCredit.new(
+          start_on: aptc_date,
+          end_on: coverage_period_end,
+          pre_amt_tot: pre_total_amount,
+          aptc: aptc_amount,
+          tot_res_amt: remaining_owed_by_consumer
+        )
+      end
+    else
+      aptc_record = self.aptc_record_on(aptc_date)
+      if aptc_record.start_on == aptc_date
+        aptc_record.update_attributes(
+          pre_amt_tot: pre_total_amount,
+          aptc: aptc_amount,
+          tot_res_amt: remaining_owed_by_consumer
+        )
+      else
+        aptc_record.update_attributes(
+          end_on: (aptc_date - 1.day)
+        )
+        self.aptc_credits << AptcCredit.new(
+          start_on: aptc_date,
+          end_on: coverage_period_end,
+          pre_amt_tot: pre_total_amount,
+          aptc: aptc_amount,
+          tot_res_amt: remaining_owed_by_consumer
+        )
+      end
+    end
+    self.pre_amt_tot = pre_total_amount
+    self.tot_res_amt = remaining_owed_by_consumer
+    self.applied_aptc = aptc_amount
+  end
+
   def coverage_period
     start_date = policy_start
 
@@ -697,6 +749,15 @@ class Policy
 
   def aptc_record_on(date)
     self.aptc_credits.detect { |aptc_rec| aptc_rec.start_on <= date && aptc_rec.end_on >= date }
+  end
+
+  def assistance_effective_date
+    if self.aptc_credits.present?
+      self.latest_aptc_record.start_on
+    else
+      dates = self.enrollees.map(&:coverage_start) + self.enrollees.map(&:coverage_end)
+      assistance_effective_date = dates.compact.sort.last
+    end
   end
 
   protected

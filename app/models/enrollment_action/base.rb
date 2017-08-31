@@ -60,9 +60,9 @@ module EnrollmentAction
     def check_already_exists
       if @action && action.existing_policy
         errors.add(:action, "enrollment already exists")
-        true
+        return true
       end
-      false
+      return false
     end
 
     # When implemented in a subclass, return true on successful persistance of

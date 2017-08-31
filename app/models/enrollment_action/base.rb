@@ -94,10 +94,10 @@ module EnrollmentAction
       batch_id = SecureRandom.uuid
       if @termination
         idx = idx + 1
-        @termination.persist_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+        @termination.persist_failed!(self.class.name.to_s, persist_errors, batch_id, idx)
       end
       if @action
-        @action.persist_failed!(self.class.name.to_s, publish_errors, batch_id, idx)
+        @action.persist_failed!(self.class.name.to_s, persist_errors, batch_id, idx)
       end
     end
 

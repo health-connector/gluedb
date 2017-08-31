@@ -1,6 +1,6 @@
 module Aws
   class S3Storage
-    ENV_LIST = ['local', 'prod', 'preprod']
+    ENV_LIST = ['local', 'prod', 'preprod', 'qa']
 
     def initialize
       setup
@@ -66,7 +66,7 @@ module Aws
 
     def set_correct_env_bucket_name(bucket_name)
       bucket_name_segment = bucket_name.split('-')
-      if ENV_LIST.include? bucket_name_segment.last && bucket_name_segment.last == aws_env
+      if ENV_LIST.include? bucket_name_segment[1] && bucket_name_segment[1] == aws_env
         return bucket_name
       else
         bucket_name_segment[bucket_name_segment.length - 1] = aws_env
@@ -79,7 +79,7 @@ module Aws
     end
 
     def env_bucket_name(bucket_name)
-      "dchbx-gluedb-#{bucket_name}-#{aws_env}"
+      "#{Settings.abbrev}-#{aws_env}-#{bucket_name}"
     end
 
     def setup

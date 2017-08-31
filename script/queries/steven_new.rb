@@ -21,9 +21,11 @@ environment_name = hostname.gsub(".","").gsub("edidbmhchbxshoporg","")
 
 timestamp = Time.now.strftime('%Y_%m_%d_%H_%M_%S')
 
+filename = "CCA_#{environment_name}_enrollment_#{timestamp}.csv"
+
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
-  CSV.open("CCA_#{environment_name}_enrollment_#{timestamp}.csv", 'w') do |csv|
+  CSV.open(filename, 'w') do |csv|
     csv << ["Subscriber ID", "Member ID" , "Policy ID", "Enrollment Group ID",
             "First Name", "Last Name","SSN", "DOB", "Gender", "Relationship",
             "Plan Name", "HIOS ID", "Plan Metal Level", "Carrier Name",
@@ -91,6 +93,11 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
   end
 
 end
+
+upload_to_s3 = Aws::S3Storage.new
+upload_to_s3.save(filename,"#{Settings.abbrev}-#{environment_name}-internal-artifact_transport",filename)
+
+
 
 timey2 = Time.now
 puts "Report ended at #{timey2}"

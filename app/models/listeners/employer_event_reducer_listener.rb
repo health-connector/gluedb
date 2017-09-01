@@ -52,6 +52,12 @@ module Listeners
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       employer_id = m_headers["employer_id"].to_s
       event_name = delivery_info.routing_key.split("employer.").last
+      if !event_name.blank?
+        if event_name.contains =~ /nfp\./
+          channel.ack(delivery_info.delivery_tag, false)
+          return
+        end
+      end
       event_time = get_timestamp(properties)
       if EmployerEvent.newest_event?(employer_id, event_name, event_time)
         r_code, resource_or_body = request_resource(employer_id)

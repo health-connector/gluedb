@@ -31,10 +31,11 @@ module Aws
     end
 
     # Here's an option to publish to SFTP. 
-      def publish_to_sftp(filename,transport_key)
+      def publish_to_sftp(filename,transport_key,uri)
         conn = AmqpConnectionProvider.start_connection
         eb = Amqp::EventBroadcaster.new(conn)
-        props = {:headers => {:artifact_key => filename, :file_name => filename, :transport_key => transport_key}}
+        aws_key = uri.split("#").last
+        props = {:headers => {:artifact_key => aws_key, :file_name => filename, :transport_key => transport_key}}
         eb.broadcast(props, payload)
         conn.close
       end

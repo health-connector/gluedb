@@ -95,8 +95,8 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 end
 
 upload_to_s3 = Aws::S3Storage.new
-upload_to_s3.save(filename,"#{Settings.abbrev}-#{environment_name}-internal-artifact_transport",filename)
-upload_to_s3.publish_to_sftp(filename,"Legacy::PushGlueEnrollmentReport")
+uri = upload_to_s3.save(filename,"#{Settings.abbrev}-#{environment_name}-internal-artifact_transport",filename)
+upload_to_s3.publish_to_sftp(filename,"Legacy::PushGlueEnrollmentReport",uri)
 
 timey2 = Time.now
 puts "Report ended at #{timey2}"

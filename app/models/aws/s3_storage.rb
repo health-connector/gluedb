@@ -30,6 +30,15 @@ module Aws
       Aws::S3Storage.new.save(file_path, bucket_name, key)
     end
 
+    # Here's an option to publish to SFTP. 
+      def publish_to_sftp(filename,transport_key)
+        conn = AmqpConnectionProvider.start_connection
+        eb = Amqp::EventBroadcaster.new(conn)
+        props = {:headers => {:artifact_key => filename, :file_name => filename, :transport_key => transport_key}}
+        eb.broadcast(props, payload)
+        conn.close
+      end
+
     # The uri has information about the bucket name and key
     # e.g. "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
     # The returned object can be streamed by controller
@@ -86,5 +95,7 @@ module Aws
       client=Aws::S3::Client.new
       @resource=Aws::S3::Resource.new(client: client)
     end
+
+    
   end
 end

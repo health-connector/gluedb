@@ -50,7 +50,7 @@ header_row = ["Person 1 HBX ID", "Person 1 First Name", "Person 1 Middle Name", 
 			"Person 20 HBX ID", "Person 20 First Name", "Person 20 Middle Name", "Person 20 Last Name","Person 20 SSN", "Person 20 DOB","Person 20 Employer Fein(s)","Person 20 Employer Name(s)",
 			"Person 21 HBX ID", "Person 21 First Name", "Person 21 Middle Name", "Person 21 Last Name","Person 21 SSN", "Person 21 DOB","Person 21 Employer Fein(s)","Person 21 Employer Name(s)"]
 
-puts "Started at #{Time.now}"
+puts "Started at #{Time.now}" unless Rails.env.test?
 
 CSV.open("multiple_instances_in_glue_by_dob_and_ssn.csv","w") do |csv|
 	csv << header_row
@@ -141,4 +141,4 @@ no_members.each do |nm|
 	no_members_file.puts(nm)
 end
 
-puts "Ended at #{Time.now}"
+puts "Ended at #{Time.now}" unless Rails.env.test?

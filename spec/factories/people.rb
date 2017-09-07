@@ -11,6 +11,7 @@ FactoryGirl.define do
       create_list(:address, 2, person: p)
       create_list(:phone, 2, person: p)
       create_list(:email, 2, person: p)
+      p.authority_member_id = p.members.first.hbx_member_id
     end
 
     trait :without_first_name do

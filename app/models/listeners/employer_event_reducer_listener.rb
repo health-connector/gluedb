@@ -53,7 +53,7 @@ module Listeners
       employer_id = m_headers["employer_id"].to_s
       event_name = delivery_info.routing_key.split("employer.").last
       if !event_name.blank?
-        if event_name =~ /nfp\./
+        if (event_name =~ /nfp\./) || (event_name =~ /nfp_/)
           channel.ack(delivery_info.delivery_tag, false)
           return
         end

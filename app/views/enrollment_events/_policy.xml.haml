@@ -47,6 +47,10 @@
   %plan
     %id
       %id= plan.hios_plan_id
+      - unless policy.carrier_specific_plan_id.blank?
+        %alias_ids
+          %alias_id
+            %id= policy.carrier_specific_plan_id
     %name= plan.name
     %active_year= plan.year
     %is_dental_only= plan.coverage_type == "dental"
@@ -69,13 +73,19 @@
           %dba= employer.dba
         %fein= employer.fein
       %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
+      - unless policy.composite_rating_tier.blank?
+        %composite_rating_tier_name= policy.composite_rating_tier
   - else
     %individual_market
       %is_carrier_to_bill true
       %applied_aptc_amount= (policy.applied_aptc).round(2)
   %premium_total_amount= policy.pre_amt_tot.round(2)
   %total_responsible_amount= policy.tot_res_amt.round(2)
+  - unless policy.rating_area.blank?
+    %rating_area= policy.rating_area
 %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?
   %modified_at= policy.updated_at.iso8601
+  %assistance_effective_date= policy.assistance_effective_date if policy.assistance_effective_date
+

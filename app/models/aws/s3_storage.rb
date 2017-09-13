@@ -76,7 +76,7 @@ module Aws
 
     def set_correct_env_bucket_name(bucket_name)
       bucket_name_segment = bucket_name.split('-')
-      if ENV_LIST.include? bucket_name_segment[1] && bucket_name_segment[1] == aws_env
+      if ENV_LIST.include? bucket_name_segment.last && bucket_name_segment.last == aws_env
         return bucket_name
       else
         bucket_name_segment[bucket_name_segment.length - 1] = aws_env
@@ -89,7 +89,7 @@ module Aws
     end
 
     def env_bucket_name(bucket_name)
-      "#{Settings.abbrev}-#{aws_env}-#{bucket_name}"
+      "#{Settings.abbrev}-gluedb-#{bucket_name}-#{aws_env}"
     end
 
     def setup

@@ -65,6 +65,7 @@ describe EnrollmentAction::CarrierSwitchRenewal, "given a qualified enrollment s
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(EnrollmentAction::CarrierSwitchRenewal).to receive(:other_carrier_renewal_candidates).with(action_event).and_return([other_carrier_term_candidate])
     allow(other_carrier_term_candidate).to receive(:terminate_as_of).with(subscriber_end).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "successfully creates the new policy" do

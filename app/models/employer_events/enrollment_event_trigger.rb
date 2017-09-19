@@ -14,8 +14,6 @@ module EmployerEvents
         @initial_employer_ids.add(enrollment_event.employer_id)
       elsif enrollment_event.event_name == ::EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
         @renewal_employer_ids.add(enrollment_event.employer_id)
-      elsif enrollment_event.event_name == ::EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
-        @renewal_employer_ids.add(enrollment_event.employer_id)
       end
       self
     end

@@ -123,6 +123,7 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment se
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(termination_event).to receive(:subscriber_end).and_return(false)
     allow(termination_event.existing_policy).to receive(:terminate_as_of).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "persists when all members persist" do

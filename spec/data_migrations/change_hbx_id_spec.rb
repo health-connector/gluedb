@@ -17,6 +17,8 @@ describe ChangeHbxId, dbclean: :after_each do
   describe "changing person hbx id" do
     before(:each) do
       allow(ENV).to receive(:[]).with("new_hbx_id").and_return("34588973")
+      allow(ENV).to receive(:[]).with("database_id").and_return(person._id)
+      person.update_attributes(:authority_member_id => person.members.first.hbx_member_id)
     end
 
     it "should change member hbx id and authority member ID if the specified ID is the authority member ID" do

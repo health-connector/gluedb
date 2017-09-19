@@ -20,6 +20,9 @@ FactoryGirl.define do
 
     trait :shop do
       employer
+      after(:create) do |policy|
+        create :premium_payment, employer: policy.employer, carrier: policy.plan.carrier, policy: policy
+      end
     end
 
     trait :terminated do 

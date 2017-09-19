@@ -171,12 +171,20 @@ describe EnrollmentAction::ActiveRenewal, "#persist" do
   context "successfuly persisted" do
     let(:db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
 
+    before(:each) do 
+      allow(subject.action).to receive(:existing_policy).and_return(false)
+    end
+
     it "returns true" do
       expect(subject.persist).to be_truthy
     end
   end
   context "failed to persist" do
     let(:db_record) { instance_double(ExternalEvents::ExternalMember, :persist => false) }
+
+    before(:each) do 
+      allow(subject.action).to receive(:existing_policy).and_return(true)
+    end
 
     it "returns false" do
       expect(subject.persist).to be_falsey

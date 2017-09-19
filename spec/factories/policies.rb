@@ -22,6 +22,11 @@ FactoryGirl.define do
       employer
     end
 
+    trait :terminated do 
+      aasm_state "terminated"
+    end
+
     factory :shop_policy, traits: [:shop]
+    factory :terminated_policy, traits: [:terminated]
   end
 end

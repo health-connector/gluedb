@@ -5,7 +5,7 @@ policies = Policy.no_timeout.where(
   {"eg_id" => {"$not" => /DC0.{32}/},
    :enrollees => {"$elemMatch" =>
       {:rel_code => "self",
-            :coverage_start => {"$gt" => Date.new(2014,12,31)}}}}
+            :coverage_start => {"$gt" => Date.new(2015,12,31)}}}}
 )
 
 policies = policies.reject{|pol| pol.market == 'individual' && !pol.subscriber.nil? &&(pol.subscriber.coverage_start.year == 2014||pol.subscriber.coverage_start.year == 2015) }
@@ -15,12 +15,15 @@ def bad_eg_id(eg_id)
   (eg_id =~ /\A000/) || (eg_id =~ /\+/)
 end
 
+count = 0
+total_count = policies.size
+
 timestamp = Time.now.strftime('%Y%m%d%H%M')
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
   CSV.open("stephen_expected_effectuated_20140930_#{timestamp}.csv", 'w') do |csv|
-    csv << ["Subscriber ID", "Member ID" , "Policy ID", "Enrollment Group ID",
+    csv << ["Subscriber ID", "Member ID" , "Policy ID", "Enrollment Group ID", "Status",
             "First Name", "Last Name","SSN", "DOB", "Gender", "Relationship",
             "Plan Name", "HIOS ID", "Plan Metal Level", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy APTC", "Policy Employer Contribution",
@@ -28,6 +31,9 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
             "Employer Name", "Employer DBA", "Employer FEIN", "Employer HBX ID",
             "Home Address", "Mailing Address","Email","Phone Number","Broker"]
     policies.each do |pol|
+      count += 1
+      puts "#{(count/total_count)*100}% done at #{Time.now}" if count % 10000 == 0
+      puts "#{(count/total_count)*100}% done at #{Time.now}" if count == total_count
       if !bad_eg_id(pol.eg_id)
         if !pol.subscriber.nil?
           #if !pol.subscriber.canceled?
@@ -59,7 +65,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
               #if !en.canceled?
                 per = en.person
                 csv << [
-                  subscriber_id, en.m_id, pol._id, pol.eg_id,
+                  subscriber_id, en.m_id, pol._id, pol.eg_id, pol.aasm_state,
                   per.name_first,
                   per.name_last,
                   en.member.ssn,

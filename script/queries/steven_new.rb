@@ -64,6 +64,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
             pol.enrollees.each do |en|
               #if !en.canceled?
                 per = en.person
+                next if per.blank?
                 csv << [
                   subscriber_id, en.m_id, pol._id, pol.eg_id,
                   per.name_first,

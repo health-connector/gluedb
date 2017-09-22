@@ -33,6 +33,7 @@ describe Aws::S3Storage do
       it "returns the URI of a saved file" do
         allow(object).to receive(:upload_file).with(file_path, :server_side_encryption => 'AES256').and_return(true)
         allow_any_instance_of(Aws::S3Storage).to receive(:get_object).and_return(object)
+        bucket_name = "#{Settings.abbrev}-#{aws_env}-aca-internal-artifact-transport"
         expect(subject.save(file_path: file_path, bucket_name: bucket_name, options: { internal_artifact: true })).to include("aca-internal-artifact-transport")
       end
     end

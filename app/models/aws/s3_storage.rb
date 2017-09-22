@@ -36,7 +36,7 @@ module Aws
         eb = Amqp::EventBroadcaster.new(conn)
         aws_key = uri.split("#").last
         props = {:headers => {:artifact_key => aws_key, :file_name => filename, :transport_key => transport_key}}
-        eb.broadcast(props, payload)
+        eb.broadcast(props, "payload")
         conn.close
       end
 

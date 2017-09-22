@@ -31,14 +31,14 @@ module Aws
     end
 
     # Here's an option to publish to SFTP. 
-      def publish_to_sftp(filename,transport_key,uri)
-        conn = AmqpConnectionProvider.start_connection
-        eb = Amqp::EventBroadcaster.new(conn)
-        aws_key = uri.split("#").last
-        props = {:headers => {:artifact_key => aws_key, :file_name => filename, :transport_key => transport_key}}
-        eb.broadcast(props, "payload")
-        conn.close
-      end
+    def publish_to_sftp(filename, transport_process, uri)
+      conn = AmqpConnectionProvider.start_connection
+      eb = Amqp::EventBroadcaster.new(conn)
+      aws_key = uri.split("#").last
+      props = {:headers => {:aws_uri => aws_key, :file_name => filename, :artifact_key => transport_process}}
+      eb.broadcast(props, "payload")
+      conn.close
+    end
 
     # The uri has information about the bucket name and key
     # e.g. "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"

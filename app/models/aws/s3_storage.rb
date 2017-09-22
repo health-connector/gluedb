@@ -9,8 +9,8 @@ module Aws
     # If success, return URI which has the s3 bucket key
     # else return nil
     # raises exception if exception occurs
-    def save(file_path, bucket_name, key=SecureRandom.uuid, *args)
-      bucket_name = fetch_bucket(bucket_name, args)
+    def save(file_path:, bucket_name:, key:SecureRandom.uuid, options: {})
+      bucket_name = fetch_bucket(bucket_name, options)
       uri = "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
       begin
         object = get_object(bucket_name, key)
@@ -36,11 +36,11 @@ module Aws
 
     # If success, return URI which has the s3 bucket key
     # else return nil
-    def self.save(file_path, bucket_name, key=SecureRandom.uuid)
-      Aws::S3Storage.new.save(file_path, bucket_name, key)
+    def self.save(file_path:, bucket_name:, key: SecureRandom.uuid, options: {})
+      Aws::S3Storage.new.save(file_path: file_path, bucket_name: bucket_name, key: key, options: options)
     end
 
-    # Here's an option to publish to SFTP. 
+    # Here's an option to publish to SFTP.
     def publish_to_sftp(filename, transport_process, uri)
       conn = AmqpConnectionProvider.start_connection
       eb = Amqp::EventBroadcaster.new(conn)
@@ -110,6 +110,6 @@ module Aws
       client=Aws::S3::Client.new
       @resource=Aws::S3::Resource.new(client: client)
     end
-    
+
   end
 end

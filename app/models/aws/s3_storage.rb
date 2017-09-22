@@ -25,12 +25,10 @@ module Aws
     end
 
     def fetch_bucket(bucket_name, args_items)
-      args_items.each do |item|
-        if item[:internal_artifact]
-          bucket_name
-        else
-          env_bucket_name(bucket_name)
-        end
+      if args_items[:internal_artifact]
+        bucket_name
+      else
+        env_bucket_name(bucket_name)
       end
     end
 

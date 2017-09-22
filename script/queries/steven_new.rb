@@ -99,7 +99,7 @@ upload_to_s3 = Aws::S3Storage.new
 bucket_name = upload_to_s3.env_bucket_for_glue_report
 uri = upload_to_s3.env_uri(bucket_name)
 aws_key = uri.split("#").last
-upload_to_s3.save(filename,bucket_name, aws_key)
+Aws::S3Storage.save(filename,bucket_name, aws_key)
 upload_to_s3.publish_to_sftp(filename,"Legacy::PushGlueEnrollmentReport", aws_key)
 
 timey2 = Time.now

@@ -9,9 +9,9 @@ module Aws
     # If success, return URI which has the s3 bucket key
     # else return nil
     # raises exception if exception occurs
-    def save(file_path, bucket_name, key=SecureRandom.uuid)
-      bucket_name = env_bucket_name(bucket_name)
-      uri = env_uri(bucket_name, key)
+    def save(file_path, bucket_name, key=SecureRandom.uuid, *args)
+      bucket_name = fetch_bucket(bucket_name, args)
+      uri = "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
       begin
         object = get_object(bucket_name, key)
         if object.upload_file(file_path, :server_side_encryption => 'AES256')
@@ -24,6 +24,16 @@ module Aws
       end
     end
 
+    def fetch_bucket(bucket_name, args_items)
+      args_items.each do |item|
+        if item[:internal_artifact]
+          bucket_name
+        else
+          env_bucket_name(bucket_name)
+        end
+      end
+    end
+
     # If success, return URI which has the s3 bucket key
     # else return nil
     def self.save(file_path, bucket_name, key=SecureRandom.uuid)
@@ -31,9 +41,10 @@ module Aws
     end
 
     # Here's an option to publish to SFTP. 
-    def publish_to_sftp(filename, transport_process, aws_key)
+    def publish_to_sftp(filename, transport_process, uri)
       conn = AmqpConnectionProvider.start_connection
       eb = Amqp::EventBroadcaster.new(conn)
+      aws_key = uri.split("#").last
       props = {:headers => {:aws_uri => aws_key, :file_name => filename, :artifact_key => transport_process}}
       eb.broadcast(props, "payload")
       conn.close
@@ -64,14 +75,6 @@ module Aws
       Aws::S3Storage.new.find(uri)
     end
 
-    def env_bucket_for_glue_report
-      "#{Settings.abbrev}-#{aws_env}-aca-internal-artifact-transport"
-    end
-
-    def env_uri(bucket_name, key=SecureRandom.uuid)
-      "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
-    end
-
     private
     def read_object(object)
       object.get.body.read
@@ -99,11 +102,14 @@ module Aws
       "#{Settings.abbrev}-gluedb-#{bucket_name}-#{aws_env}"
     end
 
+    def env_bucket_for_glue_report
+      "#{Settings.abbrev}-#{aws_env}-aca-internal-artifact-transport"
+    end
+
     def setup
       client=Aws::S3::Client.new
       @resource=Aws::S3::Resource.new(client: client)
     end
-
     
   end
 end

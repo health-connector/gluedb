@@ -9,7 +9,7 @@ module Aws
     # If success, return URI which has the s3 bucket key
     # else return nil
     # raises exception if exception occurs
-    def save(file_path:, bucket_name:, key:SecureRandom.uuid, options: {})
+    def save(file_path:, bucket_name: env_bucket_for_glue_report, key:SecureRandom.uuid, options: {})
       bucket_name = fetch_bucket(bucket_name, options)
       uri = "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
       begin
@@ -21,14 +21,6 @@ module Aws
         end
       rescue Exception => e
         raise e
-      end
-    end
-
-    def fetch_bucket(bucket_name, args_items)
-      if args_items[:internal_artifact]
-        bucket_name
-      else
-        env_bucket_name(bucket_name)
       end
     end
 
@@ -74,8 +66,17 @@ module Aws
     end
 
     private
+
     def read_object(object)
       object.get.body.read
+    end
+
+    def fetch_bucket(bucket_name, args_items)
+      if args_items[:internal_artifact]
+        bucket_name
+      else
+        env_bucket_name(bucket_name)
+      end
     end
 
     def get_object(bucket_name, key)

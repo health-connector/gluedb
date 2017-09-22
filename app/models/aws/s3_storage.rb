@@ -11,7 +11,7 @@ module Aws
     # raises exception if exception occurs
     def save(file_path, bucket_name, key=SecureRandom.uuid)
       bucket_name = env_bucket_name(bucket_name)
-      uri = "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
+      uri = env_uri(bucket_name, key)
       begin
         object = get_object(bucket_name, key)
         if object.upload_file(file_path, :server_side_encryption => 'AES256')
@@ -31,10 +31,9 @@ module Aws
     end
 
     # Here's an option to publish to SFTP. 
-    def publish_to_sftp(filename, transport_process, uri)
+    def publish_to_sftp(filename, transport_process, aws_key)
       conn = AmqpConnectionProvider.start_connection
       eb = Amqp::EventBroadcaster.new(conn)
-      aws_key = uri.split("#").last
       props = {:headers => {:aws_uri => aws_key, :file_name => filename, :artifact_key => transport_process}}
       eb.broadcast(props, "payload")
       conn.close
@@ -63,6 +62,14 @@ module Aws
     # e.g. send_data Aws::S3Storage.find(uri), :stream => true, :buffer_size => ‘4096’
     def self.find(uri)
       Aws::S3Storage.new.find(uri)
+    end
+
+    def env_bucket_for_glue_report
+      "#{Settings.abbrev}-#{aws_env}-aca-internal-artifact-transport"
+    end
+
+    def env_uri(bucket_name, key=SecureRandom.uuid)
+      "urn:openhbx:terms:v1:file_storage:s3:bucket:#{bucket_name}##{key}"
     end
 
     private

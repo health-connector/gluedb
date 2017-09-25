@@ -5,5 +5,5 @@ require File.join(Rails.root,"app","data_migrations","change_ssn.rb")
 
 namespace :migrations do 
   desc "Change SSN"
-  ChangeSsn.define_task :change_hbx_id => :environment
+  ChangeSsn.define_task :change_ssn => :environment
 end

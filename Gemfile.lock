@@ -8,8 +8,8 @@ GIT
       less-rails-bootstrap (>= 3.2.0)
 
 GIT
-  remote: git@github.com:health-connector/edi_codec.git
-  revision: ec6c2c6d08560dbad2c78b90c9c9576c758859d7
+  remote: git@github.com:dchbx/edi_codec.git
+  revision: 498d5a0013f111759e9edda4d4953ef4c7c06b1e
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)

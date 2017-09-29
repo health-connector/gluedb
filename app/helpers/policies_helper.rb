@@ -7,4 +7,12 @@ module PoliciesHelper
       false
     end
   end
+
+  def disable_void_radio_button?(policy)
+    ["canceled", "carrier_canceled"].include? policy.aasm_state
+  end
+
+  def disable_corrected_radio_button?(policy)
+    ["canceled", "carrier_canceled"].include? policy.aasm_state
+  end
 end

@@ -27,4 +27,42 @@ RSpec.describe PoliciesHelper, :type => :helper do
       end
     end
   end
+
+  describe "disable_void_radio_button?" do
+
+    context "canceled policy" do
+      let(:policy) { FactoryGirl.create(:policy, aasm_state: 'canceled') }
+
+      it "should return true" do
+        expect(helper.disable_void_radio_button?(policy)).to be_truthy
+      end
+    end
+
+    context "canceled policy" do
+      let(:policy) { FactoryGirl.create(:policy, aasm_state: 'submitted') }
+
+      it "should return false" do
+        expect(helper.disable_void_radio_button?(policy)).to be_falsey
+      end
+    end
+  end
+
+  describe "disable_corrected_radio_button?" do
+
+    context "canceled policy" do
+      let(:policy) { FactoryGirl.create(:policy, aasm_state: 'canceled') }
+
+      it "should return true" do
+        expect(helper.disable_corrected_radio_button?(policy)).to be_truthy
+      end
+    end
+
+    context "canceled policy" do
+      let(:policy) { FactoryGirl.create(:policy, aasm_state: 'submitted') }
+
+      it "should return false" do
+        expect(helper.disable_corrected_radio_button?(policy)).to be_falsey
+      end
+    end
+  end
 end

@@ -41,7 +41,7 @@ class Policy
 
   # Enrollment data for federal reporting to mirror some of Enroll's
   field :kind, type: String
-  field :enrollment_kind, type: String, default: 'unknown'
+  field :enrollment_kind, type: String
 
   validates_presence_of :eg_id
   validates_presence_of :pre_amt_tot

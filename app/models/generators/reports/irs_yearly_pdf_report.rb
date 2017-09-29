@@ -174,8 +174,7 @@ module Generators::Reports
 
       if @corrected || @void || @void_2015 || @void_2016
         bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
-          font "/Library/Fonts/Arial Unicode.ttf"
-          text "\u2714"
+          text "x"
         end
       end
 

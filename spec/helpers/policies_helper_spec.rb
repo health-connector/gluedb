@@ -1,4 +1,4 @@
-require "#{Rails.root}/app/helpers/policies_helper"
+require 'rails_helper'
 
 RSpec.describe PoliciesHelper, :type => :helper do
 
@@ -6,24 +6,24 @@ RSpec.describe PoliciesHelper, :type => :helper do
     let(:policy) { FactoryGirl.create(:policy) }
 
     context "2017 policy" do
-      let(:subscriber) { FactoryGirl.create(:enrollee, :coverage_start => Date.new(2017,01,01)) }
+      let(:subscriber) { FactoryGirl.build(:enrollee, :coverage_start => Date.new(2017,01,01)) }
       before do
         allow(policy).to receive(:subscriber).and_return(subscriber)
       end
 
       it "returns false" do
-        expect(subject.show_1095A_document_button?).to be_falsey
+        expect(helper.show_1095A_document_button?(policy)).to be_falsey
       end
     end
 
     context "2016 policy" do
-      let(:subscriber) { FactoryGirl.create(:enrollee, :coverage_start => Date.new(2016,01,01)) }
+      let(:subscriber) { FactoryGirl.build(:enrollee, :coverage_start => Date.new(2016,01,01)) }
       before do
         allow(policy).to receive(:subscriber).and_return(subscriber)
       end
 
       it "returns false" do
-        expect(subject.show_1095A_document_button?).to be_truthy
+        expect(helper.show_1095A_document_button?(policy)).to be_truthy
       end
     end
   end

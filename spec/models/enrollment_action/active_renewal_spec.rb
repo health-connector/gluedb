@@ -202,7 +202,7 @@ describe EnrollmentAction::ActiveRenewal, "#publish" do
     :event_responder => event_responder,
     :event_xml => event_xml,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1,
+    :employer_hbx_id => 1
     )
   }
   let(:action_helper_result_xml) { double }

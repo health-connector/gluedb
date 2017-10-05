@@ -13,7 +13,7 @@
           .control-group
             Type
           .control-group
-            = radio_button_tag :type, "new", checked: true, disabled: disable_radio_button?(policy)
+            = radio_button_tag :type, "new", checked: true, disabled: disable_radio_button?(@policy)
             = label_tag "Original"
           .control-group
             = radio_button_tag :type, "void"
@@ -28,7 +28,7 @@
                   = label_tag "Cancelled Policy IDs (comma separated list)"
                   = text_field_tag :void_cancelled_policy_ids, nil, maxlength:200
           .control-group
-            = radio_button_tag :type, "corrected", disabled: disable_radio_button?(policy)
+            = radio_button_tag :type, "corrected", disabled: disable_radio_button?(@policy)
             = label_tag "Corrected"
       - if @policy.has_responsible_person?
         %br

@@ -46,11 +46,12 @@ module EnrollmentAction
       @terminated_policy_information.each do |tpi|
         pol, a_member_ids = tpi
         pol.reload
-        writer = ::EnrollmentAction::EnrollmentTerminationEventWriter.new(pol, a_member_ids)
+        writer = ::EnrollmentAction::EnrollmentTerminationEventWriter.new(pol, (pol.active_member_ids + a_member_ids).uniq)
         term_event_xml = writer.write("transaction_id_placeholder", "urn:openhbx:terms:v1:enrollment#change_member_terminate")
         employer = pol.employer
         employer_hbx_id = employer.blank? ? nil : employer.hbx_id
         term_action_helper = EnrollmentAction::ActionPublishHelper.new(term_event_xml)
+        term_action_helper.filter_affected_members(a_member_ids)
         publish_edi(amqp_connection, term_action_helper.to_xml, pol.eg_id, employer_hbx_id)
       end
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)

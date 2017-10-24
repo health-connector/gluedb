@@ -21,7 +21,11 @@ puts pols_2015.length
 
 untransmitted_pols = []
 
-excluded_policies = File.read("policy_blacklist.txt").split("\n").map(&:strip)
+if File.exist?("policy_blacklist.txt")
+  excluded_policies = File.read("policy_blacklist.txt").split("\n").map(&:strip)
+else
+  excluded_policies = []
+end
 
 timestamp = Time.now.strftime('%Y%m%d%H%M')
 

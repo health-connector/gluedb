@@ -21,6 +21,8 @@ puts pols_2015.length
 
 untransmitted_pols = []
 
+excluded_policies = File.read("policy_blacklist.txt").split("\n").map(&:strip)
+
 timestamp = Time.now.strftime('%Y%m%d%H%M')
 
 CSV.open("policies_without_transmissions_#{timestamp}.csv","w") do |csv|
@@ -28,7 +30,7 @@ CSV.open("policies_without_transmissions_#{timestamp}.csv","w") do |csv|
   pols_2015.each do |pol|
     if !all_pol_ids.include?(pol.id)
       if !pol.canceled?
-        unless ragus.include? pol.id
+        unless excluded_policies.include? pol.id
           created_at = pol.created_at
           eg_id = pol.eg_id
           carrier = pol.plan.carrier.abbrev

@@ -44,6 +44,13 @@ module ExternalEvents
       end
     end
 
+    def drop_if_already_processed_termination!
+      return false unless already_processed_termination?
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_already_processed!(self)
+      end
+    end
+
     def drop_if_term_with_no_end!
       return false unless is_termination?
       return false unless subscriber_end.blank?
@@ -346,6 +353,17 @@ module ExternalEvents
 
     def is_publishable?
       Maybe.new(enrollment_event_xml).event.body.publishable?.value
+    end
+
+    def already_processed_termination?
+      return false unless is_termination?
+      return false if existing_policy.blank?
+      return true if existing_policy.canceled?
+      if existing_policy.terminated?
+        !is_cancel?
+      else
+        false
+      end
     end
 
     private

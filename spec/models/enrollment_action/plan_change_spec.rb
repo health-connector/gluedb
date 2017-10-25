@@ -82,6 +82,7 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
     allow(policy).to receive(:terminate_as_of).with(termination_date).
       and_return(true)
     allow(policy_updater).to receive(:persist).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "persists the change" do

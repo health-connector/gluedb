@@ -33,6 +33,7 @@ module Listeners
           )
         end
       end
+      EmployerEvent.execute_pending_enrollment_requests(connection, time_boundry)
       EmployerEvent.clear_before(time_boundry)
       channel.ack(delivery_info.delivery_tag, false)
     end

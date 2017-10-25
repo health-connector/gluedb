@@ -20,7 +20,6 @@ gem "psych", "2.0.5"
 
 group :development do
   gem 'capistrano', '2.15.4'
-  gem 'ruby-progressbar', '1.6.0'
 #  gem 'jazz_hands'
 end
 
@@ -73,6 +72,7 @@ group :production do
   gem 'nio4r', '1.1.1'
 end
 
+gem 'ruby-progressbar', '1.6.0'
 gem "haml"
 gem 'kaminari', '0.16.3'
 gem 'bootstrap-kaminari-views', '0.0.5'
@@ -89,7 +89,10 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "git@github.com:dchbx/edi_codec.git"
+gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'
+
+# configuration support
+gem "config", '~> 1.0.0'

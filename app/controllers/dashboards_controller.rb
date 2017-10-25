@@ -38,7 +38,7 @@ class DashboardsController < ApplicationController
 
     @response_metric = ResponseMetric.all
     @ambiguous_people_metric = AmbiguousPeopleMetric.all
-    @last_update = Protocols::X12::TransactionSetEnrollment.last.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime("%m-%d-%Y %I:%M:%S %p %Z") if Protocols::X12::TransactionSetEnrollment.last.updated_at.present?
+    @last_update = Protocols::X12::TransactionSetEnrollment.last.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime("%m-%d-%Y %I:%M:%S %p %Z") if Protocols::X12::TransactionSetEnrollment.last.present?
     render :index
   end
 

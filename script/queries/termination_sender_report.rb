@@ -39,7 +39,7 @@ end
 
 def parse_file_name_for_carrier(filename)
 	if filename.include? "DCHBX"
-		return "DC Health Link"
+		return "#{Settings.site.short_name}"
 	elsif filename.include? "DDPA"
 		return "Delta Dental"
 	elsif filename.include? "DTGA"

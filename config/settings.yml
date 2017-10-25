@@ -1,0 +1,17 @@
+site:
+  short_name: "Health Connector"
+  long_name: "Health Connector Glue DB"
+  copyright_period_start: "2017"
+
+  
+  social_media:
+    facebook_url: ""
+
+contact_center:
+  name: "Massachusetts Health Connector"
+  address: "133 Portland Street"
+  city: "Boston"
+  state_abbreviation: "MA"
+  postal_code: "02114"
+
+abbrev: "mhc"

@@ -9,7 +9,7 @@ module Handlers
         if context.persist
           super(context)
         else
-          context.persist_failed!({})
+          context.persist_failed!(context.errors.to_hash)
         end
       rescue NotImplementedError => e
         context.drop_not_yet_implemented!

@@ -58,6 +58,7 @@ describe EnrollmentAction::PassiveRenewal, "persists enrollment set for passive 
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan).
       and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "passive renewal persists" do

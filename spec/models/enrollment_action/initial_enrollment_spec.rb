@@ -30,7 +30,6 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:member_database_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
   let(:policy_database_record) { instance_double(ExternalEvents::ExternalPolicy, :persist => true) }
 
-
   subject do
     EnrollmentAction::InitialEnrollment.new(nil, enrollment_event)
   end
@@ -38,6 +37,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_from_xml).and_return(member_database_record)
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan).and_return(policy_database_record)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "successfully creates the new policy" do

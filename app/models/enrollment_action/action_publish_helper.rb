@@ -203,5 +203,20 @@ module EnrollmentAction
         end
       end
     end
+
+    def assign_assistance_date(assistance_date)
+        assistance_effective_node = event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market/cv:assistance_effective_date", XML_NS).first
+        if assistance_effective_node
+          assistance_effective_node.content = assistance_date.strftime("%Y%m%d")
+        else
+          event_xml_doc.xpath("//cv:policy/cv:enrollment/cv:individual_market", XML_NS).each do |node|
+            new_node = Nokogiri::XML::Node.new("assistance_effective_date", event_xml_doc)
+#            new_node.namespace = XML_NS[:cv]
+            new_node.content = assistance_date.strftime("%Y%m%d")
+            node << new_node
+          end
+        end
+        event_xml_doc
+    end
   end
 end

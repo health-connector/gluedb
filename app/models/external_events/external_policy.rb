@@ -30,17 +30,48 @@ module ExternalEvents
       BigDecimal.new(pre_string)
     end
 
+    def extract_rating_details
+      r_area = Maybe.new(@policy_node).policy_enrollment.rating_area.value
+      c_plan_id = Maybe.new(@policy_node).policy_enrollment.plan.alias_ids.first.value
+      potential_data = [
+       [:rating_area, r_area],
+       [:carrier_specific_plan_id, c_plan_id]
+      ]
+      potential_data.inject({}) do |acc, pair|
+        unless pair.last.blank?
+          acc[pair.first] = pair.last
+        end
+        acc
+      end
+    end
+
     def extract_other_financials
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return({}) if p_enrollment.blank?
       if p_enrollment.shop_market
         tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
+        composite_rating_tier_name = Maybe.new(p_enrollment).shop_market.composite_rating_tier_name.strip.value
         employer = find_employer(@policy_node)
-        return({ :employer => employer }) if tot_emp_res_amt.blank?
-        {
-          :employer => employer,
-          :tot_emp_res_amt => BigDecimal.new(tot_emp_res_amt)
-        }
+        potential_data = [
+          [:employer, employer],
+          [:composite_rating_tier, composite_rating_tier_name],
+          [:tot_emp_res_amt, tot_emp_res_amt]
+        ]
+        potential_data.inject({}) do |acc, pair|
+          case pair.first
+          when :employer
+            acc[pair.first] = pair.last
+          when :tot_emp_res_amt
+            unless pair.last.blank?
+              acc[pair.first] = BigDecimal.new(pair.last)
+            end
+          else
+            unless pair.last.blank?
+              acc[pair.first] = pair.last
+            end
+          end
+          acc
+        end
       else
         applied_aptc_val = Maybe.new(p_enrollment).individual_market.applied_aptc_amount.strip.value
         return({}) if applied_aptc_val.blank?
@@ -141,7 +172,7 @@ module ExternalEvents
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt
-      }.merge(extract_other_financials))
+      }.merge(extract_other_financials).merge(extract_rating_details))
       build_subscriber(policy)
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|

@@ -2,29 +2,6 @@ module EmployerEvents
   class Renderer
     XML_NS = "http://openhbx.org/api/terms/1.0"
 
-    EVENT_WHITELIST = %w(
-address_changed
-contact_changed
-fein_corrected
-name_changed
-broker_added
-broker_terminated
-general_agent_added
-general_agent_terminated
-    )
-
-    EXCLUDED_FOR_NOW = %w(
-benefit_coverage_initial_application_eligible
-benefit_coverage_period_terminated_voluntary
-benefit_coverage_period_terminated_nonpayment
-benefit_coverage_period_terminated_relocated
-benefit_coverage_renewal_carrier_dropped
-benefit_coverage_renewal_terminated_voluntary
-benefit_coverage_renewal_terminated_ineligible
-benefit_coverage_renewal_application_eligible
-benefit_coverage_period_reinstated
-    )
-
     attr_reader :employer_event
     attr_reader :timestamp
 
@@ -33,16 +10,81 @@ benefit_coverage_period_reinstated
       @timestamp = e_event.event_time
     end
 
+    def carrier_plan_years(carrier)
+      doc = Nokogiri::XML(employer_event.resource_body)
+      doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']/../../../../../../..", {:cv => XML_NS})
+    end
+
+    def has_current_or_future_plan_year?(carrier)
+      found_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value >= Date.today
+              found_plan_year = true
+            end
+          end
+        end
+        node.xpath("cv:plan_year_end", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value >= Date.today
+              found_plan_year = true
+            end
+          end
+        end
+      end
+      found_plan_year
+    end
+
+    def renewal_and_no_future_plan_year?(carrier)
+      return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
+      found_future_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value > Date.today
+              found_future_plan_year = true
+            end
+          end
+        end
+      end
+      !found_future_plan_year
+    end
+
+    def drop_and_has_future_plan_year?(carrier)
+      return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
+      found_future_plan_year = false
+      carrier_plan_years(carrier).each do |node|
+        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
+          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
+          if date_value
+            if date_value > Date.today
+              found_future_plan_year = true
+            end
+          end
+        end
+      end
+      found_future_plan_year
+    end
+
     # Return true if we rendered anything
     def render_for(carrier, out)
-      unless EVENT_WHITELIST.include?(@employer_event.event_name)
+      unless ::EmployerEvents::EventNames::EVENT_WHITELIST.include?(@employer_event.event_name)
         return false
       end
 
       doc = Nokogiri::XML(employer_event.resource_body)
-      unless doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']", {:cv => XML_NS}).any?
+
+      unless carrier_plan_years(carrier).any?
         return false
       end
+
+      return false unless has_current_or_future_plan_year?(carrier)
+      return false if drop_and_has_future_plan_year?(carrier)
+      return false if renewal_and_no_future_plan_year?(carrier)
 
       doc.xpath("//cv:elected_plans/cv:elected_plan", {:cv => XML_NS}).each do |node|
         carrier_id = node.at_xpath("cv:carrier/cv:id/cv:id", {:cv => XML_NS}).content

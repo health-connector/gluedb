@@ -79,4 +79,8 @@ class PlanYear
   def attribute_matches?(attribute, other)
     self[attribute] == other[attribute]
   end
+
+  def terminate_plan_year(end_date)
+    self.update_attributes(:end_date => end_date)
+  end
 end

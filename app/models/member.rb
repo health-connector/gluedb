@@ -153,6 +153,10 @@ class Member
     self.is_pregnant
   end
 
+  def update_member_hbx_id(new_hbx_id)
+    self.update_attributes!(:hbx_member_id => new_hbx_id)
+  end
+
 protected
   def generate_hbx_member_id
     self.hbx_member_id = self.hbx_member_id || self._id.to_s

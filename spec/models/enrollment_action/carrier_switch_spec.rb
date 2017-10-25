@@ -65,6 +65,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
     allow(policy).to receive(:save!).and_return(true)
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
+    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "successfully creates the new policy" do

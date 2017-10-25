@@ -8,8 +8,8 @@ GIT
       less-rails-bootstrap (>= 3.2.0)
 
 GIT
-  remote: git@github.com:dchbx/edi_codec.git
-  revision: ff2aba6d3c72435b8c9bc532f7a1a693d879ee75
+  remote: git@github.com:health-connector/edi_codec.git
+  revision: c602b29bd5c196101925293c83a0bc1485d89214
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: https://github.com/dchbx/openhbx_cv2.git
-  revision: f3624dda50b6235b7a2b64c9e2ce192c20fd8ed4
+  revision: 74d31cd17415d3fb27de27ba4cc10d0030422754
   specs:
     openhbx_cv2 (0.0.1)
       activesupport (>= 3.2)
@@ -137,7 +137,11 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     commonjs (0.2.7)
+    config (1.0.0)
+      activesupport (>= 3.0)
+      deep_merge (~> 1.0.0)
     database_cleaner (1.5.3)
+    deep_merge (1.0.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     devise (3.3.0)
@@ -446,6 +450,7 @@ DEPENDENCIES
   celluloid (= 0.15.2)
   ci_reporter (= 2.0.0)
   coffee-rails (~> 3.2.1)
+  config (~> 1.0.0)
   database_cleaner (= 1.5.3)
   designmodo-flatuipro-rails!
   devise (= 3.3.0)
@@ -502,4 +507,4 @@ DEPENDENCIES
   virtus
 
 BUNDLED WITH
-   1.11.2
+   1.15.1

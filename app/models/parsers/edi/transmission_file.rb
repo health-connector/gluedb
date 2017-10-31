@@ -365,7 +365,8 @@ module Parsers
             "18" => "self",
             "01" => "spouse",
             "19" => "child",
-            "15" => "ward"
+            "15" => "ward",
+            "53" => "life partner",
           }
           result = relationship_codes[r_code]
           result.nil? ? "child" : result

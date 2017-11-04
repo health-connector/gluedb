@@ -79,6 +79,7 @@
     %individual_market
       %is_carrier_to_bill true
       %applied_aptc_amount= (policy.applied_aptc).round(2)
+      %assistance_effective_date= simple_date_for(policy.assistance_effective_date) if policy.assistance_effective_date
   %premium_total_amount= policy.pre_amt_tot.round(2)
   %total_responsible_amount= policy.tot_res_amt.round(2)
   - unless policy.rating_area.blank?
@@ -87,5 +88,5 @@
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?
   %modified_at= policy.updated_at.iso8601
-  %assistance_effective_date= policy.assistance_effective_date if policy.assistance_effective_date
+  
 

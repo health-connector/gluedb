@@ -1,4 +1,4 @@
-year = '2017'
+year = '2018'
 
 puts "Importing #{year} plans"
 plan_file = File.open("db/seedfiles/#{year}_plans.json", "r")
@@ -8,6 +8,7 @@ plan_data = JSON.load(data)
 puts "Before: total #{Plan.count} plans"
 puts "#{plan_data.size} plans in json file"
 plan_data.each do |pd|
+  pd["carrier_id"] = Carrier.for_fein(pd["fein"]).id
   plan = Plan.where(year: year.to_i).and(hios_plan_id:pd["hios_plan_id"]).first
   if plan.blank?
     plan = Plan.new(pd)

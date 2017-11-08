@@ -12,7 +12,11 @@
     <% policies.each do |policy| %>
       <tr>
 	<td>
-	  <%= link_to policy.subscriber.person.full_name, policy.subscriber.person %>
+    <% if policy.subscriber %>
+	   <%= link_to policy.subscriber.person.full_name, policy.subscriber.person %>
+    <% else %>
+      <%= link_to policy.enrollees.first.person.full_name, policy.enrollees.first.person %>
+    <% end %>
         </td>
 	<td>
 	  <%= policy.id %>

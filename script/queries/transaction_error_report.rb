@@ -2,9 +2,9 @@ require 'csv'
 
 puts "Started At #{Time.now}"
 
-start_date = Time.mktime(2016,8,15,0,0,0)
+start_date = (Time.now - 1.week).beginning_of_day
 
-end_date = Time.mktime(2016,8,21,23,59,59)
+end_date = (Time.now - 1.day).end_of_day
 
 transaction_errors = Protocols::X12::TransactionSetEnrollment.where("error_list" => {"$exists" => true, "$not" => {"$size" => 0}},
 																	:created_at => {"$gte" => start_date, "$lte" => end_date}).no_timeout

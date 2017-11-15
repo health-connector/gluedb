@@ -1,3 +1,4 @@
+# To set cobra eligibility date for policy on ALL members of a policy
 require File.join(Rails.root, "lib/mongoid_migration_task")
 
 class SetCobraEligibilityDateForPolicy < MongoidMigrationTask

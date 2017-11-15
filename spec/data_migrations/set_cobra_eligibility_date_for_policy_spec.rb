@@ -1,8 +1,8 @@
 require "rails_helper"
-require File.join(Rails.root,"app","data_migrations","change_policy_start_date")
+require File.join(Rails.root,"app","data_migrations","set_cobra_eligibility_date_for_policy")
 
 describe SetCobraEligibilityDateForPolicy, dbclean: :after_each do
-  let(:given_task_name) { "set_cobra_eligibilty_date_for_policy" }
+  let(:given_task_name) { "set_cobra_eligibility_date_for_policy" }
   let(:employer) { FactoryGirl.create(:employer) }
   let!(:policy) { FactoryGirl.create(:policy,employer:employer) }
   let (:enrollees) { policy.enrollees }
@@ -15,7 +15,7 @@ describe SetCobraEligibilityDateForPolicy, dbclean: :after_each do
     end
   end
 
-  describe "should set cobra_eligibilty_date for policy" do
+  describe "should set cobra_eligibility_date for policy" do
 
     before(:each) do
       policy.subscriber.update_attributes(ben_stat:'cobra')

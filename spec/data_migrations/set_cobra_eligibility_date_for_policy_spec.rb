@@ -2,11 +2,11 @@ require "rails_helper"
 require File.join(Rails.root,"app","data_migrations","set_cobra_eligibility_date_for_policy")
 
 describe SetCobraEligibilityDateForPolicy, dbclean: :after_each do
-  let(:given_task_name) { "set_cobra_eligibility_date_for_policy" }
-  let(:employer) { FactoryGirl.create(:employer) }
-  let!(:policy) { FactoryGirl.create(:policy,employer:employer) }
-  let (:enrollees) { policy.enrollees }
-  let (:subscriber) {policy.subscriber}
+  let(:given_task_name) {"set_cobra_eligibility_date_for_policy"}
+  let(:employer) {FactoryGirl.create(:employer)}
+  let!(:policy) {FactoryGirl.create(:policy,employer:employer)}
+  let(:enrollees) {policy.enrollees}
+  let(:subscriber) {policy.subscriber}
   subject { SetCobraEligibilityDateForPolicy.new(given_task_name, double(:current_scope => nil)) }
 
   describe "given a task name" do

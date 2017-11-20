@@ -159,26 +159,57 @@ module ExternalEvents
       policy.save!
     end
 
+   def build_responsible_party(responsible_person)   
+    if responsible_person_exists?
+      responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
+      responsible_person.where(entity_identifier: "responsible party").first
+   end
+
     def policy_exists?
       eg_id = extract_enrollment_group_id(@policy_node)
       Policy.where(:hbx_enrollment_ids => eg_id).count > 0
     end
 
+    def responsible_person_exists?
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      Person.where(:authority_member_id => authority_member_id) > 0
+    end
+
+    def responsible_person
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      Person.where(:authority_member_id => authority_member_id).first if responsible_person_exists?
+    end
+
+    def responsible_party_exists?
+      responsible_person_exists? && responsible_person.responsible_parties.where(entity_identifier: "responsible party") > 0
+    end
+
+    def responsible_party
+      responsible_person.responsible_parties.where(entity_identifier: "responsible party").first if responsible_party_exists?
+    end
+
     def persist
-      return true if policy_exists?
-      policy = Policy.create!({
-        :plan => @plan,
-        :carrier_id => @plan.carrier_id,
-        :eg_id => extract_enrollment_group_id(@policy_node),
-        :pre_amt_tot => extract_pre_amt_tot,
-        :tot_res_amt => extract_tot_res_amt
-      }.merge(extract_other_financials).merge(extract_rating_details))
-      build_subscriber(policy)
-      other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
-      other_enrollees.each do |en|
-        build_enrollee(policy, en)
+      responsible_party = responsible_party_exists? ? responsible_party : build_responsible_party(responsible_person)  
+      if policy_exists? 
+        existing_policy.responsible_party_id = responsible_party.id
+        existing_policy.save!
+        return true
+      else
+        policy = Policy.create!({
+          :plan => @plan,
+          :carrier_id => @plan.carrier_id,
+          :eg_id => extract_enrollment_group_id(@policy_node),
+          :pre_amt_tot => extract_pre_amt_tot,
+          :tot_res_amt => extract_tot_res_amt,
+          :responsible_party_id => responsible_party.id
+        }.merge(extract_other_financials).merge(extract_rating_details))
+        build_subscriber(policy)
+        other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
+        other_enrollees.each do |en|
+          build_enrollee(policy, en)
+        end
+        true
       end
-      true
     end
   end
 end

@@ -4,6 +4,10 @@ module Handlers
       policy_cv.enrollees.detect { |en| en.subscriber? }
     end
 
+    def extract_responsible_party_id(policy_cv)
+      Maybe.new(policy_cv).responsible_party.id.strip.split("#").last.value
+    end
+
     def extract_member_id(enrollee)
       Maybe.new(enrollee).member.id.strip.split("#").last.value
     end

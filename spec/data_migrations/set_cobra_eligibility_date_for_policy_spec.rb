@@ -6,7 +6,7 @@ describe SetCobraEligibilityDateForPolicy, dbclean: :after_each do
   let(:employer) {FactoryGirl.create(:employer)}
   let!(:policy) {FactoryGirl.create(:policy,employer:employer)}
   let(:enrollees) {policy.enrollees}
-  let(:subscriber) {policy.subscriber}
+  let!(:subscriber) {policy.subscriber}
   subject { SetCobraEligibilityDateForPolicy.new(given_task_name, double(:current_scope => nil)) }
 
   describe "given a task name" do

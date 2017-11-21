@@ -12,9 +12,9 @@ class SetCobraEligibilityDateForPolicy < MongoidMigrationTask
     @logger = Logger.new("#{Rails.root}/log/set_cobra_eligibility_date_for_policy.log")
     while (offset_count <= policy_count) do
       @logger.info "Total offset  #offset_count}"
-      Policy.all_active_states.limit(limit_count).offset(offset_count).each do |policy|
+      Policy.limit(limit_count).offset(offset_count).each do |policy|
         begin
-          if (policy.is_cobra?) && (policy.cobra_eligibility_date.blank?) 
+          if Policy.where("enrollee.ben_stat" => "cobra", "cobra_eligibility_date" => nil)
             policy.cobra_eligibility_date = policy.subscriber.coverage_start
             if policy.save!
               @logger.info "policy: #{policy.eg_id} updated with cobra eligibility date" unless Rails.env.test?

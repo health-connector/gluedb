@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rake', '10.4.2'
-gem 'rails', '3.2.16'
+gem 'rails', '3.2.22.5'
 
 gem "mongoid", "~> 3.1.6"
 gem "origin"
@@ -84,7 +84,7 @@ gem "mongoid_auto_increment", '0.1.2'
 gem 'american_date', '1.1.0'
 gem 'cancancan', '~> 1.9'
 gem 'oj'
-gem 'roo', '2.1.1'
+gem 'roo', '2.1.0'
 gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'

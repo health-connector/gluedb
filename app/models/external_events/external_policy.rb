@@ -159,15 +159,21 @@ module ExternalEvents
       policy.save!
     end
 
-   def build_responsible_party(responsible_person)   
-    if responsible_person_exists?
-      responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
-      responsible_person.where(entity_identifier: "responsible party").first
-   end
+    def build_responsible_party(responsible_person)   
+      if responsible_person_exists?
+        responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
+        responsible_person.where(entity_identifier: "responsible party").first
+      end
+    end
 
     def policy_exists?
       eg_id = extract_enrollment_group_id(@policy_node)
       Policy.where(:hbx_enrollment_ids => eg_id).count > 0
+    end
+
+    def existing_policy
+      eg_id = extract_enrollment_group_id(@policy_node)
+      Policy.where(:hbx_enrollment_ids => eg_id).first if policy_exists?
     end
 
     def responsible_person_exists?
@@ -184,15 +190,18 @@ module ExternalEvents
       responsible_person_exists? && responsible_person.responsible_parties.where(entity_identifier: "responsible party") > 0
     end
 
-    def responsible_party
+    def existing_responsible_party
       responsible_person.responsible_parties.where(entity_identifier: "responsible party").first if responsible_party_exists?
     end
 
     def persist
-      responsible_party = responsible_party_exists? ? responsible_party : build_responsible_party(responsible_person)  
+    responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person) 
+
       if policy_exists? 
-        existing_policy.responsible_party_id = responsible_party.id
-        existing_policy.save!
+        unless existing_policy.has_responsible_person?
+          existing_policy.responsible_party_id = responsible_party.id
+          existing_policy.save!
+        end
         return true
       else
         policy = Policy.create!({

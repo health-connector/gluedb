@@ -51,4 +51,47 @@ describe ExternalEvents::ExternalPolicy, "given:
       end
     end
   end
+
+  describe "Persist" do
+  
+    let!(:responsible_party) { ResponsibleParty.new(entity_identifier: "responsible party") }
+    let!(:person) { FactoryGirl.create(:person,responsible_parties:[responsible_party])}
+
+    describe "when policy has responsible party " do
+
+      let!(:policy) {FactoryGirl.create(:policy,responsible_party_id:responsible_party.id) }
+      before :each do
+        allow(subject).to receive(:policy_exists?).and_return(true)
+        allow(subject).to receive(:existing_policy).and_return(policy)
+        allow(subject).to receive(:responsible_party_exists?).and_return(true)
+        allow(policy).to receive(:has_responsible_person?).and_return(true)
+        allow(subject).to receive(:existing_responsible_party).and_return(responsible_party)
+      end
+
+      it "should not update responsible party of policy" do
+
+        expect(subject.persist).to eq true
+        expect(policy.responsible_party_id).to eq responsible_party.id
+      end
+    end
+
+
+    describe "when policy has no responsible party " do
+
+      let!(:policy) {FactoryGirl.create(:policy) }
+
+      before :each do
+        allow(subject).to receive(:policy_exists?).and_return(true)
+        allow(subject).to receive(:existing_policy).and_return(policy)
+        allow(subject).to receive(:responsible_party_exists?).and_return(true)
+        allow(subject).to receive(:existing_responsible_party).and_return(responsible_party)
+      end
+
+      it "should update responsible party of policy" do
+        expect(policy.responsible_party_id).to eq nil
+        expect(subject.persist).to eq true
+        expect(policy.responsible_party_id).to eq responsible_party.id
+      end
+    end
+  end
 end

@@ -159,10 +159,10 @@ module ExternalEvents
       policy.save!
     end
 
-    def build_responsible_party(responsible_person)   
+    def build_responsible_party(responsible_person)
       if responsible_person_exists?
         responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
-        responsible_person.where(entity_identifier: "responsible party").first
+        responsible_person.responsible_parties.where(entity_identifier: "responsible party").first
       end
     end
 
@@ -195,13 +195,9 @@ module ExternalEvents
     end
 
     def persist
-    responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person) 
-
+      responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person) 
       if policy_exists? 
-        unless existing_policy.has_responsible_person?
-          existing_policy.responsible_party_id = responsible_party.id
-          existing_policy.save!
-        end
+        existing_policy.update_attributes(responsible_party_id:responsible_party.id) if !existing_policy.has_responsible_person? && responsible_party.present?
         return true
       else
         policy = Policy.create!({

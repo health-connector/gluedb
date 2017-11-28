@@ -196,7 +196,7 @@ class Policy
   end
 
   def is_cobra?
-    subscriber.ben_stat == 'cobra' if is_shop?
+    cobra_eligibility_date.present?
   end
 
   def spouse

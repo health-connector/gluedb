@@ -657,18 +657,6 @@ class Policy
     self.save
   end
 
-  def cobra_reinstate(term_date)
-    self.aasm_state = "submitted"
-    self.enrollees.each do |en|
-      if en.coverage_end.blank? || (!en.coverage_end.blank? && (en.coverage_end > term_date))
-        en.coverage_end = term_date
-        en.coverage_status = "active"
-        en.employment_status_code = "cobra"
-      end
-    end
-    self.save
-  end
-
   def terminate_member_id_on(member_id, term_date)
     enrollee_to_term = self.enrollees.detect { |en| en.m_id == member_id }
     return true unless enrollee_to_term

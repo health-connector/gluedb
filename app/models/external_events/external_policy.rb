@@ -7,9 +7,10 @@ module ExternalEvents
 
     # p_node : Openhbx::Cv2::Policy
     # p_record : Plan
-    def initialize(p_node, p_record)
+    def initialize(p_node, p_record, cobra_reinstate: false)
       @policy_node = p_node
       @plan = p_record
+      @cobra_reinstate = cobra_reinstate
     end
 
     def extract_pre_amt_tot
@@ -22,6 +23,13 @@ module ExternalEvents
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return 0.00 if p_enrollment.blank?
       BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
+    end
+
+     def extract_cobra_eligibility_date
+      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+      val = BigDecimal.new(Maybe.new(p_enrollment).eligibility_event.event_date.strip.value)
+      return nil if val.blank?
+      Date.strptime(val, "%Y%m%d")
     end
 
     def extract_enrollee_premium(enrollee)
@@ -131,7 +139,7 @@ module ExternalEvents
       policy.enrollees << Enrollee.new({
         :m_id => member_id,
         :rel_code => extract_rel_code(enrollee_node),
-        :ben_stat => "active",
+        :ben_stat => @cobra ? "cobra" : "active",
         :emp_state => "active",
         :coverage_start => extract_enrollee_start(enrollee_node),
         :pre_amt => extract_enrollee_premium(enrollee_node)
@@ -210,6 +218,7 @@ module ExternalEvents
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt,
+        :cobra_eligibility_date => @cobra ? extract_cobra_eligibility_date : ''
       }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
 
       build_subscriber(policy)

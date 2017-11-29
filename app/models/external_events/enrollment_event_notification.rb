@@ -255,6 +255,10 @@ module ExternalEvents
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end
 
+    def is_cobra_reinstate?
+      (enrollment_action == "urn:openhbx:terms:v1:enrollment#cobra_reinstate")
+    end
+
     def is_cancel?
       return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
       extract_enrollee_start(subscriber) >= extract_enrollee_end(subscriber)

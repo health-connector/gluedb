@@ -35,8 +35,8 @@ module EnrollmentAction
         ::EnrollmentAction::AssistanceChange,
         ::EnrollmentAction::InitialEnrollment,
         ::EnrollmentAction::Termination,
-        ::EnrollmentAction::ReselectionOfExistingCoverage,
-        ::EnrollmentAction::CobraReinstate
+        ::EnrollmentAction::CobraReinstate,
+        ::EnrollmentAction::ReselectionOfExistingCoverage
       ].detect { |kls| kls.qualifies?(chunk) }
       
       if selected_action

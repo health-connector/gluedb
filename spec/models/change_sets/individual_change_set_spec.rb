@@ -88,7 +88,7 @@ describe ::ChangeSets::IndividualChangeSet do
     let(:remote_resource_exists) { true }
     let(:remote_resource) { double(:exists? => remote_resource_exists, :record => existing_record, :name_first => nil, :name_middle => nil, :name_last => nil, :name_pfx => nil, :name_sfx => nil, :ssn => nil, :gender => nil, :dob => nil, :hbx_member_id => member_id) }
     let(:existing_record) do
-      Person.new(:members => [Member.new(:hbx_member_id => member_id,dob:Date.today)])
+      Person.new(:members => [Member.new(:hbx_member_id => member_id)])
     end
     let(:member_id) { "some member id whatever" }
     let(:home_address_changer) { double }
@@ -195,6 +195,10 @@ describe ::ChangeSets::IndividualChangeSet do
 
     context "with a change of dob change" do
       let(:dob_changed) { true }
+
+      before(:each) do
+        allow(existing_record.members.first).to receive(:dob).and_return(Date.today)
+      end
 
       describe "#any_changes?" do
         subject { changeset.any_changes? }

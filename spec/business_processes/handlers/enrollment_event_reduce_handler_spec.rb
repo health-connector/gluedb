@@ -18,6 +18,24 @@ describe Handlers::EnrollmentEventReduceHandler, "given an event that has alread
   end
 end
 
+describe Handlers::EnrollmentEventReduceHandler, "given an event that has already been processed" do
+  let(:next_step) { double }
+  let(:filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent) }
+  let(:event) { instance_double(::ExternalEvents::EnrollmentEventNotification) }
+
+  subject { Handlers::EnrollmentEventReduceHandler.new(next_step) }
+
+  before :each do
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent).to receive(:new).and_return(filter)
+    allow(filter).to receive(:filter).with([event]).and_return([])
+  end
+
+  it "does not go on to the next step" do
+    expect(next_step).not_to receive(:call)
+    subject.call([event])
+  end
+end
+
 describe Handlers::EnrollmentEventReduceHandler, "given a termination with no end" do
   let(:next_step) { double }
   let(:filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent) }
@@ -39,6 +57,30 @@ describe Handlers::EnrollmentEventReduceHandler, "given a termination with no en
   end
 end
 
+describe Handlers::EnrollmentEventReduceHandler, "given a termination which has already been processed" do
+  let(:next_step) { double }
+  let(:already_processed_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent) }
+  let(:filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination) }
+  let(:event) { instance_double(::ExternalEvents::EnrollmentEventNotification) }
+  let(:bad_term_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd) }
+
+  subject { Handlers::EnrollmentEventReduceHandler.new(next_step) }
+
+  before :each do
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent).to receive(:new).and_return(already_processed_filter)
+    allow(already_processed_filter).to receive(:filter).with([event]).and_return([event])
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd).to receive(:new).and_return(bad_term_filter)
+    allow(bad_term_filter).to receive(:filter).with([event]).and_return([event])
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination).to receive(:new).and_return(filter)
+    allow(filter).to receive(:filter).with([event]).and_return([])
+  end
+
+  it "does not go on to the next step" do
+    expect(next_step).not_to receive(:call)
+    subject.call([event])
+  end
+end
+
 describe Handlers::EnrollmentEventReduceHandler, "given:
 - 3 notifications
 - 2 of which should reduce"  do
@@ -48,12 +90,15 @@ describe Handlers::EnrollmentEventReduceHandler, "given:
   let(:duplicate_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => true, :hbx_enrollment_id => 3, :enrollment_action => "c", :drop_if_already_processed! => false) }
   let(:notifications) { [duplicate_notification_1, duplicate_notification_2, non_duplicate_notification] }
   let(:bad_term_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd) }
+  let(:dupe_termination_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination) }
 
   let(:next_step) { double("The next step in the pipeline") }
 
   subject { Handlers::EnrollmentEventReduceHandler.new(next_step) }
 
   before :each do
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination).to receive(:new).and_return(dupe_termination_filter)
+    allow(dupe_termination_filter).to receive(:filter).with(notifications).and_return(notifications)
     allow(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd).to receive(:new).and_return(bad_term_filter)
     allow(bad_term_filter).to receive(:filter).with(notifications).and_return(notifications)
     allow(next_step).to receive(:call).with([non_duplicate_notification])
@@ -82,12 +127,15 @@ describe Handlers::EnrollmentEventReduceHandler, "given:
   let(:same_bucket_notification_2) { instance_double(::ExternalEvents::EnrollmentEventNotification, :hash => 3, :drop_if_marked! => false, :bucket_id => 4, :hbx_enrollment_id => 3, :enrollment_action => "c", :drop_if_already_processed! => false) }
   let(:notifications) { [same_bucket_notification_1, same_bucket_notification_2, non_duplicate_notification] }
   let(:bad_term_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd) }
+  let(:dupe_termination_filter) { instance_double(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination) }
 
   let(:next_step) { double("The next step in the pipeline") }
 
   subject { Handlers::EnrollmentEventReduceHandler.new(next_step) }
 
   before :each do
+    allow(::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination).to receive(:new).and_return(dupe_termination_filter)
+    allow(dupe_termination_filter).to receive(:filter).with(notifications).and_return(notifications)
     allow(::ExternalEvents::EnrollmentEventNotificationFilters::TerminationWithoutEnd).to receive(:new).and_return(bad_term_filter)
     allow(bad_term_filter).to receive(:filter).with(notifications).and_return(notifications)
     allow(next_step).to receive(:call).with([non_duplicate_notification])

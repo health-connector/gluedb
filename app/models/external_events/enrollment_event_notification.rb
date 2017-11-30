@@ -255,6 +255,10 @@ module ExternalEvents
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end
 
+    def is_cobra?
+      determine_market(enrollment_event_xml) == "cobra"
+    end
+
     def is_cancel?
       return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
       extract_enrollee_start(subscriber) >= extract_enrollee_end(subscriber)

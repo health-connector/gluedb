@@ -139,6 +139,13 @@ module EnrollmentAction
       event_xml_doc
     end
 
+    def set_market_type(event_action_value)
+      event_xml_doc.xpath("//cv:enrollment_event_body/cv:enrollment/cv:market", XML_NS).each do |node|
+        node.content = event_action_value
+      end
+      event_xml_doc
+    end
+
     def set_policy_id(policy_id_value)
       event_xml_doc.xpath("//cv:enrollment_event_body/cv:enrollment/cv:policy/cv:id/cv:id", XML_NS).each do |node|
         node.content = policy_id_value

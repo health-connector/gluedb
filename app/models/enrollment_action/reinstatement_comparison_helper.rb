@@ -2,6 +2,20 @@ module EnrollmentAction
   module ReinstatementComparisonHelper
     include Handlers::EnrollmentEventXmlHelper
 
+    def start_and_end_dates_align(chunk)
+      enrollment_event_term = chunk.first
+      enrollment_event_start = chunk.last
+      term_policy = enrollment_event_term.policy_cv
+      start_policy = enrollment_event_start.policy_cv
+      term_subscriber = extract_subscriber(term_policy)
+      start_subscriber = extract_subscriber(start_policy)
+      return false if term_subscriber.blank? || start_subscriber.blank?
+      subscriber_end = extract_enrollee_end(term_subscriber)
+      subscriber_start = extract_enrollee_start(start_subscriber)
+      return false if subscriber_start.blank? || subscriber_end.blank?
+      subscriber_end == subscriber_start - 1.day
+    end
+
     def same_carrier_reinstatement_candidates(enrollment_event)
       shop_reinstatement_candidates(enrollment_event.policy_cv)
     end

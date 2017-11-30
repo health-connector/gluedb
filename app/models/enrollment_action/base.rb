@@ -22,6 +22,7 @@ module EnrollmentAction
     def self.select_action_for(chunk)
       selected_action = [
         ::EnrollmentAction::PassiveRenewal,
+        ::EnrollmentAction::CobraSwitchover,
         ::EnrollmentAction::ActiveRenewal,
         ::EnrollmentAction::CarrierSwitch,
         ::EnrollmentAction::CarrierSwitchRenewal,

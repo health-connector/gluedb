@@ -27,23 +27,25 @@ RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
   before(:each) do
     allow(policy).to receive(:has_responsible_person?).and_return(true)
     allow(policy).to receive(:responsible_person).and_return(person)
-    render :template => "enrollment_events/_enrollment_event.xml.haml", :locals => {
+    render :template => "enrollment_events/_enrollment_event",format: 'xml', :locals => {
                                                                           :affected_members => [affected_member],
                                                                           :policy => policy,
                                                                           :enrollees => enrollees,
                                                                           :event_type => event_type,
                                                                           :transaction_id => transaction_id
                                                                       }
-    
+    @doc = Nokogiri::HTML(rendered.gsub("\n", ""))
   end
   
   context "cobra enrollment" do
-    
-    it "should include cobra market kind" do
-      
+   
+   it "should include market type is cobra" do
+      expect(@doc.at_xpath('//market').text).to eq "urn:openhbx:terms:v1:aca_marketplace#cobra"
     end
-    
-    it "should include cobra eligibilty date"
-    
-    end
-end
+
+    it "should include cobra event kind and event date in rendered policy" do
+      expect(@doc.at_xpath('//event_kind').text).to eq "cobra"
+      expect(@doc.at_xpath('//event_date').text).to eq cobra_date.strftime("%m-%d-%Y")
+      end
+    end  
+  end

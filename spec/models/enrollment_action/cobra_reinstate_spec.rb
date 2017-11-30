@@ -1,25 +1,29 @@
 require 'rails_helper'
 
-describe EnrollmentAction::InitialEnrollment, "given:
+describe EnrollmentAction::CobraReinstate, "given:
 - has one enrollment
 - the first enrollment is a terminating for plan A
 - the current enrollment will represent the cobra for plan A" do
 
-  let(:plan) { instance_double(Plan, :id => 1) }
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, is_cobra_reinstate?: true) }
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, is_cobra_reinstate?: false) }
 
-  let(:member_ids_1) { 1 }
-
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => member_ids_1) }
-  let(:event_set) { event_1 }
-
-  subject { EnrollmentAction::CobraReinstate}
+  subject { EnrollmentAction::CobraReinstate }
 
   it "qualifies" do
-    expect(subject.qualifies?(event_set)).to be_truthy
+    expect(subject.qualifies?([event_1])).to be_truthy
+  end
+
+  it "does not qualify" do
+    expect(subject.qualifies?([event_2])).to be_false
+  end
+
+  it "does not qualify" do
+    expect(subject.qualifies?([event_1, event_2])).to be_false
   end
 end
 
-describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event, being persisted" do
+describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment event, being persisted" do
   let(:member_from_xml) { instance_double(Openhbx::Cv2::EnrolleeMember) }
   let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :member => member_from_xml) }
   let(:enrollees) { [enrollee] }
@@ -33,14 +37,15 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:existing_plan) { double }
   let(:member_database_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
   let(:policy_database_record) { instance_double(ExternalEvents::ExternalPolicy, :persist => true) }
+  let(:cobra_reinstate) { true }
 
   subject do
-    EnrollmentAction::InitialEnrollment.new(nil, enrollment_event)
+    EnrollmentAction::CobraReinstate.new(nil, enrollment_event)
   end
 
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_from_xml).and_return(member_database_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan).and_return(policy_database_record)
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan,cobra_reinstate).and_return(policy_database_record)
     allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
@@ -49,7 +54,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   end
 end
 
-describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event, being published" do
+describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment event, being published" do
   let(:amqp_connection) { double }
   let(:event_xml) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
@@ -70,18 +75,24 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:employer_hbx_id) { double }
 
   subject do
-    EnrollmentAction::InitialEnrollment.new(nil, enrollment_event)
+    EnrollmentAction::CobraReinstate.new(nil, enrollment_event)
   end
 
   before :each do
     allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reenroll")
+    allow(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
   end
 
-  it "publishes an event of type initial enrollment" do
-    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
+  it "publishes an event of type reenroll enrollment" do
+    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reenroll")
+    subject.publish
+  end
+
+  it "publishes set market type cobra" do
+    expect(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
     subject.publish
   end
 

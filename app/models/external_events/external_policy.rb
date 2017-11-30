@@ -7,7 +7,7 @@ module ExternalEvents
 
     # p_node : Openhbx::Cv2::Policy
     # p_record : Plan
-    def initialize(p_node, p_record, cobra_reinstate: false)
+    def initialize(p_node, p_record, cobra_reinstate = false)
       @policy_node = p_node
       @plan = p_record
       @cobra_reinstate = cobra_reinstate

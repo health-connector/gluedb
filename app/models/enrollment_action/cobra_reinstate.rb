@@ -5,7 +5,7 @@ module EnrollmentAction
     extend DependentComparisonHelper
     def self.qualifies?(chunk)
       return false if chunk.length > 1
-      chunk.first.is_cobra_reinstate? && existing_policy.present? && existing_policy.terminated?
+      chunk.first.is_cobra_reinstate?
     end
 
     def persist
@@ -17,7 +17,8 @@ module EnrollmentAction
         unless members_persisted.all?
           return false
         end
-        ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan, cobra_reinstate: true)
+        #cobra_reinstate = true
+        ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan, true)
         ep.persist
     end
 

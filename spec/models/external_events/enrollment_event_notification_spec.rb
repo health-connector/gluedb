@@ -378,3 +378,136 @@ describe ::ExternalEvents::EnrollmentEventNotification do
     end
   end
 end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is not a term" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(false)
+  end
+
+  it "is not an already processed termination" do
+    expect(subject.already_processed_termination?).to be_falsey
+  end
+end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is a term with no existing enrollment" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(true)
+    allow(subject).to receive(:existing_policy).and_return(nil)
+  end
+
+  it "is not an already processed termination" do
+    expect(subject.already_processed_termination?).to be_falsey
+  end
+end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is cancel with a canceled enrollment" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+  let(:existing_policy) { instance_double(Policy, :canceled? => true, :terminated? => true) }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(true)
+    allow(subject).to receive(:is_cancel?).and_return(true)
+    allow(subject).to receive(:existing_policy).and_return(existing_policy)
+  end
+
+  it "is an already processed termination" do
+    expect(subject.already_processed_termination?).to be_truthy
+  end
+end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is termination with a terminated enrollment" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+  let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => true) }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(true)
+    allow(subject).to receive(:is_cancel?).and_return(false)
+    allow(subject).to receive(:existing_policy).and_return(existing_policy)
+  end
+
+  it "is an already processed termination" do
+    expect(subject.already_processed_termination?).to be_truthy
+  end
+end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is a cancel with a terminated enrollment" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+  let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => true) }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(true)
+    allow(subject).to receive(:is_cancel?).and_return(true)
+    allow(subject).to receive(:existing_policy).and_return(existing_policy)
+  end
+
+  it "is not an already processed termination" do
+    expect(subject.already_processed_termination?).to be_falsey
+  end
+end
+
+describe ExternalEvents::EnrollmentEventNotification, "that is a term with an active enrollment" do
+  let(:m_tag) { double('m_tag') }
+  let(:t_stamp) { double('t_stamp') }
+  let(:e_xml) { double('e_xml') }
+  let(:headers) { double('headers') }
+  let(:responder) { instance_double('::ExternalEvents::EventResponder') }
+  let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => false) }
+
+  subject do
+    ::ExternalEvents::EnrollmentEventNotification.new responder, m_tag, t_stamp, e_xml, headers
+  end
+
+  before :each do
+    allow(subject).to receive(:is_termination?).and_return(true)
+    allow(subject).to receive(:is_cancel?).and_return(false)
+    allow(subject).to receive(:existing_policy).and_return(existing_policy)
+  end
+
+  it "is not an already processed termination" do
+    expect(subject.already_processed_termination?).to be_falsey
+  end
+end

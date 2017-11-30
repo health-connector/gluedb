@@ -1,25 +1,66 @@
 require 'rails_helper'
 
 describe EnrollmentAction::CobraReinstate, "given:
-- has one enrollment
-- the first enrollment is a terminating for plan A
-- the current enrollment will represent the cobra for plan A" do
+- 2 events
+" do
 
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, is_cobra_reinstate?: true) }
-  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, is_cobra_reinstate?: false) }
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification) } 
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification) }
 
   subject { EnrollmentAction::CobraReinstate }
 
-  it "qualifies" do
-    expect(subject.qualifies?([event_1])).to be_truthy
-  end
-
-  it "does not qualify" do
-    expect(subject.qualifies?([event_2])).to be_false
-  end
-
   it "does not qualify" do
     expect(subject.qualifies?([event_1, event_2])).to be_false
+  end
+
+end
+
+describe EnrollmentAction::CobraReinstate, "given:
+- has one enrollment
+- that enrollment is a termination
+" do
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, is_termination?: true) }
+
+  subject { EnrollmentAction::CobraReinstate }
+
+  it "does not qualify" do
+    expect(subject.qualifies?([event_1])).to be_false
+  end
+end
+
+describe EnrollmentAction::CobraReinstate, "given:
+- has one enrollment
+- that enrollment is not a termination
+- that enrollment is not cobra
+" do
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, is_termination?: false, is_cobra?: false) }
+
+  subject { EnrollmentAction::CobraReinstate }
+
+  it "does not qualify" do
+    expect(subject.qualifies?([event_1])).to be_false
+  end
+end
+
+describe EnrollmentAction::CobraReinstate, "given:
+- has one enrollment
+- that enrollment is not a termination
+- that enrollment is cobra
+- there is an already terminated corresponding shop policy
+" do
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, is_termination?: false, is_cobra?: true) }
+
+  subject { EnrollmentAction::CobraReinstate }
+
+  before :each do
+    allow(subject).to receive(:same_carrier_reinstatement_candidates).with(event_1).and_return([double])
+  end
+
+  it "qualifies" do
+    expect(subject.qualifies?([event_1])).to be_true
   end
 end
 

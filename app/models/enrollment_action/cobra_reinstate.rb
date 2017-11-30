@@ -1,11 +1,11 @@
-
 module EnrollmentAction
   class CobraReinstate < Base
-    extend PlanComparisonHelper
-    extend DependentComparisonHelper
+    extend ReinstatementComparisonHelper
     def self.qualifies?(chunk)
       return false if chunk.length > 1
-      chunk.first.is_cobra_reinstate?
+      return false if chunk.first.is_termination?
+      return false unless chunk.first.is_cobra?
+      same_carrier_reinstatement_candidates(chunk.first).any?
     end
 
     def persist

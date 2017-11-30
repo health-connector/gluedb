@@ -27,7 +27,7 @@ RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
   before(:each) do
     allow(policy).to receive(:has_responsible_person?).and_return(true)
     allow(policy).to receive(:responsible_person).and_return(person)
-    render :template => "enrollment_events/_enrollment_event",format: 'xml', :locals => {
+    render :template => "enrollment_events/_enrollment_event", :locals => {
                                                                           :affected_members => [affected_member],
                                                                           :policy => policy,
                                                                           :enrollees => enrollees,

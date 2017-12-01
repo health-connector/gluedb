@@ -218,7 +218,7 @@ module ExternalEvents
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt,
-        :cobra_eligibility_date => @cobra ? extract_cobra_eligibility_date : ''
+        :cobra_eligibility_date => @cobra ? extract_cobra_eligibility_date : nil
       }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
 
       build_subscriber(policy)

@@ -196,7 +196,7 @@ class Policy
   end
 
   def is_cobra?
-    cobra_eligibility_date.present?
+    cobra_eligibility_date.present? || enrollees.any? { |en| en.ben_stat == "cobra"}
   end
 
   def spouse

@@ -256,7 +256,7 @@ module ExternalEvents
     end
 
     def is_cobra?
-      determine_market(enrollment_event_xml) == "cobra"
+      extract_market_kind(enrollment_event_xml) == "cobra"
     end
 
     def is_cancel?

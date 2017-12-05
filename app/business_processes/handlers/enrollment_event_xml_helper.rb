@@ -52,6 +52,10 @@ module Handlers
       Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
     end
 
+    def extract_market_kind(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.enrollment.market.split("#").last.value
+    end
+
     def determine_market(enrollment_event_cv)
       shop_enrollment = Maybe.new(enrollment_event_cv).event.body.enrollment.policy.policy_enrollment.shop_market.value
       shop_enrollment.nil? ? "individual" : "shop"

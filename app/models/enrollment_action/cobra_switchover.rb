@@ -46,7 +46,7 @@ module EnrollmentAction
       end
       amqp_connection = action.event_responder.connection
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
-      action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#reenroll")
+      action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
       action_helper.keep_member_ends([])
       publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end

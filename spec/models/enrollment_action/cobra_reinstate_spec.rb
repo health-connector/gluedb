@@ -121,14 +121,14 @@ describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment e
 
   before :each do
     allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reenroll")
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
     allow(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
   end
 
   it "publishes an event of type reenroll enrollment" do
-    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reenroll")
+    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
     subject.publish
   end
 

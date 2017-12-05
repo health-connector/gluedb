@@ -10,7 +10,7 @@ module ExternalEvents
     def initialize(p_node, p_record, cobra_reinstate = false)
       @policy_node = p_node
       @plan = p_record
-      @cobra_reinstate = cobra_reinstate
+      @cobra = cobra_reinstate
     end
 
     def extract_pre_amt_tot

@@ -461,6 +461,4 @@ class Person
   def query_proxy
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
-
-
 end

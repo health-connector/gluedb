@@ -365,8 +365,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
       before do
         allow(other).to                         receive('is_termination?').and_return(false)
         allow(enrollment_event_notification).to receive('is_termination?').and_return(true)
-        allow(other).to                         receive('subscriber_start').and_return(Date.today)
-        allow(enrollment_event_notification).to receive('subscriber_end').and_return(Date.yesterday)
+        allow(other).to                         receive('subscriber_start').and_return(Date.new(2017,3,1))
+        allow(enrollment_event_notification).to receive('subscriber_end').and_return(Date.new(2017,2,28))
         allow(other).to                         receive('active_year').and_return(2016)
         allow(enrollment_event_notification).to receive('active_year').and_return(2017)
       end

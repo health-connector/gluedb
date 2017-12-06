@@ -25,11 +25,11 @@ module ExternalEvents
       BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
     end
 
-     def extract_cobra_eligibility_date
+    def extract_cobra_eligibility_date
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
-      val = BigDecimal.new(Maybe.new(p_enrollment).eligibility_event.event_date.strip.value)
+      val = Maybe.new(p_enrollment).eligibility_event.event_date.strip.value
       return nil if val.blank?
-      Date.strptime(val, "%Y%m%d")
+      Date.strptime(val, "%Y%m%d") rescue nil
     end
 
     def extract_enrollee_premium(enrollee)

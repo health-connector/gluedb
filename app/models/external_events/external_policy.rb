@@ -159,7 +159,7 @@ module ExternalEvents
       policy.enrollees << Enrollee.new({
         :m_id => subscriber_id,
         :rel_code => "self",
-        :ben_stat => "active",
+        :ben_stat => @cobra ? "cobra" : "active",
         :emp_state => "active",
         :coverage_start => extract_enrollee_start(sub_node),
         :pre_amt => extract_enrollee_premium(sub_node)

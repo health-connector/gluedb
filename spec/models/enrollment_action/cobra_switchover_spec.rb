@@ -191,6 +191,7 @@ describe EnrollmentAction::CobraSwitchover, "given a qualified enrollment set fo
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(action_publish_helper).to receive(:set_policy_id).with(1)
+    allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
     allow(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
   end
@@ -205,8 +206,13 @@ describe EnrollmentAction::CobraSwitchover, "given a qualified enrollment set fo
     subject.publish
   end
 
-  it "sets member start dates" do
+  it "sets member start dates on the termination" do
     expect(termination_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
+    subject.publish
+  end
+
+  it "sets member start dates on the reinstate" do
+    expect(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     subject.publish
   end
 

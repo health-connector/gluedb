@@ -6,7 +6,7 @@ module ChangeSets
       old_values_hash = old_dob_values(person_resource.hbx_member_id, member, person_resource)
       update_value = member.update_attributes(dob_update_hash(person_resource))
       return false unless update_value
-      
+
       update_enrollments_for(policies_to_notify)
 
       policies_to_notify.each do |pol|
@@ -32,7 +32,7 @@ module ChangeSets
 
       policies_to_notify.each do |policy|
         enrollments = policy.hbx_enrollment_ids.map do |id|
-          get_enrollment(id)
+          get_enrollment(id, amqp)
         end.compact.sort_by do |enrollment|
           enrollment.header.submitted_timestamp
         end
@@ -53,6 +53,7 @@ module ChangeSets
 
         if policy_node.policy_enrollment.shop_market
           policy.tot_emp_res_amt = Maybe.new(policy_node).policy_enrollment.shop_market.total_employer_responsible_amount.strip.value || 0.00
+
         else
           policy.applied_aptc = Maybe.new(latest_enrollment).individual_market.applied_aptc_amount.strip.value || 0.00
         end
@@ -61,14 +62,14 @@ module ChangeSets
       end
     end
 
-    def get_enrollment(id, retry_count=0)
+    def get_enrollment(id, amqp, retry_count=0)
       return nil if retry_count > 2
       rcode, payload = RemoteResources::EnrollmentEventResource.retrieve(amqp, id.to_s)
       case rcode
       when '200'
         enrollment_event_cv_for payload.body
       when '503'
-        get_enrollment(id, retry_count + 1)
+        get_enrollment(id, amqp, retry_count + 1)
       else
         nil
       end

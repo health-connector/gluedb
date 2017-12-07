@@ -107,9 +107,14 @@ describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment e
   let(:action_helper_result_xml) { double }
   let(:hbx_enrollment_id) { double }
   let(:employer_hbx_id) { double }
+  let(:existing_policy) { instance_double(Policy, :enrollees => existing_enrollees, :eg_id => "enrollment_group_id") }
+  let(:subscriber) { instance_double(Enrollee, :m_id => "1", :coverage_start => "coverage_start_date") }
+  let(:existing_enrollees) { [subscriber] }
 
   subject do
-    EnrollmentAction::CobraReinstate.new(nil, enrollment_event)
+    the_action = EnrollmentAction::CobraReinstate.new(nil, enrollment_event)
+    the_action.existing_policy = existing_policy
+    the_action
   end
 
   before :each do
@@ -117,6 +122,8 @@ describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment e
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
     allow(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
+    allow(action_publish_helper).to receive(:set_member_starts).with({"1" => "coverage_start_date"})
+    allow(action_publish_helper).to receive(:set_policy_id).with("enrollment_group_id")
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
   end
 
@@ -127,6 +134,16 @@ describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment e
 
   it "publishes set market type cobra" do
     expect(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
+    subject.publish
+  end
+
+  it "sets the policy id" do
+    expect(action_publish_helper).to receive(:set_policy_id).with("enrollment_group_id")
+    subject.publish
+  end
+
+  it "sets the existing member start dates" do
+    expect(action_publish_helper).to receive(:set_member_starts).with({"1" => "coverage_start_date"})
     subject.publish
   end
 

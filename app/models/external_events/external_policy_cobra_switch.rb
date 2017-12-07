@@ -34,7 +34,7 @@ module ExternalEvents
     def update_policy_information
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       tot_emp_res_amt_str = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
-      tot_emp_res_amt = tot_emp_res_amt_string.blank? ? 0.00 : BigDecimal.new(tot_emp_res_amt_string)
+      tot_emp_res_amt = tot_emp_res_amt_str.blank? ? 0.00 : BigDecimal.new(tot_emp_res_amt_str)
       @existing_policy.update_attributes!({
         :cobra_eligibility_date => extract_cobra_eligibility_date,
         :pre_amt_tot => extract_pre_amt_tot,

@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git@github.com:dchbx/edi_codec.git
-  revision: 2bcc54197223c218f72f9bf9baa6c28fb5d085c7
+  revision: eaf2704475630330512a8c4b3fee01d4cc9dda51
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)

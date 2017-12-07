@@ -65,29 +65,22 @@ describe EnrollmentAction::CobraReinstate, "given:
 end
 
 describe EnrollmentAction::CobraReinstate, "with an cobra reinstate enrollment event, being persisted" do
-  let(:member_from_xml) { instance_double(Openhbx::Cv2::EnrolleeMember) }
-  let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :member => member_from_xml) }
-  let(:enrollees) { [enrollee] }
-  let(:policy_cv) { instance_double(Openhbx::Cv2::Policy,:enrollees => enrollees) }
+  let(:policy_cv) { instance_double(Openhbx::Cv2::Policy) }
   let(:enrollment_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
-    :policy_cv => policy_cv,
-    :existing_plan => existing_plan
+    :policy_cv => policy_cv
   ) }
-
-  let(:existing_plan) { double }
-  let(:member_database_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
-  let(:policy_database_record) { instance_double(ExternalEvents::ExternalPolicy, :persist => true) }
-  let(:cobra_reinstate) { true }
+  let(:existing_policy) { instance_double(Policy) }
+  let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyCobraSwitch) }
 
   subject do
     EnrollmentAction::CobraReinstate.new(nil, enrollment_event)
   end
 
   before :each do
-    allow(ExternalEvents::ExternalMember).to receive(:new).with(member_from_xml).and_return(member_database_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan,cobra_reinstate).and_return(policy_database_record)
-    allow(subject.action).to receive(:existing_policy).and_return(false)
+    allow(subject).to receive(:same_carrier_reinstatement_candidates).with(enrollment_event).and_return([existing_policy])
+    allow(ExternalEvents::ExternalPolicyCobraSwitch).to receive(:new).with(policy_cv, existing_policy).and_return(policy_updater)
+    allow(policy_updater).to receive(:persist).and_return(true)
   end
 
   it "successfully creates the new policy" do

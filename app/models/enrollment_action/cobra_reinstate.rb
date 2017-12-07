@@ -1,6 +1,7 @@
 module EnrollmentAction
   class CobraReinstate < Base
     extend ReinstatementComparisonHelper
+    include ReinstatementComparisonHelper
     def self.qualifies?(chunk)
       return false if chunk.length > 1
       return false if chunk.first.is_termination?
@@ -9,17 +10,9 @@ module EnrollmentAction
     end
 
     def persist
-      members = action.policy_cv.enrollees.map(&:member)
-        members_persisted = members.map do |mem|
-          em = ExternalEvents::ExternalMember.new(mem)
-          em.persist
-        end
-        unless members_persisted.all?
-          return false
-        end
-        #cobra_reinstate = true
-        ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan, true)
-        ep.persist
+      existing_policy = same_carrier_reinstatement_candidates(action).first
+      policy_updater = ExternalEvents::ExternalPolicyCobraSwitch.new(action.policy_cv, existing_policy)
+      policy_updater.persist
     end
 
     def publish

@@ -13,20 +13,8 @@ module EnrollmentAction
     end
 
     def persist
-      return false if check_already_exists
-      members = action.policy_cv.enrollees.map(&:member)
-      members_persisted = members.map do |mem|
-        em = ExternalEvents::ExternalMember.new(mem)
-        em.persist
-      end
-      unless members_persisted.all?
-        return false
-      end
-      #cobra_reinstate = true
-      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan, true)
-      return false unless ep.persist
-      policy_to_term = termination.existing_policy
-      policy_to_term.terminate_as_of(termination.subscriber_end)
+      ep = ExternalEvents::ExternalPolicyCobraSwitch.new(action.policy_cv, termination.existing_policy)
+      ep.persist
     end
 
     def publish

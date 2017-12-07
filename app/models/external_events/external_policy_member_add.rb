@@ -103,7 +103,7 @@ module ExternalEvents
           :m_id => member_id,
           :rel_code => extract_rel_code(enrollee_node),
           :ben_stat => "active",
-          :emp_state => "active",
+          :emp_stat => "active",
           :coverage_start => extract_enrollee_start(enrollee_node),
           :pre_amt => extract_enrollee_premium(enrollee_node)
         })

@@ -107,40 +107,25 @@ describe EnrollmentAction::CobraSwitchover, "given:
 end
 
 describe EnrollmentAction::CobraSwitchover, "given an enrollment event set that indicates a cobra switchover" do
-  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
-  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 1) }
-  let(:member_primary) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
-  let(:enrollee_primary) { instance_double(::Openhbx::Cv2::Enrollee, :member => member_primary) }
-  let(:primary_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
-
-  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, :enrollees => [enrollee_primary]) }
-  let(:policy) { instance_double(Policy, :hbx_enrollment_ids => [1]) }
+  let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy) }
+  let(:policy) { instance_double(Policy) }
 
   let(:plan_change_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
-    :policy_cv => new_policy_cv,
-    :existing_plan => new_plan,
+    :policy_cv => new_policy_cv
     ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
-    :existing_policy => policy,
-    :subscriber_end => termination_date
+    :existing_policy => policy
     ) }
-  let(:termination_date) { DateTime.new(2017,2,28) }
-  let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
+  let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicyCobraSwitch) }
 
 
   subject { EnrollmentAction::CobraSwitchover.new(termination_event, plan_change_event) }
 
   before :each do
-    allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).
-      and_return(primary_db_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan, true).
-      and_return(policy_updater)
-    allow(policy).to receive(:terminate_as_of).with(termination_date).
-      and_return(true)
+    allow(ExternalEvents::ExternalPolicyCobraSwitch).to receive(:new).with(new_policy_cv, policy).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
-    allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
   it "persists the change" do

@@ -67,4 +67,59 @@ describe ChangeSets::PersonDobChangeSet do
       end
     end
   end
+
+  describe 'test' do
+    let(:member) { FactoryGirl.build :member }
+    let(:person) { FactoryGirl.create :person, members: [ member ] }
+
+    let(:example_data) {
+      o_file = File.open(File.join(Rails.root, "spec/data/remote_resources/individual.xml"))
+      data = o_file.read
+      o_file.close
+      data
+    }
+
+    let(:remote_resource) { RemoteResources::IndividualResource.parse(example_data, :single => true) }
+    let(:changeset) { ::ChangeSets::IndividualChangeSet.new(remote_resource) }
+
+    before :each do
+      allow(person).to receive(:members).and_return(double(detect: member))
+      allow(::Queries::PersonByHbxIdQuery).to receive(:new).with("18941339").and_return(double(execute: person))
+      allow(changeset).to receive(:home_address_changed?).and_return(false)
+      allow(changeset).to receive(:mailing_address_changed?).and_return(false)
+      allow(changeset).to receive(:names_changed?).and_return(false)
+      allow(changeset).to receive(:ssn_changed?).and_return(false)
+      allow(changeset).to receive(:gender_changed?).and_return(false)
+      allow(changeset).to receive(:home_email_changed?).and_return(false)
+      allow(changeset).to receive(:work_email_changed?).and_return(false)
+      allow(changeset).to receive(:home_phone_changed?).and_return(false)
+      allow(changeset).to receive(:work_phone_changed?).and_return(false)
+      allow(changeset).to receive(:mobile_phone_changed?).and_return(false)
+      allow(Amqp::Requestor).to receive(:default).and_return(instance_double(Amqp::Requestor))
+    end
+
+    it 'should work' do
+      p changeset.change_collection
+      expect(changeset.dob_changed?).to be_truthy
+    end
+
+    it 'should work too' do
+      expect(changeset.process_first_edi_change).to be_truthy
+    end
+  end
+
+  describe '#update_enrollments_for' do
+    let(:policy) { FactoryGirl.create :policy }
+    let(:dob_changeset) { ::ChangeSets::PersonDobChangeSet.new }
+    let(:member) { FactoryGirl.build :member }
+    let(:person) { FactoryGirl.create :person, members: [ member ] }
+
+    before :each do
+      allow(Amqp::Requestor).to receive(:default).and_return(instance_double(Amqp::Requestor))
+    end
+
+    it 'updates policies' do
+      expect(dob_changeset.update_enrollments_for([policy])).to be_truthy
+    end
+  end
 end

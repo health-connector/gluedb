@@ -2,7 +2,9 @@ module ChangeSets
   class PersonDobChangeSet
     include Handlers::EnrollmentEventXmlHelper
 
+    @@logger = Logger.new("#{Rails.root}/log/person_dob_change_set.log")
     def perform_update(member, person_resource, policies_to_notify, transmit = true)
+      @@logger.info("Starting perform_update")
       old_values_hash = old_dob_values(person_resource.hbx_member_id, member, person_resource)
       update_value = member.update_attributes(dob_update_hash(person_resource))
       return false unless update_value
@@ -24,10 +26,12 @@ module ChangeSets
           pubber.publish(true, "#{pol.eg_id}.xml", cv)
         end
       end
+      @@logger.info("Ending perform_update")
       true
     end
 
     def update_enrollments_for(policies_to_notify)
+      @@logger.info("Starting update_enrollments_for")
       amqp = Amqp::Requestor.default
 
       policies_to_notify.each do |policy|
@@ -60,9 +64,11 @@ module ChangeSets
 
         policy.save
       end
+      @@logger.info("Ending update_enrollments_for")
     end
 
     def get_enrollment(id, amqp, retry_count=0)
+      @@logger.info("Starting get_enrollments")
       return nil if retry_count > 2
       rcode, payload = RemoteResources::EnrollmentEventResource.retrieve(amqp, id.to_s)
       case rcode
@@ -73,6 +79,7 @@ module ChangeSets
       else
         nil
       end
+      @@logger.info("Ending get_enrollments")
     end
 
     def dob_update_hash(person_resource)

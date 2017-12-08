@@ -51,7 +51,7 @@ module Services
 
     def is_initial?(x12_xml)
       x12_doc = Nokogiri::XML(x12_xml)
-      "001" == x12_doc.at_xpath("//etf:INS_MemberLevelDetail_2000[contains(etf:INS01__MemberIndicator,'Y')]/etf:INS03__MaintenanceTypeCode", X12_NS).content.strip
+      "021" == x12_doc.at_xpath("//etf:INS_MemberLevelDetail_2000[contains(etf:INS01__MemberIndicator,'Y')]/etf:INS03__MaintenanceTypeCode", X12_NS).content.strip
     end
 
     def routing_key(x12_xml)

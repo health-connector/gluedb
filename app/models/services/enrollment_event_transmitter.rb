@@ -3,6 +3,8 @@ module Services
   class EnrollmentEventTransmitter
     include Handlers::EnrollmentEventXmlHelper
 
+    X12_NS = { :etf => "urn:x12:schemas:005:010:834A1A1:BenefitEnrollmentAndMaintenance" }
+
     def call(amqp_connection, action_xml)
       enrollment_event_cv = enrollment_event_cv_for(action_xml)
       if is_publishable?(enrollment_event_cv)
@@ -19,9 +21,9 @@ module Services
     def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(amqp_connection) do |chan|
         ex = chan.default_exchange
-        ex.publish(x12_payload, :routing_key => routing_key(enrollment_event_cv), :headers => {
+        ex.publish(x12_payload, :routing_key => routing_key(x12_xml), :headers => {
           "market" => determine_market(enrollment_event_cv),
-          "file_name" => determine_file_name(enrollment_event_cv)
+          "file_name" => determine_file_name(enrollment_event_cv, x12_xml)
         })
       end
     end
@@ -34,10 +36,10 @@ module Services
       found_plan.carrier.abbrev.upcase
     end
 
-    def determine_file_name(enrollment_event_cv)
+    def determine_file_name(enrollment_event_cv, x12_xml)
       market_identifier = shop_market?(enrollment_event_cv) ? "S" : "I"
       carrier_identifier = find_carrier_abbreviation(enrollment_event_cv)
-      category_identifier = is_initial?(enrollment_event_cv) ? "_C_E_" : "_C_M_"
+      category_identifier = is_initial?(x12_xml) ? "_C_E_" : "_C_M_"
       "834_" + transaction_id(enrollment_event_cv) + "_" + carrier_identifier + category_identifier + market_identifier + "_1.xml"
     end
 
@@ -47,13 +49,13 @@ module Services
       Maybe.new(enrollment_event_cv).event.body.publishable?.value
     end
 
-    def is_initial?(enrollment_event_cv)
-      event_name = Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.split("#").last.downcase.value
-      (event_name == "initial")
+    def is_initial?(x12_xml)
+      x12_doc = Nokogiri::XML(x12_xml)
+      "001" == x12_doc.at_xpath("//etf:INS_MemberLevelDetail_2000[contains(etf:INS01__MemberIndicator,'Y')]/etf:INS03__MaintenanceTypeCode", X12_NS).content.strip
     end
 
-    def routing_key(enrollment_event_cv)
-      is_initial?(enrollment_event_cv) ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
+    def routing_key(x12_xml)
+      is_initial?(x12_xml) ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
     end
 
     def transaction_id(enrollment_event_cv)

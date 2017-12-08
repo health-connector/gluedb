@@ -21,9 +21,9 @@ module Services
     def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(amqp_connection) do |chan|
         ex = chan.default_exchange
-        ex.publish(x12_payload, :routing_key => routing_key(x12_xml), :headers => {
+        ex.publish(x12_payload, :routing_key => routing_key(x12_payload), :headers => {
           "market" => determine_market(enrollment_event_cv),
-          "file_name" => determine_file_name(enrollment_event_cv, x12_xml)
+          "file_name" => determine_file_name(enrollment_event_cv, x12_)
         })
       end
     end

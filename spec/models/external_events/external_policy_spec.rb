@@ -54,8 +54,23 @@ describe ExternalEvents::ExternalPolicy, "given:
     end
   end
 
+  describe "#responsible_person_exists?" do
+    context 'of a responsible party existing' do
+      let(:member) { FactoryGirl.build :member }
+      let!(:person) { FactoryGirl.create(:person, members: [member])}
+
+      before do
+        responsible_party = instance_double(Openhbx::Cv2::ResponsibleParty, id: member.hbx_member_id)
+        allow(policy_cv).to receive(:responsible_party).and_return(responsible_party)
+      end
+
+      it 'returns true' do
+        expect(subject.responsible_person_exists?).to be_truthy
+      end
+    end
+  end
+
   describe ".Persist" do
-  
     let!(:responsible_party) { ResponsibleParty.new(entity_identifier: "responsible party") }
     let!(:person) { FactoryGirl.create(:person,responsible_parties:[responsible_party])}
 

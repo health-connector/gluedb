@@ -178,7 +178,7 @@ module ExternalEvents
 
     def responsible_person_exists?
       authority_member_id = extract_responsible_party_id(@policy_node)
-      Person.where(:authority_member_id => authority_member_id) > 0
+      Person.where('members.hbx_member_id' => authority_member_id).count > 0
     end
 
     def responsible_person

@@ -21,7 +21,7 @@ puts pols_2015.length
 
 untransmitted_pols = []
 
-if File.exist?("policy_blacklist.txt")
+if File.exists?("policy_blacklist.txt")
   excluded_policies = File.read("policy_blacklist.txt").split("\n").map(&:strip).map(&:to_i)
 else
   excluded_policies = []

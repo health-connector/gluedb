@@ -48,8 +48,7 @@ module ChangeSets
 
         policy.enrollees.each do |enrollee|
           policy_node_enrollee = policy_node.enrollees.find { |enrollee_node| enrollee_node.member.id == enrollee.m_id }
-          enrollee.pre_amt = BigDecimal(policy_node_enrollee.benefit.premium_amount || 0.00)
-          enrollee.save
+          enrollee.update_attributes!({pre_amt: BigDecimal(policy_node_enrollee.benefit.premium_amount || 0.00)})
         end
 
         policy.tot_res_amt = policy_node.policy_enrollment.total_responsible_amount
@@ -57,12 +56,11 @@ module ChangeSets
 
         if policy_node.policy_enrollment.shop_market
           policy.tot_emp_res_amt = Maybe.new(policy_node).policy_enrollment.shop_market.total_employer_responsible_amount.strip.value || 0.00
-
         else
-          policy.applied_aptc = Maybe.new(latest_enrollment).individual_market.applied_aptc_amount.strip.value || 0.00
+          policy.applied_aptc = Maybe.new(policy_node).policy_enrollment.individual_market.applied_aptc_amount.strip.value || 0.00
         end
 
-        policy.save
+        policy.save!
       end
       @@logger.info("Ending update_enrollments_for")
     end
@@ -71,6 +69,7 @@ module ChangeSets
       @@logger.info("Starting get_enrollments")
       return nil if retry_count > 2
       rcode, payload = RemoteResources::EnrollmentEventResource.retrieve(amqp, id.to_s)
+      @@logger.info("Ending get_enrollments")
       case rcode
       when '200'
         enrollment_event_cv_for payload.body
@@ -79,7 +78,6 @@ module ChangeSets
       else
         nil
       end
-      @@logger.info("Ending get_enrollments")
     end
 
     def dob_update_hash(person_resource)

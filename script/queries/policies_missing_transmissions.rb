@@ -39,7 +39,7 @@ CSV.open("policies_without_transmissions_#{timestamp}.csv","w") do |csv|
           eg_id = pol.eg_id
           carrier = pol.plan.carrier.abbrev
           employer = pol.try(:employer).try(:name)
-          subscriber_name = pol.subscriber.person.full_name
+          subscriber_name = pol.subscriber.person.full_name rescue ""
           subscriber_hbx_id = pol.subscriber.m_id
           csv << [created_at,eg_id,carrier,employer,subscriber_name,subscriber_hbx_id]
         end

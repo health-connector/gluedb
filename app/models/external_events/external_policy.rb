@@ -195,25 +195,24 @@ module ExternalEvents
     end
 
     def persist
-      responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person) 
-      if policy_exists? 
-        existing_policy.update_attributes(responsible_party_id:responsible_party.id) if !existing_policy.has_responsible_person? && responsible_party.present?
-        return true
-      else
-        policy = Policy.create!({
-          :plan => @plan,
-          :carrier_id => @plan.carrier_id,
-          :eg_id => extract_enrollment_group_id(@policy_node),
-          :pre_amt_tot => extract_pre_amt_tot,
-          :tot_res_amt => extract_tot_res_amt,
-          :responsible_party_id => responsible_party.id
-        }.merge(extract_other_financials).merge(extract_rating_details))
-        build_subscriber(policy)
-        other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
-        other_enrollees.each do |en|
-          build_enrollee(policy, en)
-        end
-        true
+      return true if policy_exists?
+
+      responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person)
+
+      policy = Policy.create!({
+        :plan => @plan,
+        :carrier_id => @plan.carrier_id,
+        :eg_id => extract_enrollment_group_id(@policy_node),
+        :pre_amt_tot => extract_pre_amt_tot,
+        :tot_res_amt => extract_tot_res_amt,
+        :responsible_party_id => responsible_party.id
+      }.merge(extract_other_financials).merge(extract_rating_details))
+
+      build_subscriber(policy)
+
+      other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
+      other_enrollees.each do |en|
+        build_enrollee(policy, en)
       end
     end
   end

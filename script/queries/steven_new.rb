@@ -42,6 +42,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
         if !pol.subscriber.nil?
           #if !pol.subscriber.canceled?
             subscriber_id = pol.subscriber.m_id
+            next if pol.subscriber.person.blank?
             subscriber_member = pol.subscriber.member
             auth_subscriber_id = subscriber_member.person.authority_member_id
 

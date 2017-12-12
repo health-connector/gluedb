@@ -23,7 +23,7 @@ module Services
         ex = chan.default_exchange
         ex.publish(x12_payload, :routing_key => routing_key(x12_payload), :headers => {
           "market" => determine_market(enrollment_event_cv),
-          "file_name" => determine_file_name(enrollment_event_cv, x12_)
+          "file_name" => determine_file_name(enrollment_event_cv, x12_payload)
         })
       end
     end

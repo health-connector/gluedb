@@ -73,6 +73,9 @@
           %dba= employer.dba
         %fein= employer.fein
       %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
+      - if policy.is_cobra?
+        - if policy.cobra_eligibility_date.present?
+          %cobra_eligibility_date= simple_date_for(policy.cobra_eligibility_date)
       - unless policy.composite_rating_tier.blank?
         %composite_rating_tier_name= policy.composite_rating_tier
   - else
@@ -84,11 +87,6 @@
   %total_responsible_amount= policy.tot_res_amt.round(2)
   - unless policy.rating_area.blank?
     %rating_area= policy.rating_area
-  - if policy.is_cobra?
-    %eligibility_event
-      %event_kind= "urn:dc0:terms:v1:qualifying_life_event#cobra"
-      - if policy.cobra_eligibility_date.present?
-        %event_date= simple_date_for(policy.cobra_eligibility_date)
 %request_submitted_timestamp= policy.created_at.iso8601 if policy.created_at
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?

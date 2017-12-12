@@ -6,14 +6,13 @@ describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
 " do
 
   let(:plan_cv) { instance_double(Openhbx::Cv2::PlanLink) }
-  let(:shop_market) { instance_double(Openhbx::Cv2::PolicyEnrollmentShopMarket, :total_employer_responsible_amount => tot_emp_res_amt) }
+  let(:shop_market) { instance_double(Openhbx::Cv2::PolicyEnrollmentShopMarket, :total_employer_responsible_amount => tot_emp_res_amt, :cobra_eligibility_date => cobra_start_date_str) }
   let(:policy_enrollment) do
     instance_double(
       Openhbx::Cv2::PolicyEnrollment,
       :shop_market => shop_market,
       :total_responsible_amount => tot_res_amt,
-      :premium_total_amount => pre_amt_tot,
-      :eligibility_event => eligibility_event
+      :premium_total_amount => pre_amt_tot
     )
   end
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => policy_enrollment, :enrollees => [enrollee_node], :id => policy_id) }
@@ -23,8 +22,8 @@ describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
   let(:pre_amt_tot) { "123.45" }
   let(:tot_res_amt) { "123.45" }
   let(:cobra_start_date) { Date.new(2017, 2, 1) }
+  let(:cobra_start_date_str) { "20170201" }
   let(:tot_emp_res_amt) { "0.00" }
-  let(:eligibility_event) { instance_double(Openhbx::Cv2::EligibilityEvent, :event_date => cobra_start_date.strftime("%Y%m%d") ) }
   let(:policy_id) { "a policy id" }
   let(:hbx_enrollment_ids_field_proxy) { double }
   let(:subscriber_id) { "subscriber id" }

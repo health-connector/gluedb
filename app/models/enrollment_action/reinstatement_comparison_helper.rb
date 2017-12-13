@@ -2,6 +2,13 @@ module EnrollmentAction
   module ReinstatementComparisonHelper
     include Handlers::EnrollmentEventXmlHelper
 
+    def reinstate_capable_carrier?(enrollment_event)
+      policy_cv = enrollment_event.policy_cv
+      carrier_id = extract_carrier_id(policy_cv)
+      # CF is the only one that isn't capable, across both exchanges
+      !("116036" == carrier_id)
+    end
+
     def start_and_end_dates_align(chunk)
       enrollment_event_term = chunk.first
       enrollment_event_start = chunk.last

@@ -18,6 +18,12 @@ module Handlers
       Date.strptime(val, "%Y%m%d")
     end
 
+    def extract_carrier_id(policy_cv)
+      carrier = Maybe.new(policy_cv).policy_enrollment.plan.carrier.value
+      return nil unless carrier
+      Maybe.new(carrier).id.strip.split("#").last.value
+    end
+
     def extract_enrollee_end(enrollee)
       val = Maybe.new(enrollee).benefit.end_date.strip.value
       return nil if val.blank?

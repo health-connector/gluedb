@@ -32,6 +32,8 @@ module EnrollmentAction
         ::EnrollmentAction::PlanChangeDependentDrop,
         ::EnrollmentAction::RenewalDependentAdd,
         ::EnrollmentAction::RenewalDependentDrop,
+        ::EnrollmentAction::CobraNewPolicySwitchover,
+        ::EnrollmentAction::CobraNewPolicyReinstate,
         ::EnrollmentAction::CobraSwitchover,
         ::EnrollmentAction::CobraReinstate,
         ::EnrollmentAction::AssistanceChange,

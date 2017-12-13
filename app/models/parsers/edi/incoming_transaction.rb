@@ -36,35 +36,81 @@ module Parsers
 
       def import
         return unless valid?
+        is_policy_term = false
+        is_policy_cancel = false
+        is_non_payment = false
         @etf.people.each do |person_loop|
           begin 
-          enrollee = @policy.enrollee_for_member_id(person_loop.member_id)
+            enrollee = @policy.enrollee_for_member_id(person_loop.member_id)
 
-          policy_loop = person_loop.policy_loops.first
+            policy_loop = person_loop.policy_loops.first
 
-          enrollee.c_id = person_loop.carrier_member_id
-          enrollee.cp_id = policy_loop.id
+            enrollee.c_id = person_loop.carrier_member_id
+            enrollee.cp_id = policy_loop.id
 
-          if(!@etf.is_shop? && policy_loop.action == :stop )
-            enrollee.coverage_status = 'inactive'
-            enrollee.coverage_end = policy_loop.coverage_end
-
-            if enrollee.subscriber?
-              if enrollee.coverage_start == enrollee.coverage_end
-                enrollee.policy.aasm_state = "canceled"
-              else
-                enrollee.policy.aasm_state = "terminated"
+            if(!@etf.is_shop? && policy_loop.action == :stop )
+              enrollee.coverage_status = 'inactive'
+              enrollee.coverage_end = policy_loop.coverage_end
+              if enrollee.subscriber?
+                is_non_payment = person_loop.non_payment_change?
+                if enrollee.coverage_start == enrollee.coverage_end
+                  is_policy_cancel = true
+                  policy_end_date = enrollee.coverage_end
+                  enrollee.policy.aasm_state = "canceled"
+                else
+                  is_policy_term = true
+                  policy_end_date = enrollee.coverage_end
+                  enrollee.policy.aasm_state = "terminated"
+                end
               end
             end
-
-          end
           rescue Exception
             puts @policy.eg_id
             puts person_loop.member_id
             raise $!
           end
         end
-        @policy.save
+        save_val = @policy.save
+        if is_policy_term
+          # Broadcast the term
+          reason_headers = if is_non_payment
+                             {:qualifying_reason => "urn:openhbx:terms:v1:benefit_maintenance#non_payment"}
+                           else
+                             {}
+                           end
+          Amqp::EventBroadcaster.with_broadcaster do |eb|
+            eb.broadcast(
+              { 
+                :routing_key => "info.events.policy.terminated",
+                :headers => {
+                  :resource_instance_uri => @policy.eg_id,
+                  :event_effective_date => @policy.policy_end.strftime("%Y%m%d"),
+                  :hbx_enrollment_ids => JSON.dump(@policy.hbx_enrollment_ids)
+                }.merge(reason_headers)
+              },
+              "")
+          end
+        elsif is_policy_cancel
+          # Broadcast the cancel
+          reason_headers = if is_non_payment
+                             {:qualifying_reason => "urn:openhbx:terms:v1:benefit_maintenance#non_payment"}
+                           else
+                             {}
+                           end
+          Amqp::EventBroadcaster.with_broadcaster do |eb|
+            eb.broadcast(
+              { 
+                :routing_key => "info.events.policy.canceled",
+                :headers => {
+                  :resource_instance_uri => @policy.eg_id,
+                  :event_effective_date => @policy.policy_end.strftime("%Y%m%d"),
+                  :hbx_enrollment_ids => JSON.dump(@policy.hbx_enrollment_ids)
+                }.merge(reason_headers)
+              },
+              "")
+          end
+        end
+        save_val
       end
 
       def policy_found(policy)

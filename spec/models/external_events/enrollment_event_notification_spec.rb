@@ -110,10 +110,32 @@ describe ::ExternalEvents::EnrollmentEventNotification do
   end
 
   describe "#edge_for" do
-    let(:graph) { double 'graph', :add_edge => true }
-    let(:other) { double 'other', :hbx_enrollment_id => 1 }
+    let(:graph) { double 'graph' }
+    let(:other) { instance_double(ExternalEvents::EnrollmentEventNotification, :hbx_enrollment_id => 1) }
 
     subject { enrollment_event_notification.edge_for(graph, other) }
+
+    context 'when ordering by the submitted at time, and the starts are in reverse order, and the first is a term' do
+      before do
+        allow(enrollment_event_notification).to receive(:subscriber_start).and_return(2017)
+        allow(other).to                         receive(:subscriber_start).and_return(2016)
+        allow(other).to receive(:submitted_at_time).and_return(2)
+        allow(enrollment_event_notification).to receive(:submitted_at_time).and_return(1)
+
+        allow(other).to                         receive(:active_year).and_return(2017)
+        allow(enrollment_event_notification).to receive(:active_year).and_return(2017)
+        allow(enrollment_event_notification).to receive(:hbx_enrollment_id).and_return(2)
+        allow(enrollment_event_notification).to receive(:is_termination?).and_return(true)
+        allow(other).to receive(:is_termination?).and_return(false)
+        allow(other).to receive(:hash).and_return(1)
+        allow(enrollment_event_notification).to receive(:hash).and_return(1)
+      end
+
+      it 'orders by submitted time stamp instead of coverage start' do
+        expect(graph).to receive(:add_edge).with(enrollment_event_notification, other)
+        subject
+      end
+    end
 
     context 'other being the same enrollment' do
       before { allow(enrollment_event_notification).to receive('hbx_enrollment_id').and_return(1) }
@@ -125,8 +147,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of enrollment_event_notification to other' do
+          expect(graph).to receive('add_edge').with(enrollment_event_notification, other)
           subject
-          expect(graph).to have_received('add_edge').with(enrollment_event_notification, other)
         end
       end
 
@@ -137,8 +159,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of other to enrollment_event_notification' do
+          expect(graph).to receive('add_edge').with(other, enrollment_event_notification)
           subject
-          expect(graph).to have_received('add_edge').with(other, enrollment_event_notification)
         end
       end
 
@@ -166,8 +188,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of other to enrollment_event_notification' do
+          expect(graph).to receive('add_edge').with(other, enrollment_event_notification)
           subject
-          expect(graph).to have_received('add_edge').with(other, enrollment_event_notification)
         end
       end
 
@@ -178,14 +200,16 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of enrollment_event_notification to other' do
+          expect(graph).to receive('add_edge').with(enrollment_event_notification, other)
           subject
-          expect(graph).to have_received('add_edge').with(enrollment_event_notification, other)
         end
       end
     end
 
     context "subscriber_start is different" do
       before do
+        allow(other).to receive(:submitted_at_time).and_return(1)
+        allow(enrollment_event_notification).to receive(:submitted_at_time).and_return(1)
         allow(other).to                         receive(:active_year).and_return(2017)
         allow(enrollment_event_notification).to receive(:active_year).and_return(2017)
         allow(enrollment_event_notification).to receive('hbx_enrollment_id').and_return(2)
@@ -198,8 +222,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of other to enrollment_event_notification' do
+          expect(graph).to receive('add_edge').with(other, enrollment_event_notification)
           subject
-          expect(graph).to have_received('add_edge').with(other, enrollment_event_notification)
         end
       end
 
@@ -210,14 +234,17 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of enrollment_event_notification to other' do
+          expect(graph).to receive('add_edge').with(enrollment_event_notification, other)
           subject
-          expect(graph).to have_received('add_edge').with(enrollment_event_notification, other)
         end
       end
     end
 
+
     context 'other scenarios like' do
       before do
+        allow(other).to receive(:submitted_at_time).and_return(1)
+        allow(enrollment_event_notification).to receive(:submitted_at_time).and_return(1)
         allow(other).to                         receive(:active_year).and_return(2017)
         allow(enrollment_event_notification).to receive(:active_year).and_return(2017)
         allow(other).to                         receive(:subscriber_start).and_return(2017)
@@ -243,8 +270,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of enrollment_event_notification to other' do
+          expect(graph).to receive('add_edge').with(enrollment_event_notification, other)
           subject
-          expect(graph).to have_received('add_edge').with(enrollment_event_notification, other)
         end
       end
 
@@ -255,8 +282,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of other to enrollment_event_notification' do
+          expect(graph).to receive('add_edge').with(other, enrollment_event_notification)
           subject
-          expect(graph).to have_received('add_edge').with(other, enrollment_event_notification)
         end
       end
 
@@ -267,8 +294,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of enrollment_event_notification to other' do
+          expect(graph).to receive('add_edge').with(enrollment_event_notification, other)
           subject
-          expect(graph).to have_received('add_edge').with(enrollment_event_notification, other)
         end
       end
 
@@ -279,8 +306,8 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         end
 
         it 'adds edge to graph of other to enrollment_event_notification' do
+          expect(graph).to receive('add_edge').with(other, enrollment_event_notification)
           subject
-          expect(graph).to have_received('add_edge').with(other, enrollment_event_notification)
         end
       end
     end

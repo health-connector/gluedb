@@ -197,7 +197,11 @@ module ExternalEvents
     def persist
       return true if policy_exists?
 
-      responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person)
+      responsible_party_attributes = {}
+      if !@policy_node.responsible_party.blank?
+        responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person)
+        responsible_party_attributes = { :responsible_party_id => responsible_party.id }
+      end
 
       policy = Policy.create!({
         :plan => @plan,
@@ -205,8 +209,7 @@ module ExternalEvents
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
         :tot_res_amt => extract_tot_res_amt,
-        :responsible_party_id => responsible_party.id
-      }.merge(extract_other_financials).merge(extract_rating_details))
+      }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
 
       build_subscriber(policy)
 

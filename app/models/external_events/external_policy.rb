@@ -183,6 +183,7 @@ module ExternalEvents
 
     def responsible_person
       authority_member_id = extract_responsible_party_id(@policy_node)
+      return nil if authority_member_id.blank?
       Person.where("members.hbx_member_id" => authority_member_id).first if responsible_person_exists?
     end
 

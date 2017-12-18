@@ -159,26 +159,65 @@ module ExternalEvents
       policy.save!
     end
 
+    def build_responsible_party(responsible_person)
+      if responsible_person_exists?
+        responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
+        responsible_person.responsible_parties.first
+      end
+    end
+
     def policy_exists?
       eg_id = extract_enrollment_group_id(@policy_node)
       Policy.where(:hbx_enrollment_ids => eg_id).count > 0
     end
 
+    def existing_policy
+      eg_id = extract_enrollment_group_id(@policy_node)
+      Policy.where(:hbx_enrollment_ids => eg_id).first if policy_exists?
+    end
+
+    def responsible_person_exists?
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      Person.where('members.hbx_member_id' => authority_member_id).count > 0
+    end
+
+    def responsible_person
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      return nil if authority_member_id.blank?
+      Person.where("members.hbx_member_id" => authority_member_id).first if responsible_person_exists?
+    end
+
+    def responsible_party_exists?
+      responsible_person_exists? && responsible_person.responsible_parties.any?
+    end
+
+    def existing_responsible_party
+      responsible_person.responsible_parties.first if responsible_party_exists?
+    end
+
     def persist
       return true if policy_exists?
+
+      responsible_party_attributes = {}
+      if !@policy_node.responsible_party.blank?
+        responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person)
+        responsible_party_attributes = { :responsible_party_id => responsible_party.id }
+      end
+
       policy = Policy.create!({
         :plan => @plan,
         :carrier_id => @plan.carrier_id,
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
-        :tot_res_amt => extract_tot_res_amt
-      }.merge(extract_other_financials).merge(extract_rating_details))
+        :tot_res_amt => extract_tot_res_amt,
+      }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
+
       build_subscriber(policy)
+
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|
         build_enrollee(policy, en)
       end
-      true
     end
   end
 end

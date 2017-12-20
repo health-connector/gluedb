@@ -75,7 +75,7 @@ module ChangeSets
       elsif home_email_changed?
         @home_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif dob_changed?
-        @dob_changer.perform_update(member, resource, determine_policies_to_transmit)
+        @dob_changer.perform_update(member, resource, now_or_future_active_policies)
       end
     end
 

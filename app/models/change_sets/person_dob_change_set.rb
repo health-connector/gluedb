@@ -48,7 +48,9 @@ module ChangeSets
 
         policy.enrollees.each do |enrollee|
           policy_node_enrollee = policy_node.enrollees.find { |enrollee_node| enrollee_node.member.id == enrollee.m_id }
-          enrollee.update_attributes!({pre_amt: BigDecimal(policy_node_enrollee.benefit.premium_amount || 0.00)})
+          if policy_node_enrollee
+            enrollee.update_attributes!({pre_amt: BigDecimal(policy_node_enrollee.benefit.premium_amount || 0.00)})
+          end
         end
 
         policy.tot_res_amt = policy_node.policy_enrollment.total_responsible_amount

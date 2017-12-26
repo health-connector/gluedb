@@ -2,6 +2,7 @@ module EnrollmentAction
   class PlanChangeDependentAdd < Base
     extend PlanComparisonHelper
     extend DependentComparisonHelper
+    include TerminationDateHelper
 
     def self.qualifies?(chunk)
       return false if chunk.length < 2
@@ -25,8 +26,9 @@ module EnrollmentAction
       end
       ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan)
       return false unless ep.persist
+      termination_date = select_termination_date
       policy_to_term = termination.existing_policy
-      policy_to_term.terminate_as_of(termination.subscriber_end)
+      policy_to_term.terminate_as_of(termination_date)
     end
 
     def publish

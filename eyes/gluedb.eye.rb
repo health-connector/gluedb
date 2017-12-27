@@ -101,7 +101,7 @@ Eye.application 'eye_gluedb' do
   notify :tevans, :info
 #  notify :dthomas, :info
 
-  define_forked_worker("employer_workers", "script/amqp/employer_workers.rb", BUS_DIRECTORY)
+#  define_forked_worker("employer_workers", "script/amqp/employer_workers.rb", BUS_DIRECTORY)
   define_forked_largemem_worker("legacy_listeners", "script/amqp/legacy_listeners.rb", BUS_DIRECTORY)
   define_multi_worker("broker_updated_listener", "script/amqp/broker_updated_listener.rb", BUS_DIRECTORY, 1)
   define_multi_worker("enrollment_validator", "script/amqp/enrollment_validator.rb", BUS_DIRECTORY, 2)

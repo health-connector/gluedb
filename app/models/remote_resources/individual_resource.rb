@@ -10,13 +10,15 @@ module RemoteResources
 
     has_one :person, ::RemoteResources::Person, :tag => "person"
     has_one :person_demographics, ::RemoteResources::PersonDemographics, :tag => "person_demographics"
+    has_many :relationships, ::RemoteResources::PersonRelationship,  :tag => "person_relationship"
+
 
     delegate :name_first, :name_last, :name_middle, :name_sfx, :name_pfx, :addresses, :emails, :phones, :to => :person, :allow_nil => true
 
     delegate :ssn, :dob, :gender, :to => :person_demographics, :allow_nil => true
 
     def hbx_member_id
-      Maybe.new(id).split("#").last.value
+      Maybe.new(id).strip.split("#").last.value
     end
 
     def exists?
@@ -42,7 +44,7 @@ module RemoteResources
         :name_last => name_last
       }
       if !name_middle.blank?
-        props_hash[:name_middle] = name_middle 
+        props_hash[:name_middle] = name_middle
       end
       if !name_pfx.blank?
         props_hash[:name_pfx] = name_pfx

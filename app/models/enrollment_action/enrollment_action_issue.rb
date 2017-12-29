@@ -15,6 +15,7 @@ module EnrollmentAction
     field :batch_index, type: String, default: 0
 
     index({received_at: 1, batch_id: 1, batch_index: 1, error_message: 1, "headers.return_status" => 1})
+    index({received_at: -1, batch_id: -1, batch_index: -1, "headers.return_status" => 1}, {name: "default_order_index"})
 
     scope :default_order, ->{ where({"headers.return_status" => {"$ne" => "200"}}).desc(:received_at, :batch_id, :batch_index)  }
 

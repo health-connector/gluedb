@@ -145,3 +145,97 @@ describe RemoteResources::IndividualResource do
     end
   end
 end
+
+describe RemoteResources::IndividualResource, "given an individual xml with relationships do" do
+
+  let(:individual_xml) do
+<<HEREDOC
+<?xml version='1.0' encoding='utf-8' ?>
+<individual xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://openhbx.org/api/terms/1.0'>
+<id>
+<id>2899308</id>
+</id>
+<person>
+<id>
+<id>urn:openhbx:hbx:dc0:resources:v1:person:hbx_id#2899308</id>
+</id>
+<person_name>
+<person_surname>TheTest</person_surname>
+<person_given_name>MrMan</person_given_name>
+</person_name>
+
+<addresses>
+<address>
+<type>urn:openhbx:terms:v1:address_type#home</type>
+<address_line_1>232 K St NE</address_line_1>
+<location_city_name>Washington</location_city_name>
+<location_state_code>DC</location_state_code>
+<postal_code>20002</postal_code>
+</address>
+
+</addresses>
+<emails>
+<email>
+<type>urn:openhbx:terms:v1:email_type#home</type>
+<email_address>testhomeemail@gmail.com</email_address>
+</email>
+<email>
+<type>urn:openhbx:terms:v1:email_type#work</type>
+<email_address>testworkemail@gmail.com</email_address>
+</email>
+
+</emails>
+<phones>
+<phone>
+<type>urn:openhbx:terms:v1:phone_type#mobile</type>
+<full_phone_number>5555555199</full_phone_number>
+<is_preferred>false</is_preferred>
+</phone>
+
+</phones>
+</person>
+
+<person_relationships>
+<person_relationship>
+<subject_individual>
+<id>19963359</id>
+</subject_individual>
+<relationship_uri>urn:openhbx:terms:v1:individual_relationship#spouse</relationship_uri>
+<object_individual>
+<id>2899308</id>
+</object_individual>
+</person_relationship>
+</person_relationships>
+<person_demographics>
+<ssn>555555555</ssn>
+<sex>urn:openhbx:terms:v1:gender#male</sex>
+<birth_date>19521001</birth_date>
+<is_incarcerated>false</is_incarcerated>
+<created_at>2015-11-09T10:25:23Z</created_at>
+<modified_at>2017-12-20T14:16:32Z</modified_at>
+
+</person_demographics>
+</individual>
+HEREDOC
+  end
+
+  subject do
+    RemoteResources::IndividualResource.parse(individual_xml, :single => true)
+  end
+
+  it "has one relationship" do
+    expect(subject.relationships.length).to eq 1
+  end
+
+  it "the relationship has the right subscriber id" do
+    expect(subject.relationships.first.subject_individual_member_id).to eq "19963359"
+  end
+
+  it "the relationship has the right object id" do
+    expect(subject.relationships.first.object_individual_member_id).to eq "2899308"
+  end
+
+  it "the relationship has the right relationship value" do
+    expect(subject.relationships.first.relationship).to eq "spouse"
+  end
+end

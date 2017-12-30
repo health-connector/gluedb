@@ -33,11 +33,14 @@ o.close
 ea_to_glue_map = []
 ea_enrollments_not_found = []
 
-policies = Policy.all.to_a
+# policies = Policy.all.individual_market
 
 enrollment_ids.each do |hbx_id|
   not_found = true
+  policies  = Policy.where(:hbx_enrollment_ids.in => [hbx_id])
+  
   policies.each do |policy|
+    next if policy.hbx_enrollment_ids.blank?
     result = policy.hbx_enrollment_ids.detect{|policy_enrollment_id| policy_enrollment_id == hbx_id}
     # store if found
     if result
@@ -47,6 +50,7 @@ enrollment_ids.each do |hbx_id|
       not_found = false
     end
   end
+
   if not_found
     ea_enrollments_not_found << hbx_id
     not_found_enrollments.puts(hbx_id)

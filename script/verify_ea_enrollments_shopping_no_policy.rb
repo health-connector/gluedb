@@ -12,9 +12,12 @@ not_found_enrollments = File.open(enrollments_not_found, "w")
 f.readlines.each do |line|
   temp = line.split(",")
   temp[2].chomp!
+
+  # make sure data contains all the fields we expect it to
   if temp[2].blank?
     raise ArgumentError, 'Argument cannot be blank. Check data coming from EA query. Missing aasm_state.'
   end
+
   #store enrollments that are in shopping aasm_state
   if temp[2] == "shopping"
     enrollment_ids << temp[1]

@@ -14,6 +14,12 @@ not_found_enrollments = File.open(enrollments_not_found, "w")
 f.readlines.each do |line|
   temp = line.split(",")
   temp[2].chomp!
+
+  # make sure data contains all the fields we expect it to
+  if temp[2].blank?
+    raise ArgumentError, 'Argument cannot be blank. Check data coming from EA query. Missing aasm_state.'
+  end
+  
   #store enrollments that were not in shopping aasm_state
   if temp[2] != "shopping" && temp[2] != "enrollment status"
     enrollment_ids << temp[1]
@@ -38,7 +44,7 @@ ea_enrollments_not_found = []
 enrollment_ids.each do |hbx_id|
   not_found = true
   policies  = Policy.where(:hbx_enrollment_ids.in => [hbx_id])
-  
+
   policies.each do |policy|
     next if policy.hbx_enrollment_ids.blank?
     result = policy.hbx_enrollment_ids.detect{|policy_enrollment_id| policy_enrollment_id == hbx_id}

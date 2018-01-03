@@ -4,8 +4,10 @@ header_row = ["Glue_Policy_ID", "Enrollment_Group_ID", "Subscriber_First_Name", 
 
 CSV.open("catastrophic_plans_report_for_2017.csv","w") do |csv|
   csv << header_row
+  start_date = Date.new(2017, 01, 01)
+  end_date = Date.new(2017, 12, 31)
   catastrophic_plan_ids = Plan.where(metal_level: "catastrophic").map(&:id)
-  policies = Policy.where(:"plan_id".in => catastrophic_plan_ids )
+  policies = Policy.where(:"plan_id".in => catastrophic_plan_ids, :"enrollees.coverage_start" => { "$gte" => start_date, "$lte" => end_date} )
   policies.each do |policy|
     next if !(policy.subscriber.coverage_start.year == 2017)
     begin

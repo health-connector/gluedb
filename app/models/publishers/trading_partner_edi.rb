@@ -21,9 +21,11 @@ module Publishers
       enrollment_event_cv = enrollment_event_cv_for(action_xml)
       if is_publishable?(enrollment_event_cv)
         begin
-          edi_builder = EdiCodec::X12::BenefitEnrollment.new(update_transaction_id(action_xml, new_transaction_id))
+          publish_transaction_id = new_transaction_id
+          enrollment_with_transaction_id = update_transaction_id(action_xml, publish_transaction_id)
+          edi_builder = EdiCodec::X12::BenefitEnrollment.new(enrollment_with_transaction_id)
           x12_xml = edi_builder.call.to_xml
-          publish_to_bus(amqp_connection, enrollment_event_cv, x12_xml)
+          publish_to_bus(amqp_connection, enrollment_event_cv, x12_xml, publish_transaction_id)
         rescue Exception => e
           errors.add(:error_message, e.message)
           errors.add(:event_xml, event_xml)
@@ -33,12 +35,12 @@ module Publishers
       true
     end
 
-    def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload)
+    def publish_to_bus(amqp_connection, enrollment_event_cv, x12_payload, transaction_id)
       ::Amqp::ConfirmedPublisher.with_confirmed_channel(amqp_connection) do |chan|
         ex = chan.default_exchange
         ex.publish(x12_payload, :routing_key => routing_key(x12_payload), :headers => {
           "market" => determine_market(enrollment_event_cv),
-          "file_name" => determine_file_name(enrollment_event_cv, x12_payload)
+          "file_name" => determine_file_name(enrollment_event_cv, x12_payload, transaction_id)
         })
       end
     end
@@ -51,11 +53,11 @@ module Publishers
       found_plan.carrier.abbrev.upcase
     end
 
-    def determine_file_name(enrollment_event_cv, x12_xml)
+    def determine_file_name(enrollment_event_cv, x12_xml, transaction_id)
       market_identifier = shop_market?(enrollment_event_cv) ? "S" : "I"
       carrier_identifier = find_carrier_abbreviation(enrollment_event_cv)
       category_identifier = is_initial?(x12_xml) ? "_C_E_" : "_C_M_"
-      "834_" + transaction_id(enrollment_event_cv) + "_" + carrier_identifier + category_identifier + market_identifier + "_1.xml"
+      "834_" + transaction_id + "_" + carrier_identifier + category_identifier + market_identifier + "_1.xml"
     end
 
     protected

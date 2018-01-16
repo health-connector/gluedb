@@ -54,7 +54,9 @@ module ExternalEvents
     def extract_rel_from_me(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
       case simple_relationship
-      when "spouse", "life_partner", "domestic_partner"
+      when "life_partner", "domestic_partner"
+        "life partner"
+      when "spouse"
         "spouse"
       when "ward"
         "ward"
@@ -66,7 +68,9 @@ module ExternalEvents
     def extract_rel_from_sub(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
       case simple_relationship
-      when "spouse", "life_partner", "domestic_partner"
+      when "life_partner", "domestic_partner"
+        "life partner"
+      when "spouse"
         "spouse"
       when "court_appointed_guardian"
         "ward"

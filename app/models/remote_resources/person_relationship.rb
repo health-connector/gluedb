@@ -24,7 +24,9 @@ module RemoteResources
 
     def glue_relationship
       case relationship
-      when "spouse", "life_partner", "domestic_partner"
+      when "life_partner", "domestic_partner"
+        "life partner"
+      when "spouse"
         "spouse"
       when "court_appointed_guardian"
         "ward"

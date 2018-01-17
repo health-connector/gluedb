@@ -133,6 +133,14 @@ module Parsers
         @errors << "Effectuation date mismatch: member #{details[:member_id]}, enrollee start: #{details[:policy]}, effectuation start: #{details[:effectuation]}"
       end
 
+      def indeterminate_policy_expiration(details)
+        @errors << "Could not determine natural policy expiration date: member #{details[:member_id]}"
+      end
+
+      def termination_date_after_expiration(details)
+        @errors << "Termination date after natural policy expiration: member #{details[:member_id]}, coverage end: #{details[:coverage_end]}, expiration_date: #{details[:expiration_date]}"
+      end
+
       def policy_not_found(subkeys)
         @errors << "Policy not found. Details: #{subkeys}"
       end

@@ -1,20 +1,82 @@
 # Generates Carrier Audits and Transforms
-require File.join(Rails.root, "lib/mongoid_migration_task")
-require File.join(Rails.root,"script","transform_edi_files.rb")
 
-class GenerateAudits < MongoidMigrationTask
+class TransformSimpleEdiFileSet
+  include ::Handlers::EnrollmentEventXmlHelper
+
+  XML_NS = { "cv" => "http://openhbx.org/api/terms/1.0" }
+
+  def initialize(out_path)
+    @out_path = out_path
+  end
+
+  def transform(xml_string)
+    enrollment_event_cv = enrollment_event_cv_for(xml_string)
+    if is_publishable?(enrollment_event_cv)
+      edi_builder = EdiCodec::X12::BenefitEnrollment.new(xml_string)
+      x12_xml = edi_builder.call.to_xml
+      publish_to_file(enrollment_event_cv, x12_xml)
+    end
+  end
+
+  def publish_to_file(enrollment_event_cv, x12_payload)
+    file_name = determine_file_name(enrollment_event_cv)
+    File.open(File.join(@out_path, file_name), 'w') do |f|
+      f.write(x12_payload)
+    end
+  end
+
+  def find_carrier_abbreviation(enrollment_event_cv)
+    policy_cv = extract_policy(enrollment_event_cv)
+    hios_id = extract_hios_id(policy_cv)
+    active_year = extract_active_year(policy_cv)
+    found_plan = Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
+    found_plan.carrier.abbrev.upcase
+  end
+
+  def determine_file_name(enrollment_event_cv)
+    market_identifier = shop_market?(enrollment_event_cv) ? "S" : "I"
+    carrier_identifier = find_carrier_abbreviation(enrollment_event_cv)
+    category_identifier = "_A_F_"
+    "834_" + transaction_id(enrollment_event_cv) + "_" + carrier_identifier + category_identifier + market_identifier + "_1.xml"
+  end
+
+  protected
+
+  def is_publishable?(enrollment_event_cv)
+    Maybe.new(enrollment_event_cv).event.body.publishable?.value
+  end
+
+  def is_initial?(enrollment_event_cv)
+    event_name = Maybe.new(enrollment_event_cv).event.body.enrollment.enrollment_type.strip.split("#").last.downcase.value
+    (event_name == "initial")
+  end
+
+  def routing_key(enrollment_event_cv)
+    is_initial?(enrollment_event_cv) ? "hbx.enrollment_messages" : "hbx.maintenance_messages"
+  end
+
+  def transaction_id(enrollment_event_cv)
+    Maybe.new(enrollment_event_cv).event.body.transaction_id.strip.value
+  end
+
+  def shop_market?(enrollment_event_cv)
+    determine_market(enrollment_event_cv) == "shop"
+  end
+end
+
+class GenerateAudits
   def pull_policies(market,cutoff_date,carrier_abbrev)
     carrier_ids = Carrier.where(:abbrev => carrier_abbrev).map(&:id)
-    plan_ids = Plan.where(:carrier_id => {"$in" => carrier_ids})
+    plan_ids = Plan.where(:carrier_id => {"$in" => carrier_ids}).map(&:id)
     active_start = find_active_start(market,cutoff_date)
     active_end = find_active_end(cutoff_date)
+    employer_ids = get_employer_ids(active_start,active_end,market)
 
     eligible_policies = Policy.where({:enrollees => {"$elemMatch" => {:rel_code => "self",
                                                                        :coverage_start => {"$gt" => active_start}}},
                                        :employer_id => {"$in" => employer_ids},
                                        :plan_id => {"$in" => plan_ids}}).no_timeout
 
-    cleaned_policies = []
     eligible_policies.each do |policy|
       if !policy.canceled?
         if !(policy.subscriber.coverage_start > active_end)
@@ -24,12 +86,11 @@ class GenerateAudits < MongoidMigrationTask
           next if policy.subscriber.person.blank?
           auth_subscriber_id = policy.subscriber.person.authority_member_id
           if subscriber_id == auth_subscriber_id
-            cleaned_policies << policy
+            yield policy
           end
         end
       end
     end
-    cleaned_policies
   end
 
   def find_active_start(market,cutoff_date)
@@ -56,11 +117,15 @@ class GenerateAudits < MongoidMigrationTask
   end
 
   def in_current_plan_year?(policy,employer,cutoff_date,active_start,active_end)
-    plan_year = current_plan_year(employer,cutoff_date,active_start,active_end)
+    if employer.blank?
+      date_range = (active_start..active_end)
+    else
+      plan_year = current_plan_year(employer,cutoff_date,active_start,active_end)
+      py_start = plan_year.start_date
+      py_end = plan_year.end_date
+      date_range = (py_start..py_end)
+    end
     policy_start_date = policy.subscriber.coverage_start
-    py_start = plan_year.start_date
-    py_end = plan_year.end_date
-    date_range = (py_start..py_end)
     if date_range.include?(policy_start_date)
       return true
     else
@@ -87,18 +152,18 @@ class GenerateAudits < MongoidMigrationTask
 
   def generate_cv2s
     cutoff_date = Date.strptime(ENV['cutoff_date'], '%m-%d-%Y')
-    policies = pull_policies(ENV['market'],cutoff_date,ENV['carrier'])
+    system("rm -rf untransformed_audits > /dev/null")
     Dir.mkdir("untransformed_audits")
 
-    policies.each do |policy|
+    transformer = TransformSimpleEdiFileSet.new('untransformed_audits')
+
+    pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
       affected_members = []
       policy.enrollees.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
       event_type = "urn:openhbx:terms:v1:enrollment#audit"
       tid = generate_transaction_id
       cv_render = render_cv(affected_members,policy,event_type,tid)
-      cv_file = File.new("#{policy._id}.xml","w")
-      cv_file.puts(cv_render)
-      cv_file.close
+      transformer.transform(cv_render)
     end
   end
 
@@ -112,7 +177,7 @@ class GenerateAudits < MongoidMigrationTask
     transaction_id
   end
 
-  def render_cv(affected_members,policy,event_type,transaction_id)
+  def render_cv(affected_members,policy,event_kind,transaction_id)
     render_result = ApplicationController.new.render_to_string(
          :layout => "enrollment_event",
          :partial => "enrollment_events/enrollment_event",
@@ -126,3 +191,4 @@ class GenerateAudits < MongoidMigrationTask
          })
   end
 end
+

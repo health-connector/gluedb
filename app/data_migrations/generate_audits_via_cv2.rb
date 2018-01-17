@@ -152,10 +152,10 @@ class GenerateAudits
 
   def generate_cv2s
     cutoff_date = Date.strptime(ENV['cutoff_date'], '%m-%d-%Y')
-    system("rm -rf untransformed_audits > /dev/null")
-    Dir.mkdir("untransformed_audits")
+    system("rm -rf transformed_audits > /dev/null")
+    Dir.mkdir("transformed_audits")
 
-    transformer = TransformSimpleEdiFileSet.new('untransformed_audits')
+    transformer = TransformSimpleEdiFileSet.new('transformed_audits')
 
     pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
       affected_members = []

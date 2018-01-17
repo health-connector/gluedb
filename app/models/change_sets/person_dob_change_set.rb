@@ -12,18 +12,20 @@ module ChangeSets
       update_enrollments_for(policies_to_notify)
 
       policies_to_notify.each do |pol|
-        af = ::BusinessProcesses::AffectedMember.new({
-          :policy => pol
-        }.merge(old_values_hash.first))
-        ict = IdentityChangeTransmitter.new(af, pol, "urn:openhbx:terms:v1:enrollment#change_member_name_or_demographic")
-        ict.publish
-        if pol.is_shop?
-          serializer = ::CanonicalVocabulary::IdInfoSerializer.new(
-            pol, "change", "change_in_identifying_data_elements", [person_resource.hbx_member_id], pol.active_member_ids, old_values_hash
-          )
-          cv = serializer.serialize
-          pubber = ::Services::NfpPublisher.new
-          pubber.publish(true, "#{pol.eg_id}.xml", cv)
+        if pol.active_member_ids.include?(person_resource.hbx_member_id)
+          af = ::BusinessProcesses::AffectedMember.new({
+            :policy => pol
+          }.merge(old_values_hash.first))
+          ict = IdentityChangeTransmitter.new(af, pol, "urn:openhbx:terms:v1:enrollment#change_member_name_or_demographic")
+          ict.publish
+          if pol.is_shop?
+            serializer = ::CanonicalVocabulary::IdInfoSerializer.new(
+              pol, "change", "change_in_identifying_data_elements", [person_resource.hbx_member_id], pol.active_member_ids, old_values_hash
+            )
+            cv = serializer.serialize
+            pubber = ::Services::NfpPublisher.new
+            pubber.publish(true, "#{pol.eg_id}.xml", cv)
+          end
         end
       end
       @@logger.info("Ending perform_update")

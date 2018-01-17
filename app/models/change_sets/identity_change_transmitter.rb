@@ -2,6 +2,9 @@ module ChangeSets
   class IdentityChangeTransmitter
     attr_reader :affected_member, :policy, :event_kind, :enrollees
 
+    # affected_member :: BusinessProcesses::AffectedMember
+    # pol :: Policy
+    # event_kind :: String (uri)
     def initialize(affected_member, pol, event_kind)
       @affected_member = affected_member
       @policy = pol
@@ -13,6 +16,7 @@ module ChangeSets
     end
 
     def publish
+       return true unless @policy.active_member_ids.include?(@affected_member.member_id)
        render_result = ApplicationController.new.render_to_string(
          :layout => "enrollment_event",
          :partial => "enrollment_events/enrollment_event",

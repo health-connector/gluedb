@@ -71,7 +71,6 @@ class GenerateAudits
     active_start = find_active_start(market,cutoff_date)
     active_end = find_active_end(cutoff_date)
     employer_ids = get_employer_ids(active_start,active_end,market)
-
     eligible_policies = Policy.where({:enrollees => {"$elemMatch" => {:rel_code => "self",
                                                                        :coverage_start => {"$gt" => active_start}}},
                                        :employer_id => {"$in" => employer_ids},
@@ -97,7 +96,7 @@ class GenerateAudits
     if market.downcase == 'ivl'
       active_start = cutoff_date.beginning_of_year - 1.day
     elsif market.downcase == 'shop'
-      active_start = (cutoff_date + 1.month) - 1.year
+      active_start = ((cutoff_date + 1.month) - 1.year) - 1.day
     end
     active_start
   end

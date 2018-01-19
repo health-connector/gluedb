@@ -8,8 +8,22 @@ describe ExternalEvents::ExternalPolicy, "given:
   let(:plan_cv) { instance_double(Openhbx::Cv2::PlanLink, :alias_ids => alias_ids) }
   let!(:policy_enrollment) { instance_double(Openhbx::Cv2::PolicyEnrollment, :rating_area => rating_area, :plan => plan_cv, :shop_market => shop_market) }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => policy_enrollment, :enrollees =>[enrollees1, enrollees2]) }
-  let!(:enrollees1) { double("Enrollee", subscriber?: "rspec" )}
-  let!(:enrollees2) { double("Enrollee", subscriber?: "rspec2") }
+  let(:member1) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => subscriber_xml_id, :person_relationships => []) }
+  let(:member2) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => dependent_xml_id, :person_relationships => [relationship]) }
+  let(:relationship) do
+    instance_double(Openhbx::Cv2::PersonRelationship,
+      subject_individual: dependent_xml_id,
+      object_individual: subscriber_xml_id,
+      relationship_uri: dependent_relationship_uri
+    )
+  end
+
+  let(:dependent_relationship_uri) { "urn:openhbx:terms:v1:individual_relationship#spouse" }
+
+  let(:subscriber_xml_id) { "urn:whaTEVER#subscriber_id" }
+  let(:dependent_xml_id) { "urn:whaTEVER#dependent_id" }
+  let(:enrollees1) { instance_double(Openhbx::Cv2::Enrollee, subscriber?: true, member: member1)}
+  let(:enrollees2) { instance_double(Openhbx::Cv2::Enrollee, subscriber?: false, member: member2)}
   let(:plan) { instance_double(Plan) }
   let(:rating_area) { nil }
   let(:alias_ids) { nil }
@@ -31,6 +45,25 @@ describe ExternalEvents::ExternalPolicy, "given:
     it "has the carrier_specific_plan_id" do
       expect(subject.extract_rating_details[:carrier_specific_plan_id]).to eq carrier_specific_plan_id
     end
+  end
+
+  describe "determining relationships" do
+    describe "given a domestic partner relationship" do
+      let(:dependent_relationship_uri) { "urn:openhbx:terms:v1:individual_relationship#domestic_partner" }
+
+      it "determines a dependent of type life partner" do
+        expect(subject.extract_rel_code(enrollees2)).to eq "life partner"
+      end
+    end
+
+    describe "given a life partner relationship" do
+      let(:dependent_relationship_uri) { "urn:openhbx:terms:v1:individual_relationship#life_partner" }
+
+      it "determines a dependent of type life partner" do
+        expect(subject.extract_rel_code(enrollees2)).to eq "life partner"
+      end
+    end
+
   end
 
   describe "and the policy is a shop policy" do
@@ -88,10 +121,10 @@ describe ExternalEvents::ExternalPolicy, "given:
         allow(subject).to receive(:extract_tot_res_amt).and_return("0.0")
         allow(subject).to receive(:extract_other_financials).and_return(applied_aptc)
         allow(subject).to receive(:extract_rating_details).and_return({})
-        allow(subject).to receive(:extract_subscriber).with(policy_cv).and_return("rspec-sub-node")
-        allow(subject).to receive(:subscriber_id).and_return("rspec-id")
-        allow(subject).to receive(:extract_enrollee_start).with("rspec-sub-node").and_return(Date.today)
-        allow(subject).to receive(:extract_enrollee_premium).with("rspec-sub-node").and_return("100")
+        allow(subject).to receive(:extract_enrollee_start).with(enrollees1).and_return(Date.today)
+        allow(subject).to receive(:extract_enrollee_premium).with(enrollees1).and_return("100")
+        allow(subject).to receive(:extract_enrollee_start).with(enrollees2).and_return(Date.today)
+        allow(subject).to receive(:extract_enrollee_premium).with(enrollees2).and_return("100")
         allow(policy_cv).to receive(:responsible_party).and_return(responsible_party_node)
         subject.instance_variable_set(:@plan,plan)
       end

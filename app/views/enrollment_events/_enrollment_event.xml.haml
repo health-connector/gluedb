@@ -12,6 +12,9 @@
         %transaction_id
           %id= transaction_id
         %type= event_type 
-        %market= policy.is_shop? ? "urn:openhbx:terms:v1:aca_marketplace#shop" : "urn:openhbx:terms:v1:aca_marketplace#individual"
+        - if policy.is_shop?
+          %market= policy.is_cobra? ? "urn:openhbx:terms:v1:aca_marketplace#cobra" : "urn:openhbx:terms:v1:aca_marketplace#shop"
+        - else
+          %market= "urn:openhbx:terms:v1:aca_marketplace#individual"
         %policy
           = render :partial => "enrollment_events/policy", :object => policy, :locals => { :enrollees => enrollees }

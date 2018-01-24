@@ -44,7 +44,8 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
     :existing_plan => plan,
     :all_member_ids => [1],
     :hbx_enrollment_id => 3,
-    :subscriber_start => subscriber_start
+    :subscriber_start => subscriber_start,
+    :is_cobra? => false
     ) }
 
   subject do
@@ -57,7 +58,7 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).and_return(primary_db_record)
 
     allow(EnrollmentAction::RenewalDependentDrop).to receive(:other_carrier_renewal_candidates).with(action_event).and_return([old_policy])
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan).and_return(policy_updater)
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan, false).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(old_policy).to receive(:terminate_member_id_on).with(2, member_end_date).and_return(true)
   end

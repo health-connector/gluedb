@@ -14,6 +14,14 @@ describe Handlers::EnrollmentEventXmlHelper do
     end
   end
 
+  describe "#extract_responsible_party_id" do 
+    let(:responsible_party) { double(:id => "SOMEGRP#1234") }
+    let(:policy_cv) { double(:id => "SOMEGRP#1234", responsible_party: responsible_party ) }
+    it "returns the parsed id" do
+      expect(subject.extract_responsible_party_id(policy_cv)).to eq("1234")
+    end
+  end
+
   describe "#extract_member_id" do
     let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :member => member) }
     let(:member) { instance_double(::Openhbx::Cv2::EnrolleeMember, id: "ABC#54")}

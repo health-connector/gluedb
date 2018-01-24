@@ -156,7 +156,8 @@ describe EnrollmentAction::ActiveRenewal, "#persist" do
   let(:action) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => policy_cv ,
-    :existing_plan => plan
+    :existing_plan => plan,
+    :is_cobra? => false
     )
   }
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
@@ -164,7 +165,7 @@ describe EnrollmentAction::ActiveRenewal, "#persist" do
 
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member).and_return(db_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, plan).and_return(policy_updater)
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, plan, false).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
   end
 

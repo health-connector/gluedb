@@ -19,5 +19,34 @@ module Amqp
         chan.close
       end
     end
+
+    def close
+      @connection.close
+    end
+
+    def self.__get_local
+      Thread.current[:__local_amqp_event_broadcaster_instance]
+    end
+
+    def self.with_broadcaster
+      instance = __get_local
+      if instance
+        yield instance
+      else
+        new_instance = self.new(AmqpConnectionProvider.start_connection)
+        yield new_instance
+        new_instance.close
+      end
+    end
+
+    def self.cache_local_instance
+      existing_instance = __get_local
+      raise ThreadError.new("Already using local instance scope for event broadcaster") if existing_instance
+      new_instance = self.new(AmqpConnectionProvider.start_connection)
+      Thread.current[:__local_amqp_event_broadcaster_instance] = new_instance
+      yield
+      Thread.current[:__local_amqp_event_broadcaster_instance] = nil
+      new_instance.close
+    end
   end
 end

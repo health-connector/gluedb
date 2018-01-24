@@ -44,6 +44,13 @@ module ExternalEvents
       end
     end
 
+    def drop_if_already_processed_termination!
+      return false unless already_processed_termination?
+      response_with_publisher do |result_publisher|
+        result_publisher.drop_already_processed!(self)
+      end
+    end
+
     def drop_if_term_with_no_end!
       return false unless is_termination?
       return false unless subscriber_end.blank?
@@ -206,6 +213,13 @@ module ExternalEvents
         elsif comp == 1
           graph.add_edge(other, self)
         end
+      elsif submitted_at_time != other.submitted_at_time
+        comp = submitted_at_time <=> other.submitted_at_time
+        if comp == -1
+          graph.add_edge(self, other)
+        elsif comp == 1
+          graph.add_edge(other, self)
+        end
       elsif subscriber_start != other.subscriber_start
         comp = subscriber_start <=> other.subscriber_start
         if comp == -1
@@ -246,6 +260,10 @@ module ExternalEvents
 
     def is_termination?
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
+    end
+
+    def is_cobra?
+      extract_market_kind(enrollment_event_xml) == "cobra"
     end
 
     def is_cancel?
@@ -308,6 +326,11 @@ module ExternalEvents
     def is_shop?
       !employer_hbx_id.blank?
     end
+    
+    def submitted_at_time
+      timestamp_value = Maybe.new(enrollment_event_xml).header.submitted_timestamp.value
+      Time.strptime(timestamp_value, "%Y-%m-%dT%H:%M:%S") rescue nil
+    end
 
     def coverage_type
       @coverage_type ||= Maybe.new(policy_cv).policy_enrollment.plan.is_dental_only.value
@@ -346,6 +369,17 @@ module ExternalEvents
 
     def is_publishable?
       Maybe.new(enrollment_event_xml).event.body.publishable?.value
+    end
+
+    def already_processed_termination?
+      return false unless is_termination?
+      return false if existing_policy.blank?
+      return true if existing_policy.canceled?
+      if existing_policy.terminated?
+        !is_cancel?
+      else
+        false
+      end
     end
 
     private

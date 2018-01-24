@@ -6,7 +6,8 @@ module Handlers
     def call(context)
       no_dupe_events = discard_already_processed_events(context)
       no_bad_terms = discard_terms_with_no_end_date(no_dupe_events)
-      reduced_list = perform_reduction(no_bad_terms)
+      no_rerun_terms = discard_already_processed_terminations(no_bad_terms)
+      reduced_list = perform_reduction(no_rerun_terms)
       reduced_list.map do |element|
 #        begin
           super(element)
@@ -17,6 +18,11 @@ module Handlers
     end
 
     protected
+
+    def discard_already_processed_terminations(enrollments)
+      filter = ::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedTermination.new
+      filter.filter(enrollments)
+    end
 
     def discard_already_processed_events(enrollments)
       filter = ::ExternalEvents::EnrollmentEventNotificationFilters::AlreadyProcessedEvent.new

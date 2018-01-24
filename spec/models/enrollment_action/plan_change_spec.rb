@@ -62,6 +62,7 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => new_policy_cv,
     :existing_plan => new_plan,
+    :is_cobra? => false
     ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -77,7 +78,7 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).
       and_return(primary_db_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan).
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan, false).
       and_return(policy_updater)
     allow(policy).to receive(:terminate_as_of).with(termination_date).
       and_return(true)

@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git@github.com:health-connector/edi_codec.git
-  revision: c602b29bd5c196101925293c83a0bc1485d89214
+  revision: 5bca1c8763eb42ce45dc89bef905ea7c8b82f2c7
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: https://github.com/dchbx/openhbx_cv2.git
-  revision: 74d31cd17415d3fb27de27ba4cc10d0030422754
+  revision: 8a40ef249e7a717290cd84ede24feb806947fecd
   specs:
     openhbx_cv2 (0.0.1)
       activesupport (>= 3.2)
@@ -241,7 +241,7 @@ GEM
     mongoid_auto_increment (0.1.2)
       mongoid (>= 2.0)
     moped (1.5.3)
-    multi_json (1.12.2)
+    multi_json (1.13.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-sftp (2.1.2)

@@ -73,6 +73,9 @@
           %dba= employer.dba
         %fein= employer.fein
       %total_employer_responsible_amount=(policy.tot_emp_res_amt).round(2)
+      - if policy.is_cobra?
+        - if policy.cobra_eligibility_date.present?
+          %cobra_eligibility_date= simple_date_for(policy.cobra_eligibility_date)
       - unless policy.composite_rating_tier.blank?
         %composite_rating_tier_name= policy.composite_rating_tier
   - else

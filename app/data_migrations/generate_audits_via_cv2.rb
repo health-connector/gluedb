@@ -29,7 +29,9 @@ class TransformSimpleEdiFileSet
     policy_cv = extract_policy(enrollment_event_cv)
     hios_id = extract_hios_id(policy_cv)
     active_year = extract_active_year(policy_cv)
-    found_plan = Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
+    found_plan = Caches::CustomCache.lookup(Plan, :cv2_hios_active_year_plan_cache, [active_year.to_i, hios_id]) do
+     Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
+    end
     found_plan.carrier.abbrev.upcase
   end
 
@@ -76,14 +78,33 @@ class GenerateAudits
                                        :employer_id => {"$in" => employer_ids},
                                        :plan_id => {"$in" => plan_ids}}).no_timeout
 
+    # eligible_policies.each do |policy|
+    #   if !policy.canceled?
+    #     if !(policy.subscriber.coverage_start > active_end)
+    #       employer = policy.employer
+    #       next unless in_current_plan_year?(policy,employer,cutoff_date,active_start,active_end)
+    #       subscriber_id = policy.subscriber.m_id
+    #       subscriber_person = policy.subscriber.person
+    #       next if subscriber_person.blank?
+    #       auth_subscriber_id = subscriber_person.authority_member_id
+    #       if subscriber_id == auth_subscriber_id
+    #         yield policy
+    #       end
+    #     end
+    #   end
+    # end
+
     eligible_policies.each do |policy|
       if !policy.canceled?
         if !(policy.subscriber.coverage_start > active_end)
           employer = policy.employer
           next unless in_current_plan_year?(policy,employer,cutoff_date,active_start,active_end)
+          subscriber = policy.subscriber
+          next unless subscriber
           subscriber_id = policy.subscriber.m_id
-          next if policy.subscriber.person.blank?
-          auth_subscriber_id = policy.subscriber.person.authority_member_id
+          subscriber_person = policy.subscriber.person
+          next unless subscriber_person
+          auth_subscriber_id = subscriber_person.authority_member_id
           if subscriber_id == auth_subscriber_id
             yield policy
           end
@@ -120,6 +141,7 @@ class GenerateAudits
       date_range = (active_start..active_end)
     else
       plan_year = current_plan_year(employer,cutoff_date,active_start,active_end)
+      return false if plan_year.blank?
       py_start = plan_year.start_date
       py_end = plan_year.end_date
       date_range = (py_start..py_end)
@@ -139,14 +161,8 @@ class GenerateAudits
     else
       today = cutoff_date
     end
-    employer.plan_years.each do |plan_year|
-      py_start = plan_year.start_date
-      py_end = plan_year.end_date
-      date_range = (py_start..py_end)
-      if date_range.include?(today)
-        return plan_year
-      end
-    end
+    plan_year = employer.plan_years.detect{|py| (py.start_date..py.end_date).include?(today)}
+    plan_year
   end
 
   def generate_cv2s
@@ -155,6 +171,8 @@ class GenerateAudits
     Dir.mkdir("transformed_audits")
 
     transformer = TransformSimpleEdiFileSet.new('transformed_audits')
+
+    puts "Started Generating Polices at #{Time.now}"
 
     pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
       affected_members = []

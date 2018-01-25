@@ -32,7 +32,8 @@ class TransformSimpleEdiFileSet
     found_plan = Caches::CustomCache.lookup(Plan, :cv2_hios_active_year_plan_cache, [active_year.to_i, hios_id]) do
      Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
     end
-    found_plan.carrier.abbrev.upcase
+    found_carrier = Caches::CustomCache.lookup(Carrier, :cv2_carrier_cache, found_plan.carrier_id) { found_plan.carrier } 
+    found_carrier.abbrev.upcase
   end
 
   def determine_file_name(enrollment_event_cv)

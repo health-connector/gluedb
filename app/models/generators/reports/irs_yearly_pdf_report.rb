@@ -18,7 +18,7 @@ module Generators::Reports
     def get_template(options)
       notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
 
-      if options[:calender_year] == 2016 || 2017 && options[:notice_type] != 'void'
+      if options[:calender_year] == 2016 || 2017&& options[:notice_type] != 'void'
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
       else
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
@@ -64,7 +64,12 @@ module Generators::Reports
       elsif @notice_2016 || @void_2016
         go_to_page(9)
       elsif @calender_year == 2017
-        go_to_page(10)
+        if @qhp_type == 'assisted'
+          go_to_page(11)
+        else
+          #2017 unassisted
+          go_to_page(9)
+        end
       else
         go_to_page(5)
       end
@@ -186,7 +191,7 @@ module Generators::Reports
 
     def fill_hbx_id_for_coverletter
       if @qhp_type == 'assisted'
-        pages = [4, 5]
+        pages = [4, 5, 6]
       else
         pages = [4]
       end
@@ -198,6 +203,7 @@ module Generators::Reports
         end
       end
     end
+
 
     def fill_recipient_contact(font_size=nil)
       font_size = 11 if font_size.nil?

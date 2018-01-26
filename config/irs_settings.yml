@@ -36,6 +36,9 @@ tax_document:
       template:
         unassisted: "2017-1095A-NEW-UQHP.pdf"
         assisted: "2017-1095A-NEW-AQHP.pdf"
+    void:
+      template: "2017-1095A-VOID.pdf"
+    coverage_page_no: 3
 
   documents_root_path: '/tmp/'
   documents_folder: 'irs_notices' 

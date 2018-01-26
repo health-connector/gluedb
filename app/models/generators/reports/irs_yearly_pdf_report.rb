@@ -5,6 +5,7 @@ module Generators::Reports
     attr_accessor :responsible_party_data, :settings, :calender_year
 
     def initialize(notice, options={})
+      @policy = Policy.find(notice.policy_id).first
       @settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
       initialize_variables(options)
 
@@ -28,7 +29,6 @@ module Generators::Reports
     end
 
     def initialize_variables(options)
-      @policy = Policy.find(notice.policy_id)
       @qhp_type = options[:qhp_type]
       @calender_year = options[:calender_year]
       @multiple = options[:multiple]
@@ -64,12 +64,7 @@ module Generators::Reports
       elsif @notice_2016 || @void_2016
         go_to_page(9)
       elsif @calender_year == 2017
-        if @qhp_type == 'assisted'
-          go_to_page(11)
-        else
-          #2017 unassisted
-          go_to_page(9)
-        end
+        go_to_page(11)
       else
         go_to_page(5)
       end
@@ -82,13 +77,16 @@ module Generators::Reports
       if @calender_year == 2017
         x_pos = mm2pt(14.00) - @margin[0]
         y_pos = 790.86 - mm2pt(44.00) - 65
+        bounding_box([x_pos, y_pos], :width => 300) do
+          font "/Library/Fonts/OpenSans-Regular.ttf"
+          fill_recipient_contact(10)
+        end
       else
         x_pos = mm2pt(21.83) - @margin[0]
         y_pos = 790.86 - mm2pt(57.15) - 65
-      end
-
-      bounding_box([x_pos, y_pos], :width => 300) do
-        fill_recipient_contact(10)
+        bounding_box([x_pos, y_pos], :width => 300) do
+          fill_recipient_contact(10)
+        end
       end
     end
 
@@ -102,7 +100,8 @@ module Generators::Reports
 
       #For Printing Date on template
       if @calender_year == 2017
-        bounding_box([17, 462+padding], :width => 200) do
+        bounding_box([17, 445+padding], :width => 200) do
+          font "/Library/Fonts/OpenSans-Regular.ttf"
           text "#{Date.today.strftime('%m/%d/%Y')}", size: 10
         end
       else
@@ -114,6 +113,7 @@ module Generators::Reports
       #For Printing Address on template
       if @calender_year == 2017
         bounding_box([8, 590+padding], :width => 300) do
+          font "/Library/Fonts/OpenSans-Regular.ttf"
           fill_recipient_contact(10)
         end
       else
@@ -146,7 +146,8 @@ module Generators::Reports
 
       #For Printing Receipent Name on template for 2017
       if @calender_year == 2017
-        bounding_box([41, 405.37+padding], :width => 200) do
+        bounding_box([42, 375.75+padding], :width => 200) do
+          font "/Library/Fonts/OpenSans-Regular.ttf"
           text "#{@notice.recipient.name}:", size: 10
         end
       else
@@ -190,15 +191,10 @@ module Generators::Reports
     end
 
     def fill_hbx_id_for_coverletter
-      if @qhp_type == 'assisted'
-        pages = [4, 5, 6]
-      else
-        pages = [4]
-      end
-
-      pages.each do |page|
+      [4, 5, 6].each do |page|
         go_to_page(page)
-        bounding_box([415, 739.2], :width => 200) do
+        bounding_box([400, 739.2], :width => 200) do
+          font "/Library/Fonts/OpenSans-Regular.ttf"
           text "#{@policy.subscriber.m_id}", size: 8
         end
       end

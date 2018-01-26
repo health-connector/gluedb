@@ -143,14 +143,17 @@ class GenerateAudits
     transformer = TransformSimpleEdiFileSet.new('transformed_audits')
 
     puts "Started Generating Polices at #{Time.now}"
-
     pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
-      affected_members = []
-      policy.enrollees.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
-      event_type = "urn:openhbx:terms:v1:enrollment#audit"
-      tid = generate_transaction_id
-      cv_render = render_cv(affected_members,policy,event_type,tid)
-      transformer.transform(cv_render)
+      begin
+        affected_members = []
+        policy.enrollees.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
+        event_type = "urn:openhbx:terms:v1:enrollment#audit"
+        tid = generate_transaction_id
+        cv_render = render_cv(affected_members,policy,event_type,tid)
+        transformer.transform(cv_render)
+      rescue Exception=>e
+        puts "Glue Policy ID: #{policy.id}, Glue Enrollment ID: #{policy.eg_id} failed - #{e.inspect}"
+      end
     end
   end
 

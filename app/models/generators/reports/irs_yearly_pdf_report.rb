@@ -5,7 +5,7 @@ module Generators::Reports
     attr_accessor :responsible_party_data, :settings, :calender_year
 
     def initialize(notice, options={})
-      @policy = Policy.find(notice.policy_id).first
+      @hbx_id = notice.subscriber_hbx_id
       @settings = YAML.load(File.read("#{Rails.root}/config/irs_settings.yml")).with_indifferent_access
       initialize_variables(options)
 
@@ -195,7 +195,7 @@ module Generators::Reports
         go_to_page(page)
         bounding_box([400, 739.2], :width => 200) do
           font "/Library/Fonts/OpenSans-Regular.ttf"
-          text "#{@policy.subscriber.m_id}", size: 8
+          text "#{@hbx_id}", size: 8
         end
       end
     end

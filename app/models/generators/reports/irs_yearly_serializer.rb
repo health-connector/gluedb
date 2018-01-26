@@ -409,6 +409,8 @@ module Generators::Reports
         options = { multiple: multiple, calender_year: calender_year, qhp_type: qhp_type, notice_type: notice_params[:type]}
       end
 
+      notice.subscriber_hbx_id = Policy.find(notice.policy_id).subscriber.m_id
+
       pdf_notice = Generators::Reports::IrsYearlyPdfReport.new(notice, options)
       pdf_notice.settings = @settings
       pdf_notice.responsible_party_data = @responsible_party_data[notice.policy_id.to_i] if @responsible_party_data.present? # && ![87085,87244,87653,88495,88566,89129,89702,89922,95250,115487].include?(notice.policy_id.to_i)

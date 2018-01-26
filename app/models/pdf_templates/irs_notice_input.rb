@@ -14,6 +14,7 @@ module PdfTemplates
     attribute :active_policies, String
     attribute :canceled_policies, String
     attribute :corrected_record_seq_num, String
+    attribute :subscriber_hbx_id, String
     
     def covered_household_as_of(month, year)
       month_begin = Date.new(year, month, 1)

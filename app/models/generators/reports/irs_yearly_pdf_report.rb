@@ -180,10 +180,10 @@ module Generators::Reports
       padding = -20 if @void_2016
 
       if @void_2017
-        canceled_policies = @notice.canceled_policies.split(' ')
+        canceled_policies = @notice.canceled_policies.split(',')
         print_policies(canceled_policies, 18, 285+padding)
         if @notice.active_policies.present?
-          active_policies = @notice.active_policies.split(' ')
+          active_policies = @notice.active_policies.split(',')
           print_policies(active_policies, 18, 130+padding)
         end
       end

@@ -19,8 +19,10 @@ module Generators::Reports
     def get_template(options)
       notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
 
-      if options[:calender_year] == 2016 || 2017&& options[:notice_type] != 'void'
+      if options[:calender_year] == 2016 || 2017 && options[:notice_type] != 'void'
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
+      elsif options[:calender_year] ==  2017 && options[:notice_type] == 'void'
+        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:void_type]]
       else
         template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
       end
@@ -61,7 +63,7 @@ module Generators::Reports
       return if @catastrophic_confirmation
       if @catastrophic_corrected
         go_to_page(3)
-      elsif @notice_2016 || @void_2016
+      elsif @notice_2016 || @void_2016 || @void_2017
         go_to_page(9)
       elsif @calender_year == 2017
         go_to_page(11)
@@ -87,6 +89,25 @@ module Generators::Reports
         bounding_box([x_pos, y_pos], :width => 300) do
           fill_recipient_contact(10)
         end
+      end
+    end
+
+    def print_policies(policies_array, x_ps, y_ps)
+      rows = 5
+      policies_count = policies_array.count
+      offset = 0
+
+      while(offset <= policies_count)
+        policies_array[offset, rows].each do |policy|
+          bounding_box([x_ps, y_ps], :width => 200) do
+            font "/Library/Fonts/OpenSans-Regular.ttf"
+            text "•   " +  policy
+          end
+          y_ps = y_ps - 12
+        end
+        y_ps = y_ps
+        x_ps = x_ps + 85
+        offset = offset + rows
       end
     end
 
@@ -158,6 +179,14 @@ module Generators::Reports
 
       padding = -20 if @void_2016
 
+      if @void_2017
+        canceled_policies = @notice.canceled_policies.split(' ')
+        print_policies(canceled_policies, 18, 285+padding)
+        if @notice.active_policies.present?
+          active_policies = @notice.active_policies.split(' ')
+          print_policies(active_policies, 18, 130+padding)
+        end
+      end
 
       if @void_2016
         bounding_box([93, 242+padding], :width => 200) do
@@ -191,7 +220,13 @@ module Generators::Reports
     end
 
     def fill_hbx_id_for_coverletter
-      [4, 5, 6].each do |page|
+      if @qhp_type.present? && !@void_2017
+        pages = [4, 5, 6]
+      elsif @void_2017
+        pages = [4]
+      end
+
+      pages.each do |page|
         go_to_page(page)
         bounding_box([400, 739.2], :width => 200) do
           font "/Library/Fonts/OpenSans-Regular.ttf"
@@ -219,9 +254,9 @@ module Generators::Reports
 
       x_pos_corrected = mm2pt(128.50)
       y_pos_corrected = 790.86 - mm2pt(31.80)
-      y_pos_corrected = 790.86 - mm2pt(23.80) if @void_2015 || @void_2016
+      y_pos_corrected = 790.86 - mm2pt(23.80) if @void_2015 || @void_2016 || @void_2017
 
-      if @corrected || @void || @void_2015 || @void_2016
+      if @corrected || @void || @void_2015 || @void_2016 || @void_2017
         bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
           font "/Library/Fonts/Arial Unicode.ttf"
           text "\u2714"

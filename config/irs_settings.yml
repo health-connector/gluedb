@@ -37,7 +37,9 @@ tax_document:
         unassisted: "2017-1095A-NEW-UQHP.pdf"
         assisted: "2017-1095A-NEW-AQHP.pdf"
     void:
-      template: "2017-1095A-VOID.pdf"
+      template:
+        active_false: "2017-1095A-VOID-ACTIVE-FALSE.pdf"
+        active_true: "2017-1095A-VOID-ACTIVE-TRUE.pdf"
     coverage_page_no: 3
 
   documents_root_path: '/tmp/'

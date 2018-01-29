@@ -34,6 +34,7 @@ module PdfTemplates
     end
 
     def no_premium_amount?
+      return false if monthly_premiums.count == 1
       monthly_premiums.detect{|p| p.premium_amount.to_i > 0 }.nil?
     end
 

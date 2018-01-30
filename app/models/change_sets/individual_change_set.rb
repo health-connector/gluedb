@@ -16,6 +16,7 @@ module ChangeSets
       @work_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("work")
       @mobile_phone_changer = ::ChangeSets::PersonPhoneChangeSet.new("mobile")
       @dob_changer = ::ChangeSets::PersonDobChangeSet.new
+      @relationship_changer = ::ChangeSets::MemberRelationshipChangeSet.new
     end
 
     def member
@@ -76,7 +77,19 @@ module ChangeSets
         @home_email_changer.perform_update(record, resource, determine_policies_to_transmit, !multiple_contact_changes?)
       elsif dob_changed?
         @dob_changer.perform_update(member, resource, now_or_future_active_policies)
+      elsif relationships_changed?
+        process_relationship_change
       end
+    end
+
+    def relationships_changed?
+      return false unless individual_exists?
+      return false if now_or_future_active_policies.empty?
+      @relationship_changer.applicable?(member, resource, now_or_future_active_policies)
+    end
+
+    def process_relationship_change
+      @relationship_changer.perform_update(member, resource, now_or_future_active_policies)
     end
 
     def process_name_change
@@ -118,7 +131,8 @@ module ChangeSets
         home_phone_changed?,
         work_phone_changed?,
         mobile_phone_changed?,
-        dob_changed?
+        dob_changed?,
+        relationships_changed?
       ]
     end
 
@@ -209,7 +223,7 @@ module ChangeSets
     def determine_policies_to_transmit
       selected_policies = now_or_future_active_policies.inject({}) do |acc, pol|
         carrier_id = pol.plan.carrier_id
-        individual_market = pol.employer_id.blank? 
+        individual_market = pol.employer_id.blank?
         lookup_key = [carrier_id, individual_market]
         if acc.has_key?(lookup_key)
           if acc[lookup_key].policy_start <= pol.policy_start

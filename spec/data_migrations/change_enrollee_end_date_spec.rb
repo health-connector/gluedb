@@ -5,7 +5,6 @@ describe ChangeEnrolleeEndDate, dbclean: :after_each do
   let(:given_task_name) { "change_enrollee_end_date" }
   let(:policy) { FactoryGirl.create(:policy) }
   let (:enrollees) { policy.enrollees }
-  let(:end_date) { (policy.policy_start + 2.months).end_of_month}
   subject { ChangeEnrolleeEndDate.new(given_task_name, double(:current_scope => nil)) }
 
   describe "given a task name" do 

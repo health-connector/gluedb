@@ -17,14 +17,15 @@ describe ChangeEnrolleeEndDate, dbclean: :after_each do
   describe "changing the end dates for a policy" do 
     before(:each) do 
       allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id)
-      allow(ENV).to receive(:[]).with("enrollee_id").and_return(policy.enrollees.first.id)
+      allow(ENV).to receive(:[]).with("m_id").and_return(policy.enrollees.first.m_id)
       allow(ENV).to receive(:[]).with("new_end_date").and_return('01/31/2017')
     end
 
     it "should have an end date" do
-      subject.deactivate_enrollees
+      m_id = policy.enrollees.first.m_id
+      subject.migrate
       policy.reload
-      expect(policy.enrollees.where(id: enrollee_id).first.coverage_end).to eq ['end_date'].to_date
+      expect(policy.enrollees.where(m_id: m_id).first.coverage_end).to eq Date.strptime("01/31/2017", "%m/%d/%Y")
     end
   end
 end

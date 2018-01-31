@@ -80,7 +80,7 @@ module Generators::Reports
         x_pos = mm2pt(14.00) - @margin[0]
         y_pos = 790.86 - mm2pt(44.00) - 65
         bounding_box([x_pos, y_pos], :width => 300) do
-          font "/Library/Fonts/OpenSans-Regular.ttf"
+          open_sans_font
           fill_recipient_contact(10)
         end
       else
@@ -94,18 +94,19 @@ module Generators::Reports
 
     def print_policies(policies_array, x_ps, y_ps)
       rows = 5
+      @y_ps = y_ps
       policies_count = policies_array.count
       offset = 0
 
       while(offset <= policies_count)
         policies_array[offset, rows].each do |policy|
           bounding_box([x_ps, y_ps], :width => 200) do
-            font "/Library/Fonts/OpenSans-Regular.ttf"
+            open_sans_font
             text "•   " +  policy
           end
           y_ps = y_ps - 12
         end
-        y_ps = y_ps
+        y_ps = @y_ps
         x_ps = x_ps + 85
         offset = offset + rows
       end
@@ -122,7 +123,7 @@ module Generators::Reports
       #For Printing Date on template
       if @calender_year == 2017
         bounding_box([17, 445+padding], :width => 200) do
-          font "/Library/Fonts/OpenSans-Regular.ttf"
+          open_sans_font
           text "#{Date.today.strftime('%m/%d/%Y')}", size: 10
         end
       else
@@ -134,7 +135,7 @@ module Generators::Reports
       #For Printing Address on template
       if @calender_year == 2017
         bounding_box([8, 590+padding], :width => 300) do
-          font "/Library/Fonts/OpenSans-Regular.ttf"
+          open_sans_font
           fill_recipient_contact(10)
         end
       else
@@ -168,7 +169,7 @@ module Generators::Reports
       #For Printing Receipent Name on template for 2017
       if @calender_year == 2017
         bounding_box([42, 375.75+padding], :width => 200) do
-          font "/Library/Fonts/OpenSans-Regular.ttf"
+          open_sans_font
           text "#{@notice.recipient.name}:", size: 10
         end
       else
@@ -233,6 +234,10 @@ module Generators::Reports
           text "#{@hbx_id}", size: 8
         end
       end
+    end
+
+    def open_sans_font
+      font "/Library/Fonts/OpenSans-Regular.ttf"
     end
 
 

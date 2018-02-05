@@ -19,6 +19,11 @@ module Generators::Reports
     def initialize(policy, options = {})
       @notice_type = options[:notice_type] || false
       @npt_policy = options[:npt_policy] || false
+
+      # multi_version = options[:multi_version] || false
+      # @void = options[:void] || false
+      # @void = false
+      # @carrier_hash = {}
       @policy = policy
       @policy_disposition = PolicyDisposition.new(policy)
       @subscriber = @policy.subscriber.person
@@ -40,16 +45,15 @@ module Generators::Reports
 
       # Enable for IRS H36
       # if @policy.plan.hios_plan_id.match(/^86052/)
-      #   # puts "CareFirst BlueChoice -- #{@policy.id}"
+      #   puts "CareFirst BlueChoice -- #{@policy.id}"
       #   @notice.issuer_name = "CareFirst BlueChoice"
       # end
 
       # @policy.plan.carrier.name
       @notice.qhp_id = @policy.plan.hios_plan_id.gsub('-','')
       @notice.policy_id = prepend_zeros(@policy.id.to_s, 6)
-      # @notice.has_aptc = true if @policy.applied_aptc > 0
 
-      if @policy.responsible_party_id.present? # && ![87085,87244,87653,88495,88566,89129,89702,89922,95250,115487].include?(@policy.id)
+      if @policy.responsible_party_id.present?
         append_responsible_party_address
       else
         append_recipient_address(@subscriber)
@@ -101,7 +105,7 @@ module Generators::Reports
     end
 
     def append_policy_enrollees
-      if @policy.responsible_party_id.present? # && ![87085,87244,87653,88495,88566,89129,89702,89922,95250,115487].include?(@policy.id)
+      if @policy.responsible_party_id.present?
         if responsible_party = Person.where("responsible_parties._id" => Moped::BSON::ObjectId.from_string(@policy.responsible_party_id)).first
           @notice.recipient = build_responsible_party(responsible_party)
         else
@@ -194,8 +198,6 @@ module Generators::Reports
           premium_amount = as_dollars((@policy_disposition.end_date.day.to_f / @policy_disposition.end_date.end_of_month.day) * premium_amount)
         end
 
-        # NPT's
-
         if npt_policy
           if @policy.subscriber.coverage_end.present? && ((@policy.subscriber.coverage_end.end_of_month - 1.day) == @policy.subscriber.coverage_end)
             has_middle_of_month_coverage_end = false
@@ -205,10 +207,17 @@ module Generators::Reports
             if (coverage_end_month - 1) == i
               premium_amount = 0
             end
-
+            
+            # Enable for 1095A & H41
             if coverage_end_month == i
               premium_amount = nil
             end
+
+            # Enable for H36
+            # if coverage_end_month == i
+            #   premium_amount = 0
+            # end
+
           else
             if coverage_end_month == i
               premium_amount = 0
@@ -248,11 +257,18 @@ module Generators::Reports
           # @policy_disposition.as_of(Date.new(calender_year, i, 1)).applied_aptc :
           # @multi_version_pol.aptc_as_of(Date.new(calender_year, i, 1))
 
+          # silver_plan = Plan.where({ "year" => 2014, "hios_plan_id" => "94506DC0390006-01" }).first
+          # silver_plan_premium = @policy_disposition.as_of(Date.new(calender_year, i, 1), silver_plan).ehb_premium
+
+          # silver_plan = Plan.where({ "year" => 2015, "hios_plan_id" => "94506DC0390006-01" }).first
+          # silver_plan_premium = @policy_disposition.as_of(Date.new(calender_year, i, 1), silver_plan).ehb_premium
+
+          # silver_plan = Plan.where({ "year" => 2016, "hios_plan_id" => "94506DC0390006-01" }).first
+          # silver_plan_premium = @policy_disposition.as_of(Date.new(calender_year, i, 1), silver_plan).ehb_premium
 
           silver_plan = Plan.where({:year => calender_year, :hios_plan_id => settings[:tax_document][calender_year][:slcsp]}).first
           silver_plan_premium = @policy_disposition.as_of(Date.new(calender_year, i, 1), silver_plan).ehb_premium
 
-          # silver_plan_premium = 0
 
           aptc_amt = @policy_disposition.as_of(Date.new(calender_year, i, 1)).applied_aptc
 
@@ -277,23 +293,23 @@ module Generators::Reports
                 silver_plan_premium = 0
               end
 
+              # Enable for Federal 1095A & H41
               if coverage_end_month == i
                 silver_plan_premium = nil
                 aptc_amt = nil
               end
+               
+              # Enable this for H36
+              # if coverage_end_month == i
+              #   silver_plan_premium = 0
+              #   aptc_amt = 0
+              # end
             else
               if coverage_end_month == i
                 silver_plan_premium = 0
               end
             end
           end
-
-          # This was added for failure to pay condition
-          # if @policy.id == 65209
-          #   if i > 3
-          #     silver_plan_premium = 0
-          #   end
-          # end
 
           premium_amounts.merge!({
             premium_amount_slcsp: silver_plan_premium,

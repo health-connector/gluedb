@@ -237,7 +237,7 @@ module Generators::Reports
     end
 
     def open_sans_font
-      font "#{Rails.root.join("app/assets/fonts/OpenSans-Regular.ttf")}"
+      font "#{Rails.root.join("app/assets/fonts/Open_Sans/OpenSans-Regular.ttf")}"
     end
 
     def fill_recipient_contact(font_size=nil)

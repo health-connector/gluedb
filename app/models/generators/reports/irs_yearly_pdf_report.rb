@@ -230,16 +230,15 @@ module Generators::Reports
       pages.each do |page|
         go_to_page(page)
         bounding_box([400, 739.2], :width => 200) do
-          font "/Library/Fonts/OpenSans-Regular.ttf"
+          open_sans_font
           text "#{@hbx_id}", size: 8
         end
       end
     end
 
     def open_sans_font
-      font "/Library/Fonts/OpenSans-Regular.ttf"
+      font "#{Rails.root.join("app/assets/fonts/OpenSans-Regular.ttf")}"
     end
-
 
     def fill_recipient_contact(font_size=nil)
       font_size = 11 if font_size.nil?

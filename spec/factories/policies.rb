@@ -13,6 +13,8 @@ FactoryGirl.define do
     carrier_specific_plan_id 'rspec-mock'
     rating_area  "100"
     composite_rating_tier 'rspec-mock'
+    kind 'individual'
+    enrollment_kind 'open_enrollment'
 
     after(:create) do |p, evaluator|
       create_list(:enrollee, 2, policy: p)
@@ -20,6 +22,7 @@ FactoryGirl.define do
 
     trait :shop do
       employer
+      kind 'employer_sponsored'
       after(:create) do |policy|
         create :premium_payment, employer: policy.employer, carrier: policy.plan.carrier, policy: policy
       end
@@ -27,6 +30,10 @@ FactoryGirl.define do
 
     trait :terminated do 
       aasm_state "terminated"
+    end
+
+    trait :sep do 
+      enrollment_kind 'special_enrollment'
     end
 
     factory :shop_policy, traits: [:shop]

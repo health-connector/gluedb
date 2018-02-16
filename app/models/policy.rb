@@ -10,6 +10,9 @@ class Policy
 
   attr_accessor :coverage_start
 
+  Kinds = %w(individual employer_sponsored employer_sponsored_cobra coverall unassisted_qhp insurance_assisted_qhp streamlined_medicaid emergency_medicaid hcr_chip)
+  ENROLLMENT_KINDS = %w(open_enrollment special_enrollment)
+
   auto_increment :_id
 
   field :eg_id, as: :enrollment_group_id, type: String
@@ -35,6 +38,11 @@ class Policy
   field :carrier_specific_plan_id, type: String
   field :rating_area, type: String
   field :composite_rating_tier, type: String
+  field :cobra_eligibility_date, type: Date
+
+  # Enrollment data for federal reporting to mirror some of Enroll's
+  field :kind, type: String
+  field :enrollment_kind, type: String
 
   validates_presence_of :eg_id
   validates_presence_of :pre_amt_tot
@@ -185,6 +193,10 @@ class Policy
 
   def subscriber
     enrollees.detect { |m| m.relationship_status_code == "self" }
+  end
+
+  def is_cobra?
+    cobra_eligibility_date.present? || enrollees.any? { |en| en.ben_stat == "cobra"}
   end
 
   def spouse

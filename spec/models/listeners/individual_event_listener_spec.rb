@@ -252,18 +252,6 @@ describe Listeners::IndividualEventListener do
         it_should_behave_like "a listener recording the event outcome", :individual_drop_subscriber_address_properties, "a body value for the resource"
       end
 
-      describe "and that change is to dob" do
-        let(:dob_change_result) { true }
-
-        before(:each) do
-          allow(channel).to receive(:ack).with(delivery_tag, false)
-          allow(event_broadcaster).to receive(:broadcast).with(individual_dob_changed_properties, "a body value for the resource")
-        end
-
-        it_should_behave_like "a listener consuming the message"
-        it_should_behave_like "a listener recording the event outcome", :individual_dob_changed_properties, "a body value for the resource"
-      end
-
       describe "and that change is not to dob" do
         let(:dob_change_result) { false }
 

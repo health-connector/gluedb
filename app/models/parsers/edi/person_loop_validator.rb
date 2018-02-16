@@ -42,6 +42,22 @@ module Parsers
                      )
                      valid = false
                    end
+                   max_end_date = (policy.coverage_year.end) rescue nil
+                   if max_end_date
+                     if max_end_date < coverage_end_date
+                       listener.termination_date_after_expiration({
+                         :coverage_end => policy_loop.coverage_end,
+                         :expiration_date => max_end_date.strftime("%Y%m%d"),
+                         :member_id => person_loop.member_id
+                       })
+                       valid = false
+                     end
+                   else
+                     listener.indeterminate_policy_expiration({
+                       :member_id => person_loop.member_id
+                     })
+                     valid = false
+                   end
                  end
                end
             end

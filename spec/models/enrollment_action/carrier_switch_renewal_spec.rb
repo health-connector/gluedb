@@ -47,7 +47,8 @@ describe EnrollmentAction::CarrierSwitchRenewal, "given a qualified enrollment s
     :existing_plan => plan,
     :all_member_ids => [1,2],
     :hbx_enrollment_id => 3,
-    :subscriber_start => subscriber_start
+    :subscriber_start => subscriber_start,
+    :is_cobra? => false
     ) }
 
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
@@ -61,7 +62,7 @@ describe EnrollmentAction::CarrierSwitchRenewal, "given a qualified enrollment s
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).and_return(primary_db_record)
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_secondary).and_return(secondary_db_record)
 
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan).and_return(policy_updater)
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan, false).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(EnrollmentAction::CarrierSwitchRenewal).to receive(:other_carrier_renewal_candidates).with(action_event).and_return([other_carrier_term_candidate])
     allow(other_carrier_term_candidate).to receive(:terminate_as_of).with(subscriber_end).and_return(true)

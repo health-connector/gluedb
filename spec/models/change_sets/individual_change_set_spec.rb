@@ -193,6 +193,24 @@ describe ::ChangeSets::IndividualChangeSet do
       end
     end
 
+    context "with a change of dob change" do
+      let(:dob_changed) { true }
+
+      before(:each) do
+        allow(existing_record.members.first).to receive(:dob).and_return(Date.today)
+      end
+
+      describe "#any_changes?" do
+        subject { changeset.any_changes? }
+        it { is_expected.to be_truthy }
+      end
+
+      describe "#multiple_changes?" do
+        subject { changeset.multiple_changes? }
+        it { is_expected.to be_falsey }
+      end
+    end
+
     context "with a change of home address, and a change of work email" do
       let(:home_address_changed) { true }
       let(:work_email_changed) { true }

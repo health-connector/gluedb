@@ -328,8 +328,20 @@ class Person
     phones.detect { |adr| adr.phone_type == "home" }
   end
 
+  def work_phone
+    phones.detect { |adr| adr.phone_type == "work" }
+  end
+
+  def mobile_phone
+    phones.detect { |adr| adr.phone_type == "mobile" }
+  end
+
   def home_email
     emails.detect { |adr| adr.email_type == "home" }
+  end
+
+  def work_email
+    emails.detect { |adr| adr.email_type == "work"}
   end
 
   def initialize_name_full
@@ -461,6 +473,4 @@ class Person
   def query_proxy
     @query_proxy ||= Queries::PersonAssociations.new(self)
   end
-
-
 end

@@ -7,9 +7,10 @@ module ExternalEvents
 
     # p_node : Openhbx::Cv2::Policy
     # p_record : Plan
-    def initialize(p_node, p_record)
+    def initialize(p_node, p_record, cobra_reinstate = false)
       @policy_node = p_node
       @plan = p_record
+      @cobra = cobra_reinstate
     end
 
     def extract_pre_amt_tot
@@ -22,6 +23,13 @@ module ExternalEvents
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return 0.00 if p_enrollment.blank?
       BigDecimal.new(Maybe.new(p_enrollment).total_responsible_amount.strip.value)
+    end
+
+    def extract_cobra_eligibility_date
+      p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
+      val = Maybe.new(p_enrollment).shop_market.cobra_eligibility_date.strip.value
+      return nil if val.blank?
+      Date.strptime(val, "%Y%m%d") rescue nil
     end
 
     def extract_enrollee_premium(enrollee)
@@ -84,7 +92,9 @@ module ExternalEvents
     def extract_rel_from_me(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
       case simple_relationship
-      when "spouse", "life_partner", "domestic_partner"
+      when "life_partner", "domestic_partner"
+        "life partner"
+      when "spouse"
         "spouse"
       when "ward"
         "ward"
@@ -96,7 +106,9 @@ module ExternalEvents
     def extract_rel_from_sub(rel)
       simple_relationship = Maybe.new(rel).relationship_uri.strip.split("#").last.downcase.value
       case simple_relationship
-      when "spouse", "life_partner", "domestic_partner"
+      when "life_partner", "domestic_partner"
+        "life partner"
+      when "spouse"
         "spouse"
       when "court_appointed_guardian"
         "ward"
@@ -131,8 +143,8 @@ module ExternalEvents
       policy.enrollees << Enrollee.new({
         :m_id => member_id,
         :rel_code => extract_rel_code(enrollee_node),
-        :ben_stat => "active",
-        :emp_state => "active",
+        :ben_stat => @cobra ? "cobra" : "active",
+        :emp_stat => "active",
         :coverage_start => extract_enrollee_start(enrollee_node),
         :pre_amt => extract_enrollee_premium(enrollee_node)
       })
@@ -151,12 +163,19 @@ module ExternalEvents
       policy.enrollees << Enrollee.new({
         :m_id => subscriber_id,
         :rel_code => "self",
-        :ben_stat => "active",
-        :emp_state => "active",
+        :ben_stat => @cobra ? "cobra" : "active",
+        :emp_stat => "active",
         :coverage_start => extract_enrollee_start(sub_node),
         :pre_amt => extract_enrollee_premium(sub_node)
       })
       policy.save!
+    end
+
+    def build_responsible_party(responsible_person)
+      if responsible_person_exists?
+        responsible_person.responsible_parties << ResponsibleParty.new({:entity_identifier => "responsible party" }) 
+        responsible_person.responsible_parties.first
+      end
     end
 
     def policy_exists?
@@ -164,21 +183,54 @@ module ExternalEvents
       Policy.where(:hbx_enrollment_ids => eg_id).count > 0
     end
 
+    def existing_policy
+      eg_id = extract_enrollment_group_id(@policy_node)
+      Policy.where(:hbx_enrollment_ids => eg_id).first if policy_exists?
+    end
+
+    def responsible_person_exists?
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      Person.where('members.hbx_member_id' => authority_member_id).count > 0
+    end
+
+    def responsible_person
+      authority_member_id = extract_responsible_party_id(@policy_node)
+      return nil if authority_member_id.blank?
+      Person.where("members.hbx_member_id" => authority_member_id).first if responsible_person_exists?
+    end
+
+    def responsible_party_exists?
+      responsible_person_exists? && responsible_person.responsible_parties.any?
+    end
+
+    def existing_responsible_party
+      responsible_person.responsible_parties.first if responsible_party_exists?
+    end
+
     def persist
       return true if policy_exists?
+
+      responsible_party_attributes = {}
+      if !@policy_node.responsible_party.blank?
+        responsible_party = responsible_party_exists? ? existing_responsible_party : build_responsible_party(responsible_person)
+        responsible_party_attributes = { :responsible_party_id => responsible_party.id }
+      end
+
       policy = Policy.create!({
         :plan => @plan,
         :carrier_id => @plan.carrier_id,
         :eg_id => extract_enrollment_group_id(@policy_node),
         :pre_amt_tot => extract_pre_amt_tot,
-        :tot_res_amt => extract_tot_res_amt
-      }.merge(extract_other_financials).merge(extract_rating_details))
+        :tot_res_amt => extract_tot_res_amt,
+        :cobra_eligibility_date => @cobra ? extract_cobra_eligibility_date : nil
+      }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
+
       build_subscriber(policy)
+
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }
       other_enrollees.each do |en|
         build_enrollee(policy, en)
       end
-      true
     end
   end
 end

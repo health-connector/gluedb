@@ -16,7 +16,7 @@ module EnrollmentAction
       unless members_persisted.all?
         return false
       end
-      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan)
+      ep = ExternalEvents::ExternalPolicy.new(action.policy_cv, action.existing_plan, action.is_cobra?)
       return false unless ep.persist
       policy_to_term = termination.existing_policy
       policy_to_term.terminate_as_of(termination.subscriber_end)

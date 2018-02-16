@@ -4,6 +4,10 @@ module Handlers
       policy_cv.enrollees.detect { |en| en.subscriber? }
     end
 
+    def extract_responsible_party_id(policy_cv)
+      Maybe.new(policy_cv).responsible_party.id.strip.split("#").last.value
+    end
+
     def extract_member_id(enrollee)
       Maybe.new(enrollee).member.id.strip.split("#").last.value
     end
@@ -12,6 +16,12 @@ module Handlers
       val = Maybe.new(enrollee).benefit.begin_date.strip.value
       return nil if val.blank?
       Date.strptime(val, "%Y%m%d")
+    end
+
+    def extract_carrier_id(policy_cv)
+      carrier = Maybe.new(policy_cv).policy_enrollment.plan.carrier.value
+      return nil unless carrier
+      Maybe.new(carrier).id.strip.split("#").last.value
     end
 
     def extract_enrollee_end(enrollee)
@@ -46,6 +56,10 @@ module Handlers
       hios_id = extract_hios_id(policy_cv)
       active_year = extract_active_year(policy_cv)
       Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
+    end
+
+    def extract_market_kind(enrollment_event_cv)
+      Maybe.new(enrollment_event_cv).event.body.enrollment.market.split("#").last.value
     end
 
     def determine_market(enrollment_event_cv)

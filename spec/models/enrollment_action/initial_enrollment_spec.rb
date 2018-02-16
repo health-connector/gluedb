@@ -23,7 +23,8 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:enrollment_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => policy_cv,
-    :existing_plan => existing_plan
+    :existing_plan => existing_plan,
+    :is_cobra? => false
   ) }
 
   let(:existing_plan) { double }
@@ -36,7 +37,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
 
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_from_xml).and_return(member_database_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan).and_return(policy_database_record)
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(policy_cv, existing_plan, false).and_return(policy_database_record)
     allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 

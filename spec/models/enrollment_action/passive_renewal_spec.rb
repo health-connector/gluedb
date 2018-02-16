@@ -46,6 +46,7 @@ describe EnrollmentAction::PassiveRenewal, "persists enrollment set for passive 
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => new_policy_cv,
     :existing_plan => new_plan,
+    :is_cobra? => false
     ) }
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
 
@@ -55,7 +56,7 @@ describe EnrollmentAction::PassiveRenewal, "persists enrollment set for passive 
   before :each do
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_primary).
       and_return(primary_db_record)
-    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan).
+    allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, new_plan, false).
       and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
     allow(subject.action).to receive(:existing_policy).and_return(false)

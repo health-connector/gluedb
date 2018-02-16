@@ -17,12 +17,26 @@ describe Parsers::Edi::IncomingTransaction do
   let(:coverage_end) { '20140501' }
 
   let(:policy_loop) { double(id: '4321', action: :stop, coverage_end: coverage_end) }
-  let(:person_loop) { double(member_id: '1', carrier_member_id: '1234', policy_loops: [policy_loop]) }
+  let(:person_loop) { instance_double(Parsers::Edi::Etf::PersonLoop, member_id: '1', carrier_member_id: '1234', policy_loops: [policy_loop], :non_payment_change? => false) }
   let(:etf) { double(people: [person_loop], is_shop?: false) }
   let(:incoming) do
     incoming = Parsers::Edi::IncomingTransaction.new(etf)
     incoming.policy_found(policy)
     incoming
+  end
+
+  let(:event_broadcaster) { instance_double(Amqp::EventBroadcaster) }
+
+  before :each do
+    allow(Amqp::EventBroadcaster).to receive(:with_broadcaster).and_yield(event_broadcaster)
+    allow(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.canceled",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids)
+          }
+    }, "")
   end
 
   it 'imports enrollee carrier member id' do
@@ -57,6 +71,66 @@ describe Parsers::Edi::IncomingTransaction do
     context 'when coverage start/end are different' do
       let(:coverage_start) { '20140501' }
       let(:coverage_end) { '20140706' }
+      before :each do
+        allow(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.terminated",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids)
+          }
+        }, "")
+      end
+
+      it "sends the termination notice" do
+        expect(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.terminated",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids)
+          }
+        }, "")
+        incoming.import
+      end
+
+      it 'sets the policy to terminated' do
+        incoming.import
+
+        expect(enrollee.policy.aasm_state).to eq 'terminated'
+        expect(policy.aasm_state).to eq 'terminated'
+      end
+    end
+
+    context 'when coverage start/end are different, and the reason is non-payment' do
+      let(:coverage_start) { '20140501' }
+      let(:coverage_end) { '20140706' }
+      let(:person_loop) { instance_double(Parsers::Edi::Etf::PersonLoop, member_id: '1', carrier_member_id: '1234', policy_loops: [policy_loop], :non_payment_change? => true) }
+      before :each do
+        allow(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.terminated",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids),
+            :qualifying_reason => "urn:openhbx:terms:v1:benefit_maintenance#non_payment"
+          }
+        }, "")
+      end
+
+      it "sends the termination notice" do
+        expect(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.terminated",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids),
+            :qualifying_reason => "urn:openhbx:terms:v1:benefit_maintenance#non_payment"
+          }
+        }, "")
+        incoming.import
+      end
+
       it 'sets the policy to terminated' do
         incoming.import
 
@@ -68,6 +142,19 @@ describe Parsers::Edi::IncomingTransaction do
     context 'when coverage start/end are the same' do
       let(:coverage_start) { '20140501' }
       let(:coverage_end) { '20140501' }
+
+      it "broadcasts the cancel" do
+        expect(event_broadcaster).to receive(:broadcast).with({
+          :routing_key => "info.events.policy.canceled",
+          :headers => {
+            :resource_instance_uri => policy.eg_id,
+            :event_effective_date => policy.policy_end.strftime("%Y%m%d"),
+            :hbx_enrollment_ids => JSON.dump(policy.hbx_enrollment_ids)
+          }
+        }, "")
+        incoming.import
+      end
+
       it 'sets the policy to canceled' do
         incoming.import
 

@@ -1,12 +1,5 @@
 ct_cache = Caches::Mongoid::SinglePropertyLookup.new(Plan, "coverage_type")
 
-p_repo = {}
-
-p_map = Person.collection.aggregate([{"$unwind"=> "$members"}, {"$project" => {"_id" => 0, member_id: "$members.hbx_member_id", person_id: "$_id"}}])
-p_map.each do |val|
-    p_repo[val["member_id"]] = val["person_id"]
-end
-
 all_pol_ids = Protocols::X12::TransactionSetHeader.collection.aggregate([
   {"$match" => {
     "policy_id" => { "$ne" => nil }

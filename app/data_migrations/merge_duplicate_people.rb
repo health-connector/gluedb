@@ -46,6 +46,7 @@ class MergeDuplicatePeople < MongoidMigrationTask
 
   def remove_members(person_to_remove)
     person_to_remove.unset(:authority_member_id)
+    person_to_remove.save
     person_to_remove.members.destroy_all
   end
 

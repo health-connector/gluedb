@@ -36,4 +36,8 @@ CSV.open("people_missing_addresses_#{Time.now.strftime('%Y%m%d%H%M')}.csv", "w")
 	end
 end
 
+if Rails.env.test?
+ File.delete("people_missing_addresses_#{Time.now.strftime('%Y%m%d%H%M')}.csv") if File.exists?("people_missing_addresses_#{Time.now.strftime('%Y%m%d%H%M')}.csv")
+end
+
 puts "Finished at #{Time.now}" unless Rails.env.test?

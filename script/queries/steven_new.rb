@@ -15,13 +15,9 @@ def bad_eg_id(eg_id)
   (eg_id =~ /\A000/) || (eg_id =~ /\+/)
 end
 
-hostname = %x(echo $HOSTNAME).strip
-
-environment_name = hostname.gsub(".","").gsub("edidbmhchbxshoporg","")
-
 timestamp = Time.now.strftime('%Y_%m_%d_%H_%M_%S')
 
-filename = "CCA_#{environment_name}_enrollment_#{timestamp}.csv"
+filename = "CCA_#{ENV["RAILS_ENV"]}_ENROLLMENT_#{timestamp}.csv"
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 

@@ -20,7 +20,7 @@
         - unless enrollee.subscriber?
           %person_relationships
             %person_relationship
-              %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{enrollee.relationship_status_code}"
+              %relationship_uri= "urn:openhbx:terms:v1:individual_relationship##{enrollee.relationship_status_code.gsub(' ', '_')}"
               %object_individual
                 %id= "urn:openhbx:hbx:dc0:resources:v1:person:hbx_id##{subscriber_person.authority_member.hbx_member_id}"
         %person_demographics
@@ -91,5 +91,3 @@
 %created_at= policy.created_at.iso8601 if policy.created_at
 - if !policy.updated_at.blank?
   %modified_at= policy.updated_at.iso8601
-  
-

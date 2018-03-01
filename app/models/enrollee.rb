@@ -6,6 +6,16 @@ class Enrollee
   EMPLOYMENT_STATUS_CODE_LIST   = ["active", "full-time", "part-time", "retired", "terminated"]
   RELATIONSHIP_STATUS_CODE_LIST = ["self", "spouse", "child", "ward", "life partner"]
 
+  RELATIONSHIP_CODE_MAP = {
+    "self" => "self",
+    "child" => "child",
+    "spouse" => "spouse",
+    "ward" => "ward",
+    "life_partner" => "spouse",
+    "domestic_partner" => "spouse",
+    "adopted_child" => "child"
+  }
+
   include MergingModel
 
   attr_accessor :include_checked
@@ -31,6 +41,10 @@ class Enrollee
   validates_inclusion_of :benefit_status_code, in: BENEFIT_STATUS_CODE_LIST
   validates_inclusion_of :employment_status_code, in: EMPLOYMENT_STATUS_CODE_LIST
   validates_inclusion_of :relationship_status_code, in: RELATIONSHIP_STATUS_CODE_LIST
+
+  def self.map_relationship_code(relationship_code)
+    RELATIONSHIP_CODE_MAP[relationship_code] || "child"
+  end
 
   def coverage_start_matches?(date)
     if date.kind_of?(String)

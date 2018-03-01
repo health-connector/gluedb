@@ -25,6 +25,10 @@ module Parsers
             c_member_seg.nil? ? nil : c_member_seg[2]
         end
 
+        def non_payment_change?
+          "59" == @loop["INS"][4]
+        end
+
         def rel_code
           @rel_code ||= @loop["INS"][2]
         end

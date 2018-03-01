@@ -29,6 +29,7 @@ db/seedfiles/*.yml
 node_modules
 .idea/
 config/exchange.yml
+spec/vocabularies
 
 config/settings.local.yml
 config/settings/*.local.yml

@@ -25,3 +25,60 @@ describe Parsers::Edi::PersonLoopValidator do
     end
   end
 end
+
+describe Parsers::Edi::PersonLoopValidator, "given a termination on an existing policy" do
+  let(:listener) { instance_double(Parsers::Edi::IncomingTransaction) }
+  let(:policy_loop) { instance_double(Parsers::Edi::Etf::PolicyLoop, action: :stop, coverage_end: coverage_end) }
+  let(:policy) { instance_double(Policy) }
+  let(:person_loop) { instance_double(Parsers::Edi::Etf::PersonLoop, :carrier_member_id => nil, :member_id => member_id, :policy_loops => [policy_loop]) }
+  let(:member_id) { "the member id" }
+  let(:enrollee) { instance_double(Enrollee, :coverage_start => coverage_start) }
+  let(:coverage_start) { Date.new(2016,1,1) }
+  let(:expiration_date) { Date.new(2016,12,31) }
+  let(:coverage_year) { (coverage_start..expiration_date) }
+
+  let(:validator) { Parsers::Edi::PersonLoopValidator.new }
+
+  before :each do
+    allow(policy).to receive(:enrollee_for_member_id).with(member_id).and_return(enrollee)
+  end
+
+  context "when an expiration date can not be determined" do
+    let(:coverage_end) { "20161231" }
+
+    before :each do
+      allow(policy).to receive(:coverage_year).and_raise(NoMethodError.new("plan year missing from DB"))
+    end
+
+    it "notifies the listener of the unknown expiration date" do
+      expect(listener).to receive(:indeterminate_policy_expiration).with({:member_id=>member_id})
+      expect(validator.validate(person_loop, listener, policy)).to be_falsey
+    end
+  end
+
+  context "with a termination date after the natural policy expiration" do
+    let(:coverage_end) { "20170101" }
+
+    before :each do
+      allow(policy).to receive(:coverage_year).and_return(coverage_year)
+    end
+
+    it "notifies the listener of the invalid_termination_date" do
+      expect(listener).to receive(:termination_date_after_expiration).with({:coverage_end=>coverage_end, :expiration_date=>"20161231", :member_id=>member_id})
+      expect(validator.validate(person_loop, listener, policy)).to be_falsey
+    end
+  end
+
+  context "with a termination date that is equal to the natural policy expiration" do
+    let(:coverage_end) { "20161231" }
+
+    before :each do
+      allow(policy).to receive(:is_shop?).and_return(false)
+      allow(policy).to receive(:coverage_year).and_return(coverage_year)
+    end
+
+    it "notifies the listener of the invalid_termination_date" do
+      expect(validator.validate(person_loop, listener, policy)).to be_truthy
+    end
+  end
+end

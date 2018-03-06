@@ -3,7 +3,6 @@ site:
   long_name: "Health Connector Glue DB"
   copyright_period_start: "2017"
 
-  
   social_media:
     facebook_url: ""
 
@@ -15,3 +14,6 @@ contact_center:
   postal_code: "02114"
 
 abbrev: "mhc"
+
+aca:
+  enrollment_policy_report_name: "CCA_PRODUCTION_ENROLLMENT"

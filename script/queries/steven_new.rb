@@ -1,4 +1,6 @@
 require 'csv'
+include Config::AcaHelper
+
 timey = Time.now
 puts "Report started at #{timey}"
 policies = Policy.no_timeout.where(
@@ -15,9 +17,7 @@ def bad_eg_id(eg_id)
   (eg_id =~ /\A000/) || (eg_id =~ /\+/)
 end
 
-timestamp = Time.now.strftime('%Y_%m_%d_%H_%M_%S')
-
-filename = "CCA_#{ENV["RAILS_ENV"]}_ENROLLMENT_#{timestamp}.csv"
+filename = fetch_file_format
 
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 

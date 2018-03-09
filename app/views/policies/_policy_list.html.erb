@@ -11,17 +11,21 @@
     <%= table_empty_to_human if policies.count < 1 %>
     <% policies.each do |policy| %>
       <tr>
-	<td>
-	  <%= link_to policy.subscriber.person.full_name, policy.subscriber.person %>
+        <td>
+          <% if policy.subscriber %>
+            <%= link_to policy.subscriber.person.full_name, policy.subscriber.person %>
+          <% else %>
+            <%= link_to policy.enrollees.first.person.full_name, policy.enrollees.first.person %>
+          <% end %>
         </td>
-	<td>
-	  <%= policy.id %>
+        <td>
+          <%= policy.id %>
         </td>
-	<td>
-	  <%= policy.eg_id %>
+        <td>
+          <%= policy.eg_id %>
         </td>
-	<td>
-	  <%= policy.plan.name %>
+        <td>
+          <%= policy.plan.name %>
         </td>
       </tr>
     <% end %>

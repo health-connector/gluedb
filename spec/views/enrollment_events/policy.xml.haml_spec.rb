@@ -18,7 +18,8 @@ describe "enrollment_events/_policy.xml" do
   let(:carrier) do
     instance_double Carrier,
       name: 'Carrier',
-      hbx_carrier_id: 'hbx_carrier_id'
+      hbx_carrier_id: 'hbx_carrier_id',
+      id: 'sd8f7s9d8f7'
   end
 
   let(:plan) do
@@ -29,7 +30,9 @@ describe "enrollment_events/_policy.xml" do
       year: Date.today.year,
       coverage_type: 'health',
       metal_level: 'Gold',
-      ehb: BigDecimal.new("0.0")
+      ehb: BigDecimal.new("0.0"),
+      id: 'a12db3',
+      carrier_id: carrier.id
   end
 
   let(:subscriber_person) do
@@ -108,6 +111,7 @@ describe "enrollment_events/_policy.xml" do
   end
 
   before do
+    allow(policy).to receive(:plan_id).and_return(plan.id)
     render :template => "enrollment_events/_policy",
       :layout => 'layouts/policy_test',
       :locals => { :policy => policy, :enrollees => [ subscriber, life_partner ] }

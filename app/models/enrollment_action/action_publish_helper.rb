@@ -27,6 +27,20 @@ module EnrollmentAction
       event_xml_doc
     end
 
+    def set_member_ends(member_end_date)
+      event_xml_doc.xpath("//cv:enrollment_event_body/cv:affected_members/cv:affected_member", XML_NS).each do |node|
+        node.xpath("cv:benefit/cv:end_date", XML_NS).each do |d_node|
+          d_node.content = member_end_date.strftime("%Y%m%d")
+        end
+      end
+      event_xml_doc.xpath("//cv:enrollment_event_body/cv:enrollment/cv:policy/cv:enrollees/cv:enrollee", XML_NS).each do |node|
+        node.xpath("cv:benefit/cv:end_date", XML_NS).each do |d_node|
+          d_node.content = member_end_date.strftime("%Y%m%d")
+        end
+      end
+      event_xml_doc
+    end
+
     def keep_member_ends(member_ids)
       event_xml_doc.xpath("//cv:enrollment_event_body/cv:affected_members/cv:affected_member", XML_NS).each do |node|
         found_matching_id = false

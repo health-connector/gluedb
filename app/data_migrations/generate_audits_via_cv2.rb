@@ -146,7 +146,7 @@ class GenerateAudits
     pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
       begin
         affected_members = []
-        policy.enrollees.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
+        policy.enrollees.select{|en| !en.canceled?}.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
         event_type = "urn:openhbx:terms:v1:enrollment#audit"
         tid = generate_transaction_id
         cv_render = render_cv(affected_members,policy,event_type,tid)

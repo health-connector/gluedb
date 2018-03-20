@@ -175,7 +175,7 @@ class GenerateAudits
          :locals => {
            :affected_members => affected_members,
            :policy => policy,
-           :enrollees => policy.enrollees,
+           :enrollees => policy.enrollees.select{|en| !en.canceled?},
            :event_type => event_kind,
            :transaction_id => transaction_id
          })

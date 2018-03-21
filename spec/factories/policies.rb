@@ -36,7 +36,15 @@ FactoryGirl.define do
       enrollment_kind 'special_enrollment'
     end
 
+    trait :canceled_dependent do 
+      after(:create) do |p, evaluator|
+        create_list(:enrollee, 2, policy: p)
+        create_list(:cancelled_enrollee,1, policy: p)
+      end
+    end
+
     factory :shop_policy, traits: [:shop]
     factory :terminated_policy, traits: [:terminated]
+    factory :canceled_dependent_policy, traits: [:canceled_dependent]
   end
 end

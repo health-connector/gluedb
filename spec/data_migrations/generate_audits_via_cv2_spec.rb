@@ -5,10 +5,11 @@ describe GenerateAudits, dbclean: :after_each do
   let(:cutoff_date) { Date.today.beginning_of_month }
   let(:carrier) { FactoryGirl.create(:carrier) }
   let(:carrier_abbrev) { 'SAC' }
-  let(:ivl_pol) { FactoryGirl.create(:policy) }
+  let(:ivl_pol) { FactoryGirl.create(:canceled_dependent_policy) }
   let(:shop_pol) { FactoryGirl.create(:shop_policy) }
   let(:renewal_shop_pol) { FactoryGirl.create(:shop_policy) }
   let(:person) { FactoryGirl.create(:person) }
+  let(:dependent_person) { FactoryGirl.create(:person)}
   subject { GenerateAudits.new }
 
   describe 'given that these are IVL audits' do 
@@ -25,6 +26,13 @@ describe GenerateAudits, dbclean: :after_each do
       ivl_pol.save
 
       ivl_pol.enrollees.each do |en|
+        if en.coverage_start == en.coverage_end
+          en.coverage_end = cutoff_date + 1.day
+          en.save
+        end
+      end
+
+      ivl_pol.enrollees.each do |en|
         en.coverage_start = cutoff_date + 1.day
         en.save
       end
@@ -32,6 +40,10 @@ describe GenerateAudits, dbclean: :after_each do
       person.members.first.hbx_member_id = ivl_pol.subscriber.m_id
       person.members.first.save
       person.authority_member_id = ivl_pol.subscriber.m_id
+
+      dependent_person.members.first.hbx_member_id = ivl_pol.enrollees.detect{|en| en.rel_code != "self"}.m_id
+      dependent_person.members.first.save
+      dependent_person.authority_member_id = ivl_pol.enrollees.detect{|en| en.rel_code != "self"}.m_id
     end
 
     it 'should only return the ivl policy' do 
@@ -42,6 +54,11 @@ describe GenerateAudits, dbclean: :after_each do
     it 'should not return the shop policy' do 
       yielded_policy = subject.pull_policies(market,cutoff_date,carrier_abbrev)
       expect(yielded_policy).not_to eq shop_pol
+    end
+
+    it 'should not include canceled dependents' do 
+      enrollees = subject.select_enrollees(ivl_pol)
+      expect(enrollees.select{|en| (en.coverage_start == en.coverage_end)}).to eq []
     end
   end
 

@@ -146,7 +146,7 @@ class GenerateAudits
     pull_policies(ENV['market'],cutoff_date,ENV['carrier']) do |policy|
       begin
         affected_members = []
-        policy.enrollees.select{|en| !en.canceled?}.each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
+        select_enrollees(policy).each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
         event_type = "urn:openhbx:terms:v1:enrollment#audit"
         tid = generate_transaction_id
         cv_render = render_cv(affected_members,policy,event_type,tid)
@@ -155,6 +155,11 @@ class GenerateAudits
         puts "Glue Policy ID: #{policy.id}, Glue Enrollment ID: #{policy.eg_id} failed - #{e.inspect}"
       end
     end
+  end
+
+  def select_enrollees(policy)
+    enrollees = policy.enrollees.select{|en| !en.canceled?}
+    return enrollees
   end
 
   def generate_transaction_id
@@ -175,7 +180,7 @@ class GenerateAudits
          :locals => {
            :affected_members => affected_members,
            :policy => policy,
-           :enrollees => policy.enrollees.select{|en| !en.canceled?},
+           :enrollees => select_enrollees(policy),
            :event_type => event_kind,
            :transaction_id => transaction_id
          })

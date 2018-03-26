@@ -6,8 +6,8 @@ RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
                         policy_end: policy_end, plan: plan, eg_id: 212131212, applied_aptc: 0,
                         cobra_eligibility_date: cobra_date,employer: employer, :is_shop? => true,
                         :is_cobra? => true,broker: nil,carrier_specific_plan_id:'',tot_emp_res_amt:0.0, pre_amt_tot:0.0,tot_res_amt:0.0,rating_area:'',employer:employer,composite_rating_tier:'',created_at:Date.today,updated_at:'') }
-  let(:plan) { double(carrier: carrier, name:'Care First', metal_level:'01', ehb:'0.0',coverage_type:"health", year:Date.today.year, hios_plan_id: '123121') }
-  let(:carrier) { double(name: 'Care First',hbx_carrier_id:'1')}
+  let(:plan) { double(carrier: carrier, name:'Care First', metal_level:'01', ehb:'0.0',coverage_type:"health", year:Date.today.year, hios_plan_id: '123121', id: 'a12db3') }
+  let(:carrier) { double(name: 'Care First',hbx_carrier_id:'1', id: 'sd8f7s9d8f7')}
   let(:policy_start) { Date.new(2014, 1, 1) }
   let(:policy_end) { Date.new(2014, 12, 31)}
   let(:cobra_date) { Date.new(2016, 12, 31)}
@@ -27,6 +27,9 @@ RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
   before(:each) do
     allow(policy).to receive(:has_responsible_person?).and_return(true)
     allow(policy).to receive(:responsible_person).and_return(person)
+    allow(affected_member).to receive(:enrollee_person).and_return(person)
+    allow(policy).to receive(:plan_id).and_return(plan.id)
+    allow(plan).to receive(:carrier_id).and_return(carrier.id)
     render :template => "enrollment_events/_enrollment_event", :locals => {
                                                                           :affected_members => [affected_member],
                                                                           :policy => policy,

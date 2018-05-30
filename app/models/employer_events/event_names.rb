@@ -13,6 +13,7 @@ general_agent_terminated
 benefit_coverage_initial_application_eligible
 benefit_coverage_renewal_application_eligible
 benefit_coverage_renewal_carrier_dropped
+benefit_coverage_mid_plan_year_initial_eligible
     )
 
     EXCLUDED_FOR_NOW = %w(

@@ -19,12 +19,12 @@ module Generators::Reports
     def get_template(options)
       notice_type = (['new', 'corrected'].include?(options[:notice_type]) ? 'new' : options[:notice_type])
 
-      if options[:calender_year] == 2016 || 2017 && options[:notice_type] != 'void'
-        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
-      elsif options[:calender_year] ==  2017 && options[:notice_type] == 'void'
-        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template][options[:void_type]]
+      template_name = if [2016, 2017].include?(options[:calender_year]) && options[:notice_type] != 'void'
+        settings[:tax_document][options[:calender_year]][notice_type][:template][options[:qhp_type]]
+      elsif options[:calender_year] == 2017 && options[:notice_type] == 'void'
+        settings[:tax_document][options[:calender_year]][notice_type][:template][options[:void_type]]
       else
-        template_name = settings[:tax_document][options[:calender_year]][notice_type][:template]
+        settings[:tax_document][options[:calender_year]][notice_type][:template]
       end
 
       "#{Rails.root}/lib/pdf_templates/#{template_name}"

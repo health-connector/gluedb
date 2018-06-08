@@ -73,13 +73,20 @@ class Protocols::X12::Transmission
     state :transmitted, initial: true
     state :acknowledged
     state :rejected
+    state :invalid_response
 
     event :nack do
       transitions from: :transmitted, to: :rejected
+      transitions from: :invalid_response, to: :rejected
     end
 
     event :ack do
       transitions from: :transmitted, to: :acknowledged
+      transitions from: :invalid_response, to: :acknowledged
+    end
+
+    event :invalid_response do 
+      transitions from: :transmitted, to: :invalid_response
     end
   end
 
@@ -104,6 +111,11 @@ class Protocols::X12::Transmission
       ets.reject!(the_date)
     end
     self.save!
+  end
+
+  def invalid_response!(the_date)
+    self.ack_nak_processed_at = the_date
+    self.aasm_state = 'invalid_response'
   end
 
   protected

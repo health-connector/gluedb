@@ -11,6 +11,19 @@ module Parsers
         parse_response
       end
 
+      def valid_header
+        isa_seg = @result["ISA"]
+        return false unless isa_seg.present?
+        return false unless (isa_seg[9].present? && isa_seg[10].present? && isa_seg[6].strip.present?)
+        true
+      end
+
+      def valid_response
+        ta1_seg = @result["TA1s"].first
+        return false unless (ta1_seg[1].present? && ta1_seg[2].present? && ta1_seg[3].present? && ta1_seg[4].present?)
+        true
+      end
+
       def parse_header
         isa_seg = @result["ISA"]
         result_date = isa_seg[9]
@@ -38,8 +51,10 @@ module Parsers
           :isa08 => @sender_id
         ).first
         if !transmission.nil?
-          if accepted?
+          if accepted? && valid_header && valid_response
             transmission.acknowledge!(@transmitted_at)
+          elsif accepted? && (!valid_header || !valid_response)
+            transmission.invalid_response!(@transmitted_at)
           else
             transmission.reject!(@transmitted_at)
           end

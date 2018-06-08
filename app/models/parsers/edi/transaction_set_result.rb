@@ -14,6 +14,18 @@ module Parsers
         parse_responses
       end
 
+      def valid_header
+        isa_seg = @result["ISA"]
+        return false unless isa_seg.present?
+        return false unless (isa_seg[9].present? && isa_seg[10].present? && isa_seg[6].strip.present?)
+        true
+      end
+
+      def valid_responses
+        return false unless @result["L999s"].blank?
+        true
+      end
+
       def parse_header
         isa_seg = @result["ISA"]
         result_date = isa_seg[9]
@@ -39,27 +51,30 @@ module Parsers
       end
 
       def persist!
-        @group_responses.each do |gr|
-          found_transmissions = Protocols::X12::Transmission.where(
-            :isa08 => gr.isa08,
-            :gs01 => gr.gs01,
-            :gs06 => gr.gs06,
-            :gs08 => gr.gs08,
-            :gs03 => gr.gs03
-          )
-          found_transmissions.each do |found_transmission|
-            tses = found_transmission.transaction_set_enrollments
-            gr.responses.each_pair do |k, v|
-              ts = tses.detect { |ts| ts.st02 == k }
-              if !ts.nil?
-                ts.aasm_state = v ? "acknowledged" : "rejected"
-                ts.ack_nak_processed_at = @transmitted_at
-                ts.save!
+        if valid_header && valid_responses
+          @group_responses.each do |gr|
+            found_transmissions = Protocols::X12::Transmission.where(
+              :isa08 => gr.isa08,
+              :gs01 => gr.gs01,
+              :gs06 => gr.gs06,
+              :gs08 => gr.gs08,
+              :gs03 => gr.gs03
+            )
+            found_transmissions.each do |found_transmission|
+              tses = found_transmission.transaction_set_enrollments
+              gr.responses.each_pair do |k, v|
+                ts = tses.detect { |ts| ts.st02 == k }
+                if !ts.nil?
+                  ts.aasm_state = v ? "acknowledged" : "rejected"
+                  ts.ack_nak_processed_at = @transmitted_at
+                  ts.save!
+                end
               end
             end
           end
         end
       end
+
     end
   end
 end

@@ -16,6 +16,12 @@ FactoryGirl.define do
       rel_code 'self'
     end
 
+    trait :canceled_dependent do
+        rel_code 'child'
+        coverage_end Date.new(2014,1,2)
+    end
+
     factory :subscriber_enrollee, traits: [:self_relationship]
+    factory :cancelled_enrollee, traits: [:canceled_dependent]
   end
 end

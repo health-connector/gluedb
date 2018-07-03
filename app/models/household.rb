@@ -146,8 +146,19 @@ class Household
   end
 
   def valid_policy?(pol)
-    return false if pol.rejected? || pol.has_no_enrollees? || pol.canceled?
+    # return false if pol.rejected? || pol.has_no_enrollees? || pol.canceled? || pol.is_shop? || pol.terminated? # RENEWALS
+    return false if pol.is_shop? || pol.rejected? || pol.has_no_enrollees? || pol.canceled?
+    # if pol.plan.coverage_type =~ /health/i && pol.plan.hios_plan_id.match(/-01/).blank?
+    #   puts "---found csr policy #{pol.id}"
+    #   return false
+    # end
+
+    # Comment out following checks for RENEWALS
+    return false unless pol.plan.coverage_type =~ /health/i
     return false if pol.plan.metal_level =~ /catastrophic/i
-    (pol.plan.coverage_type =~ /health/i).nil? ? false : true
+    #   return false unless [52428, 52918, 55598, 53303, 55577].include?(pol.id)
+    # end
+
+    true
   end
 end

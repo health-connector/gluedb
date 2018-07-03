@@ -43,7 +43,7 @@
     - responsible_party = policy.responsible_person
     = render "people/responsible_person", :person => responsible_party, :responsible_party => responsible_party
 %enrollment
-  - plan = policy.plan
+  - plan = Caches::CustomCache.lookup(Plan, :cv2_plan_cache, policy.plan_id) { policy.plan }
   %plan
     %id
       %id= plan.hios_plan_id
@@ -54,7 +54,7 @@
     %name= plan.name
     %active_year= plan.year
     %is_dental_only= plan.coverage_type == "dental"
-    - carrier = plan.carrier
+    - carrier = Caches::CustomCache.lookup(Carrier, :cv2_carrier_cache, plan.carrier_id) { plan.carrier }
     %carrier
       %id
         %id= carrier.hbx_carrier_id

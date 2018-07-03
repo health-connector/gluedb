@@ -207,8 +207,16 @@ class Policy
     enrollees.reject { |e| e.relationship_status_code == "self" }
   end
 
+  def dependents
+    enrollees.reject { |e| e.canceled? || e.relationship_status_code == "self" ||  e.relationship_status_code == "spouse" }
+  end
+
   def has_responsible_person?
     !self.responsible_party_id.blank?
+  end
+
+  def active_member_ids
+    enrollees.reject { |e| e.canceled? || e.terminated? }.map(&:m_id)
   end
 
   def responsible_person
@@ -474,10 +482,6 @@ class Policy
     }
   end
 
-  def active_member_ids
-    enrollees.reject { |e| e.canceled? || e.terminated? }.map(&:m_id)
-  end
-
   def active_enrollees
     enrollees.select { |e| e.coverage_status == 'active' }
   end
@@ -610,11 +614,11 @@ class Policy
     start_date = policy_start
 
     if !policy_end.nil?
-#      if policy_end.year > policy_start.year
-#        return (start_date..Date.new(start_date.year, 12, 31))
-#      else
+      # if policy_end.year > policy_start.year
+      #   return (start_date..Date.new(start_date.year, 12, 31))
+      # else
         return (start_date..policy_end)
-#      end
+      # end
     end
 
     if employer_id.blank?
@@ -690,19 +694,23 @@ class Policy
     cloneable_enrollees = self.enrollees.reject do |en|
       en.canceled? || en.terminated?
     end
-    pol.enrollees = cloneable_enrollees.map do |en|
+    enrollees = cloneable_enrollees.map do |en|
       en.clone_for_renewal(start_date)
     end
+    pol.enrollees = enrollees
+
     current_plan = Caches::MongoidCache.lookup(Plan, self.plan_id) { self.plan }
     pol.plan = Caches::MongoidCache.lookup(Plan, current_plan.renewal_plan_id) { current_plan.renewal_plan }
-    pol
+    return pol
   end
 
   def ehb_premium
+    return as_dollars(self.pre_amt_tot) if self.plan.ehb.to_f.zero?
     as_dollars(self.pre_amt_tot * self.plan.ehb)
   end
 
   def changes_over_time?
+    return true if multi_aptc?
     eligible_enrollees = self.enrollees.reject do |en|
       en.canceled?
     end
@@ -720,6 +728,7 @@ class Policy
   end
 
   def has_no_enrollees?
+    # active_enrollees = self.enrollees.reject{|en| en.canceled? || en.terminated? } # RENEWALS
     active_enrollees = self.enrollees.reject{|en| en.canceled?}
     active_enrollees.empty? ? true : false
   end

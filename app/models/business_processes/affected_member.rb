@@ -43,7 +43,7 @@ module BusinessProcesses
           if @old_names_set
             return #{prop.to_s}
           end
-          enrollee.person.#{prop.to_s}
+          enrollee_person.#{prop.to_s}
         end
       RUBY_CODE
     end
@@ -54,7 +54,7 @@ module BusinessProcesses
           if @old_#{prop.to_s}_set
             return #{prop.to_s}
           end
-          enrollee.person.authority_member.#{prop.to_s}
+          enrollee_person.authority_member.#{prop.to_s}
         end
       RUBY_CODE
     end
@@ -67,6 +67,10 @@ module BusinessProcesses
 
     def enrollee
       @enrollee ||= policy.enrollees.detect { |en| en.m_id == member_id }
+    end
+
+    def enrollee_person
+      @enrollee_person ||= enrollee.person
     end
   end
 end

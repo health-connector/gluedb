@@ -32,6 +32,15 @@ tax_document:
     coverage_page_no: 5
   2017:
     slcsp: "86052DC0400001-01"
+    new:
+      template:
+        unassisted: "2017-1095A-NEW-UQHP.pdf"
+        assisted: "2017-1095A-NEW-AQHP.pdf"
+    void:
+      template:
+        active_false: "2017-1095A-VOID-ACTIVE-FALSE.pdf"
+        active_true: "2017-1095A-VOID-ACTIVE-TRUE.pdf"
+    coverage_page_no: 3
 
   documents_root_path: '/tmp/'
   documents_folder: 'irs_notices' 

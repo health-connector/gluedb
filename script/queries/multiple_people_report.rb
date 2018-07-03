@@ -141,4 +141,11 @@ no_members.each do |nm|
 	no_members_file.puts(nm)
 end
 
+if Rails.env.test?
+	File.delete("multiple_instances_in_glue_by_dob_and_ssn.csv") if File.exist?("multiple_instances_in_glue_by_dob_and_ssn.csv")
+	File.delete("multiple_instances_in_glue_by_dob_and_ssn_shop.csv") if shop_file
+	File.delete("multiple_instances_in_glue_by_dob_and_ssn_ivl.csv") if ivl_file
+	File.delete("people_with_no_members.txt") if no_members_file
+end
+
 puts "Ended at #{Time.now}" unless Rails.env.test?

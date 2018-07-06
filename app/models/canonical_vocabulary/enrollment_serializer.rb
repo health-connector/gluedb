@@ -70,9 +70,11 @@ module CanonicalVocabulary
 
     def serialize_subscriber(xml)
       subscriber = policy.enrollees.detect { |en| en.rel_code == "self" }
-      if @included_member_ids.include?(subscriber.m_id)
-        xml['ins'].subscriber do |xml|
-          serialize_person(subscriber, xml)
+      if subscriber.present?
+        if @included_member_ids.include?(subscriber.m_id)
+          xml['ins'].subscriber do |xml|
+            serialize_person(subscriber, xml)
+          end
         end
       end
     end

@@ -171,7 +171,7 @@ class PoliciesController < ApplicationController
   end
 
   def upload_to_s3(file_name, bucket_name)
-    Aws::S3Storage.save(file_name, bucket_name)
+    Aws::S3Storage.save(file_name, bucket_name, File.basename(file_name))
   end
 
   def delete_1095A_pdf(file_name)

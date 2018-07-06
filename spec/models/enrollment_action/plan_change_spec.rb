@@ -56,19 +56,22 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
   let(:primary_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
 
   let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, :enrollees => [enrollee_primary]) }
-  let(:policy) { instance_double(Policy, :hbx_enrollment_ids => [1]) }
+  let(:policy) { instance_double(Policy, :hbx_enrollment_ids => [1], :policy_start => policy_start) }
 
   let(:plan_change_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => new_policy_cv,
     :existing_plan => new_plan,
-    :is_cobra? => false
+    :is_cobra? => false,
+    :subscriber_start => new_enrollment_start
     ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :existing_policy => policy,
     :subscriber_end => termination_date
     ) }
+  let(:new_enrollment_start) { DateTime.new(2017,3,1) }
+  let(:policy_start) { DateTime.new(2017,1,1) }
   let(:termination_date) { DateTime.new(2017,2,28) }
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
 

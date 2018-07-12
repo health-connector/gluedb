@@ -144,7 +144,7 @@ module Parsers
                   log_error(:etf_loop, "has no valid plan year")
                   return
                 end
-                plan_year = plan_years.sort_by{|py| py.start_date}.last.start_date.year
+                plan_year = plan_years.sort_by{|py| py.start_date}.last.plan_catalog_year
               else
                 plan_year = coverage_start.year
               end

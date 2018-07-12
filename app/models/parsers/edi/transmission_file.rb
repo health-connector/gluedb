@@ -109,7 +109,7 @@ module Parsers
             plan_year = PlanYear.where({
               :employer_id => employer.id,
               :start_date => { "$lte" => coverage_start }
-            }).order_by(&:start_date).last.start_date.year
+            }).order_by(&:start_date).last.plan_catalog_year
           else
             plan_year = coverage_start.year
           end

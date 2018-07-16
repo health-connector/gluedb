@@ -10,6 +10,7 @@ class PlanYear
   field :open_enrollment_end, type: Date
   field :fte_count, type: Integer
   field :pte_count, type: Integer
+  field :plan_catalog_override, type: Integer
 
   belongs_to :employer
   belongs_to :broker
@@ -68,6 +69,11 @@ class PlanYear
       ep.touch
       ep.save!
     end
+  end
+
+  def plan_catalog_year
+    return self.plan_catalog_override unless self.plan_catalog_override.blank?
+    self.start_date.year
   end
 
   def match(other)

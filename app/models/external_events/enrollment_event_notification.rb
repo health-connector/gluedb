@@ -9,6 +9,7 @@ module ExternalEvents
     attr_reader :event_responder
     attr_reader :headers
     attr_reader :business_process_history
+    attr_reader :workflow_id
 
     include Handlers::EnrollmentEventXmlHelper
 
@@ -24,6 +25,24 @@ module ExternalEvents
       @event_responder = e_responder
       @message_tag = m_tag
       @event_xml = e_xml
+      ensure_workflow_id
+      @workflow_id = @headers["workflow_id"]
+    end
+
+    def ensure_workflow_id
+      if (!message_headers.has_key?("workflow_id")) && (!message_headers.has_key?(:workflow_id))
+        @headers["workflow_id"] = SecureRandom.uuid.gsub("-","")
+      end
+    end
+
+    def extract_workflow_id(message_headers)
+      if message_headers.has_key?("workflow_id")
+        message_headers["workflow_id"]
+      elsif message_headers.has_key?(:workflow_id)
+        message_headers[:workflow_id]
+      else
+        SecureRandom.uuid.gsub("-","")
+      end
     end
 
     def hash

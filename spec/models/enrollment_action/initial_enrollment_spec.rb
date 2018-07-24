@@ -20,6 +20,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:enrollee) { instance_double(::Openhbx::Cv2::Enrollee, :member => member_from_xml) }
   let(:enrollees) { [enrollee] }
   let(:policy_cv) { instance_double(Openhbx::Cv2::Policy,:enrollees => enrollees) }
+
   let(:enrollment_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :policy_cv => policy_cv,
@@ -50,12 +51,14 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   let(:amqp_connection) { double }
   let(:event_xml) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
+  let(:workflow_id) { "SOME WORKFLOW ID" }
   let(:enrollment_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_responder => event_responder,
     :event_xml => event_xml,
     :hbx_enrollment_id => hbx_enrollment_id,
-    :employer_hbx_id => employer_hbx_id
+    :employer_hbx_id => employer_hbx_id,
+    :workflow_id => workflow_id
   ) }
   let(:action_publish_helper) { instance_double(
     EnrollmentAction::ActionPublishHelper,
@@ -74,7 +77,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
     allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_publish_helper)
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id, workflow_id)
   end
 
   it "publishes an event of type initial enrollment" do
@@ -88,7 +91,7 @@ describe EnrollmentAction::InitialEnrollment, "with an initial enrollment event,
   end
 
   it "publishes the resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id, workflow_id)
     subject.publish
   end
 end

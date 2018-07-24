@@ -4,7 +4,7 @@ describe ::ExternalEvents::EnrollmentEventNotification do
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
 
   let :enrollment_event_notification do
@@ -410,7 +410,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is not a term" do
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
 
   subject do
@@ -430,7 +430,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is a term with no ex
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
 
   subject do
@@ -451,7 +451,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is cancel with a can
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
   let(:existing_policy) { instance_double(Policy, :canceled? => true, :terminated? => true) }
 
@@ -474,7 +474,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is termination with 
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
   let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => true) }
 
@@ -497,7 +497,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is a cancel with a t
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
   let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => true) }
 
@@ -520,7 +520,7 @@ describe ExternalEvents::EnrollmentEventNotification, "that is a term with an ac
   let(:m_tag) { double('m_tag') }
   let(:t_stamp) { double('t_stamp') }
   let(:e_xml) { double('e_xml') }
-  let(:headers) { double('headers') }
+  let(:headers) { Hash.new }
   let(:responder) { instance_double('::ExternalEvents::EventResponder') }
   let(:existing_policy) { instance_double(Policy, :canceled? => false, :terminated? => false) }
 

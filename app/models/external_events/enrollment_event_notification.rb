@@ -30,7 +30,7 @@ module ExternalEvents
     end
 
     def ensure_workflow_id
-      if (!message_headers.has_key?("workflow_id")) && (!message_headers.has_key?(:workflow_id))
+      if (!@headers.has_key?("workflow_id")) && (!@headers.has_key?(:workflow_id))
         @headers["workflow_id"] = SecureRandom.uuid.gsub("-","")
       end
     end

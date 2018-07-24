@@ -141,7 +141,7 @@ module EnrollmentAction
       [self]
     end
 
-    def publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id)
+    def publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id, workflow_id)
       publisher = Publishers::TradingPartnerEdi.new(amqp_connection, event_xml)
       publish_result = false
       publish_result = publisher.publish

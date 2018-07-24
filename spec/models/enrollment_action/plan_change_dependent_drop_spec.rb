@@ -144,12 +144,16 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
   let(:dropped_enrollee) { double(m_id: 3, coverage_start: :one_month_ago) }
   let(:plan) { instance_double(Plan, id: 1) }
   let(:policy) { instance_double(Policy, id: 1, enrollees: [enrollee, new_enrollee, dropped_enrollee], eg_id: 1) }
+  let(:workflow_id_1) { "SOME WORKFLOW ID 1" }
+  let(:workflow_id_2) { "SOME WORKFLOW ID 2" }
+
   let(:dependent_drop_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     event_xml: event_xml,
     all_member_ids: [1, 2],
     hbx_enrollment_id: 1,
-    employer_hbx_id: 1
+    employer_hbx_id: 1,
+    workflow_id: workflow_id_2
   ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -158,7 +162,8 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
     all_member_ids: [1, 2, 3],
     event_responder: event_responder,
     hbx_enrollment_id: 1,
-    employer_hbx_id: 1
+    employer_hbx_id: 1,
+    workflow_id: workflow_id_1
   ) }
   let(:action_helper_result_xml) { double }
   let(:action_helper) { instance_double(
@@ -184,11 +189,11 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
     allow(termination_publish_helper).to receive(:set_member_starts).with({1 => enrollee.coverage_start, 2 => new_enrollee.coverage_start, 3 => dropped_enrollee.coverage_start})
     allow(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
     allow(termination_publish_helper).to receive(:recalculate_premium_totals_excluding_dropped_dependents).with([1,2])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id).and_return(true, [])
+    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id_1).and_return(true, [])
     allow(EnrollmentAction::ActionPublishHelper).to receive(:new).with(event_xml).and_return(action_helper)
     allow(action_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product")
     allow(action_helper).to receive(:keep_member_ends).with([])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_drop_event.hbx_enrollment_id, dependent_drop_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_drop_event.hbx_enrollment_id, dependent_drop_event.employer_hbx_id, workflow_id_2)
     allow(subject).to receive(:select_termination_date).and_return(expected_end_date)
   end
 
@@ -233,12 +238,12 @@ describe EnrollmentAction::PlanChangeDependentDrop, "given a valid enrollment" d
   end
 
   it "publishes termination event xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id_1)
     subject.publish
   end
 
   it "publishes change_product event xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_drop_event.hbx_enrollment_id, dependent_drop_event.employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_drop_event.hbx_enrollment_id, dependent_drop_event.employer_hbx_id, workflow_id_2)
     subject.publish
   end
 end

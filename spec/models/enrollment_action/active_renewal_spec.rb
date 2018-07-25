@@ -197,13 +197,15 @@ describe EnrollmentAction::ActiveRenewal, "#publish" do
   let(:amqp_connection) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
   let(:event_xml) { double }
+  let(:workflow_id) { "SOME WORKFLOW ID" }
 
   let(:action) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_responder => event_responder,
     :event_xml => event_xml,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id
     )
   }
   let(:action_helper_result_xml) { double }
@@ -223,7 +225,7 @@ describe EnrollmentAction::ActiveRenewal, "#publish" do
       to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#active_renew").
       and_return(true)
     allow(action_helper).to receive(:keep_member_ends).with([]).and_return(true)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1, workflow_id)
   end
 
   it "publishes an event of type active renew" do
@@ -239,7 +241,7 @@ describe EnrollmentAction::ActiveRenewal, "#publish" do
   it "publishes the xml to edi" do
     expect(subject).
       to receive(:publish_edi).
-      with(amqp_connection, action_helper_result_xml, 1, 1)
+      with(amqp_connection, action_helper_result_xml, 1, 1, workflow_id)
     subject.publish
   end
 end

@@ -6,6 +6,7 @@ module Amqp
 
     def broadcast(props, payload)
       publish_props = props.dup
+      publish_props.stringify_keys!
       chan = @connection.create_channel
       begin
         chan.confirm_select
@@ -13,10 +14,22 @@ module Amqp
         if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
           publish_props["timestamp"] = Time.now.to_i
         end
+        add_workflow_id_if_missing(publish_props)
         out_ex.publish(payload, publish_props)
         chan.wait_for_confirms
       ensure
         chan.close
+      end
+    end
+
+    def add_workflow_id_if_missing(message_props_hash)
+      if message_props_hash.has_key?("headers")
+        headers = message_props_hash["headers"]
+        if (!headers.has_key?("workflow_id")) && (!headers.has_key?(:workflow_id))
+          message_props_hash["headers"]["workflow_id"] = SecureRandom.uuid.gsub("-","")
+        end
+      else
+        message_props_hash["headers"] = { "workflow_id" => SecureRandom.uuid.gsub("-","") }
       end
     end
 

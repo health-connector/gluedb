@@ -107,13 +107,16 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
 
   let(:plan) { instance_double(Plan, :id => 1) }
   let(:policy) { instance_double(Policy, :enrollees => [enrollee_primary, enrollee_new], :eg_id => 1) }
+  let(:workflow_id_1) { "SOME WORKFLOW ID 1" }
+  let(:workflow_id_2) { "SOME WORKFLOW ID 2" }
 
   let(:dependent_add_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_xml => event_xml,
     :all_member_ids => [1,2],
     :hbx_enrollment_id => 2,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id_2
   ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -121,7 +124,8 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     :all_member_ids => [1],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id_1
   ) }
   let(:action_helper_result_xml) { double }
 
@@ -135,7 +139,7 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
     allow(action_publish_helper).to receive(:filter_affected_members).with([2]).and_return(true)
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product_member_add")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, termination_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id_2)
     allow(subject.action).to receive(:existing_policy).and_return(false)
   end
 
@@ -154,7 +158,7 @@ describe EnrollmentAction::PlanChangeDependentAdd, "given a qualified enrollment
   end
 
   it "publishes resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, dependent_add_event.employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, dependent_add_event.hbx_enrollment_id, dependent_add_event.employer_hbx_id, workflow_id_2)
     subject.publish
   end
 end

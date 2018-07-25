@@ -140,6 +140,7 @@ describe EnrollmentAction::RenewalDependentAdd, "#publish" do
   let(:primary_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
 
   let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, :enrollees => [enrollee_primary]) }
+  let(:workflow_id) { "SOME WORKFLOW ID" }
 
   let(:renewal_dependent_add_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -148,7 +149,8 @@ describe EnrollmentAction::RenewalDependentAdd, "#publish" do
     :event_xml => event_xml,
     :policy_cv => new_policy_cv,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id
   ) }
   let(:action_helper_result_xml) { double }
 
@@ -164,7 +166,7 @@ describe EnrollmentAction::RenewalDependentAdd, "#publish" do
     allow(action_helper).to receive(:filter_affected_members).with([2]).and_return(true)
     allow(action_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#active_renew_member_add").and_return(true)
     allow(action_helper).to receive(:keep_member_ends).with([]).and_return(true)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, renewal_dependent_add_event.hbx_enrollment_id, renewal_dependent_add_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, renewal_dependent_add_event.hbx_enrollment_id, renewal_dependent_add_event.employer_hbx_id, workflow_id)
     allow(subject.class).to receive(:same_carrier_renewal_candidates).with(renewal_dependent_add_event).and_return([renewal_enrollees])
   end
 
@@ -184,7 +186,7 @@ describe EnrollmentAction::RenewalDependentAdd, "#publish" do
   end
 
   it "publishes the xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1, workflow_id)
     subject.publish
   end
 end

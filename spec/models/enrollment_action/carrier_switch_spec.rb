@@ -84,6 +84,8 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
 
   let(:plan) { instance_double(Plan, :id => 1) }
   let(:policy) { instance_double(Policy, :enrollees => [enrollee_primary, enrollee_new], :eg_id => 1) }
+  let(:workflow_id_1) { "SOME WORKFLOW ID 1" }
+  let(:workflow_id_2) { "SOME WORKFLOW ID 2" }
 
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -92,7 +94,8 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     :all_member_ids => [1,2],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id_1
   ) }
   let(:action_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -101,7 +104,8 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     :all_member_ids => [1,2],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1
+    :employer_hbx_id => 1,
+    :workflow_id => workflow_id_2
   ) }
 
   let(:termination_helper_result_xml) { double }
@@ -128,11 +132,11 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     allow(termination_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     allow(termination_publish_helper).to receive(:set_policy_id).with(1)
     allow(termination_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
-    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id).and_return([true, {}])
+    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id, workflow_id_1).and_return([true, {}])
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(action_publish_helper).to receive(:set_policy_id).with(1)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id, workflow_id_2)
     allow(termination_publish_helper).to receive(:swap_qualifying_event).with(event_xml)
   end
 
@@ -152,7 +156,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
   end
 
   it "publishes termination resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id, workflow_id_1)
     subject.publish
   end
 
@@ -167,7 +171,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
   end
 
   it "publishes initialization resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id, workflow_id_2)
     subject.publish
   end
 

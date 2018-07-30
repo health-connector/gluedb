@@ -2,7 +2,7 @@
 <enrollment_event xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://openhbx.org/api/terms/1.0'>
   <header>
     <hbx_id>DC0</hbx_id>
-    <submitted_timestamp>2018-07-30T14:47:13-04:00</submitted_timestamp>
+    <submitted_timestamp>2018-07-30T17:11:30-04:00</submitted_timestamp>
   </header>
   <event>
     <body>
@@ -137,11 +137,11 @@
             </benefit>
           </affected_member>
         </affected_members>
-        <transaction_id>2018073018471320111416</transaction_id>
+        <transaction_id>2018073021113062736575</transaction_id>
         <is_trading_partner_publishable>true</is_trading_partner_publishable>
         <enrollment>
           <transaction_id>
-            <id>2018073018471320111416</id>
+            <id>2018073021113062736575</id>
           </transaction_id>
           <type>urn:openhbx:terms:v1:enrollment#reinstate_enrollment</type>
           <market>urn:openhbx:terms:v1:aca_marketplace#individual</market>

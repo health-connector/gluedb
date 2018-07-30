@@ -1,4 +1,3 @@
-# require 'pry'
 require File.join(Rails.root, 'script', 'generate_c_v_2_1s.rb')
 
 class GenerateTransforms
@@ -11,62 +10,20 @@ class GenerateTransforms
   def generate_transforms
     system("rm -rf source_xmls > /dev/null")
     system("rm -rf transformed_x12s > /dev/null")
+    system("rm -rf cv1s > /dev/null")
+
     Dir.mkdir("source_xmls")
     Dir.mkdir("transformed_x12s")
     Dir.mkdir("cv1s")
-    
-    cv21s = GenerateCv21s.new([ENV['eg_ids']],ENV['reason_code']).run
+
+    cv21s = GenerateCv21s.new(ENV['reason_code']).run
     transformer_1 = TransformSimpleEdiFileSet.new('transformed_x12s')
     transformer_1 = TransformSimpleEdiFileSet.new('cv1')
 
 
   end
-
-    # transformer_1.transform('source_xmls/*.xml')
-    # transformer_1.transform 
-    # transformer_2.transform
-    # find_policies([ENV['eg_ids']]).each do |policy|
-    #   affected_members = []
-    #   select_enrollees(policy).each{|en| affected_members << BusinessProcesses::AffectedMember.new(:policy => policy, :member_id => en.m_id)}
-    #   event_type = "urn:openhbx:terms:v1:enrollment##{ENV['reason_code']}"
-    #   tid = generate_transaction_id
-    #   cv_render = render_cv(affected_members,policy,event_type,tid)
-    #   binding.pry
-    #   transformer_1.transform(cv_render)
-    #   transformer_2.transform(cv_render)
-    # end
-
-  # def select_enrollees(policy)
-  #   enrollees = policy.enrollees
-  #   return enrollees
-  # end
-
-  # def generate_transaction_id
-  #   transaction_id ||= begin
-  #                         ran = Random.new
-  #                         current_time = Time.now.utc
-  #                         reference_number_base = current_time.strftime("%Y%m%d%H%M%S") + current_time.usec.to_s[0..2]
-  #                         reference_number_base + sprintf("%05i", ran.rand(65535))
-  #                       end
-  #   transaction_id
-  # end
-
-  # def render_cv(affected_members,policy,event_kind,transaction_id)
-  #   render_result = ApplicationController.new.render_to_string(
-  #        :layout => "enrollment_event",
-  #        :partial => "enrollment_events/enrollment_event",
-  #        :format => :xml,
-  #        :locals => {
-  #          :affected_members => affected_members,
-  #          :policy => policy,
-  #          :enrollees => select_enrollees(policy),
-  #          :event_type => event_kind,
-  #          :transaction_id => transaction_id
-  #        })
-  # end
 end
 
-# Simple class to do transforms
 
 class TransformSimpleEdiFileSet
   include Handlers::EnrollmentEventXmlHelper
@@ -81,8 +38,8 @@ class TransformSimpleEdiFileSet
     action_xml = File.read(file_path)
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
-      if @out_path = "transform_xmls"
-        edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+      if @out_path == "transformed_xmls"
+        edi_builder == EdiCodec::X12::BenefitEnrollment.new(action_xml)
       elsif @out_path = "cv1s"
         edi_builder = EdiCodec::Cv1::Cv1Builder.new(action_xml)
       end
@@ -139,9 +96,9 @@ class TransformSimpleEdiFileSet
 end
 
 
-if @out_path = 'transform_x12s'
+if @out_path == 'transformed_x12s'
   out_path = "transformed_x12s"
-elsif @out_path = 'cv1s'
+elsif @out_path == 'cv1s'
   out_path = "cv1s"
 end
   

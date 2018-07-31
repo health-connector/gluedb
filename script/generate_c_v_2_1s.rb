@@ -36,9 +36,6 @@ policies.each do |policy|
   policy.enrollees.each{|en| affected_members << BusinessProcesses::AffectedMember.new({:policy => policy, :member_id => en.m_id})}
   event_type = reason_code
   tid = generate_transaction_id
-  
-  binding.pry
-  
   cv_render = render_cv(affected_members,policy,event_type,tid)
   f = File.open("#{policy.eg_id}_#{reason_code.split('#').last}.xml","w")
   f.puts(cv_render)

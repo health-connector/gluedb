@@ -1,2 +1,1 @@
-mv source_xmls/1_reinstate_enrollment.xml failed_transforms/
-mv source_xmls/5_reinstate_enrollment.xml failed_transforms/
+mv source_xmls/5_terminate_enrollment.xml failed_transforms/

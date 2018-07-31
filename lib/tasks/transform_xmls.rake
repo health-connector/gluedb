@@ -1,6 +1,6 @@
 
 # This rake task updates the kind field for the given policy to "coverall".
-# format RAILS_ENV=production  bundle exec rake migrations:transform_xmls eg_ids="1234" reason_code="reinstate_enrollment"
+# format RAILS_ENV=production  bundle exec rake migrations:transform_xmls eg_ids="100618" reason_code="reinstate_enrollment"
 namespace :migrations do 
   desc "Generate Transforms"
   task :transform_xmls => :environment do 

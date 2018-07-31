@@ -1,4 +1,5 @@
 # Simple class to do transforms
+require 'pry'
 class TransformSimpleEdiFileSet
   include Handlers::EnrollmentEventXmlHelper
 
@@ -8,12 +9,15 @@ class TransformSimpleEdiFileSet
     @out_path = out_path
   end
 
-  def transform(file_path)
+  def transform(file_path)  
     action_xml = File.read(file_path)
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
+      binding.pry
       x12_xml = edi_builder.call.to_xml
+      
+      
       publish_to_file(enrollment_event_cv, x12_xml)
     end
   end
@@ -78,7 +82,7 @@ dir_glob.each do |f|
   begin
     transformer.transform(f)
   rescue Exception => e
-    puts "#{f} - #{e.inspect}"
+    puts "#{f} - #{e.backtrace.inspect}"
     error_file.puts("mv #{f} failed_transforms/")
   end
 end

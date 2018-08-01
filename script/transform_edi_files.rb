@@ -14,7 +14,6 @@ class TransformSimpleEdiFileSet
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
-      binding.pry
       x12_xml = edi_builder.call.to_xml
       
       
@@ -33,6 +32,7 @@ class TransformSimpleEdiFileSet
     policy_cv = extract_policy(enrollment_event_cv)
     hios_id = extract_hios_id(policy_cv)
     active_year = extract_active_year(policy_cv)
+    binding.pry
     found_plan = Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
     found_plan.carrier.abbrev.upcase
   end

@@ -35,27 +35,27 @@ describe Listeners::IndividualEventListener do
     let(:other_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.unknown_error",
       :headers => {
-        :return_status => "500",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "500",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:not_found_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.resource_not_found",
       :headers => {
-        :return_status => "404",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "404",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:timeout_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.resource_timeout",
       :headers => {
-        :return_status => "503",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "503",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
@@ -104,18 +104,18 @@ describe Listeners::IndividualEventListener do
     let(:individual_creation_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_created",
       :headers => {
-        :return_status => "422",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "422",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:individual_created_properties) { {
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_created",
       :headers => {
-        :return_status => "200",
-        :individual_id => individual_id, 
-        :submitted_timestamp => timestamp
+        "return_status" => "200",
+        "individual_id" => individual_id, 
+        "submitted_timestamp" => timestamp
       }
     } }
 
@@ -171,45 +171,45 @@ describe Listeners::IndividualEventListener do
     let(:individual_updated_properties) { {
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
-        :return_status => "200",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "200",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:individual_update_error_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
-        :return_status => "422",
-        :individual_id => individual_id, 
-        :submitted_timestamp => timestamp
+        "return_status" => "422",
+        "individual_id" => individual_id, 
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:individual_drop_subscriber_address_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.subscriber_home_address_required",
       :headers => {
-        :return_status => "422",
-        :individual_id => individual_id, 
-        :submitted_timestamp => timestamp
+        "return_status" => "422",
+        "individual_id" => individual_id, 
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:individual_dob_changed_properties) { {
       :routing_key => "error.application.gluedb.individual_update_event_listener.individual_dob_changed",
       :headers => {
-        :return_status => "501",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "501",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
     let(:individual_unchanged_properties) { {
       :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated",
       :headers => {
-        :return_status => "304",
-        :individual_id => individual_id,
-        :submitted_timestamp => timestamp
+        "return_status" => "304",
+        "individual_id" => individual_id,
+        "submitted_timestamp" => timestamp
       }
     } }
 
@@ -318,9 +318,9 @@ describe Listeners::IndividualEventListener do
         let(:individual_updated_properties) { {
           :routing_key => "info.application.gluedb.individual_update_event_listener.individual_updated_partially",
           :headers => {
-            :return_status => "200",
-            :individual_id => individual_id,
-            :submitted_timestamp => timestamp
+            "return_status" => "200",
+            "individual_id" => individual_id,
+            "submitted_timestamp" => timestamp
           }
         } }
 

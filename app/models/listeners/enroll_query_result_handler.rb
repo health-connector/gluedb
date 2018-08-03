@@ -29,7 +29,8 @@ module Listeners
           dex.publish(
             new_body,
             {
-              :routing_key => reply_to
+              :routing_key => reply_to,
+              :headers => m_headers
             }
           )
         end

@@ -90,8 +90,8 @@ class GenerateCv21s
       f.puts(cv_render)
       f.close
       `mv #{file_name} source_xmls`
-      `zip source_xmls.zip source_xmls`
-      `./cv_x12_gen.sh`
+      `zip -r source_xmls.zip source_xmls`
+      `rails r script/cv_x12_gen.rb`
     end
   end
 

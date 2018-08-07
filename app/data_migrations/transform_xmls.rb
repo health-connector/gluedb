@@ -1,10 +1,5 @@
 
 class GenerateTransforms
-
-  def find_policies(eg_ids)
-    policies = Policy.where(:eg_id => {"$in" => eg_ids})
-    
-  end
   
   def generate_transforms
     system("rm -rf source_xmls > /dev/null")
@@ -56,13 +51,12 @@ class GenerateCv21s
       event_type = @reason_code
       tid = generate_transaction_id
       cv_render = render_cv(affected_members,policy,event_type,tid)
-      # file_name = "#{policy.eg_id}_#{@reason_code.split('#').last}.xml"
       f = File.open("#{policy.eg_id}_#{@reason_code.split('#').last}.xml","w")
       f.puts(cv_render)
       f.close
       `mv #{f} source_xmls`
       `zip -r source_xmls.zip source_xmls`
-      `rails r script/cv_x12_gen.rb`
+      `bundle exec rails r script/cv_x12_gen.rb -e production`
     end
   end
 

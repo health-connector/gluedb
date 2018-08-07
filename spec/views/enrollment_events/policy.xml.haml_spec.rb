@@ -78,6 +78,7 @@ describe "enrollment_events/_policy.xml" do
       tot_res_amt: BigDecimal.new("899.99"),
       rating_area: 'rating_area',
       created_at: Time.now - 1.week,
+      is_cobra?: false,
       updated_at: nil
   end
 

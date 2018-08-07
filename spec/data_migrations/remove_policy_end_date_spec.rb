@@ -16,12 +16,14 @@ describe RemovePolicyEndDate, dbclean: :after_each do
   describe "removing the end dates" do 
     before(:each) do 
       allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id)
+      allow(ENV).to receive(:[]).with("benefit_status").and_return('active')
     end
 
     it "should not have any end dates" do
       subject.remove_end_dates
       policy.reload
       expect(policy.enrollees.map(&:coverage_end).uniq[0]).to be_nil
+      expect(policy.enrollees.first.ben_stat).to eq 'active'
     end
   end
 

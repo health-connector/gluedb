@@ -21,7 +21,7 @@ namespace :migrations do
     Caches::CustomCache.allocate(Plan, :cv2_plan_cache, plan_id_map)
     Caches::CustomCache.allocate(Plan, :cv2_hios_active_year_plan_cache, active_year_hios_map)
     gt = GenerateTransforms.new
-    gt.generate_transforms
+    gt.begin_transform
     Caches::CustomCache.release(Carrier, :cv2_carrier_cache)
     Caches::CustomCache.release(Plan, :cv2_plan_cache)
     Caches::CustomCache.release(Plan, :cv2_hios_active_year_plan_cache)

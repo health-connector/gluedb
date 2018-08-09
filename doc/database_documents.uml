@@ -1,0 +1,272 @@
+@startuml
+
+package Person <<Database >> {
+ class Person {
+  name_pfx
+  name_first
+  name_middle
+  name_last
+  name_sfx
+  name_full
+  alternate_name
+  updated_by
+  job_title
+  department
+  is_active
+ }
+  
+ class Member {
+  dob
+  death_date
+  ssn
+  gender
+  ethnicity
+  race
+  birth_location
+  marital_status
+  hbx_role
+  citizen_status
+  is_state_resident
+  is_incarcerated
+  is_disabled
+  is_pregnant
+  +ssn=(val)
+  +gender=(val)
+  {method} +policies
+  {method} +carriers
+  {method} +enrollees
+  {method} +policies_with_over_age_children
+  {method} +authority?
+  +merge_member(m_member)
+  ~self.find_for_member_id(member_id)
+  {method} +can_be_quoted?
+  {method} +is_state_resident?
+  {method} +is_incarcerated?
+  {method} +is_disabled?
+  {method} +is_pregnant?
+  +update_member_hbx_id(new_hbx_id)
+  {method} #generate_hbx_member_id
+  {method} #no_pregnant_males
+  {method} #dob_string
+  {method} #safe_downcase(val)
+ }
+ class Address {
+  address_type
+  address_1
+  address_2
+  address_3
+  city
+  county
+  state
+  zip
+  {method} +location
+  {method} +clean_fields
+  +match(another_address)
+  +same_location?(another_address)
+  +attribute_matches?(attribute, other)
+  {method} +formatted_address
+  {method} +full_address
+  +merge_update(m_address)
+  {method} +home?
+  ~self.make(data)
+  ~safe_downcase(val)
+ }
+ class Phone {
+  phone_type
+  phone_number
+  extension
+  area_code
+  +match(another_phone)
+  +attribute_matches?(attribute, other)
+  +phone_number=(value)
+  +extension=(value)
+  ~self.make(data)
+  +filter_non_numbers(str)
+  +merge_update(m_phone)
+ }
+ class Email {
+   email_type
+   email_address
+   +match(another_email)
+   +attribute_matches?(attribute, other)
+   +merge_update(m_email)
+   ~self.make(data)
+ }
+  
+  class PersonRelationship {
+    kind
+    relative_id
+    {method} +relative
+  }
+
+  class ResponsibleParty {
+    entity_identifier
+    entity_type
+    organization_name
+  }
+
+  Person "1" *-- "many" Address : embeds_many
+  Person "1" *-- "many" Phone : embeds_many
+  Person "1" *-- "many" Email : embeds_many
+  Person "1" *-- "many" Member : embeds_many
+  Person "1" *-left- "many" PersonRelationship : embeds_many
+  Person "1" *- "many" ResponsibleParty : embeds_many
+  Person <-right- PersonRelationship::relative
+  
+  hide empty members
+}
+
+package Employers {
+  class Employer {
+    name
+    hbx_id
+    fein
+    sic_code
+  }
+  
+  Employer "1" *-- "many" Person::Person : has_many
+}
+
+package Policy as PolicyDoc <<Database >> {
+  class "Policy (root)" as Policy {
+    enrollment_group_id
+    preceding_enrollment_group_id
+    allocated_aptc
+    elected_aptc
+    applied_aptc
+    csr_amt
+    total_premium_amount
+    total_responsible_amount
+    employer_contribution
+    sep_reason
+    carrier_to_bill
+    aasm_state
+    updated_by
+    is_active
+    hbx_enrollment_ids
+    carrier_specific_plan_id
+    rating_area
+    composite_rating_tier
+    cobra_eligibility_date
+  }
+  
+  class Enrollee {
+    hbx_member_id
+    disabled_status
+    benefit_status_code
+    employment_status_code
+    relationship_status_code
+    carrier_member_id
+    carrier_policy_id
+    premium_amount
+    coverage_start
+    coverage_end
+    coverage_status
+    ~self.map_relationship_code(relationship_code)
+    +coverage_start_matches?(date)
+    {method} +person
+    {method} +member
+    +calculate_premium_using(plan, rate_start_date)
+    +merge_enrollee(m_enrollee, p_action)
+    +apply_policy_action(action)
+    +clone_for_renewal(start_date)
+    {method} +active?
+    {method} +canceled?
+    {method} +terminated?
+    {method} +subscriber?
+    +reference_premium_for(plan, rate_date)
+    {method} +coverage_ended?
+  }
+
+  Policy -> Enrollee
+  
+  Employer "1" *- Policy : belongs_to
+  ResponsibleParty "many" -* "1" Policy : has_many
+}
+
+class Carrier {
+  name
+  abbreviation
+  hbx_carrier_id
+  individual_market_health
+  individual_market_dental
+  shop_market_health
+  shop_market_dental
+  is_active
+  {method} +invalidate_find_caches
+  {method} +fein
+  {method} ~self.individual_market_health
+  {method} ~self.individual_market_dental
+  {method} ~self.shop_market_health
+  {method} ~self.shop_market_dental
+  ~self.for_hbx_id(hbx_val)
+  ~self.for_fein(c_fein)
+}
+
+class Broker {
+  b_type
+  name_pfx
+  name_first
+  name_middle
+  name_last
+  name_sfx
+  name_full
+  alternate_name
+  npn
+  is_active
+  {method} ~self.default_search_order
+  ~self.search_hash(s_str)
+  ~self.find_or_create(m_broker)
+  ~self.find_or_create_without_merge(m_broker)
+  ~self.find_by_npn(number)
+  +merge_address(m_address)
+  +merge_email(m_email)
+  +merge_phone(m_phone)
+  {method} +full_name
+
+ initialize_name_full
+}
+
+class Plan {
+  name
+  abbreviation
+  hbx_plan_id
+  hios_plan_id
+  coverage_type
+  metal_level
+  market_type
+  ehb_max_as_percent
+  year
+  {method} +invalidate_find_cache
+  ~self.find_by_hios_id_and_year(h_id, year)
+  +rate(rate_period_date, benefit_begin_date, birth_date)
+  +premium_for_enrollee(enrollee)
+  {method} ~self.default_search_order
+  ~self.search_hash(s_str)
+  {method} +plan_for_2015
+}
+
+class PlanYear {
+  start_date
+  end_date
+  open_enrollment_start
+  open_enrollment_end
+  fte_count
+  pte_count
+  ~self.make(data)
+  +update_group_ids(carrier_id, g_id)
+  +match(other)
+  +attribute_matches?(attribute, other)
+  +terminate_plan_year(end_date)
+}
+
+Policy "1" *-- Carrier : belongs_to
+Policy "1" *-- Broker : belongs_to
+Employer "many" --* "1" Broker : has_many
+Carrier "many" *-* "many" Broker
+Carrier "many" --* "1" Plan
+Policy "1" *-- "many" Plan
+Employer "many" *--* "many" Plan
+PlanYear "1" *- "many" Employer
+PlanYear "1" *-- "many" Broker
+@enduml

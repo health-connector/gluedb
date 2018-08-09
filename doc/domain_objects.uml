@@ -1,0 +1,71 @@
+@startuml
+package EnrollmentAction {
+ hide empty members
+ class Base {
+  Symbol action
+  Symbol termination
+  Array errors
+  -initialize(term, init)
+  +update_business_process_history(entry)
+  ~self.select_action_for(chunk)
+  ~self.construct(chunk)
+  {method} +check_already_exists
+  {method} +persist
+  {method} +publish
+  {method} +drop_not_yet_implemented!
+  +persist_failed!(persist_errors)
+  +publish_failed!(publish_errors)
+  {method} +flow_successful!
+  +read_attribute_for_validation(attr)
+  ~self.human_attribute_name(attr, options = {})
+  {method} ~self.lookup_ancestors
+  +publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id)
+ }
+ class ActionPublishHelper
+ 
+ rectangle Cobra {
+  hide empty members
+  class CobraNewPolicyReinstate
+  class CobraNewPolicySwitchover
+  class CobraReinstate
+  class CobraSwitchover
+ }
+
+ class EnrollmentActionIssue
+ class EnrollmentTerminationEventWriter
+ class InitialEnrollment
+
+ rectangle Changes {
+  hide empty members
+  class AssistanceChange
+  class CarrierSwitch
+  class DependentAdd
+  class DependentDrop
+  class PlanChange
+  class PlanChangeDependentAdd
+  class PlanChangeDependentDrop
+  class ReselectionOfExistingCoverage
+ }
+ 
+ rectangle Renewals {
+  hide empty members
+  class ActiveRenewal
+  class CarrierSwitchRenewal
+  class RenewalDependentAdd
+  class RenewalDependentDrop
+  class PassiveRenewal
+ }
+ 
+ class Termination
+ 
+ Base <|-- Changes
+ Base <|-- Cobra
+ Base <|-- Renewals
+ 
+ Base <|-up- ActionPublishHelper
+ Base <|-up- EnrollmentActionIssue
+ Base <|-up- EnrollmentTerminationEventWriter
+ Base <|-left- InitialEnrollment
+ Base <|-right- Termination
+}
+@enduml

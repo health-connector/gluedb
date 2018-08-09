@@ -8,7 +8,7 @@ class TransformSimpleEdiFileSet
     @out_path = out_path
   end
 
-  def transform(file_path)  
+  def transform(file_path)
     action_xml = File.read(file_path)
     enrollment_event_cv = enrollment_event_cv_for(action_xml)
     if is_publishable?(enrollment_event_cv)
@@ -20,7 +20,7 @@ class TransformSimpleEdiFileSet
 
   def publish_to_file(enrollment_event_cv, x12_payload)
     file_name = determine_file_name(enrollment_event_cv)
-    File.open(File.join(@out_path, file_name), 'w ') do |f|
+    File.open(File.join(@out_path, file_name), 'w') do |f|
       f.write(x12_payload)
     end
   end

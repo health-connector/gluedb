@@ -1,0 +1,188 @@
+@startuml
+hide empty members
+
+package EnrollmentAction {
+
+  class "Base" as EABaseClass
+
+  class AssistanceComparisonHelper << (M, #ffffff) >>
+  class DependentComparisonHelper << (M, #ffffff) >>
+  class PlanComparisonHelper << (M, #ffffff) >>
+  class ReinstatementComparisonHelper << (M, #ffffff) >>
+  class TerminationDateHelper << (M, #ffffff) >>
+
+  class ActionPublishHelper
+
+  class CobraNewPolicyReinstate
+  class CobraNewPolicySwitchover
+  class CobraReinstate
+  class CobraSwitchover
+
+  class EnrollmentActionIssue
+  class EnrollmentTerminationEventWriter
+  class InitialEnrollment
+
+  class AssistanceChange
+  class CarrierSwitch
+  class DependentAdd
+  class DependentDrop
+  class PlanChange
+  class PlanChangeDependentAdd
+  class PlanChangeDependentDrop
+  class ReselectionOfExistingCoverage
+ 
+  class ActiveRenewal
+  class CarrierSwitchRenewal
+  class RenewalDependentAdd
+  class RenewalDependentDrop
+  class PassiveRenewal 
+  class Termination
+}
+
+package ExternalEvents {
+  package EnrollmentEventNotificationFilters {
+    class AlreadyProcessedEvent
+    class AlreadyProcessedTermination
+    class BogusPlanYear
+    class BogusRenewalTermination
+    class BogusTermination
+    class RemoveSameActionsAndSelectSilent
+    class TerminationWithoutEnd
+  }
+
+  class EnrollmentEventNotification
+  class EventResponder
+  class ExternalMember
+  class ExternalPolicyAssistanceChange
+  class ExternalPolicyCobraSwitch
+  class ExternalPolicyMemberAdd
+  class ExternalPolicyMemberDrop
+  class ExternalPolicy
+}
+
+package Handlers {
+  class "Base" as HandlerBaseClass
+  class EnrollmentEventXmlHelper << (M, #ffffff) >>
+
+  class EnrollmentEventReduceHandler
+  class EnrollmentEventEnrichHandler
+  class EnrollmentEventPersistHandler
+  class EnrollmentEventPublishHandler
+}
+
+package Listeners {
+  class BrokerUpdatedListener
+  class EmployerDigestDropListener
+  class EmployerEventReducerListener
+  class EmployerUpdatedListener
+  class EnrollQueryResultHandler
+  class EnrollmentEventBatchHandler
+  class PersonMatcher
+}
+
+package ChangeSets {
+  class IdentityChangeTransmitter
+  class IndividualChangeSet
+  class MemberRelationshipChangeSet
+  class PersonAddressChangeSet
+  class PersonDobChangeSet
+  class PersonEmailChangeSet
+  class PersonGenderChangeSet
+  class PersonNameChangeSet
+  class PersonPhoneChangeSet
+  class PersonSsnChangeSet
+  class SimpleMaintenanceTransmitter
+}
+
+package RemoteResources {
+  class Address
+  class Email
+  class EnrollmentEventResource
+  class IndividualResource
+  class PersonDemographics
+  class PersonRelationship
+  class Person
+  class Phone
+}
+
+package Services {
+  class EnrollmentEventTransmitter
+  class NfpPublisher
+}
+
+package Publishers {
+  class EnrollmentEventNotificationResult
+  class TradingPartnerEdi
+  class TradingPartnerLegacyCv
+}
+
+package Parsers"":"":Edi {
+  class EtfValidation
+  class FindCarrier
+  class FindPlan
+  class FindPolicy
+  class ImportCache
+  class IncommingTransaction
+  class ParserLog
+  class PersonLoopValidator
+  class RemittanceTransmission
+  class TransactionSetResult
+  class TransmissionFile
+  class TransmissionResponse
+
+  package Etf {
+    class BrokerLoop
+    class Category
+    class EmployerLoop
+    class EtfLoop
+    class PersonLoop
+    class PersonParser
+    class PolicyLoopValidator
+    class PolicyLoop
+    class ReportingCategories
+    class ResponsiblePartyParser
+  }
+
+  package Remittance {
+    class IndividualName
+    class RemittanceDetail
+  }
+}
+
+package PersonMatchStrategies {
+  class AmbiguousMatchError
+  class Finder
+  class FirstLastDob
+  class FirstLastEmail
+  class MemberId
+  class MemberSsn
+  class RelaxedFinder
+  class SsnDobName
+}
+
+package BusinessProcesses {
+  class AffectedMember
+  class TransformationError
+}
+
+class ArrayWindow
+class EnrollmentEventProcessingClient
+class EmployerEvent
+
+package EmployerEvents {
+  class CarrierFile
+  class EmployerImporter
+  class EnrollmentEventTrigger
+  class EventNames
+  class Renderer
+}
+
+package Amqp {
+  class Client
+  class ConfirmedPublisher
+  class EventBroadcaster
+  class Requestor
+  class RetryClient
+}
+
+@enduml

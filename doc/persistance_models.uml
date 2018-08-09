@@ -45,7 +45,7 @@ package Carrier as CarrierDoc <<Database >> {
   CarrierProfile -* Carrier
 }
 
-package Protocols"":"":X12 as X12Package  << (S,#000000) >> {
+package Protocols"":"":X12 as X12Package {
   package TransactionSetHeader as TSHeaderDoc <<Database >> {
     class TransactionSetHeader
     class TransactionSetEnrollment

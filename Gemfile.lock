@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git@github.com:health-connector/edi_codec.git
-  revision: 7ce2ba02c46fd2737dd9b1795371e5c37f5d6a5d
+  revision: ee4a19a6d10b1eda8fe638a24e1ae342de7dcefb
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -127,7 +127,6 @@ GEM
       sexp_processor
     codeclimate-engine-rb (0.4.0)
       virtus (~> 1.0)
-    coderay (1.1.2)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     coffee-rails (3.2.2)
@@ -225,7 +224,6 @@ GEM
     mail (2.5.5)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    method_source (0.9.0)
     mime-types (1.25.1)
     mini_portile2 (2.1.0)
     mongoid (3.1.7)
@@ -279,9 +277,6 @@ GEM
     prawn (0.11.1)
       pdf-reader (>= 0.9.0)
       ttfunk (~> 1.0.0)
-    pry (0.11.3)
-      coderay (~> 1.1.0)
-      method_source (~> 0.9.0)
     psych (2.0.5)
     public_suffix (2.0.5)
     rack (1.4.7)
@@ -488,7 +483,6 @@ DEPENDENCIES
   parallel_tests
   pd_x12
   prawn (~> 0.11.1)
-  pry
   psych (= 2.0.5)
   rails (= 3.2.22.5)
   rails_best_practices

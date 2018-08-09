@@ -1,5 +1,4 @@
 # Simple class to do transforms
-require 'pry'
 class TransformSimpleEdiFileSet
   include Handlers::EnrollmentEventXmlHelper
 
@@ -15,15 +14,13 @@ class TransformSimpleEdiFileSet
     if is_publishable?(enrollment_event_cv)
       edi_builder = EdiCodec::X12::BenefitEnrollment.new(action_xml)
       x12_xml = edi_builder.call.to_xml
-      
-      
       publish_to_file(enrollment_event_cv, x12_xml)
     end
   end
 
   def publish_to_file(enrollment_event_cv, x12_payload)
     file_name = determine_file_name(enrollment_event_cv)
-    File.open(File.join(@out_path, file_name), 'w') do |f|
+    File.open(File.join(@out_path, file_name), 'w ') do |f|
       f.write(x12_payload)
     end
   end
@@ -32,7 +29,6 @@ class TransformSimpleEdiFileSet
     policy_cv = extract_policy(enrollment_event_cv)
     hios_id = extract_hios_id(policy_cv)
     active_year = extract_active_year(policy_cv)
-    binding.pry
     found_plan = Plan.where(:hios_plan_id => hios_id, :year => active_year.to_i).first
     found_plan.carrier.abbrev.upcase
   end
@@ -82,7 +78,7 @@ dir_glob.each do |f|
   begin
     transformer.transform(f)
   rescue Exception => e
-    puts "#{f} - #{e.backtrace.inspect}"
+    puts "#{f} - #{e.inspect}"
     error_file.puts("mv #{f} failed_transforms/")
   end
 end

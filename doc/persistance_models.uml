@@ -138,4 +138,8 @@ Transmission "*" <-u-> "1" TradingProfile
 
 PremiumPayment "*" <--> "1" Employer
 
+note "These records are used only in federal reporting" as FDNote1
+
+FDNote1 .r. FamilyDoc
+
 @enduml

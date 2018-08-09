@@ -1,0 +1,141 @@
+@startuml
+hide empty members
+
+package Person as PersonDoc <<Database >> {
+
+  class Address
+  class Email
+  class Phone
+
+  class Person
+
+  class Member
+  class ResponsibleParty
+
+  Person "1" *-u-  "*" Member
+  Person "1" *-r- "0..1" ResponsibleParty
+  Person "1" *-u- "*" Address
+  Person "1" *-d- "*" Email
+  Person "1" *-d- "*" Phone
+
+  'Member -l[hidden]- ResponsibleParty
+}
+
+package Employer as EmployerDoc <<Database >> {
+  class Employer
+}
+
+package Policy as PolicyDoc <<Database >> {
+  class Policy
+  class Enrollee
+  class AptcCredit
+
+  Policy "1" *-u- "1..*" Enrollee
+  Policy "1" *-d- "*" AptcCredit
+  
+  Enrollee "*" <-> "1" Member
+  ResponsibleParty "1" <--> "*" Policy
+  Employer "1" <--> "*" Policy
+}
+
+package Carrier as CarrierDoc <<Database >> {
+  class Carrier
+  class CarrierProfile
+
+  CarrierProfile -* Carrier
+}
+
+package Protocols"":"":X12 as X12Package  << (S,#000000) >> {
+  package TransactionSetHeader as TSHeaderDoc <<Database >> {
+    class TransactionSetHeader
+    class TransactionSetEnrollment
+    class TransactionSetPremiumPayment
+    TransactionSetEnrollment --|> TransactionSetHeader
+    TransactionSetPremiumPayment -u-|> TransactionSetHeader
+    TransactionSetHeader "*" -> "1" Carrier
+    TransactionSetEnrollment "*" -> "1" Policy
+    TransactionSetEnrollment "*" -> "1" Employer
+  }
+
+  package Transmission as TransmissionDoc <<Database >> {
+    class Transmission
+    TransactionSetHeader "*" <-u-> "1" Transmission
+  }
+}
+
+package TradingPartner as TradingPartnerDoc <<Database >> {
+    class TradingPartner
+    class TradingProfile
+
+    TradingProfile "*" -r-* "1" TradingPartner
+}
+
+package Broker as BrokerPackage <<Database >> {
+  class Broker
+}
+
+package Plan as PlanPackage <<Database >> {
+  class Plan
+}
+
+package PlanYear as PlanYearPackage <<Database >> {
+  class PlanYear
+}
+
+package PremiumPayment as PPPackage <<Database >> {
+  class PremiumPayment
+
+  PremiumPayment "*" <--> "1" Policy
+  PremiumPayment "*" <-u-> "1" Carrier
+  PremiumPayment "*" <--> "1" TransactionSetPremiumPayment
+}
+
+package Family as FamilyDoc <<Database >> {
+  class Family
+  class FamilyMember
+  class Household
+  class IrsGroup
+  class HbxEnrollment
+  class HbxEnrollmentMember
+  class CoverageHousehold
+  class HbxEnrollmentMember
+  class TaxHousehold
+  class TaxHouseholdMember
+
+  
+  Family "1" *-u- "*" Household
+  Family "1" *-u- "*" IrsGroup
+  Household "*" <-u-> "1" IrsGroup
+  Family "1" *-- "1..*" FamilyMember
+
+  FamilyMember "*" -u-> "1" Person
+
+  Household "1" *-- "*" HbxEnrollment
+  Household "1" *- "*" TaxHousehold
+  Household "1" *-- "*" CoverageHousehold
+
+  HbxEnrollmentMember "*" --> "1" FamilyMember
+  HbxEnrollmentMember "*" --* "1" HbxEnrollment
+
+  CoverageHousehold *-- CoverageHouseholdMember
+  CoverageHouseholdMember "*" --> "1" FamilyMember
+
+  TaxHousehold "1" *-d- "*" TaxHouseholdMember
+  TaxHouseholdMember "*" --> "1" FamilyMember
+}
+
+Family -r- TaxHousehold
+
+'PersonDoc -l[hidden]- FamilyDoc
+CarrierDoc -u[hidden]- Employer
+
+Policy "*" *-u- "1" Broker
+Carrier "1" <--> "1..*" Plan
+Policy "*" <--> "1" Plan
+PlanYear "*" <--> "1" Employer
+PlanYear "*" <-> "1" Broker
+Transmission "*" <-u-> "1" TradingProfile
+
+PremiumPayment "*" <--> "1" Employer
+
+@enduml

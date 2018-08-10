@@ -15,9 +15,12 @@ describe GenerateTransforms, dbclean: :after_each do
       file_name = "#{policy.eg_id}_#{reason_code.split('#').last}.xml"
       enrollees.each {|en| FactoryGirl.create(:person, authority_member_id: en.m_id)}
 
-      subject.begin_transform
-
+      subject.generate_transform
       expect(File.exist?(Rails.root.join('source_xmls', file_name))).to be(true) 
+    end
+    after(:all) do
+      FileUtils.rm_rf(Dir["#{Rails.root}/source_xmls/*"])
+      FileUtils.rm_rf(Dir["#{Rails.root}/source_xmls.zip"])
     end
   end
 

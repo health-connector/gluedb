@@ -11,11 +11,23 @@ module Parsers::Xml::Cv
     element :name, String, tag: "name"
     element :dba, String, tag: "dba"
 
+
+    has_many :addresses, Parsers::Xml::Cv::AddressParser, tag: "addresses/cv:address"
+    # has_one :phone, Parsers::Xml::Cv::PhoneParser, xpath: "phone"
+
+    def address_requests
+      addresses.map(&:request_hash)
+    end
+
     def to_hash
+      binding.pry
       {
           id:id,
           name:name,
-          dba:dba
+          dba:dba,
+          addresses: addresses,
+          # phones: phone
+
       }
     end
   end

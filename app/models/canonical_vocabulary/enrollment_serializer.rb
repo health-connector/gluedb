@@ -64,6 +64,8 @@ module CanonicalVocabulary
           xml['emp'].name(emp.dba.blank?  ? emp.name : emp.dba)
           xml['emp'].exchange_employer_id(emp.hbx_id)
           xml['emp'].fein(emp.fein)
+          # xml['emp'].address(emp.addresses.first)
+          # xml['emp'].phone(emp.phones.first)
         end
       end
     end

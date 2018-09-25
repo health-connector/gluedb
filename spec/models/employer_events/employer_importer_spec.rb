@@ -17,6 +17,26 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
         <plan_years>
         </plan_years>
       </employer_profile>
+      <office_locations>
+      <office_location>
+        <id>
+          <id>55fc838254726568cd018d01</id>
+        </id>
+        <primary>true</primary>
+        <address>
+          <type>urn:openhbx:terms:v1:address_type#work</type>
+          <address_line_1>830 I St NE</address_line_1>
+          <location_city_name>Washington</location_city_name>
+          <location_state_code>DC</location_state_code>
+          <postal_code>20002</postal_code>
+        </address>
+        <phone>
+          <type>urn:openhbx:terms:v1:phone_type#work</type>
+          <full_phone_number>2025551212</full_phone_number>
+          <is_preferred>false</is_preferred>
+        </phone>
+      </office_location>
+    </office_locations>
       </organization>
       XML_CODE
     end
@@ -45,6 +65,26 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
           <plan_year/>
         </plan_years>
       </employer_profile>
+      <office_locations>
+      <office_location>
+        <id>
+          <id>55fc838254726568cd018d01</id>
+        </id>
+        <primary>true</primary>
+        <address>
+          <type>urn:openhbx:terms:v1:address_type#work</type>
+          <address_line_1>830 I St NE</address_line_1>
+          <location_city_name>Washington</location_city_name>
+          <location_state_code>DC</location_state_code>
+          <postal_code>20002</postal_code>
+        </address>
+        <phone>
+          <type>urn:openhbx:terms:v1:phone_type#work</type>
+          <full_phone_number>2025551212</full_phone_number>
+          <is_preferred>false</is_preferred>
+        </phone>
+      </office_location>
+    </office_locations>
       </organization>
       XML_CODE
     end
@@ -64,6 +104,26 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
       <name>TEST NAME</name>
       <dba>TEST DBA</name>
       <fein>123456789</fein>
+      <office_locations>
+      <office_location>
+        <id>
+          <id>55fc838254726568cd018d01</id>
+        </id>
+        <primary>true</primary>
+        <address>
+          <type>urn:openhbx:terms:v1:address_type#work</type>
+          <address_line_1>830 I St NE</address_line_1>
+          <location_city_name>Washington</location_city_name>
+          <location_state_code>DC</location_state_code>
+          <postal_code>20002</postal_code>
+        </address>
+        <phone>
+          <type>urn:openhbx:terms:v1:phone_type#work</type>
+          <full_phone_number>2025551212</full_phone_number>
+          <is_preferred>false</is_preferred>
+        </phone>
+      </office_location>
+    </office_locations>
       </organization>
       XML_CODE
     end
@@ -116,6 +176,26 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
           </plan_year>
         </plan_years>
       </employer_profile>
+      <office_locations>
+      <office_location>
+        <id>
+          <id>55fc838254726568cd018d01</id>
+        </id>
+        <primary>true</primary>
+        <address>
+          <type>urn:openhbx:terms:v1:address_type#work</type>
+          <address_line_1>830 I St NE</address_line_1>
+          <location_city_name>Washington</location_city_name>
+          <location_state_code>DC</location_state_code>
+          <postal_code>20002</postal_code>
+        </address>
+        <phone>
+          <type>urn:openhbx:terms:v1:phone_type#work</type>
+          <full_phone_number>2025551212</full_phone_number>
+          <is_preferred>false</is_preferred>
+        </phone>
+      </office_location>
+    </office_locations>
       </organization>
       XML_CODE
     end
@@ -193,6 +273,26 @@ RSpec.shared_context "employer importer shared persistance context" do
           </plan_year>
         </plan_years>
       </employer_profile>
+      <office_locations>
+      <office_location>
+        <id>
+          <id>55fc838254726568cd018d01</id>
+        </id>
+        <primary>true</primary>
+        <address>
+          <type>urn:openhbx:terms:v1:address_type#work</type>
+          <address_line_1>830 I St NE</address_line_1>
+          <location_city_name>Washington</location_city_name>
+          <location_state_code>DC</location_state_code>
+          <postal_code>20002</postal_code>
+        </address>
+        <phone>
+          <type>urn:openhbx:terms:v1:phone_type#work</type>
+          <full_phone_number>2025551212</full_phone_number>
+          <is_preferred>false</is_preferred>
+        </phone>
+      </office_location>
+    </office_locations> 
       </organization>
       XML_CODE
     end
@@ -205,31 +305,43 @@ RSpec.shared_context "employer importer shared persistance context" do
       name: "TEST NAME"
     }
   end
+  
+  let(:employer_record_id) { double }
+  let(:employer_record) { instance_double(Employer, :id => employer_record_id, :plan_years => existing_plan_years,addresses:addresses) }
+  let(:address) { instance_double(Address) }
+  let(:addresses) { [ address ] }
+  let(:phone) { instance_double(Phone) }
+  let(:phones) { [ phone ] }
 
-    let(:employer_record_id) { double }
-    let(:employer_record) { instance_double(Employer, :id => employer_record_id, :plan_years => existing_plan_years) }
+  before :each do
+    allow(employer_record).to receive(:addresses).and_return([]) 
+    allow(employer_record).to receive(:phones).and_return([])
+    allow(Employer).to receive(:where).with({hbx_id: "EMPLOYER_HBX_ID_STRING"}).and_return(existing_employer_records)
+    allow(address).to receive(:update_attributes!).and_return(address)
+    allow(phone).to receive(:update_attributes!).and_return(phone)
+  end
 
-    before :each do
-      allow(Employer).to receive(:where).with({hbx_id: "EMPLOYER_HBX_ID_STRING"}).and_return(existing_employer_records)
-    end
 end
 
 describe EmployerEvents::EmployerImporter, "for a new employer, given an employer xml with published plan years" do
   include_context "employer importer shared persistance context"
-
+  
   let(:existing_employer_records) { [] }
   let(:first_plan_year_record) { instance_double(PlanYear) }
   let(:last_plan_year_record) { instance_double(PlanYear) }
   let(:existing_plan_years) { [] }
-
+    
   before :each do
+    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
+    allow(employer_record).to receive(:addresses).and_return([]) 
+    allow(employer_record).to receive(:phones).and_return([])
+    allow(employer_record).to receive(:save).and_return(employer_record)
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
   end
-
+  
   subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
-
+  
   it "persists the employer with the correct attributes" do
     expect(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
     subject.persist
@@ -253,6 +365,9 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with no pla
   subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
 
   before :each do
+    allow(employer_record).to receive(:addresses).and_return(addresses) 
+    allow(employer_record).to receive(:phones).and_return(phones)
+    allow(employer_record).to receive(:save).and_return(employer_record)
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
@@ -283,6 +398,9 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
   before :each do
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+    allow(employer_record).to receive(:addresses).and_return(addresses) 
+    allow(employer_record).to receive(:phones).and_return(phones)
+    allow(employer_record).to receive(:save).and_return(employer_record)
   end
 
   it "updates the employer with the correct attributes" do
@@ -293,5 +411,46 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
   it "creates only the one new plan year for the employer with the correct attributes" do
     expect(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
     subject.persist
+  end
+  
+  it "employer has demographic attrbutes" do
+    subject.persist    
+    expect(employer_record.addresses.first).to eq(address)
+    expect(employer_record.phones.first).to eq(phone)
+  end
+end
+
+describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
+  include_context "employer importer shared persistance context"
+
+  let(:existing_employer_records) { [employer_record] }
+  let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
+  let(:last_plan_year_record) { instance_double(PlanYear) }
+  let(:existing_plan_years) { [first_plan_year_record] }
+  let(:updated_address) { instance_double(Address)  }
+  let(:updated_addresses) { [updated_address]  }
+  let(:updated_phone) { instance_double(Phone)}
+  let(:updated_phones) { [updated_phone]}
+
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+
+  before :each do
+    allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
+    allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+    allow(employer_record).to receive(:addresses).and_return(addresses) 
+    allow(employer_record).to receive(:phones).and_return(phones)
+    allow(employer_record).to receive(:save).and_return(employer_record)
+  end
+
+  it "can update existing attributes " do
+    allow(updated_address).to receive(:update_attributes!).and_return(updated_address)
+    allow(updated_phone).to receive(:update_attributes!).and_return(updated_phone)
+    allow(employer_record).to receive(:addresses).and_return(updated_addresses) 
+    allow(employer_record).to receive(:phones).and_return(updated_phones)
+    
+    subject.persist 
+  
+    expect(employer_record.addresses.first).to eq(updated_address)
+    expect(employer_record.phones.first).to eq(updated_phone)
   end
 end

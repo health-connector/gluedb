@@ -69,4 +69,9 @@ class Carrier
       Carrier.where("carrier_profiles.fein" => c_fein).first
     end
   end
+
+  def shop_profile
+    carrier_profiles.where(profile_name: /.*SHP/).first
+  end
+
 end

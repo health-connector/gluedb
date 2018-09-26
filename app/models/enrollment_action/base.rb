@@ -25,6 +25,7 @@ module EnrollmentAction
         ::EnrollmentAction::ActiveRenewal,
         ::EnrollmentAction::CarrierSwitch,
         ::EnrollmentAction::CarrierSwitchRenewal,
+        ::EnrollmentAction::SimpleProductChange,
         ::EnrollmentAction::DependentAdd,
         ::EnrollmentAction::DependentDrop,
         ::EnrollmentAction::PlanChange,

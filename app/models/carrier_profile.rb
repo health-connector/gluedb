@@ -7,10 +7,4 @@ class CarrierProfile
   field :fein, type: String
   field :profile_name, type: String
   field :requires_employer_updates_on_enrollments, type: Boolean, default: false
-
-  before_save :update_employer_updates_on_enrollments
-
-  def update_employer_updates_on_enrollments
-    write_attribute(:requires_employer_updates_on_enrollments, true) if profile_name == "THPP_SHP"
-  end
 end

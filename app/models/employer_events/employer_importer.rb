@@ -1,7 +1,6 @@
 module EmployerEvents
   class EmployerImporter
     XML_NS = { "cv" => "http://openhbx.org/api/terms/1.0" }
-    include HappyMapper
 
     attr_reader :xml
 

@@ -7,36 +7,36 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
-      <id>
-      <id>EMPLOYER_HBX_ID_STRING</id>
-      </id>
-      <name>TEST NAME</name>
-      <dba>TEST DBA</name>
-      <fein>123456789</fein>
-      <employer_profile>
-        <plan_years>
-        </plan_years>
-      </employer_profile>
-      <office_locations>
-      <office_location>
         <id>
-          <id>55fc838254726568cd018d01</id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
         </id>
-        <primary>true</primary>
-        <address>
-          <type>urn:openhbx:terms:v1:address_type#work</type>
-          <address_line_1>830 I St NE</address_line_1>
-          <location_city_name>Washington</location_city_name>
-          <location_state_code>DC</location_state_code>
-          <postal_code>20002</postal_code>
-        </address>
-        <phone>
-          <type>urn:openhbx:terms:v1:phone_type#work</type>
-          <full_phone_number>2025551212</full_phone_number>
-          <is_preferred>false</is_preferred>
-        </phone>
-      </office_location>
-    </office_locations>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+          </plan_years>
+        </employer_profile>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <address>
+              <type>urn:openhbx:terms:v1:address_type#work</type>
+              <address_line_1>830 I St NE</address_line_1>
+              <location_city_name>Washington</location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>20002</postal_code>
+            </address>
+            <phone>
+              <type>urn:openhbx:terms:v1:phone_type#work</type>
+              <full_phone_number>2025551212</full_phone_number>
+              <is_preferred>false</is_preferred>
+            </phone>
+          </office_location>
+        </office_locations>
       </organization>
       XML_CODE
     end
@@ -54,37 +54,37 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
-      <id>
-      <id>EMPLOYER_HBX_ID_STRING</id>
-      </id>
-      <name>TEST NAME</name>
-      <dba>TEST DBA</name>
-      <fein>123456789</fein>
-      <employer_profile>
-        <plan_years>
-          <plan_year/>
-        </plan_years>
-      </employer_profile>
-      <office_locations>
-      <office_location>
         <id>
-          <id>55fc838254726568cd018d01</id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
         </id>
-        <primary>true</primary>
-        <address>
-          <type>urn:openhbx:terms:v1:address_type#work</type>
-          <address_line_1>830 I St NE</address_line_1>
-          <location_city_name>Washington</location_city_name>
-          <location_state_code>DC</location_state_code>
-          <postal_code>20002</postal_code>
-        </address>
-        <phone>
-          <type>urn:openhbx:terms:v1:phone_type#work</type>
-          <full_phone_number>2025551212</full_phone_number>
-          <is_preferred>false</is_preferred>
-        </phone>
-      </office_location>
-    </office_locations>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+            <plan_year/>
+          </plan_years>
+        </employer_profile>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <address>
+              <type>urn:openhbx:terms:v1:address_type#work</type>
+              <address_line_1>830 I St NE</address_line_1>
+              <location_city_name>Washington</location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>20002</postal_code>
+            </address>
+            <phone>
+              <type>urn:openhbx:terms:v1:phone_type#work</type>
+              <full_phone_number>2025551212</full_phone_number>
+              <is_preferred>false</is_preferred>
+            </phone>
+          </office_location>
+        </office_locations>
       </organization>
       XML_CODE
     end
@@ -98,32 +98,32 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
-      <id>
-      <id>EMPLOYER_HBX_ID_STRING</id>
-      </id>
-      <name>TEST NAME</name>
-      <dba>TEST DBA</name>
-      <fein>123456789</fein>
-      <office_locations>
-      <office_location>
         <id>
-          <id>55fc838254726568cd018d01</id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
         </id>
-        <primary>true</primary>
-        <address>
-          <type>urn:openhbx:terms:v1:address_type#work</type>
-          <address_line_1>830 I St NE</address_line_1>
-          <location_city_name>Washington</location_city_name>
-          <location_state_code>DC</location_state_code>
-          <postal_code>20002</postal_code>
-        </address>
-        <phone>
-          <type>urn:openhbx:terms:v1:phone_type#work</type>
-          <full_phone_number>2025551212</full_phone_number>
-          <is_preferred>false</is_preferred>
-        </phone>
-      </office_location>
-    </office_locations>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <address>
+              <type>urn:openhbx:terms:v1:address_type#work</type>
+              <address_line_1>830 I St NE</address_line_1>
+              <location_city_name>Washington</location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>20002</postal_code>
+            </address>
+            <phone>
+              <type>urn:openhbx:terms:v1:phone_type#work</type>
+              <full_phone_number>2025551212</full_phone_number>
+              <is_preferred>false</is_preferred>
+            </phone>
+          </office_location>
+        </office_locations>
       </organization>
       XML_CODE
     end
@@ -158,44 +158,44 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
-      <id>
-      <id>EMPLOYER_HBX_ID_STRING</id>
-      </id>
-      <name>TEST NAME</name>
-      <dba>TEST DBA</name>
-      <fein>123456789</fein>
-      <employer_profile>
-        <plan_years>
-          <plan_year>
-            <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
-            <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
-          </plan_year>
-          <plan_year>
-            <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
-            <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
-          </plan_year>
-        </plan_years>
-      </employer_profile>
-      <office_locations>
-      <office_location>
         <id>
-          <id>55fc838254726568cd018d01</id>
+          <id>EMPLOYER_HBX_ID_STRING</id>
         </id>
-        <primary>true</primary>
-        <address>
-          <type>urn:openhbx:terms:v1:address_type#work</type>
-          <address_line_1>830 I St NE</address_line_1>
-          <location_city_name>Washington</location_city_name>
-          <location_state_code>DC</location_state_code>
-          <postal_code>20002</postal_code>
-        </address>
-        <phone>
-          <type>urn:openhbx:terms:v1:phone_type#work</type>
-          <full_phone_number>2025551212</full_phone_number>
-          <is_preferred>false</is_preferred>
-        </phone>
-      </office_location>
-    </office_locations>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+            <plan_year>
+              <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+            <plan_year>
+              <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+          </plan_years>
+        </employer_profile>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <address>
+              <type>urn:openhbx:terms:v1:address_type#work</type>
+              <address_line_1>830 I St NE</address_line_1>
+              <location_city_name>Washington</location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>20002</postal_code>
+            </address>
+            <phone>
+              <type>urn:openhbx:terms:v1:phone_type#work</type>
+              <full_phone_number>2025551212</full_phone_number>
+              <is_preferred>false</is_preferred>
+            </phone>
+          </office_location>
+        </office_locations>
       </organization>
       XML_CODE
     end
@@ -255,44 +255,44 @@ RSpec.shared_context "employer importer shared persistance context" do
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
-      <id>
-      <id>EMPLOYER_HBX_ID_STRING</id>
-      </id>
-      <name>TEST NAME</name>
-      <dba>TEST DBA</name>
-      <fein>123456789</fein>
-      <employer_profile>
-        <plan_years>
-          <plan_year>
-            <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
-            <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
-          </plan_year>
-          <plan_year>
-            <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
-            <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
-          </plan_year>
-        </plan_years>
-      </employer_profile>
-      <office_locations>
-      <office_location>
         <id>
-          <id>55fc838254726568cd018d01</id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
         </id>
-        <primary>true</primary>
-        <address>
-          <type>urn:openhbx:terms:v1:address_type#work</type>
-          <address_line_1>830 I St NE</address_line_1>
-          <location_city_name>Washington</location_city_name>
-          <location_state_code>DC</location_state_code>
-          <postal_code>20002</postal_code>
-        </address>
-        <phone>
-          <type>urn:openhbx:terms:v1:phone_type#work</type>
-          <full_phone_number>2025551212</full_phone_number>
-          <is_preferred>false</is_preferred>
-        </phone>
-      </office_location>
-    </office_locations> 
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+            <plan_year>
+              <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+            <plan_year>
+              <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+          </plan_years>
+        </employer_profile>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <address>
+              <type>urn:openhbx:terms:v1:address_type#work</type>
+              <address_line_1>830 I St NE</address_line_1>
+              <location_city_name>Washington</location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>20002</postal_code>
+            </address>
+            <phone>
+              <type>urn:openhbx:terms:v1:phone_type#work</type>
+              <full_phone_number>2025551212</full_phone_number>
+              <is_preferred>false</is_preferred>
+            </phone>
+          </office_location>
+        </office_locations> 
       </organization>
       XML_CODE
     end

@@ -3,10 +3,6 @@ require "rails_helper"
 describe Publishers::EmployerEnrollmentNotification do
   describe "#publish_edi" do
 
-    before :each do
-      DatabaseCleaner.clean
-    end
-
     let!(:amqp_connection) { double }
     let!(:event_xml) { double }
     let(:trading_partner_edi_publisher) { Publishers::TradingPartnerEdi.new(amqp_connection, event_xml) }
@@ -87,7 +83,6 @@ describe Publishers::EmployerEnrollmentNotification do
   end
 
   describe "#employer_policies", dbclean: :after_each do
-
     let!(:employer) { FactoryGirl.create(:employer) }
     let!(:enrollees) { policy.enrollees.update_all(coverage_end:nil) }
     let!(:update_enrollees) { united_health_care_policy.enrollees.update_all(coverage_end:nil) }
@@ -112,9 +107,7 @@ describe Publishers::EmployerEnrollmentNotification do
     end
 
     context "#render_cv", dbclean: :after_each do
-
       context "should render CV for policy" do
-
         before :each do
           allow(first_enrollee).to receive(:person).and_return(person)
           allow(second_enrollee).to receive(:person).and_return(person)
@@ -131,7 +124,5 @@ describe Publishers::EmployerEnrollmentNotification do
         end
       end
     end
-
   end
-
-  end
+end

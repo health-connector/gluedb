@@ -74,10 +74,3 @@ module Publishers
     end
   end
 end
-
-
-
-
-
-
-

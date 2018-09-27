@@ -4,13 +4,28 @@ module EmployerEvents
 
     attr_reader :xml
 
-    def initialize(employer_xml)
+    def initialize(employer_xml, event_name)
       @xml = Nokogiri::XML(employer_xml)
-    end
+      @event_name = event_name.split("#").last
+      @org  = Openhbx::Cv2::Organization.parse(@xml, single: true)
 
+    end
+    
     def importable?
       @importable ||= @xml.xpath("//cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).any?  
     end
+
+    def contacts(employer)
+      {
+       name_pfx: employer.name_pfx,
+       name_first: employer.name_first,
+       name_middle: employer.name_middle,
+       name_last: employer.name_last,
+       name_sfx: employer.name_sfx,
+       name_full: employer.name_full,
+       alternate_name: employer.alternate_name
+      }
+    end  
 
     def employer_values
       hbx_id_node = @xml.xpath("//cv:organization/cv:id/cv:id", XML_NS).first
@@ -28,51 +43,57 @@ module EmployerEvents
         name: company_name
       }
     end
+
+    def add_office_locations(locations, employer)
+      if locations.present?
+        employer.addresses.clear 
+        employer.phones.clear 
+        add_location_details(locations, employer)
+      end
+    end
+
+    def add_location_details(locations, employer) 
+        locations.each do |loc|
+          type =  loc.address.type.split("#").last
+          address_1 = loc.address.address_line_1
+          address_2 = loc.address.address_line_2 
+          city =  loc.address.location_city_name 
+          location_state_code = loc.address.location_state_code 
+          zip = loc.address.postal_code
+          full_phone_number = loc.phone.full_phone_number 
+          phone_type = loc.phone.type.split('#').last
+          employer.phones << Phone.new(full_phone_number:full_phone_number, phone_type:phone_type)
+          employer.addresses << Address.new(type: type, address_1:address_1,address_2: address_2, city: city,location_state_code: location_state_code,zip: zip)
+          employer.save
+      end
+    end 
     
-    def demographic_values 
-      type = @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:address//cv:type", XML_NS).first
-      address_line_1 =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:address//cv:address_line_1", XML_NS).first
-      location_city_name =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:address//cv:location_city_name", XML_NS).first
-      location_state_code =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:address//cv:location_state_code", XML_NS).first
-      postal_code =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:address//cv:postal_code", XML_NS).first
-      phone_type =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:phone//cv:type", XML_NS).first
-      phone_number =  @xml.xpath("//cv:organization/cv:office_locations//cv:office_location//cv:phone//cv:full_phone_number", XML_NS).first
-
-      address_type = stripped_node_value(type).split("#").last
-      address_line_1 = stripped_node_value(address_line_1)
-      city = stripped_node_value(location_city_name)
-      state = stripped_node_value(location_state_code)
-      zip = stripped_node_value(postal_code)
-      phone_type = stripped_node_value(phone_type).split("#").last
-      phone_number = stripped_node_value(phone_number)
-
-      {
-        address: {
-            address_type: address_type,
-            address_1: address_line_1,
-            city:city ,
-            location_state_code: state,
-            zip: zip
-        },
-
-        phone: {
-          phone_type: phone_type, 
-          full_phone_number: phone_number
-
-        }
-      }
+    def add_contacts(contacts, employer)
+      binding.pry
+      contacts.first do |contact|
+        if contact.name_full.blank?
+          employer.update_attributes!(
+              name_pfx: contact.name_pfx,
+              name_first: contact.name_first,
+              name_middle: contact.name_middle,
+              name_last: contact.name_last,
+              name_sfx: contact.name_sfx,
+              name_full: contact.name_full,
+              alternate_name: contact.alternate_name
+            )
+        end
+      end
     end
 
-    def add_employer_demographics(demographic_values, employer)
-      employer.addresses << Address.new(demographic_values[:address])
-      employer.phones << Phone.new(demographic_values[:phone])
-      employer.save 
-    end
+    
+    def manage_employer_demographics(employer)
+      if employer.contacts. || @event_name == "contact_changed"
+        add_contacts(@org.contacts,employer)
+      end
 
-    def update_employer_demographics(demographic_values, employer)  
-      employer.addresses.first.update_attributes!(demographic_values[:address])
-      employer.phones.first.update_attributes!(demographic_values[:phone])
-      employer.save
+      if employer.addresses.blank? || employer.phones.blank?  ||  @event_name == "address_changed"
+        add_office_locations(@org.office_locations,employer)
+      end
     end
 
     def plan_year_values
@@ -93,11 +114,11 @@ module EmployerEvents
       existing_employer = Employer.where({:hbx_id => employer_values[:hbx_id]}).first
       employer_record = if existing_employer
                           existing_employer.update_attributes!(employer_values)
-                          update_employer_demographics(demographic_values, existing_employer)
+                          manage_employer_demographics(existing_employer)
                           existing_employer
                         else
                           employer = Employer.create!(employer_values)
-                          add_employer_demographics(demographic_values, employer)
+                          manage_employer_demographics(employer)
                           employer
                         end
       employer_id = employer_record.id

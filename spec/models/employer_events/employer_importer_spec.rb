@@ -1,9 +1,13 @@
 require "rails_helper"
 
 describe EmployerEvents::EmployerImporter, "given an employer xml" do
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
   describe "with no published plan years" do
+    let(:event_name) do 
+      "urn:openhbx:events:v1:employer#created"
+    end
+
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
@@ -37,6 +41,20 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             </phone>
           </office_location>
         </office_locations>
+        <contacts>
+          <contact>
+            <id>1234545667</id>
+            <person_name>
+              <person_surname> Smith </person_surname>
+              <person_given_name>  Dan </person_given_name>
+              <person_middle_name> John</person_middle_name>
+              <person_full_name>Dan John Smith</person_full_name>
+              <person_name_prefix_text></person_name_prefix_text>
+              <person_name_suffix_text> </person_name_suffix_text>>
+              <person_alternate_name> </person_alternate_name>
+            </person_name>
+            <contact>
+        </contacts>
       </organization>
       XML_CODE
     end
@@ -51,6 +69,9 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
   end
 
   describe "with a published plan year" do
+    let(:event_name) do 
+      "urn:openhbx:events:v1:employer#created"
+    end
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
@@ -85,6 +106,20 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             </phone>
           </office_location>
         </office_locations>
+        <contacts>
+          <contact>
+            <id>1234545667</id>
+            <person_name>
+              <person_surname> Smith </person_surname>
+              <person_given_name>  Dan </person_given_name>
+              <person_middle_name> John</person_middle_name>
+              <person_full_name>Dan John Smith</person_full_name>
+              <person_name_prefix_text></person_name_prefix_text>
+              <person_name_suffix_text> </person_name_suffix_text>>
+              <person_alternate_name> </person_alternate_name>
+            </person_name>
+          </contact>
+        </contacts>
       </organization>
       XML_CODE
     end
@@ -95,6 +130,9 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
   end
 
   describe "employer with basic information" do
+    let(:event_name) do 
+      "urn:openhbx:events:v1:employer#created"
+    end
     let(:employer_event_xml) do
       <<-XML_CODE
       <organization xmlns="http://openhbx.org/api/terms/1.0">
@@ -124,11 +162,28 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             </phone>
           </office_location>
         </office_locations>
+        <contacts>
+          <contact>
+            <id>1234545667</id>
+            <person_name>
+              <person_surname> Smith </person_surname>
+              <person_given_name>  Dan </person_given_name>
+              <person_middle_name> John</person_middle_name>
+              <person_full_name>Dan John Smith</person_full_name>
+              <person_name_prefix_text></person_name_prefix_text>
+              <person_name_suffix_text> </person_name_suffix_text>>
+              <person_alternate_name> </person_alternate_name>
+            </person_name>
+          </contact>
+        </contacts>
       </organization>
       XML_CODE
     end
 
     describe "the extracted employer information" do
+      let(:event_name) do 
+        "urn:openhbx:events:v1:employer#created"
+      end
       let(:employer_information) { subject.employer_values }
 
       it "is has hbx_id information" do
@@ -150,6 +205,9 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
   end
 
   describe "with multiple published plan years" do
+    let(:event_name) do 
+      "urn:openhbx:events:v1:employer#created"
+    end
     let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
     let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
     let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
@@ -196,6 +254,20 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             </phone>
           </office_location>
         </office_locations>
+        <contacts>
+          <contact>
+            <id>1234545667</id>
+            <person_name>
+              <person_surname> Smith </person_surname>
+              <person_given_name>  Dan </person_given_name>
+              <person_middle_name> John</person_middle_name>
+              <person_full_name>Dan John Smith</person_full_name>
+              <person_name_prefix_text></person_name_prefix_text>
+              <person_name_suffix_text> </person_name_suffix_text>>
+              <person_alternate_name> </person_alternate_name>
+            </person_name>
+          </contact>
+        </contacts>
       </organization>
       XML_CODE
     end
@@ -205,6 +277,9 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     end
 
     describe "the extracted plan year values" do
+      let(:event_name) do 
+        "urn:openhbx:events:v1:employer#created"
+      end
       let(:plan_year_values) { subject.plan_year_values }
 
       it "has the right length" do
@@ -231,6 +306,9 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
 end
 
 RSpec.shared_context "employer importer shared persistance context" do
+  let(:event_name) do 
+    "urn:openhbx:events:v1:employer#created"
+  end 
     let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
     let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
     let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
@@ -293,6 +371,20 @@ RSpec.shared_context "employer importer shared persistance context" do
             </phone>
           </office_location>
         </office_locations> 
+        <contacts>
+          <contact>
+            <id>1234545667</id>
+            <person_name>
+              <person_surname> Smith </person_surname>
+              <person_given_name>  Dan </person_given_name>
+              <person_middle_name> John</person_middle_name>
+              <person_full_name>Dan John Smith</person_full_name>
+              <person_name_prefix_text></person_name_prefix_text>
+              <person_name_suffix_text> </person_name_suffix_text>>
+              <person_alternate_name> </person_alternate_name>
+            </person_name>
+          </contact>
+        </contacts>
       </organization>
       XML_CODE
     end
@@ -314,6 +406,17 @@ RSpec.shared_context "employer importer shared persistance context" do
   let(:phones) { [ phone ] }
 
   before :each do
+    allow(employer_record).to receive(:name_pfx).and_return("") 
+    allow(employer_record).to receive(:name_first).and_return("") 
+    allow(employer_record).to receive(:name_middle).and_return("") 
+    allow(employer_record).to receive(:name_sfx).and_return("") 
+    allow(employer_record).to receive(:name_full).and_return("") 
+    allow(employer_record).to receive(:name_last).and_return("") 
+
+
+    allow(employer_record).to receive(:alternate_name).and_return("") 
+
+
     allow(employer_record).to receive(:addresses).and_return([]) 
     allow(employer_record).to receive(:phones).and_return([])
     allow(Employer).to receive(:where).with({hbx_id: "EMPLOYER_HBX_ID_STRING"}).and_return(existing_employer_records)
@@ -340,7 +443,7 @@ describe EmployerEvents::EmployerImporter, "for a new employer, given an employe
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
   end
   
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
   
   it "persists the employer with the correct attributes" do
     expect(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
@@ -362,7 +465,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with no pla
   let(:last_plan_year_record) { instance_double(PlanYear) }
   let(:existing_plan_years) { [] }
 
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
   before :each do
     allow(employer_record).to receive(:addresses).and_return(addresses) 
@@ -393,7 +496,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
   let(:last_plan_year_record) { instance_double(PlanYear) }
   let(:existing_plan_years) { [first_plan_year_record] }
 
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
   before :each do
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
@@ -432,7 +535,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
   let(:updated_phone) { instance_double(Phone)}
   let(:updated_phones) { [updated_phone]}
 
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }
+  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
   before :each do
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)

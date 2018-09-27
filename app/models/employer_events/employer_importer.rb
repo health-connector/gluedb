@@ -66,10 +66,16 @@ module EmployerEvents
           employer.save
       end
     end 
+
+    def contacts_phones(phones)
+      phones.each do |phone|
+      end
+    end
     
     def add_contacts(contacts, employer)
+      employer.employer_contacts.clear
       contacts.each do |contact|
-        
+
         binding.pry
         
           employer.employer_contacts <<  EmployerContact.new(
@@ -81,6 +87,8 @@ module EmployerEvents
               full_name: contact.full_name,
               alternate_name: contact.alternate_name
             )
+           contacts_phones(contacts.phones) 
+           contacts_addresses(contacts.addresses) 
       end
     end
 

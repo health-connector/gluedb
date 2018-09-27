@@ -45,13 +45,13 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
           <contact>
             <id>1234545667</id>
             <person_name>
-              <person_surname> Smith </person_surname>
-              <person_given_name>  Dan </person_given_name>
-              <person_middle_name> John</person_middle_name>
-              <person_full_name>Dan John Smith</person_full_name>
-              <person_name_prefix_text></person_name_prefix_text>
-              <person_name_suffix_text> </person_name_suffix_text>>
-              <person_alternate_name> </person_alternate_name>
+              <job_title> Smith </job_title>
+              <department>  Dan </department>
+              <name_prefix> John</name_prefix>
+              <first_name>Dan John Smith</first_name>
+              <middle_name></middle_name>
+              <last_name> </last_name>
+              <name_suffix> </name_suffix>
             </person_name>
             <contact>
         </contacts>

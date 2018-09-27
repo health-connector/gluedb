@@ -8,7 +8,6 @@ module EmployerEvents
       @xml = Nokogiri::XML(employer_xml)
       @event_name = event_name.split("#").last
       @org  = Openhbx::Cv2::Organization.parse(@xml, single: true)
-
     end
     
     def importable?
@@ -46,8 +45,8 @@ module EmployerEvents
 
     def add_office_locations(locations, employer)
       if locations.present?
-        employer.addresses.clear 
-        employer.phones.clear 
+        # employer.cont.clear 
+        # employer.phones.clear 
         add_location_details(locations, employer)
       end
     end
@@ -62,36 +61,36 @@ module EmployerEvents
           zip = loc.address.postal_code
           full_phone_number = loc.phone.full_phone_number 
           phone_type = loc.phone.type.split('#').last
-          employer.phones << Phone.new(full_phone_number:full_phone_number, phone_type:phone_type)
-          employer.addresses << Address.new(type: type, address_1:address_1,address_2: address_2, city: city,location_state_code: location_state_code,zip: zip)
+          # employer.phones << Phone.new(full_phone_number:full_phone_number, phone_type:phone_type)
+          # employer.addresses << Address.new(type: type, address_1:address_1,address_2: address_2, city: city,location_state_code: location_state_code,zip: zip)
           employer.save
       end
     end 
     
     def add_contacts(contacts, employer)
-      binding.pry
-      contacts.first do |contact|
-        if contact.name_full.blank?
-          employer.update_attributes!(
-              name_pfx: contact.name_pfx,
-              name_first: contact.name_first,
-              name_middle: contact.name_middle,
-              name_last: contact.name_last,
-              name_sfx: contact.name_sfx,
-              name_full: contact.name_full,
+      contacts.each do |contact|
+        
+        binding.pry
+        
+          employer.employer_contacts <<  EmployerContact.new(
+              name_prefix: contact.name_prefix,
+              first_name: contact.first_name,
+              middle_name: contact.middle_name,
+              last_name: contact.last_name,
+              name_suffix: contact.name_suffix,
+              full_name: contact.full_name,
               alternate_name: contact.alternate_name
             )
-        end
       end
     end
 
     
     def manage_employer_demographics(employer)
-      if employer.contacts. || @event_name == "contact_changed"
-        add_contacts(@org.contacts,employer)
+      if employer.employer_contacts.blank? || @event_name == "contact_changed"
+        add_contacts(@org.contacts, employer)
       end
 
-      if employer.addresses.blank? || employer.phones.blank?  ||  @event_name == "address_changed"
+      if employer.employer_office_locations.  blank? || employer.phones.blank?  ||  @event_name == "address_changed"
         add_office_locations(@org.office_locations,employer)
       end
     end

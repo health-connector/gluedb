@@ -44,24 +44,32 @@ module Publishers
     def process_enrollments_for_edi
       return unless employer_policies
       amqp_connection = AmqpConnectionProvider.start_connection
-      employer_policies.each do |policy|
-        render_result = render_cv(policy)
-        publish_edi(amqp_connection, render_result, policy)
+      begin
+        employer_policies.each do |policy|
+          render_result = render_cv(policy)
+          publish_edi(amqp_connection, render_result, policy)
+        end
+      rescue Exception => e
+        e.backtrace.join("\n")
       end
       amqp_connection.close
     end
 
     def publish_edi(amqp_connection, render_result, policy)
-      publisher = Publishers::TradingPartnerEdi.new(amqp_connection, render_result)
-      publish_result = false
-      publish_result = publisher.publish
-      if publish_result
-        publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, render_result, policy.eg_id, employer.hbx_id)
-        unless publisher2.publish
-          return [false, publisher2.errors.to_hash]
+      begin
+        publisher = Publishers::TradingPartnerEdi.new(amqp_connection, render_result)
+        publish_result = false
+        publish_result = publisher.publish
+        if publish_result
+          publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, render_result, policy.eg_id, employer.hbx_id)
+          unless publisher2.publish
+            return [false, publisher2.errors.to_hash]
+          end
         end
+        [publish_result, publisher.errors.to_hash]
+      rescue Exception => e
+        e.backtrace.join("\n")
       end
-      [publish_result, publisher.errors.to_hash]
     end
 
     def transaction_id

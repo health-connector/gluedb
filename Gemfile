@@ -29,6 +29,7 @@ group 'development', 'test' do
 end
 
 group :development, :assets, :test do
+  gem 'pry'
   gem 'libv8'
   gem 'therubyracer', '0.12.2', :platforms => :ruby
   gem 'sass-rails',   '~> 3.2.3'

@@ -457,6 +457,209 @@ RSpec.shared_context "employer importer shared persistance context" do
       XML_CODE
     end
 
+    let(:employer_event_xml_multiple_contacts) do
+      <<-XML_CODE
+      <organization xmlns="http://openhbx.org/api/terms/1.0">
+        <id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
+        </id>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+            <plan_year>
+              <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+            <plan_year>
+              <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+          </plan_years>
+        </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+              <phone>
+                <type>work</type>
+                <full_phone_number>11111111</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+              <phone>
+                <type>work</type>
+                <full_phone_number>11111111</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+
+            </phones>
+          </office_location>
+        </office_locations> 
+      </organization>
+      XML_CODE
+    end
+
+    let(:employer_event_xml_multiple_office_locations) do
+      <<-XML_CODE
+      <organization xmlns="http://openhbx.org/api/terms/1.0">
+        <id>
+         <id>EMPLOYER_HBX_ID_STRING</id>
+        </id>
+        <name>TEST NAME</name>
+        <dba>TEST DBA</name>
+        <fein>123456789</fein>
+        <employer_profile>
+          <plan_years>
+            <plan_year>
+              <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+            <plan_year>
+              <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+              <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+            </plan_year>
+          </plan_years>
+        </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
+        <office_locations>
+          <office_location>
+            <id>
+              <id>55fc838254726568cd018d01</id>
+            </id>
+            <primary>true</primary>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+          </office_location>
+        </office_locations> 
+      </organization>
+      XML_CODE
+    end
+
   let(:expected_employer_values) do
     {
       hbx_id: "EMPLOYER_HBX_ID_STRING",
@@ -544,70 +747,93 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with no pla
     expect(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
     subject.persist
   end
-end
-
-describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
-  include_context "employer importer shared persistance context"
-
-  let(:existing_employer_records) { [employer_record] }
-  let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
-  let(:last_plan_year_record) { instance_double(PlanYear) }
-  let(:existing_plan_years) { [first_plan_year_record] }
-
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
-
-  before :each do
-    allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
-    allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    allow(employer_record).to receive(:employer_contacts).and_return([]) 
-    allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save!).and_return(employer_record)
-  end
-
-  it "updates the employer with the correct attributes" do
-    expect(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
-    subject.persist
-  end
-
-  it "creates only the one new plan year for the employer with the correct attributes" do
-    expect(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    subject.persist
-  end
   
-  # it "employer has demographic attrbutes" do
-  #   subject.persist    
-  #   expect(employer_record.addresses.first).to eq(address)
-  #   expect(employer_record.phones.first).to eq(phone)
-  # end
-end
-
-describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
-  include_context "employer importer shared persistance context"
-
-  let(:existing_employer_records) { [employer_record] }
-  let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
-  let(:last_plan_year_record) { instance_double(PlanYear) }
-  let(:existing_plan_years) { [first_plan_year_record] }
-  let(:contact) {instance_double(EmployerContact)}
-  let(:office_location) {instance_double(EmployerOfficeLocation)}
-  subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
-
-  before :each do
-    allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
-    allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    allow(employer_record).to receive(:employer_contacts).and_return([]) 
-    allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save!).and_return(employer_record)
-  end
-
-  # it "can update existing attributes " do
-
-  #   allow(employer_record).to receive(:employer_contacts).and_return([]) 
-  #   allow(employer_record).to receive(:employer_office_locations).and_return([])
+  
+  
+  
+  describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
     
-  #   subject.persist 
+    let(:existing_employer_records) { [employer_record] }
+    let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
+    let(:last_plan_year_record) { instance_double(PlanYear) }
+    let(:existing_plan_years) { [first_plan_year_record] }
+    let(:contact) {instance_double(EmployerContact)}
+    let(:office_location) {instance_double(EmployerOfficeLocation)}
+
+    subject { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, event_name) }
+    
+    before :each do
+      allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
+      allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+      allow(employer_record).to receive(:employer_office_locations).and_return([])
+      allow(employer_record).to receive(:save!).and_return(employer_record)
+      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+    end
+    
+    it "employer can have employer_contacts created" do
+      expect(employer_record.employer_contacts.count).to eq 0
+      
+      subject.persist 
+      
+      expect(employer_record.employer_contacts.count).to eq 2
+    end
+    it "employer can add phones to one of the created contacts" do
+      subject.persist 
+      
+      expect(employer_record.employer_contacts.first.phones.size).to eq 2
+      expect(employer_record.employer_contacts.first.phones.pop.class).to eq Phone
+
+    end
+    it "employer can add addresses to one of the created contacts" do
+      subject.persist 
+      
+      expect(employer_record.employer_contacts.first.addresses.size).to eq 1
+      expect(employer_record.employer_contacts.first.addresses.pop.class).to eq Address
+
+    end
+  end
   
-  #   expect(employer_record.addresses.first).to eq(updated_address)
-  #   expect(employer_record.phones.first).to eq(updated_phone)
-  # end
+  describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
+    
+    let(:existing_employer_records) { [employer_record] }
+    let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
+    let(:last_plan_year_record) { instance_double(PlanYear) }
+    let(:existing_plan_years) { [first_plan_year_record] }
+    let(:contact) {instance_double(EmployerContact)}
+    let(:office_location) {instance_double(EmployerOfficeLocation)}
+
+    subject { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_office_locations, event_name) }
+    
+    before :each do
+      allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
+      allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+      allow(employer_record).to receive(:employer_office_locations).and_return([])
+      allow(employer_record).to receive(:save!).and_return(employer_record)
+      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+    end
+    
+      # it "employer can have employer_contacts created" do
+      #   expect(employer_record.employer_office_locations.count).to eq 0
+        
+      #   subject.persist 
+        
+      #   expect(employer_record.employer_office_locations.count).to eq 2
+      # end
+    # it "employer can add phones to one of the created office_locations" do
+    #   subject.persist 
+      
+    #   expect(employer_record.employer_office_locations.first.phones.size).to eq 2
+    #   expect(employer_record.employer_office_locations.first.phones.pop.class).to eq Phone
+
+    # end
+    # it "employer can add addresses to one of the created office_locations" do
+    #   subject.persist 
+      
+    #   expect(employer_record.employer_office_locations.first.addresses.size).to eq 1
+    #   expect(employer_record.employer_office_locations.first.addresses.pop.class).to eq Address
+
+    # end
+  end
 end

@@ -2,7 +2,6 @@ require 'rails_helper'
 
 describe EmployerContact do
 
-
   describe "with a type of work" do
     it "should have a valid contact type" do
       subject.job_title = "manager"

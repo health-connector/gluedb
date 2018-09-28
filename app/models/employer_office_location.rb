@@ -3,7 +3,6 @@ class EmployerOfficeLocation
 
   include MergingModel
 
-
   field :id, type: String
   field :name, type: String
   field :is_primary, type: Boolean 
@@ -15,7 +14,5 @@ class EmployerOfficeLocation
   accepts_nested_attributes_for :phone, reject_if: :all_blank, allow_destroy: true
 
   embedded_in :employer, :inverse_of => :employer_contacts 
-
-
-
+  
 end

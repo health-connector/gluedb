@@ -14,32 +14,12 @@ module EmployerEvents
       @importable ||= @xml.xpath("//cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).any?  
     end
 
-    def contacts(employer)
+    def employer_values 
       {
-       name_pfx: employer.name_pfx,
-       name_first: employer.name_first,
-       name_middle: employer.name_middle,
-       name_last: employer.name_last,
-       name_sfx: employer.name_sfx,
-       name_full: employer.name_full,
-       alternate_name: employer.alternate_name
-      }
-    end  
-
-    def employer_values
-      hbx_id_node = @xml.xpath("//cv:organization/cv:id/cv:id", XML_NS).first
-      company_name_node = @xml.xpath("//cv:organization/cv:name", XML_NS).first
-      dba_node = @xml.xpath("//cv:organization/cv:dba", XML_NS).first
-      fein_node = @xml.xpath("//cv:organization/cv:fein", XML_NS).first
-      hbx_id = stripped_node_value(hbx_id_node)
-      company_name = stripped_node_value(company_name_node)
-      dba = stripped_node_value(dba_node)
-      fein = stripped_node_value(fein_node)
-      {
-        hbx_id: hbx_id,
-        fein: fein,
-        dba: dba,
-        name: company_name
+        hbx_id: @org.id,
+        fein: @org.fein,
+        dba: @org.dba,
+        name: @org.name
       }
     end
 
@@ -53,65 +33,6 @@ module EmployerEvents
       end
     end
 
-    def add_office_locations(incoming_office_locations, employer)
-      employer.employer_office_locations.clear
-      incoming_office_locations.each do |incoming_office_location|   
-        new_location = EmployerOfficeLocation.new(
-          name: incoming_office_location.name
-          )
-          employer.employer_office_locations << new_location
-         add_location_phone(new_location, employer)  
-         add_location_address(new_location, employer) 
-         employer.save!
-      end
-    end
-
-    def add_location_phone(incoming_phone, new_location, employer)
-      new_phone = Phone.new(
-        phone_number:  incoming_phone.full_phone_number.last(7),
-        full_phone_number: incoming_phone.full_phone_number,
-        phone_type: incoming_phone.type,
-        primary: incoming_phone.is_preferred
-        )
-        new_location.phone = new_phone
-        employer.save!
-    end
-
-    def new_phone()
-    end
-    def add_location_address(incoming_location, new_location, employer)
-    end
-
-
-
-    def add_contacts_phones(incoming_phones, new_contact, employer)
-      incoming_phones.each do |incoming_phone|
-        new_phone = Phone.new(
-          phone_number:  incoming_phone.full_phone_number.last(7),
-          full_phone_number: incoming_phone.full_phone_number,
-          phone_type: incoming_phone.type,
-          primary: incoming_phone.is_preferred
-          )
-          new_contact.phones << new_phone
-          employer.save!
-        end
-    end
-
-    def add_contacts_addresses(incoming_addresses, new_contact, employer)
-      incoming_addresses.each do |incoming_address|
-      new_address =  Address.new(
-        address_1: incoming_address.address_line_1,
-        address_2: incoming_address.address_line_2,
-        city: incoming_address.location_city_name,
-        state: incoming_address.location_state_code,
-        zip: incoming_address.postal_code,
-        address_type: incoming_address.type
-        )
-        new_contact.addresses << new_address 
-        employer.save!
-      end
-    end
-    
     def add_contacts(incoming_contacts, employer)
       employer.employer_contacts.clear
       incoming_contacts.each do |incoming_contact|   
@@ -127,10 +48,57 @@ module EmployerEvents
             add_contacts_phones(incoming_contact.phones, new_contact, employer)  
             add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
             employer.employer_contacts << new_contact
-           employer.save!
+            employer.save!
       end
     end
 
+    def add_office_locations(incoming_office_locations, employer)
+      employer.employer_office_locations.clear
+      incoming_office_locations.each do |incoming_office_location|   
+        new_location = EmployerOfficeLocation.new(
+          name: incoming_office_location.name
+          )
+          new_location.phone = new_phone(incoming_office_location.phone)
+          new_location.address = new_address(incoming_office_location.address)
+          employer.employer_office_locations << new_location
+          employer.save!
+      end
+    end
+    
+    def add_contacts_phones(incoming_phones, new_contact, employer)
+      incoming_phones.each do |incoming_phone|
+        new_contact.phones << new_phone(incoming_phone)
+        employer.save!
+      end
+    end
+    
+    def add_contacts_addresses(incoming_addresses, new_contact, employer)
+      incoming_addresses.each do |incoming_address|
+        new_contact.addresses << new_address(incoming_address)
+        employer.save!
+      end
+    end
+
+    def new_phone(incoming_phone)
+      Phone.new(
+          phone_number:  incoming_phone.full_phone_number.last(7),
+          full_phone_number: incoming_phone.full_phone_number,
+          phone_type: incoming_phone.type,
+          primary: incoming_phone.is_preferred
+          )
+    end
+
+    def new_address(incoming_address)
+      Address.new(
+        address_1: incoming_address.address_line_1,
+        address_2: incoming_address.address_line_2,
+        city: incoming_address.location_city_name,
+        state: incoming_address.location_state_code,
+        zip: incoming_address.postal_code,
+        address_type: incoming_address.type
+        )
+    end
+    
     def plan_year_values
       @xml.xpath("//cv:organization/cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).map do |node|
         py_start_node = node.xpath("cv:plan_year_start", XML_NS).first

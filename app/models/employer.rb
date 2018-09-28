@@ -292,10 +292,3 @@ class Employer
     end
   end
 end
-
-
-
-
-
-
-

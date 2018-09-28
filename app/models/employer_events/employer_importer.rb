@@ -43,34 +43,51 @@ module EmployerEvents
       }
     end
 
-    def add_office_locations(locations, employer)
-      if locations.present?
-        # employer.cont.clear 
-        # employer.phones.clear 
-        add_location_details(locations, employer)
+    def manage_employer_demographics(employer)
+      if employer.employer_contacts.blank? || @event_name == "contact_changed"
+        add_contacts(@org.contacts, employer)
+      end
+
+      if employer.employer_office_locations.blank? ||  @event_name == "address_changed"
+        add_office_locations(@org.office_locations,employer)
       end
     end
 
-    def add_location_details(locations, employer) 
-        locations.each do |loc|
-          binding.pry
-          type =  loc.address.type.split("#").last
-          address_1 = loc.address.address_line_1
-          address_2 = loc.address.address_line_2 
-          city =  loc.address.location_city_name 
-          location_state_code = loc.address.location_state_code 
-          zip = loc.address.postal_code
-          full_phone_number = loc.phone.full_phone_number 
-          phone_type = loc.phone.type.split('#').last
-          # employer.phones << Phone.new(full_phone_number:full_phone_number, phone_type:phone_type)
-          # employer.addresses << Address.new(type: type, address_1:address_1,address_2: address_2, city: city,location_state_code: location_state_code,zip: zip)
-          employer.save!
+    def add_office_locations(incoming_office_locations, employer)
+      employer.employer_office_locations.clear
+      incoming_office_locations.each do |incoming_office_location|   
+        new_location = EmployerOfficeLocation.new(
+          name: incoming_office_location.name
+          )
+          employer.employer_office_locations << new_location
+         add_location_phone(new_location, employer)  
+         add_location_address(new_location, employer) 
+         employer.save!
       end
-    end 
+    end
+
+    def add_location_phone(incoming_phone, new_location, employer)
+      new_phone = Phone.new(
+        phone_number:  incoming_phone.full_phone_number.last(7),
+        full_phone_number: incoming_phone.full_phone_number,
+        phone_type: incoming_phone.type,
+        primary: incoming_phone.is_preferred
+        )
+        new_location.phone = new_phone
+        employer.save!
+    end
+
+    def new_phone()
+    end
+    def add_location_address(incoming_location, new_location, employer)
+    end
+
+
 
     def add_contacts_phones(incoming_phones, new_contact, employer)
       incoming_phones.each do |incoming_phone|
         new_phone = Phone.new(
+          phone_number:  incoming_phone.full_phone_number.last(7),
           full_phone_number: incoming_phone.full_phone_number,
           phone_type: incoming_phone.type,
           primary: incoming_phone.is_preferred
@@ -80,8 +97,18 @@ module EmployerEvents
         end
     end
 
-    def contacts_addresses(addresses, contact)
-      addresses.each do |address|
+    def add_contacts_addresses(incoming_addresses, new_contact, employer)
+      incoming_addresses.each do |incoming_address|
+      new_address =  Address.new(
+        address_1: incoming_address.address_line_1,
+        address_2: incoming_address.address_line_2,
+        city: incoming_address.location_city_name,
+        state: incoming_address.location_state_code,
+        zip: incoming_address.postal_code,
+        address_type: incoming_address.type
+        )
+        new_contact.addresses << new_address 
+        employer.save!
       end
     end
     
@@ -97,20 +124,10 @@ module EmployerEvents
               job_title: incoming_contact.job_title,
               department: incoming_contact.department  
             )
+            add_contacts_phones(incoming_contact.phones, new_contact, employer)  
+            add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
             employer.employer_contacts << new_contact
-           add_contacts_phones(incoming_contact.phones, new_contact, employer)  
-          #  contacts_addresses(contact.addresses) 
-      end
-    end
-
-    
-    def manage_employer_demographics(employer)
-      if employer.employer_contacts.blank? || @event_name == "contact_changed"
-        add_contacts(@org.contacts, employer)
-      end
-
-      if employer.employer_office_locations.  blank? || employer.phones.blank?  ||  @event_name == "address_changed"
-        add_office_locations(@org.office_locations,employer)
+           employer.save!
       end
     end
 

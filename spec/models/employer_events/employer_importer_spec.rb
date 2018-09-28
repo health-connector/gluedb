@@ -21,40 +21,65 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
           <plan_years>
           </plan_years>
         </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
         <office_locations>
           <office_location>
             <id>
               <id>55fc838254726568cd018d01</id>
             </id>
             <primary>true</primary>
-            <address>
-              <type>urn:openhbx:terms:v1:address_type#work</type>
-              <address_line_1>830 I St NE</address_line_1>
-              <location_city_name>Washington</location_city_name>
-              <location_state_code>DC</location_state_code>
-              <postal_code>20002</postal_code>
-            </address>
-            <phone>
-              <type>urn:openhbx:terms:v1:phone_type#work</type>
-              <full_phone_number>2025551212</full_phone_number>
-              <is_preferred>false</is_preferred>
-            </phone>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
           </office_location>
-        </office_locations>
-        <contacts>
-          <contact>
-            <id>1234545667</id>
-            <person_name>
-              <job_title> Smith </job_title>
-              <department>  Dan </department>
-              <name_prefix> John</name_prefix>
-              <first_name>Dan John Smith</first_name>
-              <middle_name></middle_name>
-              <last_name> </last_name>
-              <name_suffix> </name_suffix>
-            </person_name>
-            <contact>
-        </contacts>
+        </office_locations> 
       </organization>
       XML_CODE
     end
@@ -86,40 +111,66 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             <plan_year/>
           </plan_years>
         </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
         <office_locations>
           <office_location>
             <id>
               <id>55fc838254726568cd018d01</id>
             </id>
             <primary>true</primary>
-            <address>
-              <type>urn:openhbx:terms:v1:address_type#work</type>
-              <address_line_1>830 I St NE</address_line_1>
-              <location_city_name>Washington</location_city_name>
-              <location_state_code>DC</location_state_code>
-              <postal_code>20002</postal_code>
-            </address>
-            <phone>
-              <type>urn:openhbx:terms:v1:phone_type#work</type>
-              <full_phone_number>2025551212</full_phone_number>
-              <is_preferred>false</is_preferred>
-            </phone>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
           </office_location>
-        </office_locations>
-        <contacts>
-          <contact>
-            <id>1234545667</id>
-            <person_name>
-              <person_surname> Smith </person_surname>
-              <person_given_name>  Dan </person_given_name>
-              <person_middle_name> John</person_middle_name>
-              <person_full_name>Dan John Smith</person_full_name>
-              <person_name_prefix_text></person_name_prefix_text>
-              <person_name_suffix_text> </person_name_suffix_text>>
-              <person_alternate_name> </person_alternate_name>
-            </person_name>
-          </contact>
-        </contacts>
+        </office_locations> 
+
       </organization>
       XML_CODE
     end
@@ -142,40 +193,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
         <name>TEST NAME</name>
         <dba>TEST DBA</name>
         <fein>123456789</fein>
-        <office_locations>
-          <office_location>
-            <id>
-              <id>55fc838254726568cd018d01</id>
-            </id>
-            <primary>true</primary>
-            <address>
-              <type>urn:openhbx:terms:v1:address_type#work</type>
-              <address_line_1>830 I St NE</address_line_1>
-              <location_city_name>Washington</location_city_name>
-              <location_state_code>DC</location_state_code>
-              <postal_code>20002</postal_code>
-            </address>
-            <phone>
-              <type>urn:openhbx:terms:v1:phone_type#work</type>
-              <full_phone_number>2025551212</full_phone_number>
-              <is_preferred>false</is_preferred>
-            </phone>
-          </office_location>
-        </office_locations>
-        <contacts>
-          <contact>
-            <id>1234545667</id>
-            <person_name>
-              <person_surname> Smith </person_surname>
-              <person_given_name>  Dan </person_given_name>
-              <person_middle_name> John</person_middle_name>
-              <person_full_name>Dan John Smith</person_full_name>
-              <person_name_prefix_text></person_name_prefix_text>
-              <person_name_suffix_text> </person_name_suffix_text>>
-              <person_alternate_name> </person_alternate_name>
-            </person_name>
-          </contact>
-        </contacts>
+
       </organization>
       XML_CODE
     end
@@ -234,40 +252,65 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             </plan_year>
           </plan_years>
         </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
         <office_locations>
           <office_location>
             <id>
               <id>55fc838254726568cd018d01</id>
             </id>
             <primary>true</primary>
-            <address>
-              <type>urn:openhbx:terms:v1:address_type#work</type>
-              <address_line_1>830 I St NE</address_line_1>
-              <location_city_name>Washington</location_city_name>
-              <location_state_code>DC</location_state_code>
-              <postal_code>20002</postal_code>
-            </address>
-            <phone>
-              <type>urn:openhbx:terms:v1:phone_type#work</type>
-              <full_phone_number>2025551212</full_phone_number>
-              <is_preferred>false</is_preferred>
-            </phone>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
           </office_location>
-        </office_locations>
-        <contacts>
-          <contact>
-            <id>1234545667</id>
-            <person_name>
-              <person_surname> Smith </person_surname>
-              <person_given_name>  Dan </person_given_name>
-              <person_middle_name> John</person_middle_name>
-              <person_full_name>Dan John Smith</person_full_name>
-              <person_name_prefix_text></person_name_prefix_text>
-              <person_name_suffix_text> </person_name_suffix_text>>
-              <person_alternate_name> </person_alternate_name>
-            </person_name>
-          </contact>
-        </contacts>
+        </office_locations> 
       </organization>
       XML_CODE
     end
@@ -351,40 +394,65 @@ RSpec.shared_context "employer importer shared persistance context" do
             </plan_year>
           </plan_years>
         </employer_profile>
+        <contacts>
+          <contact>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
+            <id>
+              <id>123344</id>
+            </id>
+            <job_title>rector</job_title>
+            <department>hr</department>
+            <person_name>
+              <person_given_name>Dan</person_given_name>
+              <person_middle_name>l</person_middle_name>
+              <person_surname>Smith</person_surname>
+              <person_name_suffix_text>Sr.</person_name_suffix_text>
+              <person_name_prefix_text> Mr.</person_name_prefix_text>
+            </person_name>
+          </contact>
+        </contacts>
         <office_locations>
           <office_location>
             <id>
               <id>55fc838254726568cd018d01</id>
             </id>
             <primary>true</primary>
-            <address>
-              <type>urn:openhbx:terms:v1:address_type#work</type>
-              <address_line_1>830 I St NE</address_line_1>
-              <location_city_name>Washington</location_city_name>
-              <location_state_code>DC</location_state_code>
-              <postal_code>20002</postal_code>
-            </address>
-            <phone>
-              <type>urn:openhbx:terms:v1:phone_type#work</type>
-              <full_phone_number>2025551212</full_phone_number>
-              <is_preferred>false</is_preferred>
-            </phone>
+            <name>Work</name>
+            <addresses>
+              <address>
+                <type>work</type>
+                <address_line_1>12 Downing</address_line_1>
+                <address_line_2>23 Taft </address_line_2>
+                <location_city_name>Washington </location_city_name>
+                <location_state_code>DC</location_state_code>
+                <postal_code>12344</postal_code>
+              </address>
+            </addresses>
+            <phones>
+              <phone>
+                <type>home</type>
+                <full_phone_number>123322222</full_phone_number>
+                <is_preferred>true</is_preferred>
+              </phone>
+            </phones>
           </office_location>
         </office_locations> 
-        <contacts>
-          <contact>
-            <id>1234545667</id>
-            <person_name>
-              <person_surname> Smith </person_surname>
-              <person_given_name>  Dan </person_given_name>
-              <person_middle_name> John</person_middle_name>
-              <person_full_name>Dan John Smith</person_full_name>
-              <person_name_prefix_text></person_name_prefix_text>
-              <person_name_suffix_text> </person_name_suffix_text>>
-              <person_alternate_name> </person_alternate_name>
-            </person_name>
-          </contact>
-        </contacts>
       </organization>
       XML_CODE
     end
@@ -428,7 +496,7 @@ describe EmployerEvents::EmployerImporter, "for a new employer, given an employe
     allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
     allow(employer_record).to receive(:employer_contacts).and_return([]) 
     allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save).and_return(employer_record)
+    allow(employer_record).to receive(:save!).and_return(employer_record)
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
   end
@@ -460,7 +528,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with no pla
   before :each do
     allow(employer_record).to receive(:employer_contacts).and_return([]) 
     allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save).and_return(employer_record)
+    allow(employer_record).to receive(:save!).and_return(employer_record)
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
@@ -493,7 +561,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
     allow(employer_record).to receive(:employer_contacts).and_return([]) 
     allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save).and_return(employer_record)
+    allow(employer_record).to receive(:save!).and_return(employer_record)
   end
 
   it "updates the employer with the correct attributes" do
@@ -529,7 +597,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
     allow(employer_record).to receive(:employer_contacts).and_return([]) 
     allow(employer_record).to receive(:employer_office_locations).and_return([])
-    allow(employer_record).to receive(:save).and_return(employer_record)
+    allow(employer_record).to receive(:save!).and_return(employer_record)
   end
 
   # it "can update existing attributes " do

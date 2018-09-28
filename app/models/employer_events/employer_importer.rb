@@ -53,6 +53,7 @@ module EmployerEvents
 
     def add_location_details(locations, employer) 
         locations.each do |loc|
+          binding.pry
           type =  loc.address.type.split("#").last
           address_1 = loc.address.address_line_1
           address_2 = loc.address.address_line_2 
@@ -63,32 +64,42 @@ module EmployerEvents
           phone_type = loc.phone.type.split('#').last
           # employer.phones << Phone.new(full_phone_number:full_phone_number, phone_type:phone_type)
           # employer.addresses << Address.new(type: type, address_1:address_1,address_2: address_2, city: city,location_state_code: location_state_code,zip: zip)
-          employer.save
+          employer.save!
       end
     end 
 
-    def contacts_phones(phones)
-      phones.each do |phone|
+    def add_contacts_phones(incoming_phones, new_contact, employer)
+      incoming_phones.each do |incoming_phone|
+        new_phone = Phone.new(
+          full_phone_number: incoming_phone.full_phone_number,
+          phone_type: incoming_phone.type,
+          primary: incoming_phone.is_preferred
+          )
+          new_contact.phones << new_phone
+          employer.save!
+        end
+    end
+
+    def contacts_addresses(addresses, contact)
+      addresses.each do |address|
       end
     end
     
-    def add_contacts(contacts, employer)
+    def add_contacts(incoming_contacts, employer)
       employer.employer_contacts.clear
-      contacts.each do |contact|
-
-        binding.pry
-        
-          employer.employer_contacts <<  EmployerContact.new(
-              name_prefix: contact.name_prefix,
-              first_name: contact.first_name,
-              middle_name: contact.middle_name,
-              last_name: contact.last_name,
-              name_suffix: contact.name_suffix,
-              full_name: contact.full_name,
-              alternate_name: contact.alternate_name
+      incoming_contacts.each do |incoming_contact|   
+          new_contact = EmployerContact.new(
+              name_prefix: incoming_contact.name_prefix,
+              first_name: incoming_contact.first_name,
+              middle_name: incoming_contact.middle_name,
+              last_name: incoming_contact.last_name,
+              name_suffix: incoming_contact.name_suffix,
+              job_title: incoming_contact.job_title,
+              department: incoming_contact.department  
             )
-           contacts_phones(contacts.phones) 
-           contacts_addresses(contacts.addresses) 
+            employer.employer_contacts << new_contact
+           add_contacts_phones(incoming_contact.phones, new_contact, employer)  
+          #  contacts_addresses(contact.addresses) 
       end
     end
 

@@ -101,14 +101,12 @@ describe EnrollmentAction::CobraNewPolicyReinstate, "with an cobra reinstate enr
   let(:amqp_connection) { double }
   let(:event_xml) { double }
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
-  let(:workflow_id) { "SOME WORKFLOW ID" }
   let(:enrollment_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_responder => event_responder,
     :event_xml => event_xml,
     :hbx_enrollment_id => hbx_enrollment_id,
-    :employer_hbx_id => employer_hbx_id,
-    :workflow_id => workflow_id
+    :employer_hbx_id => employer_hbx_id
   ) }
   let(:action_publish_helper) { instance_double(
     EnrollmentAction::ActionPublishHelper,
@@ -128,7 +126,7 @@ describe EnrollmentAction::CobraNewPolicyReinstate, "with an cobra reinstate enr
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
     allow(action_publish_helper).to receive(:set_market_type).with("urn:openhbx:terms:v1:aca_marketplace#cobra")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id, workflow_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
   end
 
   it "publishes an event of type reenroll enrollment" do
@@ -147,7 +145,7 @@ describe EnrollmentAction::CobraNewPolicyReinstate, "with an cobra reinstate enr
   end
 
   it "publishes the resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id, workflow_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, hbx_enrollment_id, employer_hbx_id)
     subject.publish
   end
 end

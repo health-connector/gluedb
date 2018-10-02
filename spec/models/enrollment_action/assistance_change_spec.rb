@@ -66,14 +66,10 @@ describe EnrollmentAction::AssistanceChange, "being published" do
 
   let(:subscriber_start) { double }
 
-  let(:workflow_id_1) { "SOME WORKFLOW ID 1" }
-  let(:workflow_id_2) { "SOME WORKFLOW ID 2" }
-
   let(:termination_event) do
     instance_double(
       ::ExternalEvents::EnrollmentEventNotification,
-      :existing_policy => policy,
-      :workflow_id => workflow_id_1
+      :existing_policy => policy
     )
   end
 
@@ -84,8 +80,7 @@ describe EnrollmentAction::AssistanceChange, "being published" do
       :event_responder => event_responder,
       :subscriber_start => subscriber_start,
       :hbx_enrollment_id => double,
-      :employer_hbx_id => nil,
-      :workflow_id => workflow_id_2
+      :employer_hbx_id => nil
     )
   end
 
@@ -105,11 +100,11 @@ describe EnrollmentAction::AssistanceChange, "being published" do
     allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(action_publish_helper).to receive(:assign_assistance_date).with(subscriber_start)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, new_enrollment_event.hbx_enrollment_id, new_enrollment_event.employer_hbx_id, workflow_id_2)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, new_enrollment_event.hbx_enrollment_id, new_enrollment_event.employer_hbx_id)
   end
 
   it "publishes the new edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, new_enrollment_event.hbx_enrollment_id, new_enrollment_event.employer_hbx_id, workflow_id_2)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, new_enrollment_event.hbx_enrollment_id, new_enrollment_event.employer_hbx_id)
     subject.publish
   end
 

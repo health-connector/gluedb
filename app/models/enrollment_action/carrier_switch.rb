@@ -34,14 +34,14 @@ module EnrollmentAction
       termination_helper.set_policy_id(existing_policy.eg_id)
       termination_helper.set_member_starts(member_date_map)
       termination_helper.swap_qualifying_event(action.event_xml)
-      publish_result, publish_errors = publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id, termination.workflow_id)
+      publish_result, publish_errors = publish_edi(amqp_connection, termination_helper.to_xml, existing_policy.eg_id, termination.employer_hbx_id)
       unless publish_result
         return [publish_result, publish_errors]
       end
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#initial")
       action_helper.keep_member_ends([])
-      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id, action.workflow_id)
+      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
   end
 end

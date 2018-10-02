@@ -57,9 +57,7 @@ module EnrollmentAction
     def self.construct(chunk)
       term = chunk.detect { |c| c.is_termination? }
       action = chunk.detect { |c| !c.is_termination? }
-      new_action = self.new(term, action)
-      new_action.action_selected(chunk)
-      new_action
+      self.new(term, action)
     end
 
     # Check if an enrollment already exists - if it does and you don't want to send out a new transaction, call this method. 
@@ -143,22 +141,7 @@ module EnrollmentAction
       [self]
     end
 
-    def action_selected(chunk)
-      connection = chunk.first.event_responder.connection
-
-      broadcaster = ::Amqp::EventBroadcaster.new(connection)
-      broadcaster.broadcast(
-        {
-          :routing_key => "info.application.gluedb.policies.enrollment_action_determined",
-          :headers => {
-            "enrollment_action_name" => self.class.name.to_s
-          }
-        },
-        JSON.dump({"event_workflow_ids" => chunk.map(&:workflow_id)})
-      )
-    end
-
-    def publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id, workflow_id)
+    def publish_edi(amqp_connection, event_xml, hbx_enrollment_id, employer_id)
       publisher = Publishers::TradingPartnerEdi.new(amqp_connection, event_xml)
       publish_result = false
       publish_result = publisher.publish

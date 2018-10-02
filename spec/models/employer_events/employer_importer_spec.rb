@@ -699,9 +699,11 @@ RSpec.shared_context "employer importer shared persistance context" do
   let(:addresses) { [ address ] }
   let(:phone) { instance_double(Phone) }
   let(:phones) { [ phone ] }
+  let(:contacts){ [instance_double(EmployerContact) , instance_double(EmployerContact) ]  }
+  let(:contact){ instance_double(EmployerContact) }
 
   before :each do
-    allow(employer_record).to receive(:employer_contacts).and_return([]) 
+    allow(employer_record).to receive(:employer_contacts).and_return(contacts) 
     allow(employer_record).to receive(:employer_office_locations).and_return([])
 
     allow(Employer).to receive(:where).with({hbx_id: "EMPLOYER_HBX_ID_STRING"}).and_return(existing_employer_records)
@@ -721,9 +723,10 @@ end
       
     before :each do
       allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+      allow(employer_record).to receive(:employer_contacts).and_return(contacts) 
       allow(employer_record).to receive(:employer_office_locations).and_return([])
       allow(employer_record).to receive(:save!).and_return(employer_record)
+      allow(employer_record).to receive(:employer_office_locations=).and_return(instance_of(Array))
       allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
       allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
     end
@@ -753,8 +756,9 @@ end
     subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
     before :each do
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+      allow(employer_record).to receive(:employer_contacts).and_return(contacts) 
       allow(employer_record).to receive(:employer_office_locations).and_return([])
+      allow(employer_record).to receive(:employer_office_locations=).and_return(instance_of(Array))
       allow(employer_record).to receive(:save!).and_return(employer_record)
       allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
       allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
@@ -778,7 +782,6 @@ end
     let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
     let(:last_plan_year_record) { instance_double(PlanYear) }
     let(:existing_plan_years) { [first_plan_year_record] }
-    let(:contact) {instance_double(EmployerContact)}
     let(:office_location) {instance_double(EmployerOfficeLocation)}
 
     subject { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, event_name) }
@@ -786,67 +789,23 @@ end
     before :each do
       allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
       allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
-      allow(employer_record).to receive(:employer_office_locations).and_return([])
+      allow(employer_record).to receive(:employer_contacts=).with(instance_of(Array)) 
       allow(employer_record).to receive(:save!).and_return(employer_record)
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
+      allow(employer_record).to receive(:employer_contacts).and_return(nil)
+      allow(contact).to receive(:phones=).and_return(instance_of(Array))
+      allow(employer_record).to receive(:employer_office_locations=).with(instance_of(Array)) 
     end
     
-    it "employer can have multiple employer_contacts created" do
-      expect(employer_record.employer_contacts.count).to eq 0
+    it "adds every employer contact" do
       subject.persist 
-      expect(employer_record.employer_contacts.count).to eq 2
+      expect(employer_record).to have_received(:employer_contacts=).with(instance_of(Array))
     end
 
-    it "employer can add phones to one of the created contacts" do
+    it "adds every employer office location" do
       subject.persist 
-      expect(employer_record.employer_contacts.first.phones.size).to eq 2
-      expect(employer_record.employer_contacts.first.phones.pop.class).to eq Phone
-
+      expect(employer_record).to have_received(:employer_office_locations=).with(instance_of(Array))
     end
 
-    it "employer can add addresses to one of the created contacts" do
-      subject.persist 
-      expect(employer_record.employer_contacts.first.addresses.size).to eq 1
-      expect(employer_record.employer_contacts.first.addresses.pop.class).to eq Address
-    end
-  end
-
-  describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
-    
-    let(:existing_employer_records) { [employer_record] }
-    let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
-    let(:last_plan_year_record) { instance_double(PlanYear) }
-    let(:existing_plan_years) { [first_plan_year_record] }
-    let(:contact) {instance_double(EmployerContact)}
-    let(:office_location) {instance_double(EmployerOfficeLocation)}
-
-    subject { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_office_locations, event_name) }
-    
-    before :each do
-      allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
-      allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
-      allow(employer_record).to receive(:employer_office_locations).and_return([])
-      allow(employer_record).to receive(:save!).and_return(employer_record)
-      allow(employer_record).to receive(:employer_contacts).and_return([]) 
-    end
-    
-    it "employer can have multiple employer office locations created" do
-      expect(employer_record.employer_office_locations.count).to eq 0
-      subject.persist 
-      expect(employer_record.employer_office_locations.count).to eq 2
-    end
-
-    it "employer can add  a phone to one of the created office locations" do
-      subject.persist 
-      expect(employer_record.employer_office_locations.first.phone.class).to eq Phone
-    end
-
-    it "employer can add an address to one of the created office_locations" do
-      subject.persist   
-      expect(employer_record.employer_office_locations.first.address.class).to eq Address
-    end
   end
 end
 

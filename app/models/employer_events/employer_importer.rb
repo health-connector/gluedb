@@ -34,58 +34,54 @@ module EmployerEvents
     end
 
     def add_contacts(incoming_contacts, employer)
-      employer.employer_contacts.clear
-      incoming_contacts.each do |incoming_contact|   
-          new_contact = EmployerContact.new(
-              name_prefix: incoming_contact.name_prefix,
-              first_name: incoming_contact.first_name,
-              middle_name: incoming_contact.middle_name,
-              last_name: incoming_contact.last_name,
-              name_suffix: incoming_contact.name_suffix,
-              job_title: incoming_contact.job_title,
-              department: incoming_contact.department  
-            )
-            add_contacts_phones(incoming_contact.phones, new_contact, employer)  
-            add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
-            employer.employer_contacts << new_contact
-            employer.save!
-      end
+      employer.employer_contacts = incoming_contacts.map do |incoming_contact| 
+        contact_attributes =  {
+          name_prefix: incoming_contact.name_prefix,
+          first_name: incoming_contact.first_name,
+          middle_name: incoming_contact.middle_name,
+          last_name: incoming_contact.last_name,
+          name_suffix: incoming_contact.name_suffix,
+          job_title: incoming_contact.job_title,
+          department: incoming_contact.department
+        }
+        contact_attributes.delete_if{ |k,v| v.blank?}
+        new_contact = EmployerContact.new(contact_attributes)
+        add_contacts_phones(incoming_contact.phones, new_contact, employer)  
+        add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
+        new_contact
+        end
+      employer.save!
     end
 
-    def add_office_locations(incoming_office_locations, employer)
-      employer.employer_office_locations.clear
-      incoming_office_locations.each do |incoming_office_location|   
-        new_location = EmployerOfficeLocation.new(
-          name: incoming_office_location.name
-          )
-          new_location.phone = new_phone(incoming_office_location.phone)
-          new_location.address = new_address(incoming_office_location.address)
-          employer.employer_office_locations << new_location
-          employer.save!
-      end
-    end
-    
     def add_contacts_phones(incoming_phones, new_contact, employer)
-      incoming_phones.each do |incoming_phone|
-        new_contact.phones << new_phone(incoming_phone)
-        employer.save!
+      new_contact.phones = incoming_phones.map do |incoming_phone|
+        new_phone(incoming_phone)
       end
     end
     
     def add_contacts_addresses(incoming_addresses, new_contact, employer)
-      incoming_addresses.each do |incoming_address|
-        new_contact.addresses << new_address(incoming_address)
-        employer.save!
+      new_contact.addresses = incoming_addresses.map  do |incoming_address|
+        new_address(incoming_address)
       end
     end
-
+    
+    def add_office_locations(incoming_office_locations, employer)
+      employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|   
+          new_location = EmployerOfficeLocation.new(name:incoming_office_location.name) 
+          new_location.phone = new_phone(incoming_office_location.phone)
+          new_location.address = new_address(incoming_office_location.address)
+          new_location
+        end
+      employer.save!
+    end
+    
     def new_phone(incoming_phone)
       Phone.new(
-          phone_number:  incoming_phone.full_phone_number.last(7),
-          full_phone_number: incoming_phone.full_phone_number,
-          phone_type: incoming_phone.type,
-          primary: incoming_phone.is_preferred
-          )
+        phone_number:  incoming_phone.full_phone_number.last(7),
+        full_phone_number: incoming_phone.full_phone_number,
+        phone_type: incoming_phone.type,
+        primary: incoming_phone.is_preferred
+      )
     end
 
     def new_address(incoming_address)
@@ -96,7 +92,7 @@ module EmployerEvents
         state: incoming_address.location_state_code,
         zip: incoming_address.postal_code,
         address_type: incoming_address.type
-        )
+      )
     end
     
     def plan_year_values

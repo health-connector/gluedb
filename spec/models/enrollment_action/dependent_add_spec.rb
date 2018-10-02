@@ -83,15 +83,12 @@ describe EnrollmentAction::DependentAdd, "given a qualified enrollment set, bein
 
   let(:plan) { instance_double(Plan, :id => 1) }
   let(:policy) { instance_double(Policy, :enrollees => [enrollee_primary, enrollee_new], :eg_id => 1) }
-  let(:workflow_id_1) { "SOME WORKFLOW ID 1" }
-  let(:workflow_id_2) { "SOME WORKFLOW ID 2" }
 
   let(:dependent_add_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_xml => event_xml,
     :all_member_ids => [1,2],
-    :hbx_enrollment_id => 2,
-    :workflow_id => workflow_id_2
+    :hbx_enrollment_id => 2
   ) }
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -99,8 +96,7 @@ describe EnrollmentAction::DependentAdd, "given a qualified enrollment set, bein
     :all_member_ids => [1],
     :event_responder => event_responder,
     :hbx_enrollment_id => 1,
-    :employer_hbx_id => 1,
-    :workflow_id => workflow_id_1
+    :employer_hbx_id => 1
   ) }
   let(:action_helper_result_xml) { double }
 
@@ -116,7 +112,7 @@ describe EnrollmentAction::DependentAdd, "given a qualified enrollment set, bein
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_member_add")
     allow(action_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id_1)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
   end
 
   subject do
@@ -139,7 +135,7 @@ describe EnrollmentAction::DependentAdd, "given a qualified enrollment set, bein
   end
 
   it "publishes resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id_1)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
     subject.publish
   end
 end

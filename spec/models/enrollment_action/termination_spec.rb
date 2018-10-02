@@ -55,8 +55,6 @@ describe EnrollmentAction::Termination, "given a valid enrollment" do
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, connection: amqp_connection) }
   let(:enrollee) { double(m_id: 1, coverage_start: :one_month_ago) }
   let(:policy) { instance_double(Policy, id: 1, enrollees: [enrollee], eg_id: 1) }
-  let(:workflow_id) { "SOME WORKFLOW ID" }
-
   let(:termination_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     event_xml: event_xml,
@@ -64,8 +62,7 @@ describe EnrollmentAction::Termination, "given a valid enrollment" do
     all_member_ids: [enrollee.m_id],
     event_responder: event_responder,
     hbx_enrollment_id: 1,
-    employer_hbx_id: 1,
-    workflow_id: workflow_id
+    employer_hbx_id: 1
   ) }
   let(:action_helper_result_xml) { double }
   let(:action_publish_helper) { instance_double(
@@ -78,7 +75,7 @@ describe EnrollmentAction::Termination, "given a valid enrollment" do
     allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     allow(action_publish_helper).to receive(:set_policy_id).with(policy.id)
     allow(action_publish_helper).to receive(:set_member_starts).with({1 => enrollee.coverage_start})
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
   end
 
   subject do
@@ -101,7 +98,7 @@ describe EnrollmentAction::Termination, "given a valid enrollment" do
   end
 
   it "publishes resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id, workflow_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, termination_event.hbx_enrollment_id, termination_event.employer_hbx_id)
     subject.publish
   end
 end

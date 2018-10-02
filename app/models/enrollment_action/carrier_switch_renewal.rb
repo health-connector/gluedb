@@ -44,12 +44,12 @@ module EnrollmentAction
         employer = pol.employer 
         employer_hbx_id = employer.blank? ? nil : employer.hbx_id
         term_action_helper = EnrollmentAction::ActionPublishHelper.new(term_event_xml)
-        publish_edi(amqp_connection, term_action_helper.to_xml, pol.eg_id, employer_hbx_id, action.workflow_id)
+        publish_edi(amqp_connection, term_action_helper.to_xml, pol.eg_id, employer_hbx_id)
       end
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#initial")
       action_helper.keep_member_ends([])
-      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id, action.workflow_id)
+      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
   end
 end

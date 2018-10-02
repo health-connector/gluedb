@@ -1,25 +1,103 @@
-require "rails_helper"
+require 'rails_helper'
 
-describe EnrollmentAction::CarrierSwitch, "Carrier switch" do
+describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
+-- has one event" do
 
-  let(:plan_1) { instance_double(Plan, :id => 1, :carrier_id => 1) }
-  let(:plan_2) { instance_double(Plan, :id => 2, :carrier_id => 2) }
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification) }
+  let(:event_set) { [event_1] }
 
-  let(:member_ids_1) { [1,2] }
-  let(:member_ids_2) { [1,2,3] }
+  subject { EnrollmentAction::SimpleProductChange }
 
-  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan_1, :all_member_ids => member_ids_1) }
-  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan_2, :all_member_ids => member_ids_2) }
+  it "doesn't qualify" do
+    expect(subject.qualifies?(event_set)).to be_falsey
+  end
+end
+
+describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
+-- has two events
+-- has the same plan" do
+
+  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
+  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 1) }
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
   let(:event_set) { [event_1, event_2] }
 
-  subject { EnrollmentAction::CarrierSwitch }
+  subject { EnrollmentAction::SimpleProductChange }
+
+  it "doesn't qualify" do
+    expect(subject.qualifies?(event_set)).to be_falsey
+  end
+end
+
+describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
+-- has two events
+-- has different carriers" do
+
+  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
+  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 2) }
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => new_plan, :all_member_ids => [1,2]) }
+  let(:event_set) { [event_1, event_2] }
+
+  subject { EnrollmentAction::SimpleProductChange }
+
+  it "doesn't qualify" do
+    expect(subject.qualifies?(event_set)).to be_falsey
+  end
+end
+
+describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
+--  provides a new plan id
+--  with no dependents changed
+--  with a carrier that DOES NOT require simple plan changes" do
+  let(:non_tufts_carrier) { instance_double(Carrier, requires_simple_plan_changes?: false) }
+  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
+  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 1) }
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => new_plan, :all_member_ids => [1,2]) }
+  let(:event_set) { [event_1, event_2] }
+
+  subject { EnrollmentAction::SimpleProductChange }
+
+  before :each do
+    allow(plan).to receive(:carrier).and_return(non_tufts_carrier)
+    allow(new_plan).to receive(:carrier).and_return(non_tufts_carrier)
+  end
+
+  it "doesn't qualify" do
+    expect(subject.qualifies?(event_set)).to be_falsey
+  end
+end
+
+describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
+--  provides a new plan id
+--  with no dependents changed
+--  with a carrier that requires simple plan changes" do
+  let(:tufts_carrier) { instance_double(Carrier, requires_simple_plan_changes?: true) }
+  let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
+  let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 1) }
+
+  let(:event_1) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => plan, :all_member_ids => [1,2]) }
+  let(:event_2) { instance_double(ExternalEvents::EnrollmentEventNotification, :existing_plan => new_plan, :all_member_ids => [1,2]) }
+  let(:event_set) { [event_1, event_2] }
+
+  subject { EnrollmentAction::SimpleProductChange }
+
+  before :each do
+    allow(plan).to receive(:carrier).and_return(tufts_carrier)
+    allow(new_plan).to receive(:carrier).and_return(tufts_carrier)
+  end
 
   it "qualifies" do
     expect(subject.qualifies?(event_set)).to be_truthy
   end
 end
 
-describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, being persisted" do
+describe EnrollmentAction::SimpleProductChange, "#persist" do
   let(:member_primary) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 1) }
   let(:member_secondary) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 2) }
   let(:member_new) { instance_double(Openhbx::Cv2::EnrolleeMember, id: 3) }
@@ -55,7 +133,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
   let(:policy_updater) { instance_double(ExternalEvents::ExternalPolicy) }
 
   subject do
-    EnrollmentAction::CarrierSwitch.new(termination_event, action_event)
+    EnrollmentAction::SimpleProductChange.new(termination_event, action_event)
   end
 
   before :each do
@@ -82,7 +160,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
   end
 end
 
-describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for terminate, and a new enrollment, being published" do
+describe EnrollmentAction::SimpleProductChange, "#publish" do
   let(:amqp_connection) { double }
   let(:event_xml) { double }
   let(:termination_event_xml) { double }
@@ -127,7 +205,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
   ) }
 
   subject do
-    EnrollmentAction::CarrierSwitch.new(termination_event, action_event)
+    EnrollmentAction::SimpleProductChange.new(termination_event, action_event)
   end
 
   before :each do
@@ -137,7 +215,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     allow(termination_publish_helper).to receive(:set_policy_id).with(1)
     allow(termination_publish_helper).to receive(:set_member_starts).with({ 1 => :one_month_ago, 2 => :one_month_ago })
     allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, termination_event.existing_policy.eg_id, termination_event.employer_hbx_id).and_return([true, {}])
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
     allow(action_publish_helper).to receive(:set_policy_id).with(1)
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
@@ -164,8 +242,8 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set for 
     subject.publish
   end
 
-  it "publishes an event of enrollment initialization" do
-    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#initial")
+  it "publishes an event of product change" do
+    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#change_product")
     subject.publish
   end
 

@@ -1,4 +1,24 @@
-require 'spec_helper'
+require 'rails_helper'
+
+describe Carrier, "given nothing" do
+  it "does not require simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_falsey
+  end
+end
+
+describe Carrier, "given:
+- a requirement for simple plan changes
+" do
+  subject do
+    Carrier.new({
+      :requires_simple_plan_changes => true
+    })
+  end
+
+  it "requires simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_truthy
+  end
+end
 
 describe Carrier do
   subject(:carrier) { build :carrier }

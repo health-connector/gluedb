@@ -44,7 +44,7 @@ module EnrollmentAction
       action_helper.set_member_starts(member_date_map)
       action_helper.keep_member_ends([])
       action_helper.assign_assistance_date(subscriber_start)
-      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id, action.workflow_id)
+      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
   end
 end

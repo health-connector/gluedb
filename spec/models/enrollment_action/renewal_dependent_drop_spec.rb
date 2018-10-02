@@ -92,7 +92,6 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
   let(:event_responder) { instance_double(::ExternalEvents::EventResponder, :connection => amqp_connection) }
   let(:event_xml) { double }
   let(:action_helper_result_xml) { double }
-  let(:workflow_id) { "SOME WORKFLOW ID" }
  
   let(:action_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
@@ -103,8 +102,7 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
     :all_member_ids => [1],
     :hbx_enrollment_id => 3,
     :employer_hbx_id => employer_hbx_id,
-    :subscriber_start => subscriber_start,
-    :workflow_id => workflow_id
+    :subscriber_start => subscriber_start
     ) }
 
   let(:action_helper) { instance_double(
@@ -144,11 +142,11 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
       to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#active_renew").
       and_return(true)
     allow(action_helper).to receive(:keep_member_ends).with([]).and_return(true)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 3, 1, workflow_id).and_return([true, nil])
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 3, 1).and_return([true, nil])
     allow(::EnrollmentAction::ActionPublishHelper).to receive(:new).with(termination_writer_result_xml).and_return(termination_publish_helper)
     allow(termination_publish_helper).
       to receive(:filter_affected_members).with([2])
-    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id, workflow_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id)
   end
 
   it "publishes successfully" do
@@ -156,14 +154,14 @@ describe EnrollmentAction::RenewalDependentDrop, "given a qualified enrollent se
   end
 
   it "terminates the specified enrollments" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id, workflow_id)
+    expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id)
     subject.publish
   end
 
   it "publishes the renewal enrollment" do
     expect(subject).
       to receive(:publish_edi).
-      with(amqp_connection, action_helper_result_xml, 3, 1, workflow_id)
+      with(amqp_connection, action_helper_result_xml, 3, 1)
     subject.publish
   end
 end

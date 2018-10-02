@@ -41,7 +41,7 @@ module EnrollmentAction
       term_helper.set_event_action("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
       term_helper.set_policy_id(existing_policy.eg_id)
       term_helper.set_member_starts(member_date_map)
-      publish_result, publish_errors = publish_edi(term_connection, term_helper.to_xml, termination.hbx_enrollment_id, termination.employer_hbx_id, termination.workflow_id)
+      publish_result, publish_errors = publish_edi(term_connection, term_helper.to_xml, termination.hbx_enrollment_id, termination.employer_hbx_id)
       unless publish_result
         return [publish_result, publish_errors]
       end
@@ -49,7 +49,7 @@ module EnrollmentAction
       action_helper = EnrollmentAction::ActionPublishHelper.new(action.event_xml)
       action_helper.set_event_action("urn:openhbx:terms:v1:enrollment#reinstate_enrollment")
       action_helper.keep_member_ends([])
-      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id, action.workflow_id)
+      publish_edi(amqp_connection, action_helper.to_xml, action.hbx_enrollment_id, action.employer_hbx_id)
     end
   end
 end

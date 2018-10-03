@@ -9,10 +9,11 @@ describe Publishers::EmployerEnrollmentNotification do
     let(:event_xml) { double }
     let(:hbx_enrollment_id) { double }
     let(:employer) { double(hbx_id: '123') }
-    let(:cv_publish_errors_hash) { double }
-    let(:cv_publish_errors) { double(:to_hash => cv_publish_errors_hash) }
-    let(:policy) { FactoryGirl.create(:policy) }
-
+    let(:errors_message) { double }
+    let(:cv_publish_errors) { {:error_message => errors_message} }
+    let!(:policy) { FactoryGirl.create(:policy) }
+    let!(:publish_error){ Publishers::EmployerEnrollmentNotification::PublishError.new("EDI Codec CV2 Publish Failed", {:error_message => cv_publish_errors[:error_message]})}
+    let!(:publish_sucess){ Publishers::EmployerEnrollmentNotification::PublishError.new("EDI Codec CV2 Publish Sucessfully", {:error_message => cv_publish_errors[:error_message]})}
     subject { Publishers::EmployerEnrollmentNotification.new(employer) }
 
     before :each do
@@ -36,23 +37,24 @@ describe Publishers::EmployerEnrollmentNotification do
 
       it "returns the publishing errors" do
         publish_status, publish_errors = subject.publish_edi(amqp_connection, event_xml, policy)
-        expect(publish_errors).to eq cv_publish_errors_hash
+        expect(publish_errors).to eq publish_error
       end
     end
 
     describe "which publishes trading partner edi" do
+
       let(:legacy_cv_publisher) { double }
+      let(:legacy_cv_errors) { {:error_message => errors_message} }
+      let!(:cv_publish_error){ Publishers::EmployerEnrollmentNotification::PublishError.new("CV1 Publish Failed", {:error_message => legacy_cv_errors[:error_message]})}
+      let!(:cv_publish_sucess){ Publishers::EmployerEnrollmentNotification::PublishError.new("CV1 Publish Sucessfully", {:error_message => legacy_cv_errors[:error_message]})}
 
       before :each do
         allow(trading_partner_edi_publisher).to receive(:publish).and_return(true)
+        allow(subject).to receive(:create_sucess_or_failure_edi_process).with(policy, event_xml, publish_sucess).and_return(true)
         allow(Publishers::TradingPartnerLegacyCv).to receive(:new).with(amqp_connection, event_xml, policy.eg_id, employer.hbx_id).and_return(legacy_cv_publisher)
       end
 
       describe "but fails to publish the legacy cv" do
-        let(:legacy_cv_errors_hash) { double }
-        let(:legacy_cv_errors) { double(:to_hash => legacy_cv_errors_hash) }
-
-
         before :each do
           allow(legacy_cv_publisher).to receive(:publish).and_return(false)
           allow(legacy_cv_publisher).to receive(:errors).and_return(legacy_cv_errors)
@@ -65,13 +67,15 @@ describe Publishers::EmployerEnrollmentNotification do
 
         it "returns the publishing errors" do
           _publish_status, publish_errors = subject.publish_edi(amqp_connection, event_xml, policy)
-          expect(publish_errors).to eq legacy_cv_errors_hash
+          expect(publish_errors).to eq cv_publish_error
         end
       end
 
       describe "and publishes the legacy cv" do
         before :each do
+          allow(subject).to receive(:create_sucess_or_failure_edi_process).with(policy, event_xml, cv_publish_sucess).and_return(true)
           allow(legacy_cv_publisher).to receive(:publish).and_return(true)
+          allow(legacy_cv_publisher).to receive(:errors).and_return(legacy_cv_errors)
         end
 
         it "returns true" do
@@ -120,7 +124,7 @@ describe Publishers::EmployerEnrollmentNotification do
         end
 
         it "should include type of enrollment" do
-          expect(@doc.at_xpath('//type').text).to eq "urn:openhbx:terms:v1:enrollment#initial"
+          expect(@doc.at_xpath('//type').text).to eq "urn:openhbx:terms:v1:enrollment#audit"
         end
       end
     end

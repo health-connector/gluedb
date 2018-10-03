@@ -1,6 +1,8 @@
 module Publishers
   class EmployerEnrollmentNotification
 
+    PublishError = Struct.new(:message, :headers)
+
     attr_reader :employer
 
     def initialize(employer)
@@ -21,12 +23,10 @@ module Publishers
     end
 
     def render_cv(policy)
-      affected_members = policy.active_member_ids.map do |a_member_id|
-        ::BusinessProcesses::AffectedMember.new({
+      affected_members = ::BusinessProcesses::AffectedMember.new({
                                                     :policy => policy,
-                                                    :member_id => a_member_id
+                                                    :member_id => policy.subscriber.id
                                                 })
-      end
       ApplicationController.new.render_to_string(
           :layout => "enrollment_event",
           :partial => "enrollment_events/enrollment_event",
@@ -35,7 +35,7 @@ module Publishers
               :affected_members => affected_members,
               :policy => policy,
               :enrollees => policy.enrollees.reject { |e| e.canceled? || e.terminated? },
-              :event_type => "urn:openhbx:terms:v1:enrollment#initial",
+              :event_type => "urn:openhbx:terms:v1:enrollment#audit",
               :transaction_id => transaction_id
           }
       )
@@ -47,12 +47,25 @@ module Publishers
       begin
         employer_policies.each do |policy|
           render_result = render_cv(policy)
-          publish_edi(amqp_connection, render_result, policy)
+          sucess, errors = publish_edi(amqp_connection, render_result, policy)
+          unless sucess
+            create_sucess_or_failure_edi_process(policy, render_result, errors)
+          end
         end
-      rescue Exception => e
-        e.backtrace.join("\n")
       end
-      amqp_connection.close
+      ensure
+        amqp_connection.close
+    end
+
+    def create_sucess_or_failure_edi_process(policy, render_result, errors)
+      EnrollmentAction::EnrollmentActionIssue.create!({
+                                                          :hbx_enrollment_id => policy.eg_id,
+                                                          :hbx_enrollment_vocabulary => render_result,
+                                                          :enrollment_action_uri => "urn:openhbx:terms:v1:enrollment#sponsor_information_change",
+                                                          :error_message => errors.message,
+                                                          :headers => errors.headers,
+                                                          :received_at =>  Time.now
+                                                      })
     end
 
     def publish_edi(amqp_connection, render_result, policy)
@@ -60,15 +73,22 @@ module Publishers
         publisher = Publishers::TradingPartnerEdi.new(amqp_connection, render_result)
         publish_result = false
         publish_result = publisher.publish
+
         if publish_result
+          create_sucess_or_failure_edi_process(policy, render_result, PublishError.new("EDI Codec CV2 Publish Sucessfully", { :error_message => publisher.errors[:error_message]}))
           publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, render_result, policy.eg_id, employer.hbx_id)
-          unless publisher2.publish
-            return [false, publisher2.errors.to_hash]
+          if publisher2.publish
+            create_sucess_or_failure_edi_process(policy, render_result, PublishError.new("CV1 Publish Sucessfully", { :error_message => publisher2.errors[:error_message]}))
+          else
+            return [false, PublishError.new("CV1 Publish Failed", { :error_message => publisher2.errors[:error_message]})]
           end
+        else
+          return [false, PublishError.new("EDI Codec CV2 Publish Failed", { :error_message => publisher.errors[:error_message]})]
         end
+
         [publish_result, publisher.errors.to_hash]
       rescue Exception => e
-        e.backtrace.join("\n")
+        return [false, PublishError.new("Publish EDI Failed", {:error_message => e.message, :error_type => e.class.name, :backtrace => e.backtrace[0..5].join("\n")})]
       end
     end
 

@@ -49,7 +49,7 @@ module EmployerEvents
         add_contacts_phones(incoming_contact.phones, new_contact, employer)  
         add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
         new_contact
-        end
+      end
       employer.save!
     end
 

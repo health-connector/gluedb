@@ -155,17 +155,17 @@ describe EnrollmentAction::SimpleRenewal, "given a qualified enrollment set for 
     allow(::EnrollmentAction::ActionPublishHelper).to receive(:new).with(termination_writer_result_xml).and_return(termination_publish_helper)
     allow(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id)
     allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
-    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#auto_renew")
+    allow(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#active_renew")
     allow(action_publish_helper).to receive(:keep_member_ends).with([])
+  end
+
+  it "publishes an event of enrollment termination" do
+    expect(termination_writer).to receive(:write).with("transaction_id_placeholder", "urn:openhbx:terms:v1:enrollment#terminate_enrollment").and_return(termination_writer_result_xml)
+    subject.publish
   end
 
   it "publishes termination resulting xml to edi" do
     expect(subject).to receive(:publish_edi).with(amqp_connection, termination_helper_result_xml, terminated_policy_eg_id, employer_hbx_id)
-    subject.publish
-  end
-
-  it "publishes an event of enrollment auto renewing" do
-    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#auto_renew")
     subject.publish
   end
 
@@ -174,14 +174,13 @@ describe EnrollmentAction::SimpleRenewal, "given a qualified enrollment set for 
     subject.publish
   end
 
-  it "publishes auto renewing resulting xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
+  it "publishes an event of enrollment active renewing" do
+    expect(action_publish_helper).to receive(:set_event_action).with("urn:openhbx:terms:v1:enrollment#active_renew")
     subject.publish
   end
 
-  it "publishes an event of type auto renew" do
-    expect(action_publish_helper).to receive(:set_event_action).
-      with("urn:openhbx:terms:v1:enrollment#auto_renew").and_return(true)
+  it "publishes active renewing resulting xml to edi" do
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, action_event.hbx_enrollment_id, action_event.employer_hbx_id)
     subject.publish
   end
 

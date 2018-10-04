@@ -57,9 +57,9 @@ module Publishers
                                                               :received_at =>  Time.now
                                                           })
         end
-      end
       ensure
         amqp_connection.close
+      end
     end
 
     def publish_edi(amqp_connection, render_result, policy)

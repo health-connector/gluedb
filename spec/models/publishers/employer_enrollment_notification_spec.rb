@@ -89,7 +89,7 @@ describe Publishers::EmployerEnrollmentNotification do
           allow(subject).to receive(:publish_edi).with(amqp_connection, event_xml, policy).and_return([true, edi_publish_sucess])
         end
 
-        it "when edi process sucessfully published should create sucess record in enrollemt action" do
+        it "when sucessfully published edi should create sucess record in enrollemt action" do
           subject.process_enrollments_for_edi
           expect(EnrollmentAction::EnrollmentActionIssue.all.count).to eq 1
           expect(EnrollmentAction::EnrollmentActionIssue.all.first.error_message).to eq "EDI Codec CV2/Leagcy CV1 Published Sucessfully"

@@ -94,7 +94,6 @@ module EmployerEvents
     def new_phone(incoming_phone)
       phone_attributes = {
         phone_number: incoming_phone.full_phone_number, 
-        full_phone_number: incoming_phone.full_phone_number,
         phone_type: incoming_phone.type,
         primary: incoming_phone.is_preferred
       }

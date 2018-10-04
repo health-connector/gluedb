@@ -47,25 +47,19 @@ module Publishers
       begin
         employer_policies.each do |policy|
           render_result = render_cv(policy)
-          sucess, errors = publish_edi(amqp_connection, render_result, policy)
-          unless sucess
-            create_sucess_or_failure_edi_process(policy, render_result, errors)
-          end
+          publish_result, errors = publish_edi(amqp_connection, render_result, policy)
+          EnrollmentAction::EnrollmentActionIssue.create!({
+                                                              :hbx_enrollment_id => policy.eg_id,
+                                                              :hbx_enrollment_vocabulary => render_result,
+                                                              :enrollment_action_uri => "urn:openhbx:terms:v1:enrollment#sponsor_information_change",
+                                                              :error_message => errors.message,
+                                                              :headers => errors.headers,
+                                                              :received_at =>  Time.now
+                                                          })
         end
       end
       ensure
         amqp_connection.close
-    end
-
-    def create_sucess_or_failure_edi_process(policy, render_result, errors)
-      EnrollmentAction::EnrollmentActionIssue.create!({
-                                                          :hbx_enrollment_id => policy.eg_id,
-                                                          :hbx_enrollment_vocabulary => render_result,
-                                                          :enrollment_action_uri => "urn:openhbx:terms:v1:enrollment#sponsor_information_change",
-                                                          :error_message => errors.message,
-                                                          :headers => errors.headers,
-                                                          :received_at =>  Time.now
-                                                      })
     end
 
     def publish_edi(amqp_connection, render_result, policy)
@@ -75,18 +69,15 @@ module Publishers
         publish_result = publisher.publish
 
         if publish_result
-          create_sucess_or_failure_edi_process(policy, render_result, PublishError.new("EDI Codec CV2 Publish Sucessfully", { :error_message => publisher.errors[:error_message]}))
           publisher2 = Publishers::TradingPartnerLegacyCv.new(amqp_connection, render_result, policy.eg_id, employer.hbx_id)
-          if publisher2.publish
-            create_sucess_or_failure_edi_process(policy, render_result, PublishError.new("CV1 Publish Sucessfully", { :error_message => publisher2.errors[:error_message]}))
-          else
+          unless publisher2.publish
             return [false, PublishError.new("CV1 Publish Failed", { :error_message => publisher2.errors[:error_message]})]
           end
         else
           return [false, PublishError.new("EDI Codec CV2 Publish Failed", { :error_message => publisher.errors[:error_message]})]
         end
 
-        [publish_result, publisher.errors.to_hash]
+        [publish_result, PublishError.new("EDI Codec CV2/Leagcy CV1 Published Sucessfully", { :error_message => publisher.errors[:error_message]})]
       rescue Exception => e
         return [false, PublishError.new("Publish EDI Failed", {:error_message => e.message, :error_type => e.class.name, :backtrace => e.backtrace[0..5].join("\n")})]
       end

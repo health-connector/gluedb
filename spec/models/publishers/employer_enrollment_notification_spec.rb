@@ -3,17 +3,16 @@ require "rails_helper"
 describe Publishers::EmployerEnrollmentNotification do
   describe "#publish_edi" do
 
-    let!(:amqp_connection) { double }
+    let!(:amqp_connection) { double(close: true) }
     let!(:event_xml) { double }
     let(:trading_partner_edi_publisher) { Publishers::TradingPartnerEdi.new(amqp_connection, event_xml) }
     let(:event_xml) { double }
     let(:hbx_enrollment_id) { double }
     let(:employer) { double(hbx_id: '123') }
-    let(:errors_message) { double }
-    let(:cv_publish_errors) { {:error_message => errors_message} }
+    let(:cv_publish_errors) { {:error_message => "errors_message"} }
     let!(:policy) { FactoryGirl.create(:policy) }
     let!(:publish_error){ Publishers::EmployerEnrollmentNotification::PublishError.new("EDI Codec CV2 Publish Failed", {:error_message => cv_publish_errors[:error_message]})}
-    let!(:publish_sucess){ Publishers::EmployerEnrollmentNotification::PublishError.new("EDI Codec CV2 Publish Sucessfully", {:error_message => cv_publish_errors[:error_message]})}
+    let!(:edi_publish_sucess){ Publishers::EmployerEnrollmentNotification::PublishError.new("EDI Codec CV2/Leagcy CV1 Published Sucessfully", {:error_message => cv_publish_errors[:error_message]})}
     subject { Publishers::EmployerEnrollmentNotification.new(employer) }
 
     before :each do
@@ -41,20 +40,18 @@ describe Publishers::EmployerEnrollmentNotification do
       end
     end
 
-    describe "which publishes trading partner edi" do
+    describe "which publishes trading partner edi" , dbclean: :after_each do
 
       let(:legacy_cv_publisher) { double }
-      let(:legacy_cv_errors) { {:error_message => errors_message} }
+      let(:legacy_cv_errors) { {:error_message => "errors_message"} }
       let!(:cv_publish_error){ Publishers::EmployerEnrollmentNotification::PublishError.new("CV1 Publish Failed", {:error_message => legacy_cv_errors[:error_message]})}
-      let!(:cv_publish_sucess){ Publishers::EmployerEnrollmentNotification::PublishError.new("CV1 Publish Sucessfully", {:error_message => legacy_cv_errors[:error_message]})}
 
       before :each do
         allow(trading_partner_edi_publisher).to receive(:publish).and_return(true)
-        allow(subject).to receive(:create_sucess_or_failure_edi_process).with(policy, event_xml, publish_sucess).and_return(true)
         allow(Publishers::TradingPartnerLegacyCv).to receive(:new).with(amqp_connection, event_xml, policy.eg_id, employer.hbx_id).and_return(legacy_cv_publisher)
       end
 
-      describe "but fails to publish the legacy cv" do
+      describe "but fails to publish the legacy cv", dbclean: :after_each do
         before :each do
           allow(legacy_cv_publisher).to receive(:publish).and_return(false)
           allow(legacy_cv_publisher).to receive(:errors).and_return(legacy_cv_errors)
@@ -73,7 +70,6 @@ describe Publishers::EmployerEnrollmentNotification do
 
       describe "and publishes the legacy cv" do
         before :each do
-          allow(subject).to receive(:create_sucess_or_failure_edi_process).with(policy, event_xml, cv_publish_sucess).and_return(true)
           allow(legacy_cv_publisher).to receive(:publish).and_return(true)
           allow(legacy_cv_publisher).to receive(:errors).and_return(legacy_cv_errors)
         end
@@ -81,6 +77,35 @@ describe Publishers::EmployerEnrollmentNotification do
         it "returns true" do
           publish_status, _publish_errors = subject.publish_edi(amqp_connection, event_xml, policy)
           expect(publish_status).to be_truthy
+        end
+      end
+    end
+
+    describe "#process_enrollments_for_edi", dbclean: :after_each do
+
+      context "edi_publish sucess",dbclean: :after_each do
+
+        before :each do
+          allow(subject).to receive(:publish_edi).with(amqp_connection, event_xml, policy).and_return([true, edi_publish_sucess])
+        end
+
+        it "when edi process sucessfully published should create sucess record in enrollemt action" do
+          subject.process_enrollments_for_edi
+          expect(EnrollmentAction::EnrollmentActionIssue.all.count).to eq 1
+          expect(EnrollmentAction::EnrollmentActionIssue.all.first.error_message).to eq "EDI Codec CV2/Leagcy CV1 Published Sucessfully"
+        end
+      end
+
+      context "edi_publish fail", dbclean: :after_each do
+
+        before :each do
+          allow(subject).to receive(:publish_edi).with(amqp_connection, event_xml, policy).and_return([true, publish_error])
+        end
+
+        it "when fail to publish edi should create failure record in enrollemt action" do
+          subject.process_enrollments_for_edi
+          expect(EnrollmentAction::EnrollmentActionIssue.all.count).to eq 1
+          expect(EnrollmentAction::EnrollmentActionIssue.all.first.error_message).to eq "EDI Codec CV2 Publish Failed"
         end
       end
     end

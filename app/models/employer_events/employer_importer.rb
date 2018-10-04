@@ -46,26 +46,33 @@ module EmployerEvents
         }
         contact_attributes.delete_if{ |k,v| v.blank?}
         new_contact = EmployerContact.new(contact_attributes)
-        add_contacts_phones(incoming_contact.phones, new_contact, employer)  
-        add_contacts_addresses(incoming_contact.addresses, new_contact, employer) 
+        add_contacts_phones(incoming_contact.phones, new_contact)  
+        add_contacts_addresses(incoming_contact.addresses, new_contact) 
+        add_contacts_emails(incoming_contact.emails, new_contact) 
         new_contact
       end
       employer.save!
     end
 
-    def add_contacts_phones(incoming_phones, new_contact, employer)
+    def add_contacts_phones(incoming_phones, new_contact)
       new_contact.phones = incoming_phones.map do |incoming_phone|
         new_phone(incoming_phone)
       end
     end
+
+    def add_contacts_emails(incoming_emails, new_contact)
+      new_contact.emails = incoming_emails.map do |incoming_email|
+        new_email(incoming_email)
+      end
+    end
     
-    def add_contacts_addresses(incoming_addresses, new_contact, employer)
+    def add_contacts_addresses(incoming_addresses, new_contact)
       new_contact.addresses = incoming_addresses.map  do |incoming_address|
         new_address(incoming_address)
       end
     end
     
-    def add_office_locations(incoming_office_locations, employer)
+    def add_office_locations(incoming_office_locations)
       employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|   
           new_location = EmployerOfficeLocation.new(name:incoming_office_location.name) 
           new_location.phone = new_phone(incoming_office_location.phone)
@@ -73,6 +80,13 @@ module EmployerEvents
           new_location
         end
       employer.save!
+    end
+
+    def new_email(incoming_email)
+      Email.new(
+        type: incoming_email.type,
+        email_address: incoming_email.email_address
+      )
     end
     
     def new_phone(incoming_phone)

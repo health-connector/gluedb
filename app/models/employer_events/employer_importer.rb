@@ -72,7 +72,7 @@ module EmployerEvents
       end
     end
     
-    def add_office_locations(incoming_office_locations)
+    def add_office_locations(incoming_office_locations, employer)
       employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|   
           new_location = EmployerOfficeLocation.new(name:incoming_office_location.name) 
           new_location.phone = new_phone(incoming_office_location.phone)
@@ -83,30 +83,36 @@ module EmployerEvents
     end
 
     def new_email(incoming_email)
-      Email.new(
+     email_attributes = {
         type: incoming_email.type,
-        email_address: incoming_email.email_address
-      )
+        email_address: incoming_email.email_address 
+      }
+      email_attributes.delete_if{ |k,v| v.blank?}
+      Email.new(email_attributes)
     end
     
     def new_phone(incoming_phone)
-      Phone.new(
-        phone_number:  incoming_phone.full_phone_number.last(7),
+      phone_attributes = {
+        phone_number: incoming_phone.full_phone_number, 
         full_phone_number: incoming_phone.full_phone_number,
         phone_type: incoming_phone.type,
         primary: incoming_phone.is_preferred
-      )
+      }
+      phone_attributes.delete_if{ |k,v| v.blank?}
+      Phone.new(phone_attributes)
     end
 
     def new_address(incoming_address)
-      Address.new(
+      address_attributes = {
         address_1: incoming_address.address_line_1,
         address_2: incoming_address.address_line_2,
         city: incoming_address.location_city_name,
         state: incoming_address.location_state_code,
         zip: incoming_address.postal_code,
-        address_type: incoming_address.type
-      )
+        address_type: incoming_address.type 
+      }
+      address_attributes.delete_if{ |k,v| v.blank?}
+      Address.new(address_attributes)
     end
     
     def plan_year_values

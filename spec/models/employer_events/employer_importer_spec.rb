@@ -490,6 +490,12 @@ RSpec.shared_context "employer importer shared persistance context" do
                 <postal_code>12344</postal_code>
               </address>
             </addresses>
+            <emails>
+              <email>
+              <type>work</type>
+              <email_address>joe@joe.com</email_address>
+              </email> 
+            </emails>
             <phones>
               <phone>
                 <type>home</type>
@@ -637,23 +643,19 @@ RSpec.shared_context "employer importer shared persistance context" do
             </id>
             <primary>true</primary>
             <name>Work</name>
-            <addresses>
-              <address>
-                <type>work</type>
-                <address_line_1>12 Downing</address_line_1>
-                <address_line_2>23 Taft </address_line_2>
-                <location_city_name>Washington </location_city_name>
-                <location_state_code>DC</location_state_code>
-                <postal_code>12344</postal_code>
-              </address>
-            </addresses>
-            <phones>
+            <address>
+              <type>work</type>
+              <address_line_1>12 Downing</address_line_1>
+              <address_line_2>23 Taft </address_line_2>
+              <location_city_name>Washington </location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>12344</postal_code>
+            </address>
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
                 <is_preferred>true</is_preferred>
               </phone>
-            </phones>
           </office_location>
           <office_location>
             <id>
@@ -661,16 +663,14 @@ RSpec.shared_context "employer importer shared persistance context" do
             </id>
             <primary>true</primary>
             <name>Work</name>
-            <addresses>
-              <address>
-                <type>work</type>
-                <address_line_1>12 Downing</address_line_1>
-                <address_line_2>23 Taft </address_line_2>
-                <location_city_name>Washington </location_city_name>
-                <location_state_code>DC</location_state_code>
-                <postal_code>12344</postal_code>
-              </address>
-            </addresses>
+            <address>
+              <type>work</type>
+              <address_line_1>12 Downing</address_line_1>
+              <address_line_2>23 Taft </address_line_2>
+              <location_city_name>Washington </location_city_name>
+              <location_state_code>DC</location_state_code>
+              <postal_code>12344</postal_code>
+            </address>
             <phones>
               <phone>
                 <type>home</type>

@@ -15,6 +15,7 @@ class Carrier
   field :is_active, type: Boolean, default: true
 
   field :requires_simple_plan_changes, type: Boolean, default: false
+  field :requires_simple_renewal, type: Boolean, default: false
   
   has_many :plans
   has_many :policies

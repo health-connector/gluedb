@@ -30,7 +30,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
   let(:terminated_policy_cv) { instance_double(Openhbx::Cv2::Policy, :enrollees => [enrollee_primary, enrollee_secondary])}
   let(:new_policy_cv) { instance_double(Openhbx::Cv2::Policy, :enrollees => [enrollee_primary, enrollee_secondary, enrollee_new]) }
   let(:plan) { instance_double(Plan, :id => 1) }
-  let(:policy) { instance_double(Policy, :hbx_enrollment_ids => [1,2]) }
+  let(:policy) { instance_double(Policy, :hbx_enrollment_ids => [1,2], :terminate_as_of => subscriber_end) }
   let(:primary_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
   let(:secondary_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
   let(:new_db_record) { instance_double(ExternalEvents::ExternalMember, :persist => true) }
@@ -63,7 +63,6 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_secondary).and_return(secondary_db_record)
     allow(ExternalEvents::ExternalMember).to receive(:new).with(member_new).and_return(new_db_record)
 
-    allow(policy).to receive(:terminate_as_of).with(subscriber_end).and_return(true)
     allow(policy).to receive(:save!).and_return(true)
     allow(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan, false).and_return(policy_updater)
     allow(policy_updater).to receive(:persist).and_return(true)
@@ -71,14 +70,7 @@ describe EnrollmentAction::CarrierSwitch, "given a qualified enrollment set, bei
   end
 
   it "successfully creates the new policy" do
-    expect(ExternalEvents::ExternalPolicy).to receive(:new).with(new_policy_cv, plan, false).and_return(policy_updater)
-    expect(policy_updater).to receive(:persist).and_return(true)
     expect(subject.persist).to be_truthy
-  end
-
-  it "terminates the old policy" do
-    expect(policy).to receive(:terminate_as_of).with(subscriber_end).and_return(true)
-    subject.persist
   end
 end
 

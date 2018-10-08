@@ -15,7 +15,8 @@ class Email
   embedded_in :person, :inverse_of => :emails
   embedded_in :employer, :inverse_of => :emails
   embedded_in :broker, :inverse_of => :emails
-  embedded_in :employer_contact, :inverse_of => :emails
+  embedded_in :employer_contact, :inverse_of => :addresses
+  embedded_in :employer_office_location, :inverse_of => :addresses
 
 
 

@@ -15,12 +15,14 @@ module EmployerEvents
     end
 
     def employer_values 
-      {
+     employer_values = {
         hbx_id: @org.id,
         fein: @org.fein,
         dba: @org.dba,
         name: @org.name
       }
+      employer_values.delete_if{ |k,v| v.blank?}
+      employer_values
     end
 
     def manage_employer_demographics(employer)

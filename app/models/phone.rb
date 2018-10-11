@@ -23,7 +23,6 @@ class Phone
   embedded_in :employer_contact, :inverse_of => :addresses
   embedded_in :employer_office_location, :inverse_of => :addresses
 
-
   def match(another_phone)
     return(false) if another_phone.nil?
     attrs_to_match = [:phone_type, :phone_number]

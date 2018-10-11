@@ -62,7 +62,6 @@ class Employer
   embeds_many :employer_office_locations, :inverse_of => :employer
   accepts_nested_attributes_for :employer_office_locations, reject_if: :all_blank, allow_destroy: true
 
-
   embeds_many :addresses, :inverse_of => :employer
   accepts_nested_attributes_for :addresses, reject_if: :all_blank, allow_destroy: true
 

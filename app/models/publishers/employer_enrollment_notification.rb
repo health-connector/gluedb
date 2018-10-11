@@ -10,16 +10,31 @@ module Publishers
     end
 
     def employer_policies
-
-      policies = Policy.where( :employer_id => employer.id,
+      policies = Policy.where(:employer_id => employer.id,
                                :aasm_state.in => %w[submitted resubmitted effectuated],
-                               :enrollees =>
-                                   { "$elemMatch" => {"$or" => [
-                                       {"coverage_end" => nil},
-                                       {"coverage_end" => { "$gt" => Time.now }}]
-                                   }
-                               })
-      policies.select{|pol| (pol.is_active? || pol.future_active?) && pol.carrier.shop_profile.requires_employer_updates_on_enrollments }
+                              :carrier_id.in => enrollment_update_required_carrier,
+                              :enrollees =>
+                                   { "$elemMatch" => {"$and" => [
+                                       {"$or" => [
+                                           {"coverage_start" => { "$gt" => Date.today - 1.year }},
+                                           {"coverage_start" => { "$lt" => Date.today + 1.year }}
+                                       ]},
+                                       {"$or" => [
+                                           {"coverage_end" => nil},
+                                           {"coverage_end" => { "$gt" => Time.now }}]
+                                       }]}
+                                   })
+
+      policies.select{|pol| (pol.is_active? || pol.future_active?)}  # extra check.
+    end
+
+    def enrollment_update_required_carrier
+       Carrier.all.inject([]) do |carrier_id, carrier|
+         if carrier.shop_profile.present? && carrier.shop_profile.requires_employer_updates_on_enrollments
+           carrier_id << carrier.id
+         end
+         carrier_id
+      end
     end
 
     def render_cv(policy)

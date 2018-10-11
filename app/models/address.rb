@@ -30,7 +30,6 @@ class Address
   embedded_in :employer_contact, :inverse_of => :addresses
   embedded_in :employer_office_location, :inverse_of => :addresses
 
-
   # embeds_one :location
 
   before_save :clean_fields

@@ -37,7 +37,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
             <id>
@@ -75,7 +75,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
           </office_location>
@@ -127,7 +127,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
             <id>
@@ -164,8 +164,8 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
             <phones>
               <phone>
                 <type>home</type>
-                <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <full_phone_number>12322222</full_phone_number>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
           </office_location>
@@ -306,7 +306,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
           </office_location>
@@ -409,7 +409,7 @@ RSpec.shared_context "employer importer shared persistance context" do
             <phones>
               <phone>
                 <type>home</type>
-                <full_phone_number>123322222</full_phone_number>
+                <full_phone_number></full_phone_number>
                 <is_preferred>true</is_preferred>
               </phone>
             </phones>
@@ -448,7 +448,7 @@ RSpec.shared_context "employer importer shared persistance context" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
           </office_location>
@@ -491,21 +491,17 @@ RSpec.shared_context "employer importer shared persistance context" do
               </address>
             </addresses>
             <emails>
-              <email>
-              <type>work</type>
-              <email_address>joe@joe.com</email_address>
-              </email> 
             </emails>
             <phones>
               <phone>
-                <type>home</type>
-                <full_phone_number>123322222</full_phone_number>
+                <type></type>
+                <full_phone_number></full_phone_number>
                 <is_preferred>true</is_preferred>
               </phone>
               <phone>
-                <type>work</type>
-                <full_phone_number>11111111</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <type></type>
+                <full_phone_number></full_phone_number>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
             <id>
@@ -516,7 +512,7 @@ RSpec.shared_context "employer importer shared persistance context" do
             <person_name>
               <person_given_name>Dan</person_given_name>
               <person_middle_name>l</person_middle_name>
-              <person_surname>Smith</person_surname>
+              <person_surname>Fred</person_surname>
               <person_name_suffix_text>Sr.</person_name_suffix_text>
               <person_name_prefix_text> Mr.</person_name_prefix_text>
             </person_name>
@@ -534,14 +530,14 @@ RSpec.shared_context "employer importer shared persistance context" do
             </addresses>
             <phones>
               <phone>
-                <type>home</type>
-                <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <type></type>
+                <full_phone_number></full_phone_number>
+                <is_preferred></is_preferred>
               </phone>
               <phone>
-                <type>work</type>
-                <full_phone_number>11111111</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <type></type>
+                <full_phone_number></full_phone_number>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
             <id>
@@ -577,11 +573,10 @@ RSpec.shared_context "employer importer shared persistance context" do
             </addresses>
             <phones>
               <phone>
-                <type>home</type>
-                <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <type></type>
+                <full_phone_number></full_phone_number>
+                <is_preferred></is_preferred>
               </phone>
-
             </phones>
           </office_location>
         </office_locations> 
@@ -654,7 +649,7 @@ RSpec.shared_context "employer importer shared persistance context" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
           </office_location>
           <office_location>
@@ -675,7 +670,7 @@ RSpec.shared_context "employer importer shared persistance context" do
               <phone>
                 <type>home</type>
                 <full_phone_number>123322222</full_phone_number>
-                <is_preferred>true</is_preferred>
+                <is_preferred></is_preferred>
               </phone>
             </phones>
           </office_location>

@@ -18,8 +18,6 @@ class Email
   embedded_in :employer_contact, :inverse_of => :addresses
   embedded_in :employer_office_location, :inverse_of => :addresses
 
-
-
   def match(another_email)
     return false if another_email.nil?
     attrs_to_match = [:email_type, :email_address]

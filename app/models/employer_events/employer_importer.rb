@@ -15,13 +15,14 @@ module EmployerEvents
     end
 
     def employer_values 
-     employer_values = {
+     employer_values = 
+     {
         hbx_id: @org.id,
         fein: @org.fein,
         dba: @org.dba,
         name: @org.name
       }
-      employer_values.delete_if{ |k,v| v.blank?}
+      employer_values.delete_if{|k,v| v.blank?}
       employer_values
     end
 
@@ -36,22 +37,25 @@ module EmployerEvents
     end
 
     def add_contacts(incoming_contacts, employer)
-      employer.employer_contacts = incoming_contacts.map do |incoming_contact| 
-        contact_attributes =  {
-          name_prefix: incoming_contact.name_prefix,
-          first_name: incoming_contact.first_name,
-          middle_name: incoming_contact.middle_name,
-          last_name: incoming_contact.last_name,
-          name_suffix: incoming_contact.name_suffix,
-          job_title: incoming_contact.job_title,
-          department: incoming_contact.department
-        }
-        contact_attributes.delete_if{ |k,v| v.blank?}
-        new_contact = EmployerContact.new(contact_attributes)
-        add_contacts_phones(incoming_contact.phones, new_contact)  
-        add_contacts_addresses(incoming_contact.addresses, new_contact) 
-        add_contacts_emails(incoming_contact.emails, new_contact) 
-        new_contact
+      if incoming_contacts.present? 
+        employer.employer_contacts = incoming_contacts.map do |incoming_contact| 
+          contact_attributes =  
+          {
+            name_prefix: incoming_contact.name_prefix,
+            first_name: incoming_contact.first_name,
+            middle_name: incoming_contact.middle_name,
+            last_name: incoming_contact.last_name,
+            name_suffix: incoming_contact.name_suffix,
+            job_title: incoming_contact.job_title,
+            department: incoming_contact.department
+          }
+          contact_attributes.delete_if{|k,v| v.blank?}
+          new_contact = EmployerContact.new(contact_attributes)
+          add_contacts_phones(incoming_contact.phones, new_contact)  
+          add_contacts_addresses(incoming_contact.addresses, new_contact) 
+          add_contacts_emails(incoming_contact.emails, new_contact) 
+          new_contact
+        end
       end
       employer.save!
     end
@@ -85,35 +89,44 @@ module EmployerEvents
     end
 
     def new_email(incoming_email)
-     email_attributes = {
-        type: incoming_email.type,
-        email_address: incoming_email.email_address 
-      }
-      email_attributes.delete_if{ |k,v| v.blank?}
-      Email.new(email_attributes)
+      if incoming_email.present?
+        email_attributes =
+        {
+          type: incoming_email.type,
+          email_address: incoming_email.email_address 
+        }
+        email_attributes.delete_if{|k,v| v.blank?}
+        Email.new(email_attributes)
+      end
     end
     
     def new_phone(incoming_phone)
-      phone_attributes = {
-        phone_number: incoming_phone.full_phone_number, 
-        phone_type: incoming_phone.type,
-        primary: incoming_phone.is_preferred
-      }
-      phone_attributes.delete_if{ |k,v| v.blank?}
-      Phone.new(phone_attributes)
+      if incoming_phone.present?
+        phone_attributes = 
+        {
+          phone_number: incoming_phone.full_phone_number, 
+          phone_type: incoming_phone.type,
+          primary: incoming_phone.is_preferred
+        }
+        phone_attributes.delete_if{|k,v| v.blank?}
+        Phone.new(phone_attributes)
+      end
     end
 
     def new_address(incoming_address)
-      address_attributes = {
-        address_1: incoming_address.address_line_1,
-        address_2: incoming_address.address_line_2,
-        city: incoming_address.location_city_name,
-        state: incoming_address.location_state_code,
-        zip: incoming_address.postal_code,
-        address_type: incoming_address.type 
-      }
-      address_attributes.delete_if{ |k,v| v.blank?}
-      Address.new(address_attributes)
+      if incoming_address.present?
+        address_attributes = 
+        {
+          address_1: incoming_address.address_line_1,
+          address_2: incoming_address.address_line_2,
+          city: incoming_address.location_city_name,
+          state: incoming_address.location_state_code,
+          zip: incoming_address.postal_code,
+          address_type: incoming_address.type 
+        }
+        address_attributes.delete_if{|k,v| v.blank?}
+        Address.new(address_attributes)
+      end
     end
     
     def plan_year_values

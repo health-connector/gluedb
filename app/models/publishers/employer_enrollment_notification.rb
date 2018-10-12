@@ -14,6 +14,7 @@ module Publishers
                               :carrier_id.in => enrollment_update_required_carrier,
                               :enrollees =>
                                    { "$elemMatch" => {"$and" => [
+                                       {"rel_code" => 'self'},
                                        {"$or" => [
                                            {"coverage_start" => { "$gt" => Date.today - 1.year }},
                                            {"coverage_start" => { "$lt" => Date.today + 1.year }}

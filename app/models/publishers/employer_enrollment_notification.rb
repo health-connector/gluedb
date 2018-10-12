@@ -11,7 +11,6 @@ module Publishers
 
     def employer_policies
       policies = Policy.where(:employer_id => employer.id,
-                               :aasm_state.in => %w[submitted resubmitted effectuated],
                               :carrier_id.in => enrollment_update_required_carrier,
                               :enrollees =>
                                    { "$elemMatch" => {"$and" => [
@@ -30,7 +29,7 @@ module Publishers
 
     def enrollment_update_required_carrier
        Carrier.all.inject([]) do |carrier_id, carrier|
-         if carrier.shop_profile.present? && carrier.shop_profile.requires_employer_updates_on_enrollments
+         if carrier.requires_employer_updates_on_enrollments
            carrier_id << carrier.id
          end
          carrier_id

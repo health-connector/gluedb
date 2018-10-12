@@ -116,8 +116,8 @@ describe Publishers::EmployerEnrollmentNotification do
     let!(:enrollees) { policy.enrollees.update_all(coverage_end:nil) }
     let!(:update_enrollees) { united_health_care_policy.enrollees.update_all(coverage_end:nil) }
     let(:united_carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "UHIC_SHP",requires_employer_updates_on_enrollments:false)}
-    let(:carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "THPP_SHP",requires_employer_updates_on_enrollments:true)}
-    let(:carrier) { FactoryGirl.create(:carrier, carrier_profiles:[carrier_profile]) }
+    let(:carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "THPP_SHP")}
+    let(:carrier) { FactoryGirl.create(:carrier, requires_employer_updates_on_enrollments:true, carrier_profiles:[carrier_profile]) }
     let(:united_health_carrier) { FactoryGirl.create(:carrier, carrier_profiles:[united_carrier_profile]) }
     let!(:policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:carrier) }
     let!(:united_health_care_policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:united_health_carrier) }

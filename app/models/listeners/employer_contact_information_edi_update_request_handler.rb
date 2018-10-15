@@ -12,13 +12,15 @@ module Listeners
       employer = Employer.where(hbx_id: employer_id).first
       en = Publishers::EmployerEnrollmentNotification.new(employer)
       en.process_enrollments_for_edi
+
       broadcast_event({
         :routing_key => "info.application.glue.employer_contact_information_edi_update_request_handler.request_processed",
         :headers => m_headers.merge({
           :return_status => "200"
         })
-      })
-      channel.ack(delivery_info.delivery_tag, false)
+      }, body)
+      
+      channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
     def get_timestamp(msg_properties)

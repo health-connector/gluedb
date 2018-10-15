@@ -113,7 +113,7 @@ describe Publishers::EmployerEnrollmentNotification do
 
   describe "#employer_policies", dbclean: :after_each do
     let!(:employer) { FactoryGirl.create(:employer) }
-    let!(:enrollees) { policy.enrollees.update_all(coverage_end:nil) }
+    let!(:enrollees) { policy.enrollees.update_all(coverage_start:Date.today.beginning_of_month, coverage_end:nil) }
     let!(:update_enrollees) { united_health_care_policy.enrollees.update_all(coverage_end:nil) }
     let(:united_carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "UHIC_SHP",requires_employer_updates_on_enrollments:false)}
     let(:carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "THPP_SHP")}

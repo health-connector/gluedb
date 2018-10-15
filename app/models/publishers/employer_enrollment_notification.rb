@@ -13,16 +13,11 @@ module Publishers
       policies = Policy.where(:employer_id => employer.id,
                               :carrier_id.in => enrollment_update_required_carrier,
                               :enrollees =>
-                                   { "$elemMatch" => {"$and" => [
-                                       {"rel_code" => 'self'},
-                                       {"$or" => [
-                                           {"coverage_start" => { "$gt" => Date.today - 1.year }},
-                                           {"coverage_start" => { "$lt" => Date.today + 1.year }}
-                                       ]},
-                                       {"$or" => [
-                                           {"coverage_end" => nil},
-                                           {"coverage_end" => { "$gt" => Time.now }}]
-                                       }]}
+                                   { "$elemMatch" => {
+                                       "rel_code" => 'self',
+                                       "coverage_start" => { "$gt" => Date.today - 1.year },
+                                       "coverage_end" => nil
+                                       }
                                    })
 
       policies.select{|pol| (pol.is_active? || pol.future_active?)}  # extra check.

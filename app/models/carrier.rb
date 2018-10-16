@@ -13,6 +13,7 @@ class Carrier
   field :shp_hlt, as: :shop_market_health, type: Boolean, default: false
   field :shp_dtl, as: :shop_market_dental, type: Boolean, default: false
   field :is_active, type: Boolean, default: true
+  field :requires_employer_updates_on_enrollments, type: Boolean, default: false
 
   has_many :plans
   has_many :policies
@@ -69,4 +70,9 @@ class Carrier
       Carrier.where("carrier_profiles.fein" => c_fein).first
     end
   end
+
+  def shop_profile
+    carrier_profiles.where(profile_name: /.*SHP/).first
+  end
+
 end

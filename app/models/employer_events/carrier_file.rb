@@ -1,9 +1,12 @@
+require 'set'
+
 module EmployerEvents
   class CarrierFile
     attr_reader :carrier
     attr_reader :buffer
     attr_reader :begin_timestamp
     attr_reader :end_timestamp
+    attr_reader :rendered_employers
 
     def initialize(carrier)
       @carrier = carrier
@@ -11,6 +14,7 @@ module EmployerEvents
       @buffer = StringIO.new
       @begin_timestamp = nil
       @end_timestamp = nil
+      @rendered_employers = Set.new
     end
 
     def empty?
@@ -25,8 +29,9 @@ module EmployerEvents
       carrier.abbrev.upcase + "_" + start_timestamp_string + "_" + end_timestamp_string + ".xml"
     end
 
-    def render_event_using(renderer)
+    def render_event_using(renderer, event)
       if renderer.render_for(carrier, @buffer)
+        @rendered_employers << event.employer_id
         @empty = false
         update_timestamps(renderer.timestamp)
       end

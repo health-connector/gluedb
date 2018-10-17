@@ -1,0 +1,45 @@
+- if !employer_with_contacts.employer_contacts.blank?
+  %contacts{:xmlns => "http://openhbx.org/api/terms/1.0"}
+    - employer_with_contacts.employer_contacts.each do |contact|
+      %contact
+        %id
+          %id= contact.id
+        %person_name
+          %person_surname= contact.last_name if contact.last_name
+          %person_given_name=  contact.first_name if contact.first_name
+          %person_middle_name= contact.middle_name if contact.middle_name
+          %person_full_name= nil
+          %person_name_prefix_text= contact.name_prefix if contact.name_prefix
+          %person_name_suffix_text= contact.name_suffix if contact.name_suffix
+          %person_alternate_name = nil
+        %job_title= contact.job_title if contact.job_title
+        %department= contact.department if contact.department 
+        - if !contact.addresses.blank?
+          %addresses
+            - contact.addresses.each do |address|
+              %address
+                %type= address.address_type if address.address_type
+                %address_line_1= address.address_1 if address.address_1
+                %address_line_2= address.address_2 if address.address_2
+                %address_line_3= address.address_3 if address.address_3
+                %location_city_name= address.city if  address.city
+                %location_county_code= address.county if address.county
+                %location_state_code= address.location_state_code if address.location_state_code
+                %postal_code= address.zip if address.zip
+        - if !contact.emails.blank?
+          %emails
+            - contact.emails.each do |email|
+              %email
+                %type= email.email_type if email.email_type
+                %email_address= email.email_address if email.email_address
+        - if !contact.phones.blank?
+          %phones
+            - contact.phones.each do |phone|
+              %phone
+                %type= phone.phone_type if phone.phone_type
+                %country_code= phone.country_code if phone.country_code 
+                %area_code= phone.area_code if phone.area_code
+                %phone_number= phone.phone_number if phone.phone_number
+                %full_phone_number= nil
+                %extension= phone.extension if phone.extension
+                %is_preferred= phone.primary if phone.primary

@@ -19,6 +19,8 @@ describe AddDependent, dbclean: :after_each do
     before(:each) do 
       allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id)
       allow(ENV).to receive(:[]).with("rel_code").and_return("child")
+      allow(ENV).to receive(:[]).with("coverage_start").and_return("10/03/2018")
+      allow(ENV).to receive(:[]).with("coverage_end").and_return("10/03/2018")
     end
     
     it 'adds the dependent if it does not exist' do 

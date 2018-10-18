@@ -20,7 +20,10 @@ class AddDependent < MongoidMigrationTask
     if is_already_member?(policy, person)
       puts "This person is already an enrollee on this policy" unless Rails.env.test?
     else 
-      policy.enrollees.create!(m_id:person.authority_member_id, rel_code:ENV['rel_code'])
+      enrollee = policy.enrollees.create!(m_id:person.authority_member_id, rel_code:ENV['rel_code'])
+      enrollee.update_attributes!(coverage_start: ENV["coverage_start"])
+      enrollee.update_attributes!(coverage_end: ENV["coverage_end"])
+      puts "Successfully updated enrollee: #{enrollee.m_id} and policy: #{policy.eg_id}" unless Rails.env.test?
     end
   end
 
@@ -28,5 +31,4 @@ class AddDependent < MongoidMigrationTask
     member = policy.enrollees.where(m_id: person.authority_member_id).first
     return true if member.present? 
   end
-
 end

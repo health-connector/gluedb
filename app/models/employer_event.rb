@@ -35,7 +35,7 @@ class EmployerEvent
   end
 
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
-    employer_importer = ::EmployerEvents::EmployerImporter.new(new_payload)
+    employer_importer = ::EmployerEvents::EmployerImporter.new(new_payload, new_event_name)
     employer_importer.persist
     if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME)
       latest_time = ([new_event_time] + self.where(:employer_id => new_employer_id).map(&:event_time)).max

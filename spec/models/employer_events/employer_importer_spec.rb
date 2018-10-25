@@ -5,7 +5,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
 
   describe "with no published plan years" do
     let(:event_name) do 
-      "urn:openhbx:events:v1:employer#created"
+      "urn:openhbx:events:v1:employer#contact_changed"
     end
 
     let(:employer_event_xml) do
@@ -91,7 +91,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
 
   describe "with a published plan year" do
     let(:event_name) do 
-      "urn:openhbx:events:v1:employer#created"
+      "urn:openhbx:events:v1:employer#contact_changed"
     end
     let(:employer_event_xml) do
       <<-XML_CODE
@@ -178,7 +178,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
 
   describe "employer with basic information" do
     let(:event_name) do 
-      "urn:openhbx:events:v1:employer#created"
+      "urn:openhbx:events:v1:employer#contact_changed"
     end
     let(:employer_event_xml) do
       <<-XML_CODE
@@ -219,7 +219,7 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
 
   describe "with multiple published plan years" do
     let(:event_name) do 
-      "urn:openhbx:events:v1:employer#created"
+      "urn:openhbx:events:v1:employer#contact_changed"
     end
     let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
     let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
@@ -872,9 +872,15 @@ RSpec.shared_context "employer importer shared persistance context" do
     let(:last_plan_year_record) { instance_double(PlanYear) }
     let(:existing_plan_years) { [first_plan_year_record] }
     let(:office_location) { instance_double(EmployerOfficeLocation) }
+    let(:incoming_office_location) { instance_double(EmployerOfficeLocation, name:"place") }
+
+    let(:address_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, address_changed_event_name) }
+    let(:contact_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, contact_changed_event_name) }
+    let(:contact_changed_event_name) {"urn:openhbx:events:v1:employer#contact_changed"}
+    let(:address_changed_event_name) {"urn:openhbx:events:v1:employer#address_changed"}
 
     subject { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, event_name) }
-    
+
     before :each do
       allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
       allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
@@ -895,5 +901,50 @@ RSpec.shared_context "employer importer shared persistance context" do
       expect(employer_record).to have_received(:employer_office_locations=).with(instance_of(Array))
     end
 
+    describe '#is_contact_information_update_event?' do
+      let(:address_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, address_changed_event_name) }
+      let(:contact_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, contact_changed_event_name) }
+      let(:contact_changed_event_name) {"urn:openhbx:events:v1:employer#contact_changed"}
+      let(:address_changed_event_name) {"urn:openhbx:events:v1:employer#address_changed"}
+
+      context 'with a non-update event' do
+        it 'returns false' do
+          expect(subject.is_contact_information_update_event?).to eq false
+        end
+      end
+      
+      context "with a contact changed update event" do
+        it 'returns true' do
+          expect(contact_changed_subject.is_contact_information_update_event?).to eq true
+        end
+      end
+      
+      context "with an address changed update event" do
+        it 'returns true' do
+          expect(contact_changed_subject.is_contact_information_update_event?).to eq true
+        end
+      end
+    end
+
+    describe '#extract_office_location_attributes' do 
+      
+      context 'with an incoming office location' do 
+        it 'extracts office the location attributes' do 
+          expect(subject.extract_office_location_attributes(incoming_office_location)).to eq ({name: "place"})
+        end
+      end
+    end
+
+    describe '#strip_type_urn' do
+      let(:home_type_urn) { "urn:openhbx:terms:v1:phone_type#home" }
+      let(:work_type_urn) { "urn:openhbx:terms:v1:phone_type#work" }
+
+      context 'with an incoming event type urn' do 
+        it 'strips the event type urn' do 
+          expect(subject.send(:strip_type_urn, home_type_urn)).to eq ("home")
+          expect(subject.send(:strip_type_urn, work_type_urn)).to eq ("work")
+        end
+      end
+    end
   end
 end

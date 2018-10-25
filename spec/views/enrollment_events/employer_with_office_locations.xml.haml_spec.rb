@@ -10,7 +10,7 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
 
   let(:address) do 
     instance_double Address, 
-      address_type:"urn:openhbx:terms:v1:address_type#mailing", 
+      address_type:"mailing", 
       location_state_code:"CA",
       address_1:"14400 Harvard",
       address_2:"Apt 3",
@@ -28,7 +28,7 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
 
   let(:phone) do 
     instance_double Phone,
-      phone_type:"urn:openhbx:terms:v1:phone_type#mobile",
+      phone_type:"mobile",
       phone_number:"5102222222",
       extension:"123",
       primary: true,
@@ -47,7 +47,7 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
 
   let(:email) do 
     instance_double Email,
-      email_type:"urn:openhbx:terms:v1:email_type#home",
+      email_type:"home",
       email_address:"tim@tim.com"
   end
 

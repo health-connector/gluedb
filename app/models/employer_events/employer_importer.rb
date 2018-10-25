@@ -27,13 +27,18 @@ module EmployerEvents
     end
 
     def manage_employer_demographics(employer)
-      if employer.employer_contacts.blank? || @event_name == "contact_changed"
+      if employer.employer_contacts.blank? || is_contact_information_update_event?
         add_contacts(@org.contacts, employer)
       end
 
-      if employer.employer_office_locations.blank? ||  @event_name == "address_changed"
+      if employer.employer_office_locations.blank? || is_contact_information_update_event?
         add_office_locations(@org.office_locations,employer)
       end
+    end
+
+    def is_contact_information_update_event?
+      clean_event_name = Maybe.new(@event_name).strip.split("#").last.value
+      ["address_changed", "contact_changed"].include?(clean_event_name)
     end
 
     def add_contacts(incoming_contacts, employer)
@@ -77,10 +82,19 @@ module EmployerEvents
         new_address(incoming_address)
       end
     end
+
+    def extract_office_location_attributes(incoming_office_location)
+      ol_attributes = {
+        name: incoming_office_location.name
+      }
+      ol_attributes.delete_if{|k,v| v.blank?}
+    end
     
     def add_office_locations(incoming_office_locations, employer)
       employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|   
-          new_location = EmployerOfficeLocation.new(name:incoming_office_location.name) 
+          new_location = EmployerOfficeLocation.new(
+            extract_office_location_attributes(incoming_office_location)
+          )
           new_location.phone = new_phone(incoming_office_location.phone)
           new_location.address = new_address(incoming_office_location.address)
           new_location
@@ -92,7 +106,7 @@ module EmployerEvents
       if incoming_email.present?
         email_attributes =
         {
-          type: incoming_email.type,
+          type: strip_type_urn(incoming_email.type),
           email_address: incoming_email.email_address 
         }
         email_attributes.delete_if{|k,v| v.blank?}
@@ -105,8 +119,8 @@ module EmployerEvents
         phone_attributes = 
         {
           phone_number: incoming_phone.full_phone_number, 
-          phone_type: incoming_phone.type,
-          primary: incoming_phone.is_preferred
+          phone_type: strip_type_urn(incoming_phone.type),
+          primary: !!incoming_phone.is_preferred
         }
         phone_attributes.delete_if{|k,v| v.blank?}
         Phone.new(phone_attributes)
@@ -122,7 +136,7 @@ module EmployerEvents
           city: incoming_address.location_city_name,
           state: incoming_address.location_state_code,
           zip: incoming_address.postal_code,
-          address_type: incoming_address.type 
+          address_type: strip_type_urn(incoming_address.type)
         }
         address_attributes.delete_if{|k,v| v.blank?}
         Address.new(address_attributes)
@@ -171,6 +185,10 @@ module EmployerEvents
     end
 
     protected
+
+    def strip_type_urn(node_content)
+      Maybe.new(node_content).strip.split("#").last.value
+    end
 
     def stripped_node_value(node)
       node ? node.content.strip : nil

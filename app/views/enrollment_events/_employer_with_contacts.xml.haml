@@ -18,7 +18,7 @@
           %addresses
             - contact.addresses.each do |address|
               %address
-                %type= address.address_type if address.address_type
+                %type= "urn:openhbx:terms:v1:address_type#" + address.address_type
                 %address_line_1= address.address_1 if address.address_1
                 %address_line_2= address.address_2 if address.address_2
                 %address_line_3= address.address_3 if address.address_3
@@ -30,13 +30,13 @@
           %emails
             - contact.emails.each do |email|
               %email
-                %type= email.email_type if email.email_type
+                %type= "urn:openhbx:terms:v1:email_type#" + email.email_type
                 %email_address= email.email_address if email.email_address
         - if !contact.phones.blank?
           %phones
             - contact.phones.each do |phone|
               %phone
-                %type= phone.phone_type if phone.phone_type
+                %type= "urn:openhbx:terms:v1:phone_type#" + phone.phone_type
                 %country_code= phone.country_code if phone.country_code 
                 %area_code= phone.area_code if phone.area_code
                 %phone_number= phone.phone_number if phone.phone_number

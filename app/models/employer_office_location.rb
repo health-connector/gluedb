@@ -3,7 +3,6 @@ class EmployerOfficeLocation
 
   include MergingModel
 
-  field :id, type: String
   field :name, type: String
   field :is_primary, type: Boolean 
 

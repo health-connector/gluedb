@@ -6,7 +6,7 @@
         %primary= location.is_primary if location.is_primary      
         - if !location.address.blank?
           %address
-            %type= location.address.address_type if location.address.address_type
+            %type= "urn:openhbx:terms:v1:address_type#" + location.address.address_type
             %address_line_1= location.address.address_1 if location.address.address_1
             %address_line_2= location.address.address_2 if location.address.address_2
             %address_line_3= location.address.address_3 if location.address.address_3
@@ -16,7 +16,7 @@
             %postal_code= location.address.zip if location.address.zip
         - if !location.phone.blank?
           %phone
-            %type= location.phone.phone_type if location.phone.phone_type
+            %type= "urn:openhbx:terms:v1:phone_type#" + location.phone.phone_type
             %country_code= location.phone.country_code if location.phone.country_code
             %area_code= location.phone.area_code if location.phone.area_code
             %phone_number= location.phone.phone_number if location.phone.phone_number

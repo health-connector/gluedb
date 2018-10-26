@@ -802,7 +802,7 @@ RSpec.shared_context "employer importer shared persistance context" do
     it "creates new contact email" do
       expect(Email).to receive(:new).with(
         {
-          type: "work",
+          email_type: "work",
           email_address: "me@work.com"
         }
       ).and_return(new_contact_email)

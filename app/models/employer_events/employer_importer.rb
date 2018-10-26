@@ -106,7 +106,7 @@ module EmployerEvents
       if incoming_email.present?
         email_attributes =
         {
-          type: strip_type_urn(incoming_email.type),
+          email_type: strip_type_urn(incoming_email.type),
           email_address: incoming_email.email_address 
         }
         email_attributes.delete_if{|k,v| v.blank?}

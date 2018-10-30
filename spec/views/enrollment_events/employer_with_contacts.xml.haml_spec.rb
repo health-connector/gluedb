@@ -11,12 +11,11 @@ describe "enrollment_events/_employer_with_contacts.xml.haml" do
   let(:address) do 
     instance_double Address, 
       address_type:"mailing",
-      location_state_code:"CA",
       address_1:"14400 Harvard",
       address_2:"Apt 3",
       address_3: "Ste. 200",
       city:"Winters",
-      location_state_code:"CA",
+      state:"CA",
       county:"Yolo",
       zip:"95694" 
   end

@@ -17,7 +17,6 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
       address_3: "Ste. 200",
       city:"Winters",
       state:"CA",
-      location_state_code:"CA",
       county:"Yolo",
       zip:"95694" 
   end

@@ -75,15 +75,21 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
   before do
     allow(employer_office_location).to receive(:phone).and_return(phone)
     allow(employer_office_location).to receive(:address).and_return(address)
-    render :partial => "enrollment_events/employer_with_office_locations", :object => employer
   end
 
-  subject { "<organization xmlns='http://openhbx.org/api/terms/1.0'>
+  subject do
+      rendered_xml = ApplicationController.new.render_to_string(
+        :layout => nil,
+        :partial => "enrollment_events/employer_with_office_locations",
+        :object => employer,
+        :format => :xml
+      )
+      "<organization xmlns='http://openhbx.org/api/terms/1.0'>
               <id>
                 <id></id> 
               </id>  
-              <name>This one place</name>          
-              #{rendered}
+              <name>This one place</name>
+              #{rendered_xml}
               <website></website>
               <contacts>
                 <contact>
@@ -123,7 +129,7 @@ describe "enrollment_events/_employer_with_office_locations.xml.haml" do
               </contacts>
               <is_active>true</is_active>
             </organization>"
-          }
+  end
 
   it "should be schema valid" do
     expect(validate_with_schema(Nokogiri::XML(subject))).to eq([])

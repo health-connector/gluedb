@@ -80,10 +80,17 @@ describe "enrollment_events/_employer_with_contacts.xml.haml" do
     allow(employer_contact).to receive(:phones).and_return(phones)
     allow(employer_contact).to receive(:emails).and_return(emails)
     
-    render :partial => "enrollment_events/employer_with_contacts", :object => employer
+
   end
 
-  subject { rendered }
+  subject do
+    ApplicationController.new.render_to_string(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_contacts",
+      :object => employer,
+      :format => :xml
+    )
+  end
 
   it "should be schema valid" do
     expect(validate_with_schema(Nokogiri::XML(subject))).to eq([])

@@ -1,5 +1,5 @@
 - if !employer_with_office_locations.employer_office_locations.blank?
-  %office_locations
+  %office_locations{:xmlns => "http://openhbx.org/api/terms/1.0"}
     - employer_with_office_locations.employer_office_locations.each do |location|
       %office_location  
         %name= location.name if location.name

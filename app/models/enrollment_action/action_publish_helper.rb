@@ -257,7 +257,7 @@ module EnrollmentAction
       if employer_id
         employer = Employer.where(:hbx_id => employer_id).first
         if employer
-          cont = ActionController::Base.new
+          cont = ApplicationController.new
           unless event_xml_doc.xpath("//cv:enrollment/cv:shop_market/cv:employer_link/cv:contacts", XML_NS).any?
             add_contact_xml_for(cont, employer)
           end
@@ -269,7 +269,12 @@ module EnrollmentAction
     end
 
     def add_contact_xml_for(controller, employer)
-      contact_xml = controller.render :partial => "enrollment_events/employer_with_contacts", :object => employer
+      contact_xml = controller.render_to_string(
+        :layout => nil,
+        :partial => "enrollment_events/employer_with_contacts",
+        :object => employer,
+        :format => :xml
+      )
       contact_xml_doc = Nokogiri::XML(contact_xml)
       contact_xml_node = contact_xml_doc.root
       if contact_xml_node
@@ -284,7 +289,12 @@ module EnrollmentAction
     end
 
     def add_office_location_xml_for(controller, employer)
-      ol_xml = controller.render :partial => "enrollment_events/employer_with_office_locations", :object => employer
+      ol_xml = controller.render_to_string(
+        :layout => nil,
+        :partial => "enrollment_events/employer_with_office_locations",
+        :object => employer,
+        :format => :xml
+      )
       ol_xml_doc = Nokogiri::XML(ol_xml)
       ol_xml_node = ol_xml_doc.root
       if ol_xml_node

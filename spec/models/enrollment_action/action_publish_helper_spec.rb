@@ -498,11 +498,11 @@ RSpec.shared_examples "a publish helper adding employer contact and office locat
   let(:transformed_target_xml) { Nokogiri::XML(publish_helper.to_xml) }
 
   let(:employer) { instance_double(Employer) }
-  let(:controller) { instance_double(ActionController::Base) }
+  let(:controller) { instance_double(ApplicationController) }
 
   before :each do
     allow(Employer).to receive(:where).with({:hbx_id => employer_id}).and_return([employer])
-    allow(ActionController::Base).to receive(:new).and_return(controller)
+    allow(ApplicationController).to receive(:new).and_return(controller)
   end
 
   it "includes the employer contacts" do
@@ -556,8 +556,11 @@ describe EnrollmentAction::ActionPublishHelper, "given an event that has no empl
   let(:contacts_xml) { "<contacts/>"}
 
   before :each do
-    allow(controller).to receive(:render).with(
-      :partial => "enrollment_events/employer_with_contacts", :object => employer
+    allow(controller).to receive(:render_to_string).with(
+      :layout =>  nil,
+      :partial => "enrollment_events/employer_with_contacts",
+      :object => employer,
+      :format => :xml
     ).and_return(contacts_xml)
   end
 
@@ -588,8 +591,11 @@ describe EnrollmentAction::ActionPublishHelper, "given an event that has no offi
   let(:office_locations_xml) { "<office_locations/>"}
   
   before :each do
-    allow(controller).to receive(:render).with(
-      :partial => "enrollment_events/employer_with_office_locations", :object => employer
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_office_locations",
+      :object => employer,
+      :format => :xml
     ).and_return(office_locations_xml)
   end
 
@@ -622,11 +628,15 @@ describe EnrollmentAction::ActionPublishHelper, "given an event that has no empl
   let(:office_locations_xml) { "<office_locations/>"}
   
   before :each do
-    allow(controller).to receive(:render).with(
-      :partial => "enrollment_events/employer_with_contacts", :object => employer
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_contacts", :object => employer,
+      :format => :xml
     ).and_return(contacts_xml)
-    allow(controller).to receive(:render).with(
-      :partial => "enrollment_events/employer_with_office_locations", :object => employer
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_office_locations", :object => employer,
+      :format => :xml
     ).and_return(office_locations_xml)
   end
 

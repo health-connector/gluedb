@@ -50,5 +50,4 @@
                 %type= "urn:openhbx:terms:v1:phone_type#" + phone.phone_type
                 - unless phone.phone_number.blank?
                   %full_phone_number= phone.phone_number
-                - if phone.primary
-                  %is_preferred= true
+                %is_preferred= phone.primary ? "true" : "false"

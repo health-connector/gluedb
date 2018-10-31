@@ -8,7 +8,7 @@ class Phone
   field :phone_type, type: String
   field :phone_number, type: String
   field :extension, type: String, default: ""
-  field :primary, type: Boolean
+  field :primary, type: Boolean, default: false
   field :country_code, type: String, default: ""
   field :area_code, type: String, default: ""
   field :full_phone_number, type: String, default: ""

@@ -85,7 +85,8 @@ module EmployerEvents
 
     def extract_office_location_attributes(incoming_office_location)
       ol_attributes = {
-        name: incoming_office_location.name
+        name: incoming_office_location.name,
+        is_primary: !!incoming_office_location.is_primary
       }
       ol_attributes.delete_if{|k,v| v.blank?}
     end

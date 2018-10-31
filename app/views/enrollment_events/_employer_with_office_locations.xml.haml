@@ -4,7 +4,7 @@
       %office_location
         - unless location.name.blank?  
           %name= location.name
-        %primary= location.is_primary
+        %primary= location.is_primary ? "true" : "false"
         - if !location.address.blank?
           %address
             %type= "urn:openhbx:terms:v1:address_type#" + location.address.address_type
@@ -26,5 +26,4 @@
             %type= "urn:openhbx:terms:v1:phone_type#" + location.phone.phone_type
             - unless location.phone.phone_number.blank?
               %full_phone_number= location.phone.phone_number
-            - if location.phone.primary
-              %is_preferred= true
+            %is_preferred= location.phone.primary ? "true" : "false"

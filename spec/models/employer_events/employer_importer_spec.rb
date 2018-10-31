@@ -759,7 +759,7 @@ RSpec.shared_context "employer importer shared persistance context" do
 
     it "creates new office locations" do
       expect(EmployerOfficeLocation).to receive(:new).with(
-        {name: "Work"}
+        {name: "Work", :is_primary=>true}
       ).and_return(office_location)
       subject.persist
     end
@@ -872,7 +872,7 @@ RSpec.shared_context "employer importer shared persistance context" do
     let(:last_plan_year_record) { instance_double(PlanYear) }
     let(:existing_plan_years) { [first_plan_year_record] }
     let(:office_location) { instance_double(EmployerOfficeLocation) }
-    let(:incoming_office_location) { instance_double(EmployerOfficeLocation, name:"place") }
+    let(:incoming_office_location) { instance_double(Openhbx::Cv2::OfficeLocation, name:"place", is_primary: true) }
 
     let(:address_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, address_changed_event_name) }
     let(:contact_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, contact_changed_event_name) }
@@ -930,7 +930,7 @@ RSpec.shared_context "employer importer shared persistance context" do
       
       context 'with an incoming office location' do 
         it 'extracts office the location attributes' do 
-          expect(subject.extract_office_location_attributes(incoming_office_location)).to eq ({name: "place"})
+          expect(subject.extract_office_location_attributes(incoming_office_location)).to eq ({name: "place", is_primary: true})
         end
       end
     end

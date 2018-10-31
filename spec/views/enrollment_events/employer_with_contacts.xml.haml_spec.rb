@@ -28,7 +28,7 @@ describe "enrollment_events/_employer_with_contacts.xml.haml" do
       phone_type:"mobile",
       phone_number:"5102222222",
       extension:"123",
-      primary: true,
+      primary: nil,
       country_code:"1",
       area_code:"123",
       full_phone_number:"123-456-5678"

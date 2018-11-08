@@ -1,5 +1,4 @@
 require 'rails_helper'
-require "pry"
 
 describe EnrollmentAction::SimpleProductChange, "given an enrollment event set that:
 -- has one event" do
@@ -54,7 +53,7 @@ describe EnrollmentAction::SimpleProductChange, "given an enrollment event set t
 --  provides a new plan id
 --  with no dependents changed
 --  with a carrier that DOES NOT require simple plan changes" do
-  let(:tufts_carrier) { instance_double(Carrier, requires_simple_plan_changes?: false) }
+  let(:non_tufts_carrier) { instance_double(Carrier, requires_simple_plan_changes?: false) }
   let(:plan) { instance_double(Plan, :id => 1, carrier_id: 1) }
   let(:new_plan) { instance_double(Plan, :id => 2, carrier_id: 1) }
 
@@ -65,8 +64,8 @@ describe EnrollmentAction::SimpleProductChange, "given an enrollment event set t
   subject { EnrollmentAction::SimpleProductChange }
 
   before :each do
-    allow(plan).to receive(:carrier).and_return(tufts_carrier)
-    allow(new_plan).to receive(:carrier).and_return(tufts_carrier)
+    allow(plan).to receive(:carrier).and_return(non_tufts_carrier)
+    allow(new_plan).to receive(:carrier).and_return(non_tufts_carrier)
   end
 
   it "doesn't qualify" do

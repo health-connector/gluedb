@@ -15,6 +15,8 @@ class Carrier
   field :is_active, type: Boolean, default: true
   field :requires_employer_updates_on_enrollments, type: Boolean, default: false
 
+  field :requires_simple_plan_changes, type: Boolean, default: false
+  
   has_many :plans
   has_many :policies
   has_many :premium_payments

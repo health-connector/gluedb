@@ -149,7 +149,7 @@ describe Publishers::EmployerEnrollmentNotification do
         end
 
         it "should include type of enrollment" do
-          expect(@doc.at_xpath('//type').text).to eq "urn:openhbx:terms:v1:enrollment#audit"
+          expect(@doc.at_xpath('//type').text).to eq "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
         end
       end
     end

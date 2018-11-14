@@ -45,7 +45,7 @@ module Publishers
               :affected_members => affected_members,
               :policy => policy,
               :enrollees => policy.enrollees.reject { |e| e.canceled? || e.terminated? },
-              :event_type => "urn:openhbx:terms:v1:enrollment#audit",
+              :event_type => "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers",
               :transaction_id => transaction_id
           }
       )

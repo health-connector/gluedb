@@ -35,14 +35,14 @@ module Publishers
     def render_cv(policy)
       affected_members = ::BusinessProcesses::AffectedMember.new({
                                                     :policy => policy,
-                                                    :member_id => policy.subscriber.id
+                                                    :member_id => policy.subscriber.m_id
                                                 })
       ApplicationController.new.render_to_string(
           :layout => "enrollment_event",
           :partial => "enrollment_events/enrollment_event",
           :format => :xml,
           :locals => {
-              :affected_members => affected_members,
+              :affected_members => [affected_members],
               :policy => policy,
               :enrollees => policy.enrollees.reject { |e| e.canceled? || e.terminated? },
               :event_type => "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers",

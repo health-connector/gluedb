@@ -1,6 +1,10 @@
 require "rails_helper"
 
 describe Publishers::EmployerEnrollmentNotification do
+  let(:xml_ns) do
+    { :cv => "http://openhbx.org/api/terms/1.0" }
+  end
+
   describe "#publish_edi" do
 
     let!(:amqp_connection) { double(close: true) }
@@ -83,7 +87,7 @@ describe Publishers::EmployerEnrollmentNotification do
 
     describe "#process_enrollments_for_edi", dbclean: :after_each do
 
-      context "edi_publish sucess",dbclean: :after_each do
+      context "edi_publish success",dbclean: :after_each do
 
         before :each do
           allow(subject).to receive(:publish_edi).with(amqp_connection, event_xml, policy).and_return([true, edi_publish_sucess])
@@ -122,8 +126,9 @@ describe Publishers::EmployerEnrollmentNotification do
     let!(:policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:carrier) }
     let!(:united_health_care_policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:united_health_carrier) }
     let!(:person) {FactoryGirl.create(:person)}
-    let!(:first_enrollee) {policy.enrollees[0]}
-    let!(:second_enrollee) {policy.enrollees[1]}
+    let!(:first_enrollee) { policy.enrollees[0] }
+    let!(:second_enrollee) { policy.enrollees[1] }
+    let(:subscriber_enrollee_id) { policy.subscriber.m_id }
 
     subject { Publishers::EmployerEnrollmentNotification.new(employer) }
 
@@ -135,21 +140,34 @@ describe Publishers::EmployerEnrollmentNotification do
       end
     end
 
-    context "#render_cv", dbclean: :after_each do
+    context "#render_cv" do
       context "should render CV for policy" do
+        let(:subscriber_member_id) { person.authority_member_id }
+
         before :each do
           allow(first_enrollee).to receive(:person).and_return(person)
           allow(second_enrollee).to receive(:person).and_return(person)
           render_result = subject.render_cv(policy)
-          @doc = Nokogiri::HTML(render_result.gsub("\n", ""))
+          @doc = Nokogiri::XML(render_result.gsub("\n", ""))
         end
 
-        it "should include market type" do
-          expect(@doc.at_xpath('//market').text).to eq "urn:openhbx:terms:v1:aca_marketplace#shop"
+        it "includes only one affected member" do
+          expect(@doc.xpath('//cv:affected_members/cv:affected_member', xml_ns).count).to eq(1)
         end
 
-        it "should include type of enrollment" do
-          expect(@doc.at_xpath('//type').text).to eq "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
+        it "includes the subscriber in the list of affected members" do
+          affected_member_ids = @doc.xpath('//cv:affected_members/cv:affected_member/cv:member/cv:id/cv:id', xml_ns).map do |node|
+            node.content.split("#").last
+          end
+          expect(affected_member_ids).to include(subscriber_member_id)
+        end
+
+        it "includes market type" do
+          expect(@doc.at_xpath('//cv:market', xml_ns).text).to eq "urn:openhbx:terms:v1:aca_marketplace#shop"
+        end
+
+        it "includes type of enrollment" do
+          expect(@doc.at_xpath('//cv:type', xml_ns).text,).to eq "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers"
         end
       end
     end

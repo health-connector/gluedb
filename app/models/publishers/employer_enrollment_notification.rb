@@ -58,12 +58,14 @@ module Publishers
         employer_policies.each do |policy|
           render_result = render_cv(policy)
           publish_result, errors = publish_edi(amqp_connection, render_result, policy)
+          headers = errors.headers.any? ? errors.headers.merge({:return_status => "500"}) : { :return_status => "200" }
+          error_message = errors.headers.any? ? errors.message : nil
           EnrollmentAction::EnrollmentActionIssue.create!({
                                                               :hbx_enrollment_id => policy.eg_id,
                                                               :hbx_enrollment_vocabulary => render_result,
                                                               :enrollment_action_uri => "urn:openhbx:terms:v1:enrollment#sponsor_information_change",
-                                                              :error_message => errors.message,
-                                                              :headers => errors.headers,
+                                                              :error_message => error_message,
+                                                              :headers => headers,
                                                               :received_at =>  Time.now
                                                           })
         end
@@ -87,7 +89,7 @@ module Publishers
           return [false, PublishError.new("EDI Codec CV2 Publish Failed", { :error_message => publisher.errors[:error_message]})]
         end
 
-        [publish_result, PublishError.new("EDI Codec CV2/Leagcy CV1 Published Sucessfully", { :error_message => publisher.errors[:error_message]})]
+        [publish_result, PublishError.new("EDI Codec CV2/Leagcy CV1 Published Sucessfully", {})]
       rescue Exception => e
         return [false, PublishError.new("Publish EDI Failed", {:error_message => e.message, :error_type => e.class.name, :backtrace => e.backtrace[0..5].join("\n")})]
       end

@@ -89,7 +89,7 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git"
+gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git", tag: "ma-0.2.0"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'

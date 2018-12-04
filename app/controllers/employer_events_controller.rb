@@ -8,15 +8,10 @@ class EmployerEventsController < ApplicationController
   def publish
     ec = ExchangeInformation
     connection = AmqpConnectionProvider.start_connection
-    EmployerEvent.with_digest_payloads do |payload|
-      Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |chan|
-        ex = chan.fanout(ec.event_publish_exchange, {:durable => true})
-        ex.publish(
-          payload,
-          {routing_key: "info.events.trading_partner.employer_digest.published"}
-        )
-      end
-    end
+    broadcaster = Amqp::EventBroadcaster.new(connection)
+    broadcaster.broadcast({
+      :routing_key => "info.events.trading_partner.employer_digest.requested"
+    }, "")
     connection.close
     redirect_to employer_events_path
   end

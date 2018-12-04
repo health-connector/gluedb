@@ -1,6 +1,46 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Carrier do
+describe Carrier, "given nothing" do
+  it "does not require simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_falsey
+  end
+end
+
+describe Carrier, "given:
+- a requirement for simple plan changes
+", dbclean: :after_each do
+  subject do
+    Carrier.new({
+      :requires_simple_plan_changes => true
+    })
+  end
+
+  it "requires simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_truthy
+  end
+end
+
+describe Carrier, "given nothing" do
+  it "does not require simple renewal" do
+    expect(subject.requires_simple_renewal?).to be_falsey
+  end
+end
+
+describe Carrier, "given:
+- a requirement for simple renewal
+", dbclean: :after_each  do
+  subject do
+    Carrier.new({
+      :requires_simple_renewal => true
+    })
+  end
+
+  it "requires simple renewal" do
+    expect(subject.requires_simple_renewal?).to be_truthy
+  end
+end
+
+describe Carrier, dbclean: :after_each do
   subject(:carrier) { build :carrier }
   [
     :name,

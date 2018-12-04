@@ -53,7 +53,6 @@ group :test do
   gem 'rspec-rails', '3.3.3'
   gem 'rspec-collection_matchers', '1.1.2'
   gem 'capybara', '2.4.4'
-  gem "capybara-webkit"
   gem 'factory_girl_rails', '4.5.0'
   gem 'factory_girl', '4.5.0'
   gem 'database_cleaner', '1.5.3'
@@ -89,7 +88,7 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git", tag: "ma-0.2.1"
+gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'

@@ -270,6 +270,10 @@ describe EnrollmentAction::ActionPublishHelper, "SHOP: recalculating premium tot
     expect(total_employer_responsible_amount_xpath.content).to eq("185.00")
   end
 
+  it "is shop" do
+    expect(publish_helper.is_shop?).to be_truthy
+  end
+
   context "with an original employer contribution greater than the adjusted total" do
     let(:total_employer_responsible_amount) { '250.00' }
     it "recalculates the contribution to be no greater than the total premium" do
@@ -354,6 +358,10 @@ describe EnrollmentAction::ActionPublishHelper, "IVL: recalculating premium tota
 
   it "recalculates the correct total_responsible_amount" do
     expect(total_responsible_amount_xpath.content).to eq("50.0")
+  end
+
+  it "is not shop" do
+    expect(publish_helper.is_shop?).to be_falsey
   end
 
   context "with an original aptc amount greater than the adjusted total" do
@@ -478,4 +486,159 @@ describe EnrollmentAction::ActionPublishHelper, "told to assign an assistance ef
   it "sets the correct date" do
     expect(assistance_date_result.content).to eq "20081024"
   end
+end
+
+RSpec.shared_examples "a publish helper adding employer contact and office location information" do
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+
+  let(:employer_id) { "some_employer_id" }
+
+  let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(event_xml) }
+
+  let(:transformed_target_xml) { Nokogiri::XML(publish_helper.to_xml) }
+
+  let(:employer) { instance_double(Employer) }
+  let(:controller) { instance_double(ApplicationController) }
+
+  before :each do
+    allow(Employer).to receive(:where).with({:hbx_id => employer_id}).and_return([employer])
+    allow(ApplicationController).to receive(:new).and_return(controller)
+  end
+
+  it "includes the employer contacts" do
+    expect(
+      transformed_target_xml.
+        xpath("//cv:shop_market/cv:employer_link/cv:contacts", xml_namespace).
+        count
+    ).to eq 1
+  end
+
+  it "includes the employer office locations" do
+    expect(
+      transformed_target_xml.
+        xpath("//cv:shop_market/cv:employer_link/cv:office_locations", xml_namespace).
+        count
+    ).to eq 1
+  end
+
+  it "includes employer contacts before the office locations" do
+    ec_node = transformed_target_xml.
+                xpath("//cv:shop_market/cv:employer_link/cv:contacts", xml_namespace).first
+    ol_node = transformed_target_xml.
+                xpath("//cv:shop_market/cv:employer_link/cv:office_locations", xml_namespace).first
+    ol_index = ol_node.parent.children.index(ol_node)
+    ec_index = ol_node.parent.children.index(ec_node)
+    expect(ec_index < ol_index).to be_truthy
+  end
+end
+
+describe EnrollmentAction::ActionPublishHelper, "given an event that has no employer contact info" do
+
+  let(:event_xml) do
+    <<-EVENTXML
+      <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+        <policy>
+        <enrollment>
+          <shop_market>
+            <employer_link>
+              <id>
+                <id>urn:kjlsdfke##{employer_id}</id>
+              </id>
+              <office_locations/>
+            </employer_link>
+          </shop_market>
+        </enrollment>
+      </policy>
+    </enrollment>
+    EVENTXML
+  end
+
+  let(:contacts_xml) { "<contacts/>"}
+
+  before :each do
+    allow(controller).to receive(:render_to_string).with(
+      :layout =>  nil,
+      :partial => "enrollment_events/employer_with_contacts",
+      :object => employer,
+      :format => :xml
+    ).and_return(contacts_xml)
+  end
+
+  it_behaves_like "a publish helper adding employer contact and office location information"
+end
+
+describe EnrollmentAction::ActionPublishHelper, "given an event that has no office locations" do
+
+  let(:event_xml) do
+    <<-EVENTXML
+      <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+        <policy>
+        <enrollment>
+          <shop_market>
+            <employer_link>
+              <id>
+                <id>urn:kjlsdfke##{employer_id}</id>
+              </id>
+              <contacts/>
+            </employer_link>
+          </shop_market>
+        </enrollment>
+      </policy>
+    </enrollment>
+    EVENTXML
+  end
+
+  let(:office_locations_xml) { "<office_locations/>"}
+  
+  before :each do
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_office_locations",
+      :object => employer,
+      :format => :xml
+    ).and_return(office_locations_xml)
+  end
+
+  it_behaves_like "a publish helper adding employer contact and office location information"
+end
+
+describe EnrollmentAction::ActionPublishHelper, "given an event that has no employer contact info or office locations" do
+
+  let(:employer_id) { "some_employer_id" }
+
+  let(:event_xml) do
+    <<-EVENTXML
+      <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+        <policy>
+        <enrollment>
+          <shop_market>
+            <employer_link>
+              <id>
+                <id>urn:kjlsdfke##{employer_id}</id>
+              </id>
+            </employer_link>
+          </shop_market>
+        </enrollment>
+      </policy>
+    </enrollment>
+    EVENTXML
+  end
+
+  let(:contacts_xml) { "<contacts/>"}
+  let(:office_locations_xml) { "<office_locations/>"}
+  
+  before :each do
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_contacts", :object => employer,
+      :format => :xml
+    ).and_return(contacts_xml)
+    allow(controller).to receive(:render_to_string).with(
+      :layout => nil,
+      :partial => "enrollment_events/employer_with_office_locations", :object => employer,
+      :format => :xml
+    ).and_return(office_locations_xml)
+  end
+
+  it_behaves_like "a publish helper adding employer contact and office location information"
 end

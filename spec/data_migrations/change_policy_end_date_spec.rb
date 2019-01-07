@@ -16,7 +16,7 @@ describe ChangePolicyEndDate, dbclean: :after_each do
 
   describe "changing the end dates for a policy" do 
     before(:each) do 
-      allow(ENV).to receive(:[]).with("eg_id").and_return(policy.eg_id)
+      allow(ENV).to receive(:[]).with("eg_ids").and_return(policy.eg_id)
       allow(ENV).to receive(:[]).with("end_date").and_return(end_date)
     end
 

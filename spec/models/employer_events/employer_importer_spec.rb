@@ -868,12 +868,18 @@ RSpec.shared_context "employer importer shared persistance context" do
   describe EmployerEvents::EmployerImporter, "for an existing employer with one overlapping plan year, given an employer xml with published plan years" do
     
     let(:existing_employer_records) { [employer_record] }
-    let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil) }
+    let(:first_plan_year_record) { FactoryGirl.create(:plan_year, :start_date => first_plan_year_start_date, :end_date => nil)}
     let(:last_plan_year_record) { instance_double(PlanYear) }
     let(:existing_plan_years) { [first_plan_year_record] }
+
+    let(:plan_year_updates) do
+      {
+          end_date: first_plan_year_end_date
+      }
+    end
+
     let(:office_location) { instance_double(EmployerOfficeLocation) }
     let(:incoming_office_location) { instance_double(Openhbx::Cv2::OfficeLocation, name:"place", is_primary: true) }
-
     let(:address_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, address_changed_event_name) }
     let(:contact_changed_subject) { EmployerEvents::EmployerImporter.new(employer_event_xml_multiple_contacts, contact_changed_event_name) }
     let(:contact_changed_event_name) {"urn:openhbx:events:v1:employer#contact_changed"}
@@ -899,6 +905,16 @@ RSpec.shared_context "employer importer shared persistance context" do
     it "adds every employer office location" do
       subject.persist 
       expect(employer_record).to have_received(:employer_office_locations=).with(instance_of(Array))
+    end
+
+    it "should update existing plan year end date if plan year end date != employer xml plan year end date " do
+      expect(first_plan_year_record).to receive(:update_attributes!).with(plan_year_updates).and_return(true)
+      subject.persist
+    end
+
+    it "creates only the one new plan year for the employer with the correct attributes" do
+      expect(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+      subject.persist
     end
 
     describe '#is_contact_information_update_event?' do

@@ -107,12 +107,15 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
     EnrollmentAction::ActionPublishHelper,
     :to_xml => action_helper_result_xml
     ) }
+  let(:workflow_id) { "SOME WORKFLOW ID" }
+
   let(:plan_change_event) { instance_double(
     ::ExternalEvents::EnrollmentEventNotification,
     :event_responder => event_responder,
     :event_xml => event_xml,
     :employer_hbx_id => 1,
-    :hbx_enrollment_id => 1
+    :hbx_enrollment_id => 1,
+    :workflow_id => workflow_id
     ) }
 
   subject { EnrollmentAction::PlanChange.new(nil, plan_change_event) }
@@ -124,7 +127,7 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
       with("urn:openhbx:terms:v1:enrollment#change_product").
       and_return(true)
     allow(action_publish_helper).to receive(:keep_member_ends).with([]).and_return(true)
-    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, plan_change_event.hbx_enrollment_id, plan_change_event.employer_hbx_id)
+    allow(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, plan_change_event.hbx_enrollment_id, plan_change_event.employer_hbx_id, workflow_id)
   end
 
   it "publishes an event of type change_product" do
@@ -139,7 +142,7 @@ describe EnrollmentAction::PlanChange, "given an enrollment event set that:
   end
 
   it "publishes the xml to edi" do
-    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1).
+    expect(subject).to receive(:publish_edi).with(amqp_connection, action_helper_result_xml, 1, 1, workflow_id).
       and_return(true)
     subject.publish
   end

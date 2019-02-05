@@ -317,3 +317,209 @@ describe EmployerEvents::Renderer, "given an xml" do
     end
   end
 end
+
+describe EmployerEvents::Renderer, "given an xml, with an event type of benefit_coverage_renewal_application_eligible with PAST EFFECTIVE DATE" do
+  let(:event_time) { double }
+  let(:employer_event) { instance_double(EmployerEvent, {:event_time => event_time, :event_name => EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT, :resource_body => source_document}) }
+
+  let(:carrier) { instance_double(Carrier, :hbx_carrier_id => hbx_carrier_id) }
+
+  let(:plan_year_end) { plan_year_start + 1.year - 1.day }
+  let(:old_plan_year_start) { old_plan_year_end -  1.year + 1.day }
+
+  let(:source_document) do
+    <<-XMLCODE
+		<plan_years xmlns="http://openhbx.org/api/terms/1.0">
+			<plan_year>
+				<plan_year_start>#{plan_year_start.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{plan_year_end.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>SOME CARRIER ID</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+						</elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+        <plan_year>
+				<plan_year_start>#{old_plan_year_start.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{old_plan_year_end.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>SOME CARRIER ID</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+						</elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+     </plan_years>
+    XMLCODE
+  end
+
+  subject do
+    EmployerEvents::Renderer.new(employer_event)
+  end
+
+  describe "with plan years for the specified carrier, in the future" do
+    let(:hbx_carrier_id) { "SOME CARRIER ID" }
+    let(:plan_year_start) { Date.today.next_month.beginning_of_month }
+    let(:old_plan_year_end) { plan_year_start - 1.day}
+
+    it "is NOT an invalid carrier drop event" do
+      expect(subject.drop_and_has_future_plan_year?(carrier)).to be_false
+    end
+
+    it "is not an invalid renewal event" do
+      expect(subject.renewal_and_no_future_plan_year?(carrier)).to be_falsey
+    end
+  end
+
+  describe "with plan years for the specified carrier, in the past" do
+    let(:hbx_carrier_id) { "SOME CARRIER ID" }
+    let(:plan_year_start) { Date.today.beginning_of_month }
+    let(:old_plan_year_end) { plan_year_start - 1.day}
+
+    it "is not an invalid renewal event" do
+      expect(subject.renewal_and_no_future_plan_year?(carrier)).to be_falsey
+    end
+
+    it "is NOT an invalid carrier drop event" do
+      expect(subject.drop_and_has_future_plan_year?(carrier)).to be_false
+    end
+  end
+end
+
+describe EmployerEvents::Renderer, "given an xml, with an event type of benefit_coverage_renewal_carrier_dropped, with PAST EFFECTIVE DATE" do
+  let(:event_time) { double }
+  let(:employer_event) { instance_double(EmployerEvent, {:event_time => event_time, :event_name => EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT, :resource_body => source_document}) }
+
+  let(:carrier) { instance_double(Carrier, :hbx_carrier_id => hbx_carrier_id) }
+
+  let(:plan_year_end) { plan_year_start + 1.year - 1.day }
+  let(:old_plan_year_start) { old_plan_year_end -  1.year + 1.day }
+
+  let(:source_document) do
+    <<-XMLCODE
+		<plan_years xmlns="http://openhbx.org/api/terms/1.0">
+			<plan_year>
+				<plan_year_start>#{plan_year_start.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{plan_year_end.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>SOME CARRIER ID</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+						</elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+        <plan_year>
+				<plan_year_start>#{old_plan_year_start.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{old_plan_year_end.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>TEST</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+						</elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+     </plan_years>
+    XMLCODE
+  end
+
+  subject do
+    EmployerEvents::Renderer.new(employer_event)
+  end
+
+  describe "with plan years for the specified carrier, in the future" do
+    let(:hbx_carrier_id) { "SOME CARRIER ID" }
+    let(:plan_year_start) { Date.today.next_month.beginning_of_month }
+    let(:old_plan_year_end) { plan_year_start - 1.day}
+
+    it "is an invalid carrier drop event" do
+      expect(subject.drop_and_has_future_plan_year?(carrier)).to be_truthy
+    end
+
+    it "is not an invalid renewal event" do
+      expect(subject.renewal_and_no_future_plan_year?(carrier)).to be_falsey
+    end
+  end
+
+  describe "with plan years for the specified carrier, in the past" do
+    let(:hbx_carrier_id) { "TEST" }
+    let(:plan_year_start) { Date.today.beginning_of_month }
+    let(:old_plan_year_end) { plan_year_start - 1.day}
+
+    it "is an invalid carrier drop event" do
+      expect(subject.drop_and_has_future_plan_year?(carrier)).to be_truthy
+    end
+
+    it "is not an invalid renewal event" do
+      expect(subject.renewal_and_no_future_plan_year?(carrier)).to be_falsey
+    end
+  end
+end

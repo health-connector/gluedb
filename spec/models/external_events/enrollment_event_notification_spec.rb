@@ -35,6 +35,71 @@ describe ::ExternalEvents::EnrollmentEventNotification do
         expect(result_publisher).to have_received('drop_bogus_plan_year!')
       end
     end
+
+    describe "has_bogus_plan_year?" do
+
+      let(:start_date) {Date.today.beginning_of_month}
+      let(:end_date) {Date.today.beginning_of_month + 1.year - 1.day}
+
+      let(:plan_year) { FactoryGirl.create(:plan_year, start_date: start_date, end_date: end_date)}
+
+      let(:employer) { FactoryGirl.create(:employer, plan_years:[plan_year])}
+      let(:employer_link) { double(:id => "1234") }
+      let(:enrollee) {double}
+      let(:policy_cv) { instance_double(::Openhbx::Cv2::Policy) }
+
+
+      before do
+        allow(enrollment_event_notification).to receive(:is_shop?).and_return(true)
+        allow(enrollment_event_notification).to receive(:policy_cv).and_return(policy_cv)
+      end
+
+      context 'when enrollee start date falls in b/w plan year dates' do
+
+        it 'returns false' do
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:find_employer).with(policy_cv).and_return(employer)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_subscriber).with(policy_cv).and_return(enrollee)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_enrollee_start).with(enrollee).and_return(start_date)
+          expect(enrollment_event_notification.has_bogus_plan_year?).to be_falsey
+        end
+      end
+
+      context 'when enrollee start date falls outside plan year dates with termination event' do
+        let(:enrollee_start_date) {Date.today.beginning_of_month + 1.month}
+        let(:end_date) {Date.today.beginning_of_month}
+        let(:plan_year) { FactoryGirl.create(:plan_year, start_date: start_date, end_date: end_date)}
+        let(:employer) { FactoryGirl.create(:employer, plan_years:[plan_year])}
+
+        before do
+          allow(enrollment_event_notification).to receive(:is_termination?).and_return(true)
+        end
+
+        it 'returns false' do
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:find_employer).with(policy_cv).and_return(employer)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_subscriber).with(policy_cv).and_return(enrollee)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_enrollee_start).with(enrollee).and_return(enrollee_start_date)
+          expect(enrollment_event_notification.has_bogus_plan_year?).to be_falsey
+        end
+      end
+
+      context 'when enrollee start date falls outside plan year dates with no termination event' do
+        let(:enrollee_start_date) {Date.today.beginning_of_month + 1.month}
+        let(:end_date) {Date.today.beginning_of_month}
+        let(:plan_year) { FactoryGirl.create(:plan_year, start_date: start_date, end_date: end_date)}
+        let(:employer) { FactoryGirl.create(:employer, plan_years:[plan_year])}
+
+        before do
+          allow(enrollment_event_notification).to receive(:is_termination?).and_return(false)
+        end
+
+        it 'returns true' do
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:find_employer).with(policy_cv).and_return(employer)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_subscriber).with(policy_cv).and_return(enrollee)
+          allow_any_instance_of(Handlers::EnrollmentEventXmlHelper).to receive(:extract_enrollee_start).with(enrollee).and_return(enrollee_start_date)
+          expect(enrollment_event_notification.has_bogus_plan_year?).to be_truthy
+        end
+      end
+    end
   end
 
   describe "#drop_if_bogus_term!" do

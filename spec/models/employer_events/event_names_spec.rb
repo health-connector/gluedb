@@ -8,6 +8,7 @@ describe EmployerEvents::EventNames, :dbclean => :after_each do
     let(:mid_plan_year_event_name) { "benefit_coverage_mid_plan_year_initial_eligible" }
     let(:renewal_carrier_dropped_event_name) { "benefit_coverage_renewal_carrier_dropped" }
     let(:benefit_coverage_period_terminated_voluntary) { "benefit_coverage_period_terminated_voluntary" }
+    let(:benefit_coverage_period_reinstated) { "benefit_coverage_period_reinstated" }
     let(:benefit_coverage_renewal_application_eligible) { "benefit_coverage_renewal_application_eligible" }
 
     it "should have a EVENT_WHITELIST as a constant" do
@@ -30,8 +31,12 @@ describe EmployerEvents::EventNames, :dbclean => :after_each do
       expect(renewal_successful_event).to eq benefit_coverage_renewal_application_eligible
     end
 
-    it "should not include benefit_coverage_period_terminated_voluntary as an event under white_list" do
-      expect(constant_white_list).not_to include(benefit_coverage_period_terminated_voluntary)
+    it "should include benefit_coverage_period_terminated_voluntary as an event under white_list" do
+      expect(constant_white_list).to include(benefit_coverage_period_terminated_voluntary)
+    end
+
+    it "should not include benefit_coverage_period_reinstated as an event under white_list" do
+      expect(constant_white_list).not_to include(benefit_coverage_period_reinstated)
     end
   end
 end

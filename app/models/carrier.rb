@@ -14,10 +14,11 @@ class Carrier
   field :shp_dtl, as: :shop_market_dental, type: Boolean, default: false
   field :is_active, type: Boolean, default: true
   field :requires_employer_updates_on_enrollments, type: Boolean, default: false
+  field :uses_issuer_centric_sponsor_cycles, type: Boolean, default: false
 
   field :requires_simple_plan_changes, type: Boolean, default: false
   field :requires_simple_renewal, type: Boolean, default: false
-  
+
   has_many :plans
   has_many :policies
   has_many :premium_payments

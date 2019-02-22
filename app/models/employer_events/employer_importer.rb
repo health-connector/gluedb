@@ -9,13 +9,13 @@ module EmployerEvents
       @event_name = event_name.split("#").last
       @org  = Openhbx::Cv2::Organization.parse(@xml, single: true)
     end
-    
+
     def importable?
-      @importable ||= @xml.xpath("//cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).any?  
+      @importable ||= @xml.xpath("//cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).any?
     end
 
-    def employer_values 
-     employer_values = 
+    def employer_values
+     employer_values =
      {
         hbx_id: @org.id,
         fein: @org.fein,
@@ -42,9 +42,9 @@ module EmployerEvents
     end
 
     def add_contacts(incoming_contacts, employer)
-      if incoming_contacts.present? 
-        employer.employer_contacts = incoming_contacts.map do |incoming_contact| 
-          contact_attributes =  
+      if incoming_contacts.present?
+        employer.employer_contacts = incoming_contacts.map do |incoming_contact|
+          contact_attributes =
           {
             name_prefix: incoming_contact.name_prefix,
             first_name: incoming_contact.first_name,
@@ -56,9 +56,9 @@ module EmployerEvents
           }
           contact_attributes.delete_if{|k,v| v.blank?}
           new_contact = EmployerContact.new(contact_attributes)
-          add_contacts_phones(incoming_contact.phones, new_contact)  
-          add_contacts_addresses(incoming_contact.addresses, new_contact) 
-          add_contacts_emails(incoming_contact.emails, new_contact) 
+          add_contacts_phones(incoming_contact.phones, new_contact)
+          add_contacts_addresses(incoming_contact.addresses, new_contact)
+          add_contacts_emails(incoming_contact.emails, new_contact)
           new_contact
         end
       end
@@ -76,7 +76,7 @@ module EmployerEvents
         new_email(incoming_email)
       end
     end
-    
+
     def add_contacts_addresses(incoming_addresses, new_contact)
       new_contact.addresses = incoming_addresses.map  do |incoming_address|
         new_address(incoming_address)
@@ -90,9 +90,9 @@ module EmployerEvents
       }
       ol_attributes.delete_if{|k,v| v.blank?}
     end
-    
+
     def add_office_locations(incoming_office_locations, employer)
-      employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|   
+      employer.employer_office_locations = incoming_office_locations.map do |incoming_office_location|
           new_location = EmployerOfficeLocation.new(
             extract_office_location_attributes(incoming_office_location)
           )
@@ -108,18 +108,18 @@ module EmployerEvents
         email_attributes =
         {
           email_type: strip_type_urn(incoming_email.type),
-          email_address: incoming_email.email_address 
+          email_address: incoming_email.email_address
         }
         email_attributes.delete_if{|k,v| v.blank?}
         Email.new(email_attributes)
       end
     end
-    
+
     def new_phone(incoming_phone)
       if incoming_phone.present?
-        phone_attributes = 
+        phone_attributes =
         {
-          phone_number: incoming_phone.full_phone_number, 
+          phone_number: incoming_phone.full_phone_number,
           phone_type: strip_type_urn(incoming_phone.type),
           primary: !!incoming_phone.is_preferred
         }
@@ -130,7 +130,7 @@ module EmployerEvents
 
     def new_address(incoming_address)
       if incoming_address.present?
-        address_attributes = 
+        address_attributes =
         {
           address_1: incoming_address.address_line_1,
           address_2: incoming_address.address_line_2,
@@ -143,7 +143,7 @@ module EmployerEvents
         Address.new(address_attributes)
       end
     end
-    
+
     def plan_year_values
       @xml.xpath("//cv:organization/cv:employer_profile/cv:plan_years/cv:plan_year", XML_NS).map do |node|
         py_start_node = node.xpath("cv:plan_year_start", XML_NS).first
@@ -156,6 +156,46 @@ module EmployerEvents
         }
       end
     end
+
+    def plan_year_loop(pyvs)
+      start_date = pyvs[:start_date].strftime("%Y%m%d")
+      end_date = pyvs[:end_date].strftime("%Y%m%d")
+      @xml.xpath("//cv:plan_year", XML_NS).select do |node|
+        stripped_node_value(node.xpath("cv:plan_year_start", XML_NS).first) == start_date &&
+        stripped_node_value(node.xpath("cv:plan_year_end", XML_NS).first) == end_date
+      end
+    end
+
+    def issuer_ids(pyvs)
+      plan_year_loop(pyvs).map do |outer_node|
+        outer_node.xpath("cv:benefit_groups", XML_NS).map do |node|
+          node.xpath("cv:benefit_group/cv:elected_plans", XML_NS).map do |inner_node|
+            ids = inner_node.xpath("cv:elected_plan/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
+              stripped_node_value(id)
+            end
+          return ids.flatten || nil
+          end
+        end
+      end
+    end
+
+    def carrier_mongo_ids(pyvs)
+      issuer_ids(pyvs).flatten.map do |hbx_carrier_id|
+          Carrier.where(hbx_carrier_id: hbx_carrier_id).first.id
+        end
+    end
+
+    def create_plan_year(pyvs, employer_id)
+      pyvs.merge!(:employer_id => employer_id)
+      pyvs.merge!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
+      PlanYear.create!(pyvs)
+    end
+
+    def update_plan_years(pyvs, employer)
+      plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_date] && py.end_date == pyvs[:end_date] }
+      plan_year.update_attributes!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
+    end
+
 
     def persist
       return unless importable?
@@ -178,9 +218,11 @@ module EmployerEvents
           epy_start = epy.start_date
           epy_end = epy.end_date ? epy.end_date : (epy.start_date + 1.year - 1.day)
           (epy_start..epy_end).overlaps?((start_date..end_date))
-        end 
-        if !matching_plan_years
-          PlanYear.create!(pyvs.merge(:employer_id => employer_id))
+        end
+        if matching_plan_years
+          update_plan_years(pyvs, employer_record)
+        else
+          create_plan_year(pyvs, employer_id)
         end
       end
     end
@@ -199,4 +241,4 @@ module EmployerEvents
       node ? (Date.strptime(node.content.strip, "%Y%m%d") rescue nil) : nil
     end
   end
-end 
+end

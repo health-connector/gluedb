@@ -11,6 +11,7 @@ class PlanYear
   field :fte_count, type: Integer
   field :pte_count, type: Integer
   field :plan_catalog_override, type: Integer
+  field :issuer_profile_ids, type: Array
 
   belongs_to :employer
   belongs_to :broker

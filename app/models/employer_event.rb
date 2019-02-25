@@ -34,6 +34,11 @@ class EmployerEvent
     end
   end
 
+  def self.create_plan_years(payload)
+    
+    binding.pry
+  end
+
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
     employer_importer = ::EmployerEvents::EmployerImporter.new(new_payload)
     employer_importer.persist

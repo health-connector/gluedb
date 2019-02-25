@@ -11,7 +11,6 @@ class PlanYear
   field :fte_count, type: Integer
   field :pte_count, type: Integer
   field :plan_catalog_override, type: Integer
-  field :issuer_profile_ids, type: Array
 
   belongs_to :employer
   belongs_to :broker
@@ -28,6 +27,8 @@ class PlanYear
   index({:open_enrollment_end => 1})
 
   embeds_many :elected_plans
+
+  has_and_belongs_to_many :issuers, :class_name => 'Carrier', :inverse_of => nil 
 
   has_one :contribution_strategy, :class_name => "EmployerContributions::Strategy", :inverse_of => :plan_year
 

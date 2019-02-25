@@ -6,7 +6,7 @@ FactoryGirl.define do
     open_enrollment_end  Date.new(2013,11,10)
     fte_count  1
     pte_count  1
-    issuer_profile_ids []
+    issuer_ids []
   end
 
   trait :renewal_year do 

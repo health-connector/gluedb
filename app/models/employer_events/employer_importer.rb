@@ -47,16 +47,17 @@ module EmployerEvents
         ids = node.xpath("cv:benefit_group/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
         stripped_node_value(id)
        end
-       return ids.flatten || nil
+       return ids.flatten || []
       end
     end
 
     def create_plan_year(pyvs, employer_id)
       if issuer_ids.present?
-        PlanYear.create!(pyvs.merge(:employer_id => employer_id, issuer_ids: issuer_ids))
-      else
-        PlanYear.create!(pyvs.merge(:employer_id => employer_id))
+        pyvs = (pyvs.merge(:employer_id => employer_id, :issuer_ids => issuer_ids))
+      else 
+        pyvs = (pyvs.merge(:employer_id => employer_id))
       end
+      PlanYear.create!(pyvs)
     end
 
     def persist

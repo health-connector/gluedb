@@ -150,12 +150,11 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
   end
 
 
-describe "with  published plan years and carrier ids" do
+describe "with published plan years and carrier ids" do
   let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
   let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
   let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
   let(:last_plan_year_end_date) { Date.new(2019, 3, 31) }
-
   let(:employer_event_xml) do
     <<-XML_CODE
     <organization xmlns="http://openhbx.org/api/terms/1.0">
@@ -188,28 +187,81 @@ describe "with  published plan years and carrier ids" do
             <name>Tufts Health Direct</name>
             <is_active>true</is_active>
           </carrier>
-        </benefit_groups>
+        </benefit_group>
         <benefit_group>
-        <id>
-          <id>Benefit Group Id</id>
-        </id>
-        <carrier>
           <id>
-            <id>20012</id>
+            <id>Benefit Group Id</id>
           </id>
-          <name>Tufts Health Direct</name>
-          <is_active>true</is_active>
-        </carrier>
+          <carrier>
+            <id>
+              <id>20012</id>
+            </id>
+            <name>Tufts Health Direct</name>
+            <is_active>true</is_active>
+          </carrier>
+        </benefit_group>
       </benefit_groups>
-      </benefit_group>
     </employer_profile>
     </organization>
     XML_CODE
   end
 
-  it 'finds the correct carrier ids' do 
-    expect(subject.issuer_ids).to eq(['20011','20012'])
+    it 'finds the correct carrier ids with two carriers' do 
+      expect(subject.issuer_ids).to eq(['20011', '20012'])
     end
+
+  end
+
+describe "with published plan years and one carrier id" do
+  let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
+  let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
+  let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
+  let(:last_plan_year_end_date) { Date.new(2019, 3, 31) }
+
+
+  let(:employer_event_xml) do
+    <<-XML_CODE
+    <organization xmlns="http://openhbx.org/api/terms/1.0">
+    <id>
+    <id>EMPLOYER_HBX_ID_STRING</id>
+    </id>
+    <name>TEST NAME</name>
+    <dba>TEST DBA</name>
+    <fein>123456789</fein>
+    <employer_profile>
+      <plan_years>
+        <plan_year>
+          <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+          <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+        </plan_year>
+        <plan_year>
+          <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+          <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+        </plan_year>
+      </plan_years>
+      <benefit_groups>
+        <benefit_group>
+          <id>
+            <id>Benefit Group Id</id>
+          </id>
+          <carrier>
+            <id>
+              <id>20222</id>
+            </id>
+            <name>Tufts Health Direct</name>
+            <is_active>true</is_active>
+          </carrier>
+        </benefit_group>
+      </benefit_groups>
+    </employer_profile>
+    </organization>
+    XML_CODE
+  end
+
+    it 'finds the correct carrier ids with one carrier' do 
+      expect(subject.issuer_ids).to eq(['20222'])
+    end
+
   end
 end
 
@@ -288,7 +340,7 @@ describe EmployerEvents::EmployerImporter, "for a new employer, given an employe
   before :each do
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
+    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)  
   end
 
   subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }

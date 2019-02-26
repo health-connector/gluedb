@@ -148,6 +148,69 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
       end
     end
   end
+
+
+describe "with  published plan years and carrier ids" do
+  let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
+  let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
+  let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
+  let(:last_plan_year_end_date) { Date.new(2019, 3, 31) }
+
+  let(:employer_event_xml) do
+    <<-XML_CODE
+    <organization xmlns="http://openhbx.org/api/terms/1.0">
+    <id>
+    <id>EMPLOYER_HBX_ID_STRING</id>
+    </id>
+    <name>TEST NAME</name>
+    <dba>TEST DBA</name>
+    <fein>123456789</fein>
+    <employer_profile>
+      <plan_years>
+        <plan_year>
+          <plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+          <plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+        </plan_year>
+        <plan_year>
+          <plan_year_start>#{last_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+          <plan_year_end>#{last_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+        </plan_year>
+      </plan_years>
+      <benefit_groups>
+        <benefit_group>
+          <id>
+            <id>Benefit Group Id</id>
+          </id>
+          <carrier>
+            <id>
+              <id>20011</id>
+            </id>
+            <name>Tufts Health Direct</name>
+            <is_active>true</is_active>
+          </carrier>
+        </benefit_groups>
+        <benefit_group>
+        <id>
+          <id>Benefit Group Id</id>
+        </id>
+        <carrier>
+          <id>
+            <id>20012</id>
+          </id>
+          <name>Tufts Health Direct</name>
+          <is_active>true</is_active>
+        </carrier>
+      </benefit_groups>
+      </benefit_group>
+    </employer_profile>
+    </organization>
+    XML_CODE
+  end
+
+  it 'finds the correct carrier ids' do 
+    expect(subject.issuer_ids).to eq(['20011','20012'])
+    end
+  end
 end
 
 RSpec.shared_context "employer importer shared persistance context" do

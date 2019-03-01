@@ -42,6 +42,26 @@ module EmployerEvents
       end
     end
 
+    def issuer_ids 
+      @xml.xpath("//cv:benefit_groups", XML_NS).map do |node|
+        node.xpath("//cv:benefit_group/cv:elected_plans", XML_NS).map do |inner_node|
+          ids = inner_node.xpath("//cv:elected_plan/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
+            stripped_node_value(id)
+          end
+         return ids.flatten || []
+        end
+      end
+    end
+
+    def create_plan_year(pyvs, employer_id)
+      if issuer_ids.present?
+        pyvs = (pyvs.merge(:employer_id => employer_id, :issuer_ids => issuer_ids))
+      else 
+        pyvs = (pyvs.merge(:employer_id => employer_id))
+      end
+      PlanYear.create!(pyvs)
+    end
+
     def persist
       return unless importable?
       existing_employer = Employer.where({:hbx_id => employer_values[:hbx_id]}).first
@@ -62,7 +82,7 @@ module EmployerEvents
           (epy_start..epy_end).overlaps?((start_date..end_date))
         end 
         if !matching_plan_years
-          PlanYear.create!(pyvs.merge(:employer_id => employer_id))
+          create_plan_year(pyvs, employer_id)
         end
       end
     end

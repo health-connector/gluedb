@@ -28,6 +28,8 @@ class PlanYear
 
   embeds_many :elected_plans
 
+  has_and_belongs_to_many :issuers, :class_name => 'Carrier', :inverse_of => nil 
+
   has_one :contribution_strategy, :class_name => "EmployerContributions::Strategy", :inverse_of => :plan_year
 
   def self.make(data)

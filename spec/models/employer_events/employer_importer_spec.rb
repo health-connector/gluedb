@@ -148,6 +148,113 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
       end
     end
   end
+
+
+describe "with published plan years and carrier ids" do
+  let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
+  let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
+  let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
+  let(:last_plan_year_end_date) { Date.new(2019, 3, 31) }
+  let(:employer_event_xml) do
+		<<-XMLCODE
+		<plan_years xmlns="http://openhbx.org/api/terms/1.0">
+			<plan_year>
+				<plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>20011</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>20012</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+						</elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+     </plan_years>
+		XMLCODE
+  end
+
+    it 'finds the correct carrier ids with two carriers' do 
+      expect(subject.issuer_ids).to eq(['20011', '20012'])
+    end
+
+  end
+
+describe "with published plan years and one carrier id" do
+  let(:first_plan_year_start_date) { Date.new(2017, 4, 1) }
+  let(:first_plan_year_end_date) { Date.new(2018, 3, 31) }
+  let(:last_plan_year_start_date) { Date.new(2018, 4, 1) }
+  let(:last_plan_year_end_date) { Date.new(2019, 3, 31) }
+
+
+  let(:employer_event_xml) do
+		<<-XMLCODE
+		<plan_years xmlns="http://openhbx.org/api/terms/1.0">
+			<plan_year>
+				<plan_year_start>#{first_plan_year_start_date.strftime("%Y%m%d")}</plan_year_start>
+				<plan_year_end>#{first_plan_year_end_date.strftime("%Y%m%d")}</plan_year_end>
+				<open_enrollment_start>20151013</open_enrollment_start>
+				<open_enrollment_end>20151110</open_enrollment_end>
+				<benefit_groups>
+					<benefit_group>
+						<name>Health Insurance</name>
+						<elected_plans>
+							<elected_plan>
+								<id>
+									<id>A HIOS ID</id>
+								</id>
+								<name>A PLAN NAME</name>
+								<active_year>2015</active_year>
+								<is_dental_only>false</is_dental_only>
+								<carrier>
+									<id>
+										<id>20222</id>
+									</id>
+									<name>A CARRIER NAME</name>
+								</carrier>
+							</elected_plan>
+            </elected_plans>
+					</benefit_group>
+				</benefit_groups>
+       </plan_year>
+     </plan_years>
+		XMLCODE
+  end
+
+    it 'finds the correct carrier ids with one carrier' do 
+      expect(subject.issuer_ids).to eq(['20222'])
+    end
+
+  end
 end
 
 RSpec.shared_context "employer importer shared persistance context" do
@@ -225,7 +332,7 @@ describe EmployerEvents::EmployerImporter, "for a new employer, given an employe
   before :each do
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
     allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
-    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)
+    allow(Employer).to receive(:create!).with(expected_employer_values).and_return(employer_record)  
   end
 
   subject { EmployerEvents::EmployerImporter.new(employer_event_xml) }

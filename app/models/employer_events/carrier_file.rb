@@ -26,9 +26,13 @@ module EmployerEvents
     end
 
     def render_event_using(renderer)
-      if renderer.render_for(carrier, @buffer)
-        @empty = false
-        update_timestamps(renderer.timestamp)
+      begin
+        if renderer.render_for(carrier, @buffer)
+          @empty = false
+          update_timestamps(renderer.timestamp)
+        end
+      rescue => e
+        Rails.logger.error "[#{e.class.name.to_s}] #{e.message}" 
       end
     end
 

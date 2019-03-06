@@ -32,6 +32,10 @@ class PlanYear
 
   has_one :contribution_strategy, :class_name => "EmployerContributions::Strategy", :inverse_of => :plan_year
 
+  has_and_belongs_to_many :issuers, :class_name => 'Carrier', :inverse_of => nil
+
+  scope :by_start_date, lambda { |start_date| where(:start_date => start_date) }
+
   def self.make(data)
     plan_year = PlanYear.new
     plan_year.open_enrollment_start = data[:open_enrollment_start]

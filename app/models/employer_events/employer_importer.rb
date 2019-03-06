@@ -6,8 +6,15 @@ module EmployerEvents
 
     def initialize(employer_xml, event_name)
       @xml = Nokogiri::XML(employer_xml)
+<<<<<<< HEAD
       @event_name = event_name.split("#").last
       @org  = Openhbx::Cv2::Organization.parse(@xml, single: true)
+=======
+      @carrier_id_map = Hash.new
+      Carrier.all.each do |car|
+        @carrier_id_map[car.hbx_id] = car.id
+      end
+>>>>>>> Update and provide direction on employer events.
     end
 
     def importable?
@@ -150,10 +157,41 @@ module EmployerEvents
         py_end_node = node.xpath("cv:plan_year_end", XML_NS).first
         py_start_date = date_node_value(py_start_node)
         py_end_date = date_node_value(py_end_node)
+        carrier_hbx_ids = node.xpath("cv:elected_plan/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
+          stripped_node_value(id)
+        end.compact
         {
           :start_date => py_start_date,
-          :end_date => py_end_date
+          :end_date => py_end_date,
+          :issuer_ids => carrier_hbx_ids
         }
+      end
+    end
+
+    def create_new_plan_years(employer, new_pys)
+      attributes_with_issuer_ids = new_pys.map do |py|
+        issuer_ids = new_pys[:issuer_ids].map do |ihi|
+          @carrier_id_map[ihi]
+        end.compact
+        py.merge(
+          :issuer_ids => issuer_ids,
+          :employer_id => employer.id
+        )
+      end
+      return nil if attributes_with_issuer_ids.empty?
+      PlanYear.create!(attributes_with_issuer_ids)
+    end
+
+    def update_matched_plan_years(employer, matched_plan_years)
+      matched_plan_years.each do |mpy|
+        py_record, py_attributes = mpy
+        issuer_ids = py_attributes[:issuer_ids].map do |ihi|
+          @carrier_id_map[ihi]
+        end.compact
+        plan_year_update_data = py_attributes.merge(
+          :issuer_ids => issuer_ids,
+        )
+        py_record.update_attributes!(plan_year_update_data)
       end
     end
 
@@ -166,36 +204,16 @@ module EmployerEvents
       end
     end
 
-    def issuer_ids(pyvs)
-      plan_year_loop(pyvs).map do |outer_node|
-        outer_node.xpath("cv:benefit_groups", XML_NS).map do |node|
-          node.xpath("cv:benefit_group/cv:elected_plans", XML_NS).map do |inner_node|
-            ids = inner_node.xpath("cv:elected_plan/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
-              stripped_node_value(id)
-            end
-          return ids.flatten || nil
-          end
-        end
-      end
-    end
-
     def carrier_mongo_ids(pyvs)
       issuer_ids(pyvs).flatten.map do |hbx_carrier_id|
-          Carrier.where(hbx_carrier_id: hbx_carrier_id).first.id
-        end
-    end
-
-    def create_plan_year(pyvs, employer_id)
-      pyvs.merge!(:employer_id => employer_id)
-      pyvs.merge!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
-      PlanYear.create!(pyvs)
+        Carrier.where(hbx_carrier_id: hbx_carrier_id).first.id
+      end
     end
 
     def update_plan_years(pyvs, employer)
       plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_date] && py.end_date == pyvs[:end_date] }
       plan_year.update_attributes!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
     end
-
 
     def persist
       return unless importable?
@@ -211,20 +229,47 @@ module EmployerEvents
                         end
       employer_id = employer_record.id
       existing_plan_years = employer_record.plan_years
-      plan_year_values.each do |pyvs|
-        start_date = pyvs[:start_date]
-        end_date = pyvs[:end_date] ? pyvs[:end_date] : (start_date + 1.year - 1.day)
-        matching_plan_years = existing_plan_years.any? do |epy|
-          epy_start = epy.start_date
-          epy_end = epy.end_date ? epy.end_date : (epy.start_date + 1.year - 1.day)
-          (epy_start..epy_end).overlaps?((start_date..end_date))
-        end
-        if matching_plan_years
-          update_plan_years(pyvs, employer_record)
+      match_and_persist_plan_years(employer_record, plan_year_values, existing_plan_years)
+    end
+
+    def match_and_persist_plan_years(employer, py_data, existing_plan_years)
+      existing_hash = Hash.new
+      existing_plan_years.each do |epy|
+        existing_hash[epy.start_date] = epy
+      end
+      py_data_hash = Hash.new
+      py_data_hash.each do |pdh|
+        pdh[pdh[:start_date]] = pdh
+      end
+      candidate_new_pys = Array.new
+      matched_pys = Array.new
+      error_pys = Array.new
+      existing_hash.each_pair do |k, v|
+        if py_data_hash.has_key?(k)
+          matched_pys << [existing_hash[k], py_data_hash.delete(k)]
         else
-          create_plan_year(pyvs, employer_id)
+          candidate_new_pys << py_data_hash.delete(k)
         end
       end
+      new_pys = Array.new
+      candidate_new_pys.each do |npy|
+        npy_start = npy[:start_date]
+        npy_end = npy[:end_date] ? npy[:end_date] : (npy[:start_date] + 1.year - 1.day)
+        py_is_bad = existing_plan_years.any? do |epy|
+          end_date = epy.end_date ? epy.end_date : (epy.start_date + 1.year - 1.day)
+          (npy_start..npy_end).overlaps?((epy.start_date..end_date))
+        end
+        if py_is_bad
+          error_pys << npy
+        else
+          new_pys << npy
+        end
+      end
+      error_pys.each do |error_py|
+        Rails.logger.error "[EmployerEvents::Errors::UpstreamPlanYearOverlap] Upstream plan year overlaps with, but does not match, existing plan years: Employer ID: #{employer.hbx_id}, PY Start: #{npy[:start_date]}, PY End: #{npy[:end_date]}"
+      end
+      update_matched_plan_years(employer, matched_pys)
+      create_new_plan_years(employer, new_pys)
     end
 
     protected

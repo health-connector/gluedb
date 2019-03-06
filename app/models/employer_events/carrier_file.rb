@@ -29,11 +29,15 @@ module EmployerEvents
       carrier.abbrev.upcase + "_" + start_timestamp_string + "_" + end_timestamp_string + ".xml"
     end
 
-    def render_event_using(renderer, event)
-      if renderer.render_for(carrier, @buffer)
-        @rendered_employers << event.employer_id
-        @empty = false
-        update_timestamps(renderer.timestamp)
+    def render_event_using(renderer)
+      begin
+        if renderer.render_for(carrier, @buffer)
+          @rendered_employers << event.employer_id
+          @empty = false
+          update_timestamps(renderer.timestamp)
+        end
+      rescue => e
+        Rails.logger.error "[#{e.class.name.to_s}] #{e.message}"
       end
     end
 

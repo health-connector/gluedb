@@ -101,5 +101,6 @@ class PlanYear
   def add_issuer(issuer)
     return true if issuer_ids.include?(issuer.id)
     issuer_ids << issuer.id
+    self.save
   end
 end

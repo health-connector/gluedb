@@ -63,39 +63,40 @@ module EmployerEvents
         (start_date_value && end_date_value) ? [start_date_value, end_date_value] : nil
       end.compact
       date_sets.sort_by(&:first).last
-    end
+    end 
 
     def qualifies_to_update_event_name?(carrier, employer_event)
       events = [ EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT, EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME ]
-      return false unless employer_event.event_name.in?(events) && carrier.uses_issuer_centric_sponsor_cycles
+      return true if employer_event.event_name.in?(events) && carrier.uses_issuer_centric_sponsor_cycles
     end
 
     def update_event_name(carrier, employer_event)
-      return employer_event.event_name unless qualifies_to_update_event_name?(carrier, employer_event) && found_previous_plan_year_for_carrier?(carrier)
+      return employer_event.event_name unless qualifies_to_update_event_name?(carrier, employer_event)
       employer = Employer.where(hbx_id: employer_event.employer_id).first
       if employer.nil?
         raise ::EmployerEvents::Errors::EmployerEventEmployerNotFound.new("No employer found for: #{employer_event.employer_id}, Employer Event: #{employer_event.id}")
       end
       most_recent_plan_year_dates = find_latest_carrier_plan_year_in_event(carrier)
-      if plan_year_dates.nil?
+      if most_recent_plan_year_dates.nil?
         raise ::EmployerEvents::Errors::NoCarrierPlanYearsInEvent.new("No plan years found in event for: #{carrier.id}, Employer Event: #{employer_event.id}")
       end
       start_date, end_date = most_recent_plan_year_dates
       plan_year = find_employer_plan_year_by_date(employer, start_date, end_date)
-      if has_previous_plan_year_for_carrier?(plan_year, carrier)
+      if has_previous_plan_year_for_carrier?(employer, plan_year, carrier)
         EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
       else
         EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
       end
     end
 
-    def has_previous_plan_year_for_carrier?(plan_year, carrier)
-      previous_plan_years = PlanYear.where(employer_id: plan_year.id, end_date: (plan_year.start_date - 1.day))
-      non_canceled_plan_years = previous_plan_years.reject do |py|
-        py.start_date == py.end_date
-      end
-      return false if non_canceled_plan_years.empty?
-      non_canceled_plan_years.sort_by(&:start_date).last.issuer_ids.include?(carrier.id)
+    def has_previous_plan_year_for_carrier?(employer, plan_year, carrier)
+      previous_plan_years = PlanYear.where(employer_id: employer.id, end_date: (plan_year.start_date - 1.day))
+      return false if previous_plan_years.empty? 
+        non_canceled_plan_years = previous_plan_years.reject do |py|
+          py.start_date == py.end_date
+        end
+        return false if non_canceled_plan_years.empty?
+        non_canceled_plan_years.sort_by(&:start_date).last.issuer_ids.include?(carrier.id)
     end
 
     def find_employer_plan_year_by_date(employer, start_date, end_date)
@@ -118,6 +119,7 @@ module EmployerEvents
           end
         end
       end
+
       found_previous_plan_year
     end
 

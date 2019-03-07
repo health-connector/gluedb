@@ -34,11 +34,11 @@ describe Importers::PlanYearIssuerImporter, :dbclean => :after_each do
     end
 
     it 'should write status message for record 1' do
-      expect(csv[0]['status']).to eq("Plan Year found and sucessfully updated plan year issuer_ids")
+      expect(csv[0]['result']).to eq("Plan Year found and sucessfully updated plan year issuer_ids")
     end
 
     it 'should write failure message for failure for record 2' do
-      expect(csv[1]['status']).to eq("Carrier not found")
+      expect(csv[1]['result']).to eq("Carrier not found")
     end
 
     after :all do

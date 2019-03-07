@@ -36,6 +36,8 @@ class PlanYear
 
   scope :by_start_date, lambda { |start_date| where(:start_date => start_date) }
 
+  scope :for_employer_starting_on, lambda { |employer, start_date| where(:employer_id => employer.id, :start_date => start_date) }
+
   def self.make(data)
     plan_year = PlanYear.new
     plan_year.open_enrollment_start = data[:open_enrollment_start]
@@ -94,5 +96,10 @@ class PlanYear
 
   def terminate_plan_year(end_date)
     self.update_attributes(:end_date => end_date)
+  end
+
+  def add_issuer(issuer)
+    return true if issuer_ids.include?(issuer.id)
+    issuer_ids << issuer.id
   end
 end

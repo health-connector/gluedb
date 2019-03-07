@@ -1,49 +1,86 @@
 require 'csv'
 
-class Importers::PlanYearIssuerImporter
+module Importers
+  class PlanYearIssuerImporter
+
+    class EmployerPlanYearNotFoundError < StandardError
+    end
+
+    class EmployerMultiplePlanYearsError < StandardError
+    end
+
+    class EmployerNotFoundError < StandardError
+    end
+
+    class IssuerNotFoundError < StandardError
+    end
+
+    class PlanYearDateMismatchError < StandardError
+    end
 
   def initialize(file_path)
-    csv_path = File.read(file_path)
-    @csv = CSV.parse(csv_path, :headers => true)
+    @csv_path = file_path
+    @issuer_map = Hash.new
+    Carrier.all.each do |c|
+      @issuer_map[c.hbx_carrier_id] = c
+    end
   end
 
   def export_csv
-    field_names = %w(employer_hbx_id employer_fein plan_year_start plan_year_end carrier_hbx_id carrier_fein status)
+    headers = [
+      "employer_hbx_id",
+      "employer_fein",
+      "effective_period_start_on",
+      "effective_period_end_on",
+      "carrier_hbx_id",
+      "carrier_fein",
+      "result"
+    ]
     file_name = "#{Rails.root}/plan_year_data_population_output.csv"
 
-    CSV.open(file_name, "w", force_quotes: true) do |csv_output|
-      csv_output << field_names
-      @csv.each do |row|
-        status = get_status_for(row)
-        csv_output << [row['employer_hbx_id'], row['employer_fein'], row['plan_year_start'], row['plan_year_end'], row['carrier_hbx_id'], row['carrier_fein'], status]
+    CSV.open(file_name, "w") do |csv_output|
+      csv_output << headers
+      CSV.foreach(@csv_path, :headers => true) do |in_row|
+        result = begin
+                   process_row(in_row)
+                 rescue => e
+                   "#{e.class.name}"
+                 end
+
+        csv_output << (in_row.to_a + [result])
       end
     end
   end
 
-  def get_status_for(row)
+  def process_row(row)
     employer_hbx_id = row['employer_hbx_id']
     carrier_hbx_id = row['carrier_hbx_id']
-    plan_year_start = Date.strptime(row['effective_period_start_on'], "%m-%d-%Y")
-    plan_year_end = Date.strptime(row['effective_period_end_on'], "%m-%d-%Y")
-
-    carrier =  Carrier.where(hbx_carrier_id: carrier_hbx_id).first
+    plan_year_start = Date.strptime(row['effective_period_start_on'], "%Y-%m-%d") rescue nil
+    plan_year_end = Date.strptime(row['effective_period_end_on'], "%Y-%m-%d") rescue nil
+    
     employer = Employer.by_hbx_id(employer_hbx_id).first
-    plan_years = employer.plan_years.by_start_date(plan_year_start) if employer.present? 
+    raise EmployerNotFoundError.new unless employer
 
-    return "Employer not found" if employer.blank?
-    return "Carrier not found" if carrier.blank?
-    return "Plan Year not found" if plan_years.empty?
-    return "Found More than one plan year" if plan_years.count > 1
-    return "Plan Year end date didn't matched for the found plan year" if plan_years.count == 1 && plan_years.first.end_date != plan_year_end
+    issuer = @issuer_map[carrier_hbx_id]
+    raise IssuerNotFoundError.new unless issuer
 
-    found_plan_year = plan_years.first
+    plan_years = PlanYear.for_employer_starting_on(employer, plan_year_start)
+    raise EmployerPlanYearNotFoundError.new if plan_years.empty?
 
-    if found_plan_year.issuer_ids.include?(carrier.hbx_carrier_id)
-      return "plan year found and carrier hbx_id already exists in issuer_ids"
+    if plan_years.many?
+      select_end_date_matches = plan_years.select do |py|
+        py.end_date == plan_year_end
+      end
+      raise EmployerMultiplePlanYearsError.new if select_end_date_matches.many?
+      raise PlanYearDateMismatchError.new if select_end_date_matches.empty?
+      plan_year = select_end_date_matches.first
+      raise PlanYearDateMismatchError.new if (plan_year.end_date != plan_year_end)
+      plan_year.add_issuer(issuer)
     else
-      found_plan_year.issuer_ids << carrier.hbx_carrier_id
-      found_plan_year.save
-      return "Plan Year found and sucessfully updated plan year issuer_ids"
+      plan_year = plan_years.first
+      raise PlanYearDateMismatchError.new if (plan_year.end_date != plan_year_end)
+      plan_year.add_issuer(issuer)
     end
   end
+end
 end

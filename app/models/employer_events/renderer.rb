@@ -15,6 +15,21 @@ module EmployerEvents
       doc.xpath("//cv:elected_plans/cv:elected_plan/cv:carrier/cv:id/cv:id[text() = '#{carrier.hbx_carrier_id}']/../../../../../../..", {:cv => XML_NS})
     end
 
+    def newest_effective_date_plan_year
+      doc = Nokogiri::XML(employer_event.resource_body)
+      doc.xpath("//cv:plan_year", "cv"=>"http://openhbx.org/api/terms/1.0").sort_by do |node|
+        Date.strptime(node.xpath("cv:plan_year_start", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
+      end.last
+    end
+
+    def plan_year_with_end_date(end_on)
+      doc = Nokogiri::XML(employer_event.resource_body)
+      doc.xpath("//cv:plan_year", "cv"=>"http://openhbx.org/api/terms/1.0").select do |node|
+        py_end_value = node.xpath("cv:plan_year_end", {:cv => XML_NS}).first.content
+        py_end_value == end_on
+      end.last
+    end
+
     def has_current_or_future_plan_year?(carrier)
       found_plan_year = false
       carrier_plan_years(carrier).each do |node|
@@ -50,6 +65,22 @@ module EmployerEvents
             end
           end
         end
+
+        # exception case when renewal emoloyer transmitting late after effective date of py.
+        unless found_future_plan_year
+          latest_py_node = newest_effective_date_plan_year
+          start_value = Date.strptime(latest_py_node.xpath("cv:plan_year_start", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
+          end_value = Date.strptime(latest_py_node.xpath("cv:plan_year_end", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
+          date_value = (start_value - 1.day).strftime("%Y%m%d")
+          recent_expired_plan_year = plan_year_with_end_date(date_value)
+          if start_value && end_value
+            if latest_py_node.xpath(".//cv:elected_plans", {:cv => XML_NS}).any?{|node| node.xpath(".//cv:elected_plan/cv:carrier/cv:id/cv:id", {:cv => XML_NS}).text == "#{carrier.hbx_carrier_id}" }.present?
+              if recent_expired_plan_year.present?
+                found_future_plan_year = true
+              end
+            end
+          end
+        end
       end
       !found_future_plan_year
     end
@@ -58,15 +89,33 @@ module EmployerEvents
       return false if employer_event.event_name != EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
       found_future_plan_year = false
       carrier_plan_years(carrier).each do |node|
+        end_date = Date.strptime(node.xpath("cv:plan_year_end", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
         node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
           date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
           if date_value
-            if date_value > Date.today
+            if date_value > Date.today && date_value != end_date
               found_future_plan_year = true
             end
           end
         end
       end
+
+      # exception case when renewal emoloyer transmitting late with switiching carrier after effective date of py.
+      unless found_future_plan_year
+        latest_py_node = newest_effective_date_plan_year
+        start_value = Date.strptime(latest_py_node.xpath("cv:plan_year_start", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
+        end_value = Date.strptime(latest_py_node.xpath("cv:plan_year_end", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
+        date_value = (start_value - 1.day).strftime("%Y%m%d")
+        recent_expired_plan_year = plan_year_with_end_date(date_value)
+        if start_value && end_value && start_value != end_value
+          if latest_py_node.xpath(".//cv:elected_plans", {:cv => XML_NS}).any?{|node| node.xpath(".//cv:elected_plan/cv:carrier/cv:id/cv:id", {:cv => XML_NS}).text == "#{carrier.hbx_carrier_id}" }.blank?
+            if recent_expired_plan_year.present? && recent_expired_plan_year.xpath(".//cv:elected_plans", {:cv => XML_NS}).any?{|node| node.xpath(".//cv:elected_plan/cv:carrier/cv:id/cv:id", {:cv => XML_NS}).text == "#{carrier.hbx_carrier_id}" }.present?
+              found_future_plan_year = true
+            end
+          end
+        end
+      end
+
       found_future_plan_year
     end
 

@@ -2,7 +2,6 @@ module HandleEnrollmentEvent
   class ProcessReenroll
     include Interactor::Organizer
 
-    organize(
-    )
+    organize
   end
 end

@@ -20,6 +20,8 @@ gem "psych", "2.0.5"
 
 group :development do
   gem 'capistrano', '2.15.4'
+  gem 'rubocop', '0.57.2'
+  gem 'rubocop-git', '0.1.3'
 #  gem 'jazz_hands'
 end
 
@@ -60,7 +62,6 @@ group :test do
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
   gem 'simplecov', :require => false
-  gem 'rubycritic', :require => false
   gem 'rspec_junit_formatter'
 end
 
@@ -72,7 +73,7 @@ group :production do
   gem 'nio4r', '1.1.1'
 end
 
-gem 'ruby-progressbar', '1.6.0'
+gem 'ruby-progressbar', '~> 1.7'
 gem "haml"
 gem 'kaminari', '0.16.3'
 gem 'bootstrap-kaminari-views', '0.0.5'

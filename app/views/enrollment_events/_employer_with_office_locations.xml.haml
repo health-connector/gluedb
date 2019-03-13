@@ -9,7 +9,7 @@
           %address
             %type= "urn:openhbx:terms:v1:address_type#" + location.address.address_type
             %address_line_1= location.address.address_1
-            - unless location.address.address_3.blank?
+            - unless location.address.address_2.blank?
               %address_line_2= location.address.address_2
             - unless location.address.address_3.blank?
               %address_line_3= location.address.address_3

@@ -249,6 +249,16 @@ module EnrollmentAction
         event_xml_doc
     end
 
+    def take_rating_tier_from(other_xml)
+      @other_xml_doc = Nokogiri::XML(other_xml)
+      other_rating_node = @other_xml_doc.xpath("//cv:shop_market/cv:composite_rating_tier_name", XML_NS).first
+      if other_rating_node
+        @event_xml_doc.xpath("//cv:shop_market/cv:composite_rating_tier_name", XML_NS).each do |node|
+          node.content = other_rating_node.content
+        end
+      end
+    end
+
     private
 
     def add_employer_contacts_and_office_locations

@@ -285,6 +285,63 @@ describe EnrollmentAction::ActionPublishHelper, "SHOP: recalculating premium tot
   end
 end
 
+describe EnrollmentAction::ActionPublishHelper, "SHOP: altering tiers after a dependent drop" do
+  let(:primary_member_id) { "1000" }
+  let(:secondary_member_id) { "1001" }
+  let(:dropped_member_id) { "1002" }
+  let(:xml_namespace) { { :cv => "http://openhbx.org/api/terms/1.0" } }
+  let(:dependent_drop_event) { <<-EVENTXML
+    <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+      <policy>
+      <enrollment>
+        <shop_market>
+          <composite_rating_tier_name>#{old_rating_tier}</composite_rating_tier_name>
+        </shop_market>
+        <premium_total_amount>300.00</premium_total_amount>
+        <total_responsible_amount>125.00</total_responsible_amount>
+      </enrollment>
+    </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:new_purchase_xml) { <<-EVENTXML
+    <enrollment xmlns="http://openhbx.org/api/terms/1.0">
+      <policy>
+      <enrollment>
+        <shop_market>
+          <composite_rating_tier_name>#{new_rating_tier}</composite_rating_tier_name>
+        </shop_market>
+        <premium_total_amount>300.00</premium_total_amount>
+        <total_responsible_amount>125.00</total_responsible_amount>
+      </enrollment>
+    </policy>
+  </enrollment>
+  EVENTXML
+  }
+
+  let(:old_rating_tier) { "OLD RATING TIER" }
+  let(:new_rating_tier) { "NEW RATING TIER" }
+
+  let(:publish_helper) { ::EnrollmentAction::ActionPublishHelper.new(dependent_drop_event) }
+
+  let(:target_xml_doc) {
+    publish_helper.take_rating_tier_from(new_purchase_xml)
+    Nokogiri::XML(publish_helper.to_xml)
+  }
+
+  let(:rating_tier_xpath) { target_xml_doc.xpath("//cv:shop_market/cv:composite_rating_tier_name", xml_namespace).first }
+
+  it "assigns the new rating tier" do
+    expect(rating_tier_xpath.content).to eq new_rating_tier
+  end
+
+  it "is shop" do
+    expect(publish_helper.is_shop?).to be_truthy
+  end
+
+end
+
 describe EnrollmentAction::ActionPublishHelper, "IVL: recalculating premium totals after a dependent drop" do
   let(:primary_member_id) { "1000" }
   let(:secondary_member_id) { "1001" }

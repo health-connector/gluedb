@@ -157,7 +157,6 @@ module EmployerEvents
         carrier_hbx_ids = node.xpath(".//cv:elected_plan/cv:carrier/cv:id/cv:id", XML_NS).map do |id|
           stripped_node_value(id)
         end.compact
-        
         {
           :start_date => py_start_date,
           :end_date => py_end_date,
@@ -188,8 +187,7 @@ module EmployerEvents
         end.compact
         plan_year_update_data = py_attributes.merge(
           :issuer_ids => issuer_ids,
-          )
-          # binding.pry
+        )
         py_record.update_attributes!(plan_year_update_data)
       end
     end
@@ -234,7 +232,7 @@ module EmployerEvents
       match_and_persist_plan_years(employer[:employer_id], plan_year_values, employer[:existing_plan_years]) 
     end
 
-    def match_and_persist_plan_years(employer, py_data, existing_plan_years)
+    def match_and_persist_plan_years(employer_id, py_data, existing_plan_years)
       existing_hash = Hash.new
       existing_plan_years.each do |epy|
         existing_hash[epy.start_date] = epy
@@ -243,20 +241,16 @@ module EmployerEvents
       py_data.each do |pdh|
         py_data_hash[pdh[:start_date]] = pdh
       end
-      candidate_new_pys = Array.new
       matched_pys = Array.new
       error_pys = Array.new
-      if existing_hash.present? 
-        existing_hash.each_pair do |k, v|
-          if py_data_hash.has_key?(k)
-            matched_pys << [existing_hash[k], py_data_hash.delete(k)]
-          end
+      existing_hash.each_pair do |k, v|
+        if py_data_hash.has_key?(k)
+          matched_pys << [existing_hash[k], py_data_hash.delete(k)]
         end
-      else
-        candidate_new_pys << py_data
       end
+      candidate_new_pys = py_data_hash.values
       new_pys = Array.new
-      candidate_new_pys.flatten.each do |npy|
+      candidate_new_pys.each do |npy|
         npy_start = npy[:start_date]
         npy_end = npy[:end_date] ? npy[:end_date] : (npy[:start_date] + 1.year - 1.day)
         py_is_bad = existing_plan_years.any? do |epy|
@@ -272,8 +266,8 @@ module EmployerEvents
       error_pys.each do |error_py|
         Rails.logger.error "[EmployerEvents::Errors::UpstreamPlanYearOverlap] Upstream plan year overlaps with, but does not match, existing plan years: Employer ID: #{employer.hbx_id}, PY Start: #{npy[:start_date]}, PY End: #{npy[:end_date]}" unless Rails.env.test?
       end
-      update_matched_plan_years(employer, matched_pys)
-      create_new_plan_years(employer, new_pys)
+      update_matched_plan_years(employer_id, matched_pys)
+      create_new_plan_years(employer_id, new_pys)
     end
 
     protected

@@ -47,7 +47,7 @@ module Importers
                    "#{e.class.name}"
                  end
 
-        csv_output << (in_row.to_a + [result])
+        csv_output << (in_row.fields + [result])
       end
     end
   end

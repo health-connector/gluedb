@@ -11,6 +11,12 @@ module ExternalEvents
       @policy_node = p_node
       @plan = p_record
       @cobra = cobra_reinstate
+      puts "policy_node"
+      puts @policy_node.inspect
+      puts "plan"
+      puts @plan.inspect
+      puts "cobra"
+      puts @cobra.inspect
     end
 
     def extract_pre_amt_tot
@@ -216,6 +222,8 @@ module ExternalEvents
         responsible_party_attributes = { :responsible_party_id => responsible_party.id }
       end
 
+      puts "Responsible party:"
+      puts responsible_party_attributes.inspect
       policy = Policy.create!({
         :plan => @plan,
         :carrier_id => @plan.carrier_id,

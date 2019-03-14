@@ -424,6 +424,8 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
   let(:updated_plan_year) { instance_double(PlanYear, :start_date => Date.new(2017, 4, 1), :end_date => Date.new(2018, 3, 31), :issuer_ids =>["SOME MONGO ID", "SOME OTHER MONGO ID"])}
   let(:updated_pyvs) { { :start_date => Date.new(2017, 4, 1), :end_date => Date.new(2018, 3, 31), :issuer_ids =>["SOME MONGO ID", "SOME OTHER MONGO ID"]}}
 
+  let(:created_pyvs) { { :start_date => last_plan_year_start_date, :end_date => last_plan_year_end_date, :issuer_ids =>["SOME MONGO ID", "SOME OTHER MONGO ID"], :employer_id => employer_id}}
+  
   let(:pyvs){[{:start_date => first_plan_year_start_date, :end_date => first_plan_year_end_date,   :issuer_ids => ["1", "2"] }] }
   let(:second_pyvs){[{:start_date => last_plan_year_start_date, :end_date => last_plan_year_end_date,   :issuer_ids => ["1", "2"] }] }
 
@@ -475,36 +477,45 @@ describe EmployerEvents::EmployerImporter, "given an employer xml" do
     XMLCODE
   end
 
-  it 'finds the correct carrier ids with one carrier' do
+    it 'finds the correct carrier ids with one carrier' do
 
-    expect(subject.issuer_ids(pyvs)).to eq(['20222'])
-  end
+      expect(subject.issuer_ids(pyvs)).to eq(['20222'])
+    end
 
     let(:carrier) {instance_double(Carrier, hbx_carrier_id: "20011",:id=>"SOME MONGO ID")}
     let(:carrier_2) {instance_double(Carrier, hbx_carrier_id: "20012",:id=>"SOME OTHER MONGO ID")}
 
-  before(:each) do 
-    allow(Carrier).to receive(:where).with(:hbx_carrier_id => carrier.hbx_carrier_id).and_return([carrier]) 
-    allow(Carrier).to receive(:where).with(:hbx_carrier_id => carrier_2.hbx_carrier_id).and_return([carrier_2]) 
-    allow(matched_plan_year).to receive(:issuer_ids).and_return( ["SOME MONGO ID", "SOME OTHER MONGO ID"])
-    allow(employer).to receive(:id).and_return("1") 
-    allow(Carrier).to receive(:all).and_return([carrier, carrier_2]) 
-    allow(carrier).to receive(:hbx_carrier_id).and_return('1') 
-    allow(carrier_2).to receive(:hbx_carrier_id).and_return('2') 
+    before(:each) do 
+      allow(Carrier).to receive(:where).with(:hbx_carrier_id => carrier.hbx_carrier_id).and_return([carrier]) 
+      allow(Carrier).to receive(:where).with(:hbx_carrier_id => carrier_2.hbx_carrier_id).and_return([carrier_2]) 
+      allow(matched_plan_year).to receive(:issuer_ids).and_return( ["SOME MONGO ID", "SOME OTHER MONGO ID"])
+      allow(employer).to receive(:id).and_return("1") 
+      allow(Carrier).to receive(:all).and_return([carrier, carrier_2]) 
+      allow(carrier).to receive(:hbx_carrier_id).and_return('1') 
+      allow(carrier_2).to receive(:hbx_carrier_id).and_return('2') 
 
-  end
+    end
 
-  it 'updates an existing PY' do 
-    allow(matched_plan_year).to receive(:update_attributes!).with(updated_pyvs).and_return(updated_plan_year) 
-    subject.match_and_persist_plan_years(employer, pyvs, matched_plan_years) 
-    expect(matched_plan_year.issuer_ids).to eq( ["SOME MONGO ID", "SOME OTHER MONGO ID"])
-  end
+    it 'updates an existing PY' do 
+      allow(matched_plan_year).to receive(:update_attributes!).with(updated_pyvs).and_return(updated_plan_year) 
+      subject.match_and_persist_plan_years(employer, pyvs, matched_plan_years) 
+      expect(matched_plan_year.issuer_ids).to eq( ["SOME MONGO ID", "SOME OTHER MONGO ID"])
+    end
 
-  it 'creates a new py' do 
-    subject.match_and_persist_plan_years(employer, second_pyvs, matched_plan_years) 
-    expect(matched_plan_year.issuer_ids).to eq( ["SOME MONGO ID", "SOME OTHER MONGO ID"] )
+    it 'creates a new py' do 
+      subject.match_and_persist_plan_years(employer, second_pyvs, matched_plan_years) 
+      expect(matched_plan_year.issuer_ids).to eq( ["SOME MONGO ID", "SOME OTHER MONGO ID"] )
+    end
+    it 'updates an existing PY' do 
+      expect(matched_plan_year).to receive(:update_attributes!).with(updated_pyvs) #.and_return(updated_plan_year) 
+      subject.match_and_persist_plan_years(employer_id, pyvs, matched_plan_years)
+    end
+      
+    it 'creates a new py' do
+      expect(PlanYear).to receive(:create!).with([created_pyvs])
+      subject.match_and_persist_plan_years(employer_id, second_pyvs, matched_plan_years)
+    end
   end
-end
 
 RSpec.shared_context "employer importer shared persistance context" do
   let(:event_name) do
@@ -1084,7 +1095,7 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with no pla
     allow(employer_record).to receive(:save!).and_return(employer_record)
     allow(employer_record).to receive(:update_attributes!).with(expected_employer_values).and_return(true)
     allow(PlanYear).to receive(:create!).with(first_plan_year_values).and_return(first_plan_year_record)
-    allow(PlanYear).to receive(:create!).with(last_plan_year_values).and_return(last_plan_year_record)
+    allow(PlanYear).to receive(:create!).with([last_plan_year_values]).and_return(last_plan_year_record)
   end
 
   it "updates the employer with the correct attributes" do

@@ -65,7 +65,7 @@ module Listeners
         channel.ack(delivery_info.delivery_tag, false)
       when "503"
         resource_error_broadcast("resource_timeout", r_code, m_headers, m_headers)
-        channel.reject(delivery_info.delivery_tag, false)
+        channel.reject(delivery_info.delivery_tag, true)
       else
         resource_error_broadcast("unknown_error", r_code, resource_or_body, m_headers)
         channel.ack(delivery_info.delivery_tag, false)

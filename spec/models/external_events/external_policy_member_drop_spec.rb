@@ -100,6 +100,7 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
 - a SHOP policy to change
 - a SHOP policy cv
 - a list of dropped member ids
+- a new policy cv with a new rating tier
 " do
   let(:existing_policy) { instance_double(Policy) }
   let(:dropped_member_ids) { [] }
@@ -137,7 +138,16 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
 
   describe "instructed to get the totals from a different SHOP policy CV" do
     let(:other_individual_market) { nil }
-    let(:other_shop_market) { instance_double(::Openhbx::Cv2::PolicyEnrollmentShopMarket,total_employer_responsible_amount: other_emp_res_amt_string_value) }
+    let(:other_shop_market) do
+      instance_double(
+        ::Openhbx::Cv2::PolicyEnrollmentShopMarket,
+        total_employer_responsible_amount: other_emp_res_amt_string_value,
+        composite_rating_tier_name: composite_rating_tier
+      )
+    end
+
+    let(:composite_rating_tier) { "A RATING TIER" }
+
     let(:other_policy_enrollment) { instance_double(::Openhbx::Cv2::PolicyEnrollment,
                                                     individual_market: other_individual_market,
                                                     shop_market: other_shop_market,
@@ -155,6 +165,10 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
 
     before :each do
       subject.use_totals_from(other_policy_cv)
+    end
+
+    it "gets the rating tier from the other policy cv" do
+      expect(subject.extract_rating_tier).to eq composite_rating_tier
     end
 
     it "gets the employer contribution from the other policy_cv" do

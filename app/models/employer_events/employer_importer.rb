@@ -208,7 +208,7 @@ module EmployerEvents
     end
 
     def update_plan_years(pyvs, employer)
-      plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_date] && py.end_date == pyvs[:end_date] }
+      plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_datekjj] && py.end_date == pyvs[:end_date] }
       plan_year.update_attributes!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
     end
 
@@ -229,7 +229,7 @@ module EmployerEvents
     def persist
       return unless importable?
       employer = create_or_update_employer
-      match_and_persist_plan_years(employer[:employer_id], plan_year_values, employer[:existing_plan_years]) 
+      match_and_persist_plan_years(employer[:employer_id], plan_year_values, employer[:existing_plan_years])
     end
 
     def match_and_persist_plan_years(employer_id, py_data, existing_plan_years)

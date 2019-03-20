@@ -20,6 +20,8 @@ gem "psych", "2.0.5"
 
 group :development do
   gem 'capistrano', '2.15.4'
+  gem 'rubocop', '0.57.2'
+  gem 'rubocop-git', '0.1.3'
 #  gem 'jazz_hands'
 end
 
@@ -53,14 +55,12 @@ group :test do
   gem 'rspec-rails', '3.3.3'
   gem 'rspec-collection_matchers', '1.1.2'
   gem 'capybara', '2.4.4'
-  gem "capybara-webkit"
   gem 'factory_girl_rails', '4.5.0'
   gem 'factory_girl', '4.5.0'
   gem 'database_cleaner', '1.5.3'
   gem 'ci_reporter', '2.0.0'
   gem 'savon', '2.7'
   gem 'simplecov', :require => false
-  gem 'rubycritic', :require => false
   gem 'rspec_junit_formatter'
 end
 
@@ -72,7 +72,7 @@ group :production do
   gem 'nio4r', '1.1.1'
 end
 
-gem 'ruby-progressbar', '1.6.0'
+gem 'ruby-progressbar', '~> 1.7'
 gem "haml"
 gem 'kaminari', '0.16.3'
 gem 'bootstrap-kaminari-views', '0.0.5'
@@ -89,7 +89,7 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git", tag: "ma-0.2.2"
+gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'

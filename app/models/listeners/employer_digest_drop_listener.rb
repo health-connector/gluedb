@@ -24,7 +24,7 @@ module Listeners
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       ec = ExchangeInformation
       time_boundry = Time.now
-      EmployerEvent.with_digest_payloads(time_boundry) do |payload|
+      EmployerEvent.with_digest_payloads(connection, time_boundry) do |payload|
         Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |chan|
           ex = chan.fanout(ec.event_publish_exchange, {:durable => true})
           ex.publish(

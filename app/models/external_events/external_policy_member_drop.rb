@@ -88,12 +88,17 @@ module ExternalEvents
       end
     end
 
+    def extract_rating_tier
+      p_enrollment = Maybe.new(@total_source).policy_enrollment.value
+      Maybe.new(p_enrollment).shop_market.composite_rating_tier_name.strip.value
+    end
+
     def extract_other_financials
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return({}) if p_enrollment.blank?
       if p_enrollment.shop_market
         tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
-        composite_rating_tier_name = Maybe.new(p_enrollment).shop_market.composite_rating_tier_name.strip.value
+        composite_rating_tier_name = extract_rating_tier
         employer = find_employer(@policy_node)
         potential_data = [
           [:employer, employer],

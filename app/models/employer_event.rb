@@ -35,7 +35,7 @@ class EmployerEvent
   end
 
   def self.store_and_yield_deleted(new_employer_id, new_event_name, new_event_time, new_payload)
-    employer_importer = ::EmployerEvents::EmployerImporter.new(new_payload)
+    employer_importer = ::EmployerEvents::EmployerImporter.new(new_payload, new_event_name)
     employer_importer.persist
     if not_yet_seen_by_carrier?(new_employer_id) || (new_event_name == EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME)
       latest_time = ([new_event_time] + self.where(:employer_id => new_employer_id).map(&:event_time)).max
@@ -75,7 +75,7 @@ class EmployerEvent
   end
 
   def self.execute_pending_enrollment_requests(connection, boundry_time = Time.now)
-    events = self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
+    events = self.ordered_events_since_time(boundry_time)
     trigger = EmployerEvents::EnrollmentEventTrigger.new
     events.each do |event|
       trigger.add(event)
@@ -83,23 +83,29 @@ class EmployerEvent
     trigger.publish(connection)
   end
 
-  def self.with_digest_payloads(boundry_time = Time.now)
-    events = self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
+  def self.with_digest_payloads(conn, boundry_time = Time.now)
+    events = self.ordered_events_since_time(boundry_time)
     carrier_files = Carrier.all.map do |car|
       EmployerEvents::CarrierFile.new(car)
     end
     events.each do |ev|
       event_renderer = EmployerEvents::Renderer.new(ev)
       carrier_files.each do |car|
-        car.render_event_using(event_renderer)
+        car.render_event_using(event_renderer, ev)
       end
     end
+    edi_notifier = EmployerEvents::EmployerEdiContactInfoNotificationSet.new(conn)
     carrier_files.each do |cf|
       unless cf.empty?
+        edi_notifier.notify_for_outstanding_employers_from_list(cf.rendered_employers)
         f_name, data = cf.result
         yield data
       end
     end
+  end
+
+  def self.ordered_events_since_time(boundry_time = Time.now)
+    self.where(event_time: {"$lt" => boundry_time}).order_by(event_time: 1)
   end
 
   def self.get_all_digests

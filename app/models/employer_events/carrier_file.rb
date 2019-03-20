@@ -29,7 +29,7 @@ module EmployerEvents
       carrier.abbrev.upcase + "_" + start_timestamp_string + "_" + end_timestamp_string + ".xml"
     end
 
-    def render_event_using(renderer)
+    def render_event_using(renderer, event)
       begin
         if renderer.render_for(carrier, @buffer)
           @rendered_employers << event.employer_id

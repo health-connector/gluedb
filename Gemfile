@@ -8,6 +8,7 @@ gem "origin"
 gem "aasm", "~> 3.0.25"
 gem "nokogiri", "~> 1.6.1"
 gem "bunny", '1.4.1'
+gem 'amq-protocol', '2.0.1'
 gem 'jquery-rails', '3.1.3'
 gem 'jquery-ui-rails', '5.0.5'
 gem 'virtus'
@@ -95,4 +96,4 @@ gem 'rgl', '0.5.2'
 gem 'aws-sdk'
 
 # configuration support
-gem "config", '~> 1.0.0'
+gem "config", '1.0.0'

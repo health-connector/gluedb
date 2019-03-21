@@ -418,6 +418,7 @@ PLATFORMS
 DEPENDENCIES
   aasm (~> 3.0.25)
   american_date (= 1.1.0)
+  amq-protocol (= 2.0.1)
   aws-sdk
   bh
   bootstrap-kaminari-views (= 0.0.5)
@@ -429,7 +430,7 @@ DEPENDENCIES
   celluloid (= 0.15.2)
   ci_reporter (= 2.0.0)
   coffee-rails (~> 3.2.1)
-  config (~> 1.0.0)
+  config (= 1.0.0)
   database_cleaner (= 1.5.3)
   designmodo-flatuipro-rails!
   devise (= 3.3.0)

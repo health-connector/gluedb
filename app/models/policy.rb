@@ -175,6 +175,28 @@ class Policy
     ]
   end
 
+  def calculated_premium_effective_date
+    subscriber_start = subscriber.coverage_start
+    non_canceled_enrollees = enrollees.reject do |en|
+      en.coverage_ended? && (en.coverage_end <= en.coverage_start)
+    end
+    # Return the enrollment start if everybody is canceled
+    return subscriber_start if non_canceled_enrollees.empty?
+    latest_possible_date = subscriber.coverage_ended? ? subscriber.coverage_end : coverage_year.end
+    # Discard end dates that are the last possible policy day,
+    # Since we are going to pick up one day after
+    latest_end_dates = non_canceled_enrollees.map(&:coverage_end).compact.reject do |d|
+      d >= latest_possible_date
+    end
+    # The last day of coverage +1 day is actually the
+    # date the premium for somebody terminated becomes effected
+    provided_end_dates = latest_end_dates.map do |d|
+      d + 1.day
+    end
+    latest_start_dates = non_canceled_enrollees.map(&:coverage_start).compact
+    (provided_end_dates + latest_start_dates).max
+  end
+
   def canceled?
     subscriber.canceled?
   end

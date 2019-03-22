@@ -23,6 +23,7 @@ group :development do
   gem 'capistrano', '2.15.4'
   gem 'rubocop', '0.57.2'
   gem 'rubocop-git', '0.1.3'
+  gem 'overcommit', '0.44.0'
 #  gem 'jazz_hands'
 end
 
@@ -52,7 +53,7 @@ end
 
 group :test do
   gem 'test-unit'
-	gem 'mongoid-rspec'
+  gem 'mongoid-rspec'
   gem 'rspec-rails', '3.3.3'
   gem 'rspec-collection_matchers', '1.1.2'
   gem 'capybara', '2.4.4'

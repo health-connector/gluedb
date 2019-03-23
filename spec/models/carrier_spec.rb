@@ -54,7 +54,8 @@ describe Carrier, dbclean: :after_each do
     :policies,
     :premium_payments,
     :brokers,
-    :carrier_profiles
+    :carrier_profiles,
+    :uses_issuer_centric_sponsor_cycles
   ].each do |attribute|
     it { should respond_to attribute }
   end
@@ -93,5 +94,9 @@ describe Carrier, dbclean: :after_each do
     carrier.carrier_profiles << CarrierProfile.new(fein: fein)
     carrier.save!
     expect(Carrier.for_fein(fein)).to eq carrier
+  end
+
+  it 'has a default value of false for uses_issuer_centric_sponsor_cycles' do
+    expect(carrier.uses_issuer_centric_sponsor_cycles).to eq false
   end
 end

@@ -141,10 +141,16 @@ Style/EachWithObject:
 Style/ExpandPathArguments:
   Enabled: false
 
+Style/EmptyLiteral:
+  Enabled: false
+
 Style/HashSyntax:
   Enabled: false
 
 Style/NumericPredicate:
+  Enabled: false
+
+Style/ParenthesesAroundCondition:
   Enabled: false
 
 Style/StringLiterals:
@@ -154,6 +160,9 @@ Style/SymbolArray:
   Enabled: false
 
 Style/WordArray:
+  Enabled: false
+
+Style/YodaCondition:
   Enabled: false
 
 Bundler/OrderedGems:

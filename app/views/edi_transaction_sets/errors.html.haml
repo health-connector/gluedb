@@ -21,7 +21,10 @@
         %td.col-md-1
           = t.submitted_at.strftime("%m-%d-%Y %H:%M:%S")
         %td.col-md-1
-          = t.transmission.sender.name
+          - if t.transmission.sender
+            = t.transmission.sender.name
+          - else
+            = t.transmission.ic_sender_id
         %td.col-md-9
           = t.error_list
 

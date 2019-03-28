@@ -30,61 +30,66 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
             "Employer Name", "Employer DBA", "Employer FEIN", "Employer HBX ID",
             "Home Address", "Mailing Address","Email","Phone Number","Broker"]
     policies.each do |pol|
-      if !bad_eg_id(pol.eg_id)
-        if !pol.subscriber.nil?
-          #if !pol.subscriber.canceled?
-            subscriber_id = pol.subscriber.m_id
-            subscriber_member = pol.subscriber.member
-            auth_subscriber_id = subscriber_member.person.authority_member_id
+      begin
+        unless bad_eg_id(pol.eg_id)
+          unless pol.subscriber.nil?
+            #unless pol.subscriber.canceled?
+              subscriber_id = pol.subscriber.m_id
+              subscriber_member = pol.subscriber.member
+              auth_subscriber_id = subscriber_member.person.authority_member_id
 
-            if !auth_subscriber_id.blank?
-              if subscriber_id != auth_subscriber_id
-                next
+              unless auth_subscriber_id.blank?
+                if subscriber_id != auth_subscriber_id
+                  next
+                end
               end
-            end
-            plan = Caches::MongoidCache.lookup(Plan, pol.plan_id) {
-              pol.plan
-            }
-            carrier = Caches::MongoidCache.lookup(Carrier, pol.carrier_id) {
-              pol.carrier
-            }
-            employer = nil
-            if !pol.employer_id.blank?
-            employer = Caches::MongoidCache.lookup(Employer, pol.employer_id) {
-              pol.employer
-            }
-            end
-            if !pol.broker.blank?
-              broker = pol.broker.full_name
-            end
-            pol.enrollees.each do |en|
-              #if !en.canceled?
-                per = en.person
-                next if per.blank?
-                csv << [
-                  subscriber_id, en.m_id, pol._id, pol.eg_id,
-                  per.name_first,
-                  per.name_last,
-                  en.member.ssn,
-                  en.member.dob.strftime("%Y%m%d"),
-                  en.member.gender,
-                  en.rel_code,
-                  plan.name, plan.hios_plan_id, plan.metal_level, carrier.name,
-                  en.pre_amt, pol.pre_amt_tot, pol.tot_emp_res_amt,
-                  en.coverage_start.blank? ? nil : en.coverage_start.strftime("%Y%m%d"),
-                  en.coverage_end.blank? ? nil : en.coverage_end.strftime("%Y%m%d"),
-                  pol.employer_id.blank? ? nil : employer.name,
-                  pol.employer_id.blank? ? nil : employer.dba,
-                  pol.employer_id.blank? ? nil : employer.fein,
-                  pol.employer_id.blank? ? nil : employer.hbx_id,
-                  per.home_address.try(:full_address) || pol.subscriber.person.home_address.try(:full_address),
-                  per.mailing_address.try(:full_address) || pol.subscriber.person.mailing_address.try(:full_address),
-                  per.emails.first.try(:email_address), per.phones.first.try(:phone_number), broker
-                ]
-              #end
-            end
-          #end
+              plan = Caches::MongoidCache.lookup(Plan, pol.plan_id) {
+                pol.plan
+              }
+              carrier = Caches::MongoidCache.lookup(Carrier, pol.carrier_id) {
+                pol.carrier
+              }
+              employer = nil
+              unless pol.employer_id.blank?
+              employer = Caches::MongoidCache.lookup(Employer, pol.employer_id) {
+                pol.employer
+              }
+              end
+              unless pol.broker.blank?
+                broker = pol.broker.full_name
+              end
+              pol.enrollees.each do |en|
+                #unless en.canceled?
+                  per = en.person
+                  next if per.blank?
+                  csv << [
+                    subscriber_id, en.m_id, pol._id, pol.eg_id,
+                    per.name_first,
+                    per.name_last,
+                    en.member.ssn,
+                    en.member.dob.strftime("%Y%m%d"),
+                    en.member.gender,
+                    en.rel_code,
+                    plan.name, plan.hios_plan_id, plan.metal_level, carrier.name,
+                    en.pre_amt, pol.pre_amt_tot, pol.tot_emp_res_amt,
+                    en.coverage_start.blank? ? nil : en.coverage_start.strftime("%Y%m%d"),
+                    en.coverage_end.blank? ? nil : en.coverage_end.strftime("%Y%m%d"),
+                    pol.employer_id.blank? ? nil : employer.name,
+                    pol.employer_id.blank? ? nil : employer.dba,
+                    pol.employer_id.blank? ? nil : employer.fein,
+                    pol.employer_id.blank? ? nil : employer.hbx_id,
+                    per.home_address.try(:full_address) || pol.subscriber.person.home_address.try(:full_address),
+                    per.mailing_address.try(:full_address) || pol.subscriber.person.mailing_address.try(:full_address),
+                    per.emails.first.try(:email_address), per.phones.first.try(:phone_number), broker
+                  ]
+                #end
+              end
+            #end
+          end
         end
+      rescue Exception => e
+        puts "#{e.message}, Enrollment_Group_id: #{pol.eg_id}" unless Rails.env.test?
+        puts "Error: #{e.backtrace} \n" unless Rails.env.test?
       end
     end
   end

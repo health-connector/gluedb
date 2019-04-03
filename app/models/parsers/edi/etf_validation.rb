@@ -181,7 +181,7 @@ module Parsers
       private
 
       def is_shop?
-        !(@etf_loop["L1000A"]["N1"][2] == "DC0")
+        (@etf_loop["L1000A"]["N1"][2] != ExchangeInformation.hbx_id.upcase)
       end
 
       def tsf_exists?(target_loop, label)

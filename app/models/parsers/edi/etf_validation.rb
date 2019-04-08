@@ -126,6 +126,9 @@ module Parsers
             log_error(:etf_loop, "has no valid plan")
           else
             plan = nil
+            eg_id = pol_loop.eg_id
+            hios = pol_loop.hios_id
+            plan = Maybe.new(Policy.find_for_group_and_hios(eg_id, hios)).plan.value
             coverage_start = Maybe.new(pol_loop.coverage_start).fmap { |cs| Date.parse(cs) }.value
             if !coverage_start.blank?
               if(is_shop?)
@@ -156,11 +159,9 @@ module Parsers
               else
                 plan_year = coverage_start.year
               end
-              plan = @import_cache.lookup_plan(pol_loop.hios_id, plan_year)
-            else
-              eg_id = pol_loop.eg_id
-              hios = pol_loop.hios_id
-              plan = Maybe.new(Policy.find_for_group_and_hios(eg_id, hios)).plan.value
+              if plan.blank? # rubocop:disable Metrics/BlockNesting
+                plan = @import_cache.lookup_plan(pol_loop.hios_id, plan_year)
+              end
             end
             if plan.blank?
               log_error(:etf_loop, "has no valid plan")
@@ -181,7 +182,7 @@ module Parsers
       private
 
       def is_shop?
-        !(@etf_loop["L1000A"]["N1"][2] == "DC0")
+        (@etf_loop["L1000A"]["N1"][2] != ExchangeInformation.hbx_id.upcase)
       end
 
       def tsf_exists?(target_loop, label)

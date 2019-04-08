@@ -2,10 +2,18 @@ require "rails_helper"
 
 describe ChangeSets::IdentityChangeTransmitter do
   let(:affected_member) { instance_double(::BusinessProcesses::AffectedMember, :member_id => affected_member_id) }
-  let(:policy) { instance_double(Policy, :enrollees => [], :active_member_ids => active_member_ids) }
+  let(:policy) do
+    instance_double(
+      Policy,
+      :enrollees => [],
+      :active_member_ids => active_member_ids,
+      :calculated_premium_effective_date => p_effective_date
+    )
+  end
   let(:event_kind) { "some event kind" }
   let(:active_member_ids) { ["member id 1", "member id 2"] }
   let(:enrollees) { [] }
+  let(:p_effective_date) { Date.new }
 
   subject { ChangeSets::IdentityChangeTransmitter.new(affected_member, policy, event_kind) }
 
@@ -37,7 +45,8 @@ describe ChangeSets::IdentityChangeTransmitter do
            :policy => policy,
            :enrollees => enrollees,
            :event_type => event_kind,
-           :transaction_id => transaction_id
+           :transaction_id => transaction_id,
+           :premium_effective_date => p_effective_date
          }
       ).and_return(template_result)
       allow(::Services::EnrollmentEventTransmitter).to receive(:new).and_return(enrollment_event_transmitter)

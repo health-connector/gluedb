@@ -162,6 +162,9 @@ Bundler/OrderedGems:
 Gemspec/OrderedDependencies:
   Enabled: false
 
+Performance/StringReplacement:
+  Enabled: false
+
 # Deprecated
 # Style/TrailingBlankLines:
 #   Enabled: false

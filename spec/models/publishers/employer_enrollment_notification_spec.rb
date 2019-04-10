@@ -123,7 +123,7 @@ describe Publishers::EmployerEnrollmentNotification do
     let(:carrier_profile) {CarrierProfile.new(fein: '12222', profile_name: "THPP_SHP")}
     let(:carrier) { FactoryGirl.create(:carrier, requires_employer_updates_on_enrollments:true, carrier_profiles:[carrier_profile]) }
     let(:united_health_carrier) { FactoryGirl.create(:carrier, carrier_profiles:[united_carrier_profile]) }
-    let!(:policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:carrier) }
+    let!(:policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted", carrier: carrier) }
     let!(:united_health_care_policy) { FactoryGirl.create(:policy, employer: employer, aasm_state: "submitted",carrier:united_health_carrier) }
     let!(:person) {FactoryGirl.create(:person)}
     let!(:first_enrollee) { policy.enrollees[0] }
@@ -147,8 +147,13 @@ describe Publishers::EmployerEnrollmentNotification do
         before :each do
           allow(first_enrollee).to receive(:person).and_return(person)
           allow(second_enrollee).to receive(:person).and_return(person)
+          allow(policy).to receive(:calculated_premium_effective_date).and_return(Date.new(2013,5,26))
           render_result = subject.render_cv(policy)
           @doc = Nokogiri::XML(render_result.gsub("\n", ""))
+        end
+
+        it "includes the premium effective date" do
+          expect(@doc.at_xpath("//cv:premium_effective_date", xml_ns).content).to eq "20130526"
         end
 
         it "includes only one affected member" do

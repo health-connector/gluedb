@@ -96,7 +96,7 @@ module Parsers
       def has_pre_amt_tot
         if right_subscriber_count
           if !tsf_exists?(subscriber_loop, "PRE AMT TOT")
-            log_error(:etf_loop, "has no PRE AMT TOT")
+            # log_error(:etf_loop, "has no PRE AMT TOT")
           end
         end
       end

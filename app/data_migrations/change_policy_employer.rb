@@ -13,7 +13,7 @@ class ChangePolicyEmployer < MongoidMigrationTask
         policy.save!
         puts "Successfully update eg_id:#{eg_id} with its employer_id:#{employer_id}" unless Rails.env.test?
       else
-        puts "Couldn't find employer with its id:#{ENV['mongo_id']} or policy with its eg_id:#{ENV['eg_id']}" unless Rails.env.test?
+        puts "Couldn't find employer with its id:#{employer_id} or policy with its eg_id:#{eg_id}" unless Rails.env.test?
       end
     end
   end

@@ -11,8 +11,9 @@ namespace :edi do
         :format => "%t %a %e |%B| %P%%"
       )
       CSV.foreach(f, :headers => true) do |data|
+        d_length = data.to_s.length
         yield data, pb
-        pb.progress += data.to_s.length
+        pb.progress += d_length
       end
       pb.finish
     end

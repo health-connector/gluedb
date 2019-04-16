@@ -188,7 +188,7 @@ module EmployerEvents
         plan_year_update_data = py_attributes.merge(
           :issuer_ids => issuer_ids,
         )
-        py_record.update_attributes!(plan_year_update_data)
+        py_record.update_attributes(plan_year_update_data)
       end
     end
 

@@ -16,6 +16,7 @@ module Parsers
       validate :plan_exists
       validate :no_bogus_broker
       validate :has_st_segment
+      validate :has_valid_carrier
 
       def initialize(f_name, mt, el, carrier, blist, i_cache)
         @file_name = f_name
@@ -51,6 +52,13 @@ module Parsers
           end
         end
       end
+
+      def has_valid_carrier
+        if @carrier.blank?
+          log_error(:etf_loop, "has an invalid carrier specified")
+        end
+      end
+
 
       def has_valid_employer
         # emp_seg = @etf_loop.L1000A.N1

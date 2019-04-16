@@ -1,6 +1,46 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Carrier do
+describe Carrier, "given nothing" do
+  it "does not require simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_falsey
+  end
+end
+
+describe Carrier, "given:
+- a requirement for simple plan changes
+", dbclean: :after_each do
+  subject do
+    Carrier.new({
+      :requires_simple_plan_changes => true
+    })
+  end
+
+  it "requires simple plan changes" do
+    expect(subject.requires_simple_plan_changes?).to be_truthy
+  end
+end
+
+describe Carrier, "given nothing" do
+  it "does not require simple renewal" do
+    expect(subject.requires_simple_renewal?).to be_falsey
+  end
+end
+
+describe Carrier, "given:
+- a requirement for simple renewal
+", dbclean: :after_each  do
+  subject do
+    Carrier.new({
+      :requires_simple_renewal => true
+    })
+  end
+
+  it "requires simple renewal" do
+    expect(subject.requires_simple_renewal?).to be_truthy
+  end
+end
+
+describe Carrier, dbclean: :after_each do
   subject(:carrier) { build :carrier }
   [
     :name,
@@ -14,7 +54,8 @@ describe Carrier do
     :policies,
     :premium_payments,
     :brokers,
-    :carrier_profiles
+    :carrier_profiles,
+    :uses_issuer_centric_sponsor_cycles
   ].each do |attribute|
     it { should respond_to attribute }
   end
@@ -53,5 +94,9 @@ describe Carrier do
     carrier.carrier_profiles << CarrierProfile.new(fein: fein)
     carrier.save!
     expect(Carrier.for_fein(fein)).to eq carrier
+  end
+
+  it 'has a default value of false for uses_issuer_centric_sponsor_cycles' do
+    expect(carrier.uses_issuer_centric_sponsor_cycles).to eq false
   end
 end

@@ -15,7 +15,7 @@ module LegacyEdiTransformations
       return nil if subscriber_id.blank?
       return nil if hios_id.blank?
       return nil if subscriber_start.blank?
-      plan_ids = Plan.where(:hios_id => hios_id).map(&:id)
+      plan_ids = Plan.where(:hios_plan_id => hios_id).map(&:id)
       return nil if plan_ids.blank?
       potential_policies = Policy.where(
         {

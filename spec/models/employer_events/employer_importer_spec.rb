@@ -812,7 +812,7 @@ describe EmployerEvents::EmployerImporter, "for a new employer, given an employe
   subject { EmployerEvents::EmployerImporter.new(employer_event_xml, event_name) }
 
   it 'updates an existing PY' do
-    expect(matched_plan_year).to receive(:update_attributes!).with(updated_pyvs) #.and_return(updated_plan_year)
+    expect(matched_plan_year).to receive(:update_attributes).with(updated_pyvs) #.and_return(updated_plan_year)
     subject.match_and_persist_plan_years(employer_record_id, pyvs, matched_plan_years)
   end
 
@@ -945,7 +945,6 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
 
   let(:existing_employer_records) { [employer_record] }
   let(:first_plan_year_record) { FactoryGirl.create(:plan_year, :start_date => first_plan_year_start_date, :end_date => nil, :issuer_ids => [])}
- # let(:first_plan_year_record) { instance_double(PlanYear, :start_date => first_plan_year_start_date, :end_date => nil, :issuer_ids => []) }
 
   let(:last_plan_year_record) { instance_double(PlanYear) }
   let(:existing_plan_years) { [first_plan_year_record] }
@@ -955,8 +954,9 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
   let(:incoming_office_location) { instance_double(Openhbx::Cv2::OfficeLocation, name:"place", is_primary: true) }
 
   let(:plan_year_updates) do
-    {
-        end_date: first_plan_year_end_date
+    {      :start_date =>  first_plan_year_start_date,
+           :end_date => first_plan_year_end_date,
+           :issuer_ids => ["SOME MONGO ID", "SOME OTHER MONGO ID"]
     }
   end
 
@@ -996,13 +996,14 @@ describe EmployerEvents::EmployerImporter, "for an existing employer with one ov
     subject.create_or_update_employer
   end
 
-  it "should update existing plan year end date if plan year end date != employer xml plan year end date " do
-    expect(first_plan_year_record).to receive(:update_attributes!).with(plan_year_updates).and_return(true)
+  it "should update existing plan year end date with employer xml plan year end date " do
+    expect(first_plan_year_record.end_date).to eq nil
     subject.persist
+    expect(first_plan_year_record.end_date).to eq plan_year_updates[:end_date]
   end
 
   it "creates only the one new plan year for the employer with the correct attributes" do
-    expect(first_plan_year_record).to receive(:update_attributes!).with(updated_plan_year_values).and_return(updated_plan_year)
+    expect(first_plan_year_record).to receive(:update_attributes).with(updated_plan_year_values).and_return(updated_plan_year)
     subject.persist
   end
 

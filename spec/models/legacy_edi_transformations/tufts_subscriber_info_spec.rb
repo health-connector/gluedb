@@ -107,7 +107,7 @@ describe LegacyEdiTransformations::TuftsSubscriberInfo, "given:
 
   before :each do
     allow(Plan).to receive(:where).with(
-      {:hios_id => hios_id}
+      {:hios_plan_id => hios_id}
     ).and_return(plan_results)
   end
 

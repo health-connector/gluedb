@@ -28,7 +28,15 @@ class PlanYear
 
   embeds_many :elected_plans
 
+  has_and_belongs_to_many :issuers, :class_name => 'Carrier', :inverse_of => nil 
+
   has_one :contribution_strategy, :class_name => "EmployerContributions::Strategy", :inverse_of => :plan_year
+
+  has_and_belongs_to_many :issuers, :class_name => 'Carrier', :inverse_of => nil
+
+  scope :by_start_date, lambda { |start_date| where(:start_date => start_date) }
+
+  scope :for_employer_starting_on, lambda { |employer, start_date| where(:employer_id => employer.id, :start_date => start_date) }
 
   def self.make(data)
     plan_year = PlanYear.new
@@ -88,5 +96,11 @@ class PlanYear
 
   def terminate_plan_year(end_date)
     self.update_attributes(:end_date => end_date)
+  end
+
+  def add_issuer(issuer)
+    return true if issuer_ids.include?(issuer.id)
+    issuer_ids << issuer.id
+    self.save
   end
 end

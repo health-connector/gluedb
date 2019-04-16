@@ -2,7 +2,6 @@ module HandleEnrollmentEvent
   class ProcessChangeProduct
     include Interactor::Organizer
 
-    organize(
-    )
+    organize
   end
 end

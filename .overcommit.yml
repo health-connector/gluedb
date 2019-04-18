@@ -13,9 +13,6 @@ CommitMsg:
     enabled: false
 
 PreCommit:
-  ALL:
-    on_warn: fail
-
   AuthorEmail:
     enabled: true
 
@@ -33,3 +30,4 @@ PreCommit:
 
   RuboCop:
     enabled: true
+    problem_on_unmodified_line: warn

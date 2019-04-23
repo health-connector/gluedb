@@ -7,7 +7,7 @@ describe RemoveIssuerIdsFromPlanYear, dbclean: :after_each do
   let(:start_date) {"01-01-2014"}
   let(:carrier1) {FactoryGirl.create(:carrier)}
   let(:carrier2) {FactoryGirl.create(:carrier)}
-  let(:issuer_id) {carrier1.to_s}
+  let(:issuer_id) {carrier1.id.to_s}
   let(:issuer_ids) {[carrier1.id.to_s, carrier2.id.to_s]}
   let!(:update_plan_year) {
     plan_year = employer_1.plan_years.first
@@ -31,11 +31,10 @@ describe RemoveIssuerIdsFromPlanYear, dbclean: :after_each do
 
     it 'should remove issuer_id from plan year' do
       expect(employer_1.plan_years.first.start_date.to_s).to eql start_date
-      expect(employer_1.plan_years.first.issuer_ids).to eq issuer_ids
+      expect(employer_1.plan_years.first.issuer_ids).to eq [carrier1.id, carrier2.id]
       subject.migrate
       employer_1.reload
-      expect(employer_1.plan_years.first.issuer_ids.include?(issuer_id)).to eq false
+      expect(employer_1.plan_years.first.issuer_ids).to eq [carrier2.id]
     end
-
   end
 end

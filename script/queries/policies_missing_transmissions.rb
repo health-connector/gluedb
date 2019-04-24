@@ -22,6 +22,15 @@ class PoliciesMissingTransmissions
     @timestamp = Time.now.strftime('%Y%m%d%H%M')
   end
   
+  # The ruby script returns a CSV containing the created at, eg_id, carrier
+  # employer, subscriber name, and subscriber HBX id.
+  # The criteria for policies missing transmissions is as follows:
+  # 1. The policy's id is ecluded from a list of all Policy Id's taken from 
+  #    Caches::Mongoid::SinglePropertyLookup
+  # 2. The policy subscriber is present and the policy is not cancelled
+  # 3. The policy is not included in "excluded policies", which comes from a text
+  #    file called "policy_backlist.txt" (where does this come from?)
+
   def process
     CSV.open("policies_without_transmissions_#{@timestamp}.csv","w") do |csv|
       csv << ["Created At", "Enrollment Group ID", "Carrier", "Employer", "Subscriber Name", "Subscriber HBX ID"]

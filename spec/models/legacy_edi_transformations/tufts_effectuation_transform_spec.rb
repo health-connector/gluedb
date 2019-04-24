@@ -38,47 +38,6 @@ RSpec.shared_examples_for "a Tufts Effectuation Transformation" do |span_count, 
     expect(l834s.length).to eq bgn_vals.uniq.length
   end
 
-  it "relocates supergroup 1Ls to PIDs" do
-    old_l834s = original_json["L834s"]
-    located_1_l_s = Hash.new
-    old_l834s.each do |l834|
-      l834["L2000s"].each do |l2000|
-        m_id_ref = l2000["REFs"].detect do |ref|
-          ref[1] == "23"
-        end
-        member_id = m_id_ref[2]
-        l2300s = l2000["L2300s"]
-        l2300s.each do |l2300|
-          l2300["REFs"].each do |ref|
-            if (ref[1] == "1L")
-              located_1_l_s[member_id] = ref[2]
-            end
-          end
-        end
-      end
-    end
-    parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
-    l834s = parsed_json["L834s"]
-    located_p_i_d_s = Hash.new
-    l834s.each do |l834|
-      l834["L2000s"].each do |l2000|
-        m_id_ref = l2000["REFs"].detect do |ref|
-          ref[1] == "23"
-        end
-        member_id = m_id_ref[2]
-        l2300s = l2000["L2300s"]
-        l2300s.each do |l2300|
-          l2300["REFs"].each do |ref|
-            if (ref[1] == "PID")
-              located_p_i_d_s[member_id] = ref[2]
-            end
-          end
-        end
-      end
-    end
-    expect(located_p_i_d_s.to_a).to eq(located_1_l_s.to_a)
-  end
-
   it "corrects the time zone in the BGN" do
     parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
     new_bgns = parsed_json["L834s"].map do |l834|
@@ -154,7 +113,7 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
       ::LegacyEdiTransformations::TuftsSubscriberInfo,
       :subscriber_id => "100001",
       :hios_id => "29125MA0030196-01",
-      :carrier_assigned_policy_id => "000000001",
+      :exchange_assigned_policy_id => "HBX POLICY ID 1",
       :subscriber_start => "20190401"
     )
   end
@@ -177,7 +136,7 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
     allow(::LegacyEdiTransformations::TuftsSubscriberInfo).to receive(:new).with(
       "100001",
       "29125MA0030196-01",
-      "000000001",
+      "HBX POLICY ID 1",
       "20190401"
     ).and_return(subscriber_info)
     allow(subscriber_info).to receive(:locate_policy_information).and_return(policy_information)
@@ -190,25 +149,6 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
     l834s = parsed_json["L834s"]
     n1 = l834s.first["L1000A"]["N1"]
     expect(n1).to eq [8, "P5", glue_employer_name, "FI", glue_employer_fein]
-  end
-
-  it "adds the policy ID to all members" do
-    parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
-    l834s = parsed_json["L834s"]
-    located_1_l_s = Array.new
-    l834s.each do |l834|
-      l834["L2000s"].each do |l2000|
-        l2300s = l2000["L2300s"]
-        l2300s.each do |l2300|
-          l2300["REFs"].each do |ref|
-            if (ref[1] == "1L")
-              located_1_l_s << ref[2]
-            end
-          end
-        end
-      end
-    end
-    expect(located_1_l_s).to eq [glue_policy_id]
   end
 
 end
@@ -242,7 +182,7 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
       ::LegacyEdiTransformations::TuftsSubscriberInfo,
       :subscriber_id => "100001",
       :hios_id => "29125MA0030196-01",
-      :carrier_assigned_policy_id => "000000001",
+      :exchange_assigned_policy_id => "HBX POLICY ID 1",
       :subscriber_start => "20190401"
     )
   end
@@ -252,7 +192,7 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
       ::LegacyEdiTransformations::TuftsSubscriberInfo,
       :subscriber_id => "100002",
       :hios_id => "29125MA0030195-01",
-      :carrier_assigned_policy_id => "000000003",
+      :exchange_assigned_policy_id => "HBX POLICY ID 2",
       :subscriber_start => "20190401"
     )
   end
@@ -286,14 +226,14 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
     allow(::LegacyEdiTransformations::TuftsSubscriberInfo).to receive(:new).with(
       "100001",
       "29125MA0030196-01",
-      "000000001",
+      "HBX POLICY ID 1",
       "20190401"
     ).and_return(subscriber_1_info)
     allow(subscriber_1_info).to receive(:locate_policy_information).and_return(policy_1_information)
     allow(::LegacyEdiTransformations::TuftsSubscriberInfo).to receive(:new).with(
       "100002",
       "29125MA0030195-01",
-      "000000003",
+      "HBX POLICY ID 2",
       "20190401"
     ).and_return(subscriber_2_info)
     allow(subscriber_2_info).to receive(:locate_policy_information).and_return(policy_2_information)
@@ -313,25 +253,6 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
         [8, "P5", glue_employer_name_2, "FI", glue_employer_fein_2]
       ]
     )
-  end
-
-  it "adds the policy IDs to all members" do
-    parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
-    l834s = parsed_json["L834s"]
-    located_1_l_s = Array.new
-    l834s.each do |l834|
-      l834["L2000s"].each do |l2000|
-        l2300s = l2000["L2300s"]
-        l2300s.each do |l2300|
-          l2300["REFs"].each do |ref|
-            if (ref[1] == "1L")
-              located_1_l_s << ref[2]
-            end
-          end
-        end
-      end
-    end
-    expect(located_1_l_s).to eq [glue_policy_id_1, glue_policy_id_2]
   end
 
 end

@@ -66,13 +66,6 @@ module LegacyEdiTransformations
       sub_start_date = nil
       refs = sub_l2000["REFs"]
       return nil if refs.blank?
-      car_assigned_pol_id_ref = refs.detect do |ref|
-        ref[1] == "23"
-      end
-      capi_str = car_assigned_pol_id_ref[2]
-      return nil if capi_str.blank?
-      capi_parts = capi_str.split(/\s+/)
-      capi = capi_parts[0..-2].join(" ")
       sub_id_ref = refs.detect do |ref|
         ref[1] == "0F"
       end
@@ -87,6 +80,11 @@ module LegacyEdiTransformations
       hios_ref = l2300_refs.detect do |ref|
         ref[1] == "CE"
       end
+      pol_id_ref = l2300_refs.detect do |ref|
+        ref[1] == "1L"
+      end
+      return nil if pol_id_ref.blank?
+      e_a_pol_id = pol_id_ref[2]
       l2300_dtps = l2300s.first["DTPs"]
       if l2300_dtps.present?
         dtp_348 = l2300_dtps.detect do |dtp|
@@ -96,9 +94,8 @@ module LegacyEdiTransformations
           sub_start_date = dtp_348[3]
         end
       end
-      return nil if hios_ref.blank?
-      hios_id = hios_ref[2]
-      TuftsSubscriberInfo.new(sub_id,hios_id,capi, sub_start_date)
+      hios_id = hios_ref.present? ? hios_ref[2] : nil
+      TuftsSubscriberInfo.new(sub_id,hios_id,e_a_pol_id,sub_start_date)
     end
 
     def choose_my_people(l834, sub_info, rem_people, the_834s)
@@ -110,41 +107,21 @@ module LegacyEdiTransformations
       new_834["SE"] = new_834["SE"].dup
       new_834["BGN"] = new_834["BGN"].dup
       new_834["L2000s"] = match
-      match.each do |m|
-        move_supergroup_id(m)
-      end
       the_834s << [sub_info, new_834]
       dont_match
     end
 
     def person_matches?(sub_info, remaining_person)
-      refs = remaining_person["REFs"]
-      return false if refs.blank?
-      car_assigned_pol_id_ref = refs.detect do |ref|
-        ref[1] == "23"
-      end
-      capi_str = car_assigned_pol_id_ref[2]
-      return false if capi_str.blank?
-      capi_parts = capi_str.split(/\s+/)
-      capi = capi_parts[0..-2].join(" ")
-      sub_id_ref = refs.detect do |ref|
-        ref[1] == "0F"
-      end
-      return false if sub_id_ref.blank?
-      sub_id = sub_id_ref[2]
-      return false if sub_id.blank?
       l2300s = remaining_person["L2300s"]
       return false if l2300s.blank?
       l2300_refs = l2300s.first["REFs"]
       return false if l2300_refs.blank?
-      hios_ref = l2300_refs.detect do |ref|
-        ref[1] == "CE"
+      pol_id_ref = l2300_refs.detect do |ref|
+        ref[1] == "1L"
       end
-      return false if hios_ref.blank?
-      hios_id = hios_ref[2]
-      (sub_info.subscriber_id == sub_id) &&
-        (sub_info.hios_id == hios_id) &&
-        (sub_info.carrier_assigned_policy_id == capi)
+      return false if pol_id_ref.blank?
+      e_a_pi = pol_id_ref[2]
+      (sub_info.exchange_assigned_policy_id == e_a_pi)
     end
 
     def bump_sequences(l834, index_number)
@@ -191,53 +168,11 @@ module LegacyEdiTransformations
       Rails.logger.error "[Tufts Effectuation Transform] Date Parsing Error: #{bgn.inspect}"
     end
 
-    def move_supergroup_id(loop_2000)
-      l_2300s = loop_2000["L2300s"]
-      return nil if l_2300s.blank?
-      l_2300s.each do |l2300|
-        l2300_refs = l2300["REFs"]
-        next if l2300_refs.blank?
-        l2300_refs.each do |ref|
-          if ref[1] == "1L"
-            ref[1] = "PID"
-          end
-        end
-      end
-    end
-
     def add_policy_info(sub_info, l834)
       p_info = sub_info.locate_policy_information
       return nil if p_info.blank?
       pol_id, employer_name, employer_fein = p_info
-      apply_policy_ids(l834, pol_id)
       apply_employer_information(l834, employer_name, employer_fein)
-    end
-
-    def apply_policy_ids(l834, pol_id)
-      l2000s = l834["L2000s"]
-      return nil if l2000s.blank?
-      l2000s.each do |loop_2000|
-        l_2300s = loop_2000["L2300s"]
-        return nil if l_2300s.blank?
-        l_2300s.each do |l2300|
-          l2300_refs = l2300["REFs"]
-          if l2300_refs.blank?
-            l2300["REFs"] = [
-              [
-                -1,
-                "1L",
-                pol_id
-              ]
-            ]
-          else
-            l2300_refs << [
-              -1,
-              "1L",
-              pol_id
-            ]
-          end
-        end
-      end
     end
 
     def apply_employer_information(l834, employer_name, employer_fein)

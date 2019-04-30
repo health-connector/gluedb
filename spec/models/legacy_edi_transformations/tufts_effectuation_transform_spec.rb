@@ -256,3 +256,131 @@ describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
   end
 
 end
+
+describe LegacyEdiTransformations::TuftsEffectuationTransform, "given:
+  - an effectuation with people split between policies
+  - and both policies, where specified are found
+  - and some people have no policy 1L
+" do
+
+  let(:csv_row) do
+    {
+      "WIREPAYLOADUNPACKED" => File.read(
+        File.join(
+          Rails.root,
+          "spec",
+          "data",
+          "effectuation_transforms",
+          "tufts_some_policy_some_not_mismash.json"
+        )
+      )
+    }
+  end
+
+  let(:transform) { LegacyEdiTransformations::TuftsEffectuationTransform.new }
+
+  let(:original_json) { JSON.parse(csv_row["WIREPAYLOADUNPACKED"]) }
+
+  let(:subscriber_1_info) do
+    instance_double(
+      ::LegacyEdiTransformations::TuftsSubscriberInfo,
+      :subscriber_id => "100001",
+      :hios_id => "29125MA0030196-01",
+      :exchange_assigned_policy_id => "HBX POLICY ID 1",
+      :subscriber_start => "20190401"
+    )
+  end
+
+  let(:subscriber_2_info) do
+    instance_double(
+      ::LegacyEdiTransformations::TuftsSubscriberInfo,
+      :subscriber_id => "100002",
+      :hios_id => "29125MA0030195-01",
+      :exchange_assigned_policy_id => "HBX POLICY ID 2",
+      :subscriber_start => "20190401"
+    )
+  end
+
+  let(:policy_1_information) do
+    [
+      glue_policy_id_1,
+      glue_employer_name_1,
+      glue_employer_fein_1
+    ]
+  end
+
+  let(:policy_2_information) do
+    [
+      glue_policy_id_2,
+      glue_employer_name_2,
+      glue_employer_fein_2
+    ]
+  end
+
+  let(:glue_policy_id_1) { "A POLICY ID 1" }
+  let(:glue_employer_name_1) { "EMPLOYER NAME 1" }
+  let(:glue_employer_fein_1) { "EMPLOYER FEIN 1" }
+  let(:glue_policy_id_2) { "A POLICY ID 2" }
+  let(:glue_employer_name_2) { "EMPLOYER NAME 2" }
+  let(:glue_employer_fein_2) { "EMPLOYER FEIN 2" }
+
+  subject { transform.apply(csv_row) }
+
+
+  let(:no_policy_1L_834s) do
+    parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
+    l834s = parsed_json["L834s"]
+    l834s.select do |l834|
+      has_1l = Maybe.new(l834["L2000s"]).first["L2300s"].first["REFs"].detect do |ref|
+        ref[1] == "1L"
+      end.value
+      has_1l.blank?
+    end
+  end
+
+  before :each do
+    allow(::LegacyEdiTransformations::TuftsSubscriberInfo).to receive(:new).with(
+      "100001",
+      "29125MA0030196-01",
+      "HBX POLICY ID 1",
+      "20190401"
+    ).and_return(subscriber_1_info)
+    allow(subscriber_1_info).to receive(:locate_policy_information).and_return(policy_1_information)
+    allow(::LegacyEdiTransformations::TuftsSubscriberInfo).to receive(:new).with(
+      "100002",
+      "29125MA0030195-01",
+      "HBX POLICY ID 2",
+      "20190401"
+    ).and_return(subscriber_2_info)
+    allow(subscriber_2_info).to receive(:locate_policy_information).and_return(policy_2_information)
+  end
+
+  it_behaves_like "a Tufts Effectuation Transformation", 3, "20190327", "1313"
+
+  it "creates one placeholder 'no policy' 834" do
+    expect(no_policy_1L_834s.length).to eq 1
+  end
+
+  it "places all members with no 1L under the 'no policy' placeholder" do
+    expect(no_policy_1L_834s.first["L2000s"].length).to eq 5
+  end
+
+  it "creates one placeholder 'no policy' 834" do
+    expect(no_policy_1L_834s.length).to eq 1
+  end
+
+  it "replaces the 1000A loops, except for the placeholder with different employers" do
+    parsed_json = JSON.parse(subject["WIREPAYLOADUNPACKED"])
+    l834s = parsed_json["L834s"]
+    loop_1000a_n1s = l834s.map do |l834|
+      l834["L1000A"]["N1"]
+    end
+    expect(loop_1000a_n1s).to eq(
+      [
+        [8, "P5", glue_employer_name_1, "FI", glue_employer_fein_1],
+        [8, "P5", glue_employer_name_2, "FI", glue_employer_fein_2],
+        [8, "P5", "TUFTS POLICY IDENTIFIERS UNSPECIFIED FAILURE", "FI", "000000000"]
+      ]
+    )
+  end
+end

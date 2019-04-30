@@ -1,4 +1,4 @@
-# Merges duplicate employers
+
 require File.join(Rails.root, "lib/mongoid_migration_task")
 
 class MergeDuplicateEmployers < MongoidMigrationTask
@@ -15,7 +15,7 @@ class MergeDuplicateEmployers < MongoidMigrationTask
     elsif ENV['csv_file'] == "false"
       update_duplicate_employers_without_csv
     else 
-      puts "Could not find CSV FILE or did not pass environment variables"
+      puts "Could not find CSV FILE or did not pass environment variables" unless Rails.env.test?
     end
   end
 
@@ -27,19 +27,18 @@ class MergeDuplicateEmployers < MongoidMigrationTask
 
   def update_duplicate_employers_with_csv(file_name)
     CSV.read(file_name).each do |row|
-      # Skips the header Row
       next if CSV.read(file_name)[0] == row
-      # Removes nil values (blank cells) from row array
       row = row.compact
-      # Skips entirely blank rows
       next if row.length == 0
       fein = row[1]
-      employer_to_keep = row[4]
-      employer_to_remove = row[5]
-      if Employer.find(employer_to_keep).present? && Employer.find(employer_to_remove).present? 
+      employer_to_keep_id = row[3]
+      employer_to_remove_id = row[4]
+      employer_to_keep = Employer.find(employer_to_keep_id)
+      employer_to_remove = Employer.find(employer_to_remove_id)
+      if employer_to_keep.present? && employer_to_remove.present? 
         merge_duplicate_employers(employer_to_keep,employer_to_remove)
       else
-        puts "Could not find Employer with either #{employer_to_keep} or #{employer_to_remove}" #unless Rails.env.test?
+        puts "Could not find Employer with either #{employer_to_keep_id} or #{employer_to_remove_id}" unless Rails.env.test?
       end
     end
   end
@@ -77,17 +76,23 @@ class MergeDuplicateEmployers < MongoidMigrationTask
   end
 
   def move_employees(employer_to_keep,employer_to_remove)
-    employer_to_remove.employees.each do |employee|
-      employer_to_keep.employees << employee.dup
+    if employer_to_remove.employees.present?
+      employer_to_remove.employees.each do |employee|
+        employer_to_keep.employees << employee.dup
+      end
     end
     employer_to_keep.save!
   end
 
   def set_employer_details(employer_to_keep, employer_to_remove)
-    employer_to_keep.carrier_ids << employer_to_remove.carrier_ids
-    employer_to_keep.carrier_ids.flatten!
-    employer_to_keep.plan_ids << employer_to_remove.plan_ids
-    employer_to_keep.plan_ids.flatten!
+    if employer_to_remove.carrier_ids.present?
+      employer_to_keep.carrier_ids << employer_to_remove.carrier_ids
+      employer_to_keep.carrier_ids.flatten!
+    end
+    if employer_to_remove.plan_ids.present?
+      employer_to_keep.plan_ids << employer_to_remove.plan_ids
+      employer_to_keep.plan_ids.flatten!
+    end
     employer_to_keep.broker_id = employer_to_remove.broker_id if employer_to_keep.broker_id.nil?
     employer_to_keep.save!
   end

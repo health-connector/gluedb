@@ -28,7 +28,9 @@ module LegacyEdiTransformations
       new_834_structures.each_with_index do |sub_and_l834, index|
         sub_info, l834 = sub_and_l834
         bump_sequences(l834, index)
-        add_policy_info(sub_info, l834)
+        if sub_info
+          add_policy_info(sub_info, l834)
+        end
       end
       json_structure["L834s"] = new_834_structures.map(&:last)
     end
@@ -38,10 +40,10 @@ module LegacyEdiTransformations
       all_people = doc_834["L2000s"]
       doc_834.delete("L2000s")
       l834s = Array.new
-      sub_info.inject(all_people) do |rem_people, sub|
+      leftovers = sub_info.inject(all_people) do |rem_people, sub|
         choose_my_people(doc_834, sub, rem_people, l834s)
       end
-      l834s
+      choose_leftover_people(l834s, doc_834, leftovers)
     end
 
     def extract_subscribers(l834)
@@ -109,6 +111,29 @@ module LegacyEdiTransformations
       new_834["L2000s"] = match
       the_834s << [sub_info, new_834]
       dont_match
+    end
+
+    def choose_leftover_people(l834_and_subjects, l834, leftovers)
+      return l834_and_subjects if leftovers.blank?
+
+      new_834 = l834.deep_dup
+      new_834["ST"] = new_834["ST"].dup
+      new_834["SE"] = new_834["SE"].dup
+      new_834["BGN"] = new_834["BGN"].dup
+      current_1000a = new_834["L1000A"]
+      if current_1000a
+        new_l1000a = current_1000a.dup
+        current_n1 = new_l1000a["N1"]
+        if current_n1
+          new_n1 = current_n1.dup
+          new_n1[2] = "TUFTS POLICY IDENTIFIERS UNSPECIFIED FAILURE"
+          new_n1[4] = "000000000"
+          new_l1000a["N1"] = new_n1
+          new_834["L1000A"] = new_l1000a
+        end
+      end
+      new_834["L2000s"] = leftovers
+      l834_and_subjects + [[nil, new_834]]
     end
 
     def person_matches?(sub_info, remaining_person)

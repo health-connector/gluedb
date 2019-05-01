@@ -56,12 +56,30 @@ describe "MergeDuplicateEmployers", dbclean: :after_each do
     it 'should move all the employees from the duplicate employer' do
       employer_to_keep.reload
       member_ids_before = (employer_to_remove.employees.map(&:authority_member_id) + employer_to_keep.employees.map(&:authority_member_id)).uniq.sort
-      subject.migrate
       employer1 = Employer.find(employer_to_keep.id)
       employer2 = Employer.find(employer_to_remove.id)
+      employee2_count = employer2.employees.size
+      subject.move_employees(employer1,employer2)
+      employer1.reload
       expect(employer1.employees.size).to eq member_ids_before.count
+    end
+
+    it "should update the employees to the employer based on csv" do
+      field_names = %["FEIN","HBX ID","Name","Employer_to_keep","Employer_to_Remove"]
+      export_csv_path = File.expand_path("#{Rails.root}/spec/data_migrations/test_duplicate_employer_records.csv")
+      CSV.open(export_csv_path, 'w', write_headers: true, headers: field_names) do |csv|
+        csv << [employer_to_keep.fein, employer_to_keep.hbx_id, employer_to_keep.name, employer_to_keep.id, employer_to_remove.id]
+      end
+      ENV['csv_file'] = "true"
+      employer1 = Employer.find(employer_to_keep.id)
+      employer2 = Employer.find(employer_to_remove.id)
+      expect(employer1.employees.size).to eq 1
+      expect(employer2.employees.size).to eq 1
+      subject.migrate
+      employer1.reload
+      employer2.reload
+      expect(employer1.employees.size).to eq 2
       expect(employer2.employees.size).to eq 0
-      expect(employer2.employees.map(&:authority_member_id)).to eq []
     end
   end
 end

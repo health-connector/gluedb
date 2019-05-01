@@ -108,8 +108,8 @@ class MergeDuplicateEmployers < MongoidMigrationTask
     employer_to_remove.unset(:carrier_ids)
     employer_to_remove.unset(:plan_ids)
     employer_to_remove.unset(:broker_id)
-    org_name = employer_to_remove.name_first
-    employer_to_remove.update_attributes!(name: "do_not_use_"+ "#{org_name}")
+    org_name = employer_to_remove.name
+    employer_to_remove.update_attributes!(name: "do_not_use_" + "#{org_name}")
     employer_to_remove.save!
   end
 end

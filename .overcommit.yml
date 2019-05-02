@@ -1,4 +1,3 @@
-
 CommitMsg:
   CapitalizedSubject:
     enabled: false
@@ -14,7 +13,8 @@ CommitMsg:
 
 PreCommit:
   ALL:
-    on_warn: fail
+    on_warn: warn
+    problem_on_unmodified_line: warn
 
   AuthorEmail:
     enabled: true

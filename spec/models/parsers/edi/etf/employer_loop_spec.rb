@@ -22,11 +22,11 @@ describe Parsers::Edi::Etf::EmployerLoop do
   end
 
   describe '#fein' do
-    let(:fein) { '1234' }
+    let(:fein) { '12-34' }
     let(:raw_loop) { ['','', '', '', fein] }
 
     it 'returns the employer fein' do
-      expect(employer_loop.fein).to eq fein
+      expect(employer_loop.fein).to eq "1234"
     end
   end
 

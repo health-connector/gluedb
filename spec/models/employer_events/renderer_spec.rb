@@ -331,7 +331,8 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
 
 
 
-  let(:employer) { instance_double(Employer, :hbx_id => '123456') }
+  let(:employer) { instance_double(Employer, :hbx_id => '123456', :id => employer_id) }
+  let(:employer_id) { "AN EMPLOYER ID" }
   let(:carrier) { instance_double(Carrier, :id => "111111",:hbx_carrier_id => hbx_carrier_id, :uses_issuer_centric_sponsor_cycles => true) }
   let!(:plan_year) { instance_double(PlanYear, issuer_ids: [carrier.id], start_date: formatted_start_date, end_date: formatted_end_date, employer: employer)}
   let!(:old_plan_year) { instance_double(PlanYear, issuer_ids: [carrier.id], start_date: "12/1/2014", end_date: "11/30/2015", employer: employer)}
@@ -482,25 +483,18 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
     let(:hbx_carrier_id) { "SOME CARRIER ID" }
 
     it "finds updates the event if there is a previous plan year" do
-      allow(employer_event).to receive(:event_name=).with(EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT).and_return(employer_event)
-      allow(renewal_carrier_change_employer_event).to receive(:event_name=).with(EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT).and_return(renewal_carrier_change_employer_event)
       allow(employer_event).to receive(:employer_id).and_return(employer.hbx_id)
       allow(renewal_carrier_change_employer_event).to receive(:employer_id).and_return(employer.hbx_id)
       allow(Employer).to receive(:where).with(:hbx_id => hbx_id).and_return([employer])
       allow(plan_years).to receive(:detect).and_return(plan_year)
       allow(plan_years).to receive(:detect).with(:end_date => (Date.strptime(start_date, "%Y%m%d")-1.day)).and_return([plan_year])
       allow(employer).to receive(:plan_years).and_return(plan_years)
-      allow(employer).to receive(:id).and_return(hbx_id)
+      allow(employer).to receive(:id).and_return(employer.id)
       allow(PlanYear).to receive(:where).with(employer_id: employer.id, start_date: Date.strptime(start_date, "%Y%m%d"), end_date: Date.strptime(end_date, "%Y%m%d")).and_return([plan_year])
-      allow(PlanYear).to receive(:first).and_return(plan_year)
       allow(PlanYear).to receive(:where).with(employer_id: employer.id, end_date: Date.strptime(start_date , "%Y%m%d")-1.day).and_return([plan_year])
-
-      allow(carrier).to receive(:id).and_return(carrier.id)
 
       expect(subject.update_event_name(carrier, employer_event)).to eq EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
       expect(subject.update_event_name(carrier, renewal_carrier_change_employer_event)).to eq EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
-      # expect(subject.update_event_name(carrier, first_time_employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
-
     end
 
   end
@@ -517,7 +511,8 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
     let(:hbx_id) {  "123456"}
     let(:formatted_start_date) {Date.strptime(old_plan_year_start_date, "%Y%m%d")}
     let(:formatted_end_date) {Date.strptime(old_plan_year_end_date, "%Y%m%d")}
-    let(:employer) { instance_double(Employer, :hbx_id => '123456') }
+    let(:employer) { instance_double(Employer, :hbx_id => '123456', :id => employer_id) }
+    let(:employer_id) { "AN EMPLOYER ID" }
     let(:carrier) { instance_double(Carrier, :id => "111111",:hbx_carrier_id => hbx_carrier_id, :uses_issuer_centric_sponsor_cycles => true) }
     let!(:plan_year) { instance_double(PlanYear, issuer_ids: [carrier.id], start_date: formatted_start_date, end_date: formatted_end_date, employer: employer)}
     let!(:old_plan_year) { instance_double(PlanYear, issuer_ids: [carrier.id], start_date: "12/1/2014", end_date: "11/30/2015", employer: employer)}
@@ -625,7 +620,6 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
       let(:hbx_carrier_id) { "SOME CARRIER ID" }
   
       it "finds updates the event if there is a previous plan year" do
-        allow(employer_event).to receive(:event_name=).with(EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT).and_return(employer_event)
         allow(renewal_carrier_change_employer_event).to receive(:event_name=).with(EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT).and_return(renewal_carrier_change_employer_event)
         allow(employer_event).to receive(:employer_id).and_return(employer.hbx_id)
         allow(renewal_carrier_change_employer_event).to receive(:employer_id).and_return(employer.hbx_id)
@@ -634,17 +628,11 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
         allow(plan_years).to receive(:detect).with(:end_date => (Date.strptime(start_date, "%Y%m%d")-1.day)).and_return([plan_year])
         allow(employer).to receive(:plan_years).and_return(plan_years)
         allow(employer).to receive(:id).and_return(hbx_id)
-        # allow(PlanYear).to receive(:where).with(employer_id: employer.id, start_date: Date.strptime(old_plan_year_start_date, "%Y%m%d"), end_date: Date.strptime(old_plan_year_end_date, "%Y%m%d")).and_return([nil])
 
         allow(PlanYear).to receive(:where).with(employer_id: employer.id, start_date: Date.strptime(old_plan_year_start_date, "%Y%m%d"), end_date: Date.strptime(old_plan_year_end_date, "%Y%m%d")).and_return([plan_year])
 
-        allow(PlanYear).to receive(:first).and_return(plan_year)
-        allow(PlanYear).to receive(:first).and_return(nil)
-
         allow(PlanYear).to receive(:where).with(employer_id: employer.id, end_date: Date.strptime(old_plan_year_start_date , "%Y%m%d")-1.day).and_return([])
         allow(first_time_employer_event).to receive(:employer_id).and_return(employer.id)
-  
-        allow(carrier).to receive(:id).and_return(carrier.id)
   
         expect(subject.update_event_name(carrier, first_time_employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
   
@@ -655,4 +643,219 @@ describe EmployerEvents::Renderer, "given an xml, from which it selects carrier 
 
 
 end
+end
+
+
+describe EmployerEvents::Renderer, "given:
+- an xml, from which it selects carrier plan years
+- a previous plan year in the database" do
+  let(:event_time) { double }
+  let(:start_date) { "20151201" }
+  let(:end_date) {  "20161130"}
+  let(:previous_start_date) { "20141201" }
+  let(:previous_end_date) {  "20151130"}
+  let(:formatted_start_date) { Date.strptime(start_date, "%Y%m%d") }
+  let(:formatted_end_date) { Date.strptime(end_date, "%Y%m%d") }
+
+  let(:employer_hbx_id) { "SOME EMPLOYER HBX ID"}
+  let(:hbx_carrier_id) { "SOME CARRIER HBX ID" }
+  let(:employer) { instance_double(Employer, :hbx_id => employer_hbx_id, :id => employer_id) }
+  let(:employer_id) { "AN EMPLOYER ID" }
+  let(:carrier_id) { "111111" }
+  let(:carrier) do
+    instance_double(
+      Carrier,
+      :id => carrier_id,
+      :hbx_carrier_id => hbx_carrier_id,
+      :uses_issuer_centric_sponsor_cycles => true
+    )
+  end
+  let!(:plan_year) { instance_double(PlanYear, issuer_ids: [carrier.id], start_date: formatted_start_date, end_date: formatted_end_date, employer: employer) }
+  let!(:old_plan_year) { instance_double(PlanYear, issuer_ids: [previous_plan_year_carrier_id], start_date: Date.strptime(previous_start_date, "%Y%m%d"), end_date: Date.strptime(previous_end_date, "%Y%m%d"), employer: employer) }
+  let!(:plan_years) { [plan_year,old_plan_year] }
+
+  let(:source_document) do
+		<<-XMLCODE
+    <organization xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://openhbx.org/api/terms/1.0" xsi:type="EmployerOrganizationType">
+      <id>
+        <id>234025</id>
+      </id>
+     <name>SEARCH BEYOND ADVENTURES INC</name>
+      <fein>411444593</fein>
+      <office_locations>
+        <office_location>
+          <id>
+            <id>5b46cfafaea91a66a346fd4c</id>
+          </id>
+          <primary>true</primary>
+          <address>
+           <type>urn:openhbx:terms:v1:address_type#work</type>
+            <address_line_1>245 E OLD STURBRIDGE RD</address_line_1>
+            <location_city_name>BRIMFIELD</location_city_name>
+            <location_county_name>Hampden</location_county_name>
+            <location_state>urn:openhbx:terms:v1:us_state#massachusetts</location_state>
+            <location_state_code>MA</location_state_code>
+            <postal_code>01010</postal_code>
+            <location_country_name/>
+            <address_full_text>245 E OLD STURBRIDGE RD  BRIMFIELD, MA 01010</address_full_text>
+          </address>
+          <phone>
+            <type>urn:openhbx:terms:v1:phone_type#work</type>
+            <area_code>413</area_code>
+            <phone_number>2453100</phone_number>
+            <full_phone_number>4132453100</full_phone_number>
+            <is_preferred>false</is_preferred>
+          </phone>
+        </office_location>
+      </office_locations>
+      <is_active>true</is_active>
+      <employer_profile>
+        <business_entity_kind>urn:openhbx:terms:v1:employers#s_corporation</business_entity_kind>
+        <sic_code>4725</sic_code>
+        <plan_years>
+          <plan_year>
+            <plan_year_start>#{start_date}</plan_year_start>
+            <plan_year_end>#{end_date}</plan_year_end>
+            <fte_count>2</fte_count>
+            <pte_count>0</pte_count>
+            <open_enrollment_start>20180201</open_enrollment_start>
+            <open_enrollment_end>20180320</open_enrollment_end>
+            <benefit_groups>
+              <benefit_group>
+                  <id>
+                    <id>5b46d3ddaea91a38fa64aebf</id>
+                  </id>
+                  <name>Standard</name>
+                  <group_size>1</group_size>
+                  <participation_rate>0.01</participation_rate>
+                  <rating_area>R-MA001</rating_area>
+                  <elected_plans>
+                    <elected_plan>
+                      <id>
+                        <id>59763MA0030011-01</id>
+                      </id>
+                      <name>Direct Gold 1000</name>
+                      <active_year>2018</active_year>
+                      <is_dental_only>false</is_dental_only>
+                      <carrier>
+                        <id>
+                          <id>SOME CARRIER HBX ID</id>
+                        </id>
+                        <name>Tufts Health Direct</name>
+                        <is_active>true</is_active>
+                      </carrier>
+                      <metal_level>urn:openhbx:terms:v1:plan_metal_level#gold</metal_level>
+                      <coverage_type>urn:openhbx:terms:v1:qhp_benefit_coverage#health</coverage_type>
+                      <ehb_percent>99.5</ehb_percent>
+                    </elected_plan>
+                  </elected_plans>
+              </benefit_group>
+            </benefit_groups>
+            <created_at>2018-07-12T04:06:53Z</created_at>
+            <modified_at>2018-07-12T04:06:53Z</modified_at>
+          </plan_year>
+          <plan_year>
+            <plan_year_start>#{previous_start_date}</plan_year_start>
+            <plan_year_end>#{previous_end_date}</plan_year_end>
+            <fte_count>2</fte_count>
+            <pte_count>0</pte_count>
+            <open_enrollment_start>20180201</open_enrollment_start>
+            <open_enrollment_end>20180320</open_enrollment_end>
+            <benefit_groups>
+              <benefit_group>
+                <id>
+                  <id>5b46d3ddaea91a38fa64aebf</id>
+                </id>
+                <name>Standard</name>
+                <group_size>1</group_size>
+                <participation_rate>0.01</participation_rate>
+                <rating_area>R-MA001</rating_area>
+                <elected_plans>
+                  <elected_plan>
+                    <id>
+                      <id>59763MA0030011-01</id>
+                    </id>
+                    <name>Direct Gold 1000</name>
+                    <active_year>2018</active_year>
+                    <is_dental_only>false</is_dental_only>
+                      <carrier>
+                        <id>
+                          <id>SOME CARRIER HBX ID</id>
+                        </id>
+                        <name>Tufts Health Direct</name>
+                        <is_active>true</is_active>
+                      </carrier>
+                    <metal_level>urn:openhbx:terms:v1:plan_metal_level#gold</metal_level>
+                    <coverage_type>urn:openhbx:terms:v1:qhp_benefit_coverage#health</coverage_type>
+                    <ehb_percent>99.5</ehb_percent>
+                    </elected_plan>
+                </elected_plans>
+              </benefit_group>
+            </benefit_groups>
+            <created_at>2018-07-12T04:06:53Z</created_at>
+            <modified_at>2018-07-12T04:06:53Z</modified_at>
+          </plan_year>
+        </plan_years>
+      </employer_profile>
+      <created_at>2018-07-12T03:49:03Z</created_at>
+      <modified_at>2019-02-25T22:09:12Z</modified_at>
+    </organization>
+		XMLCODE
+  end
+
+  let(:employer_event) { instance_double(EmployerEvent, {:event_time => event_time, :event_name => EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT, :resource_body => source_document}) }
+  let(:first_time_employer_event) { instance_double(EmployerEvent, {:event_time => event_time, :event_name => EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME, :resource_body => source_document}) }
+
+  let!(:doc)  {Nokogiri::XML(employer_event.resource_body)}
+
+  subject do
+     EmployerEvents::Renderer.new(employer_event)
+  end
+
+  before :each do
+    allow(employer_event).to receive(:employer_id).and_return(employer.hbx_id)
+    allow(first_time_employer_event).to receive(:employer_id).and_return(employer.hbx_id)
+    allow(Employer).to receive(:where).with(:hbx_id => employer_hbx_id).and_return([employer])
+    allow(employer).to receive(:plan_years).and_return(plan_years)
+    allow(PlanYear).to receive(:where).with(employer_id: employer.id, start_date: Date.strptime(start_date, "%Y%m%d"), end_date: Date.strptime(end_date, "%Y%m%d")).and_return([plan_year])
+    allow(PlanYear).to receive(:where).with(employer_id: employer.id, end_date: Date.strptime(start_date , "%Y%m%d")-1.day).and_return([old_plan_year])
+  end
+
+
+  describe "when the past plan year is not for the same carrier as the current plan year" do
+    let(:previous_plan_year_carrier_id) { "SOME OTHER CARRIER ID" }
+
+    it "updates the renewal event to be an initial event" do
+      expect(subject.update_event_name(carrier, employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
+    end
+
+    it "keeps the initial event as an initial event" do
+      expect(subject.update_event_name(carrier, first_time_employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
+    end
+  end
+
+  describe "when the past plan year is for the same carrier as the current plan year" do
+    let(:previous_plan_year_carrier_id) { carrier_id }
+
+    it "keeps the renewal event to be a renewal event" do
+      expect(subject.update_event_name(carrier, employer_event)).to eq EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
+    end
+
+    it "changes the initial event to a renewal event" do
+      expect(subject.update_event_name(carrier, first_time_employer_event)).to eq EmployerEvents::EventNames::RENEWAL_SUCCESSFUL_EVENT
+    end
+  end
+
+  describe "when the past plan year is for the same carrier as the current plan year BUT the previous plan year is short" do
+    let(:previous_start_date) { "20150101" }
+    let(:previous_plan_year_carrier_id) { carrier_id }
+
+    it "updates the renewal event to be an initial event" do
+      expect(subject.update_event_name(carrier, employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
+    end
+
+    it "keeps the initial event as an initial event" do
+      expect(subject.update_event_name(carrier, first_time_employer_event)).to eq EmployerEvents::EventNames::FIRST_TIME_EMPLOYER_EVENT_NAME
+    end
+  end
 end

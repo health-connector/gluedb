@@ -92,11 +92,18 @@ module EmployerEvents
     def has_previous_plan_year_for_carrier?(employer, plan_year, carrier)
       previous_plan_years = PlanYear.where(employer_id: employer.id, end_date: (plan_year.start_date - 1.day))
       return false if previous_plan_years.empty? 
-        non_canceled_plan_years = previous_plan_years.reject do |py|
-          py.start_date == py.end_date
-        end
-        return false if non_canceled_plan_years.empty?
-        non_canceled_plan_years.sort_by(&:start_date).last.issuer_ids.include?(carrier.id)
+      non_canceled_plan_years = previous_plan_years.reject do |py|
+        py.start_date == py.end_date
+      end
+      return false if non_canceled_plan_years.empty?
+      last_matching_plan_year = non_canceled_plan_years.sort_by(&:start_date).last
+      return false if last_matching_plan_year.blank?
+      last_matching_plan_year.issuer_ids.include?(carrier.id) && plan_year_is_at_least_one_year_long?(last_matching_plan_year)
+    end
+
+    def plan_year_is_at_least_one_year_long?(plan_year)
+      return false if plan_year.end_date.blank?
+      plan_year.end_date >= (plan_year.start_date + 1.year - 1.day)
     end
 
     def find_employer_plan_year_by_date(employer, start_date, end_date)

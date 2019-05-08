@@ -15,7 +15,7 @@ module Parsers
         end
 
         def fein
-          @loop[4]
+          Maybe.new(@loop[4]).strip.gsub(/[^0-9]/, "").value
         end
 
         def specified_as_group?

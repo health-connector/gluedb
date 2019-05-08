@@ -5,12 +5,12 @@ class PolicyLoopValidator
     carrier_policy_id = policy_loop.id
     if policy_loop.action != :stop
       if(carrier_policy_id.blank?)
-        listener.missing_carrier_policy_id
-        false
+        # listener.missing_carrier_policy_id
+        # false
       else
         listener.found_carrier_policy_id(carrier_policy_id)
-        true
       end
     end
+    true
   end
 end

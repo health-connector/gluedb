@@ -238,6 +238,9 @@ class Policy
       self.enrollees << m_enrollee
     else
       found_enrollee.merge_enrollee(m_enrollee, p_action)
+      found_enrollee.touch
+      self.touch
+      self.save!
     end
   end
 

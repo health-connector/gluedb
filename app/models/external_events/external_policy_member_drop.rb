@@ -97,7 +97,7 @@ module ExternalEvents
       p_enrollment = Maybe.new(@policy_node).policy_enrollment.value
       return({}) if p_enrollment.blank?
       if p_enrollment.shop_market
-        tot_emp_res_amt = Maybe.new(p_enrollment).shop_market.total_employer_responsible_amount.strip.value
+        tot_emp_res_amt = extract_employer_contribution
         composite_rating_tier_name = extract_rating_tier
         employer = find_employer(@policy_node)
         potential_data = [
@@ -177,7 +177,7 @@ module ExternalEvents
     def term_enrollee(policy, enrollee_node)
       member_id = extract_member_id(enrollee_node)
       enrollee = policy.enrollees.detect { |en| en.m_id == member_id }
-      if enrollee 
+      if enrollee
         if @dropped_member_ids.include?(member_id)
           enrollee.coverage_end = extract_enrollee_end(enrollee_node)
           enrollee.coverage_status = "inactive"

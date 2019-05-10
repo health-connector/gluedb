@@ -158,7 +158,7 @@ describe ExternalEvents::ExternalPolicyMemberDrop, "given:
 
     let(:other_premium_total_string_value) { "456.78" }
     let(:other_premium_total_bigdecimal_value) { BigDecimal.new(other_premium_total_string_value) }
-    let(:other_emp_res_amt_string_value) { "123.45" }
+    let(:other_emp_res_amt_string_value) { "123.67" }
     let(:other_emp_res_amt_bigdecimal_value) { BigDecimal.new(other_emp_res_amt_string_value) }
     let(:other_tot_res_amt_string_value) { "333.33" }
     let(:other_tot_res_amt_bigdecimal_value) { BigDecimal.new(other_tot_res_amt_string_value) }

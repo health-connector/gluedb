@@ -16,5 +16,7 @@
           %market= policy.is_cobra? ? "urn:openhbx:terms:v1:aca_marketplace#cobra" : "urn:openhbx:terms:v1:aca_marketplace#shop"
         - else
           %market= "urn:openhbx:terms:v1:aca_marketplace#individual"
+        - if defined?(premium_effective_date)
+          %premium_effective_date= simple_date_for(premium_effective_date)
         %policy
           = render :partial => "enrollment_events/policy", :object => policy, :locals => { :enrollees => enrollees }

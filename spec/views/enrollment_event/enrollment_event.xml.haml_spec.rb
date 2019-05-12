@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
+RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml", "for a cobra enrollment" do
 
   let(:policy) { double(id: 24, cobra_eligibility_date:Date.today, subscriber: subscriber1, enrollees: [subscriber1], policy_start: policy_start,
                         policy_end: policy_end, plan: plan, eg_id: 212131212, applied_aptc: 0,
@@ -39,15 +39,79 @@ RSpec.describe "app/views/enrollment_events/_enrollment_event.xml.haml" do
                                                                       }
     @doc = Nokogiri::HTML(rendered.gsub("\n", ""))
   end
-  
-  context "cobra enrollment" do
-   
-   it "should include market type is cobra" do
-      expect(@doc.at_xpath('//market').text).to eq "urn:openhbx:terms:v1:aca_marketplace#cobra"
+
+  it "should include market type is cobra" do
+    expect(@doc.at_xpath('//market').text).to eq "urn:openhbx:terms:v1:aca_marketplace#cobra"
+  end
+
+  it "should include cobra event kind and event date in rendered policy" do
+    expect(@doc.at_xpath('//cobra_eligibility_date').text).to eq cobra_date.strftime("%Y%m%d")
+  end
+end
+
+describe "app/views/enrollment_events/_enrollment_event.xml.haml", "displaying premium effective dates" do
+
+  let(:xml_ns) do
+    { :cv => "http://openhbx.org/api/terms/1.0" }
+  end
+
+  let(:enrollees) { double }
+  let(:affected_members) { double }
+  let(:policy) do
+    instance_double(
+      Policy,
+      :is_shop? => true,
+      :is_cobra? => false
+    )
+  end
+  let(:event_type) { "SOME EVENT TYPE" }
+  let(:transaction_id) { "SOME TRANSACTION ID"}
+
+  before :each do
+    stub_template "enrollment_events/_policy" => ""
+    stub_template "enrollment_events/_affected_member" => ""
+  end
+
+  describe "given no premium effective date" do
+
+    before(:each) do
+      render :partial => "enrollment_events/enrollment_event",
+             :locals => {
+               :affected_members => affected_members,
+               :policy => policy,
+               :enrollees => enrollees,
+               :event_type => event_type,
+               :transaction_id => transaction_id
+             },
+             :layout => "layouts/enrollment_event",
+             :formats => [:xml]
+      @doc = Nokogiri::XML(rendered.gsub("\n", ""))
     end
 
-    it "should include cobra event kind and event date in rendered policy" do
-      expect(@doc.at_xpath('//cobra_eligibility_date').text).to eq cobra_date.strftime("%Y%m%d")
-      end
-    end  
+    it "has no effective date tag" do
+      expect(@doc.xpath("//cv:premium_effective_date", xml_ns).any?).to be_falsey
+    end
   end
+
+  describe "given a premium effective date" do
+
+    before(:each) do
+      render :partial => "enrollment_events/enrollment_event",
+             :locals => {
+               :affected_members => affected_members,
+               :policy => policy,
+               :enrollees => enrollees,
+               :event_type => event_type,
+               :transaction_id => transaction_id,
+               :premium_effective_date => Date.new(2013, 5, 26)
+             },
+             :layout => "layouts/enrollment_event",
+             :formats => [:xml]
+      @doc = Nokogiri::XML(rendered.gsub("\n", ""))
+    end
+
+    it "has the effective date tag" do
+      expect(@doc.at_xpath("//cv:premium_effective_date", xml_ns).content).to eq "20130526"
+    end
+  end
+end

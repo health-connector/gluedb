@@ -26,7 +26,8 @@ module ChangeSets
            :policy => policy,
            :enrollees => enrollees,
            :event_type => event_kind,
-           :transaction_id => transaction_id
+           :transaction_id => transaction_id,
+           :premium_effective_date => policy.calculated_premium_effective_date
          })
 #       Rails.logger.error { "RENDERED RESULT: #{render_result}" }
        conn = AmqpConnectionProvider.start_connection

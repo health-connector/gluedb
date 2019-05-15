@@ -188,7 +188,7 @@ module EmployerEvents
         plan_year_update_data = py_attributes.merge(
           :issuer_ids => issuer_ids,
         )
-        py_record.update_attributes!(plan_year_update_data)
+        py_record.update_attributes(plan_year_update_data)
       end
     end
 
@@ -208,7 +208,7 @@ module EmployerEvents
     end
 
     def update_plan_years(pyvs, employer)
-      plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_datekjj] && py.end_date == pyvs[:end_date] }
+      plan_year = employer.plan_years.detect{|py|py.start_date == pyvs[:start_date] && py.end_date == pyvs[:end_date] }
       plan_year.update_attributes!(:issuer_ids => carrier_mongo_ids(pyvs)) if carrier_mongo_ids(pyvs).present?
     end
 

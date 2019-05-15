@@ -20,22 +20,23 @@ module Listeners
       resource_event_broadcast("error", event_key, r_code, body, other_headers)
     end
 
-    def process_retrieved_resource(delivery_info, employer_id, event_resource, m_headers, event_name, event_time)
-      resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s}))
+    def process_retrieved_resource(delivery_info, employer_id, event_resource, m_headers, event_name, event_time, trading_partner_publishable)
+      resource_event_broadcast("info", "event_stored", "200", event_resource, m_headers.merge({:event_name => event_name, :event_time => event_time.to_i.to_s, :is_trading_partner_publishable => trading_partner_publishable}))
 
-      EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource) do |destroyed_event|
+      EmployerEvent.store_and_yield_deleted(employer_id, event_name, event_time, event_resource, trading_partner_publishable) do |destroyed_event|
         resource_event_broadcast("info", "event_reduced", "200", destroyed_event.resource_body, {
           :employer_id => destroyed_event.employer_id,
           :event_name => destroyed_event.event_name,
-          :event_time => destroyed_event.event_time.to_i.to_s
+          :event_time => destroyed_event.event_time.to_i.to_s,
+          :is_trading_partner_publishable => trading_partner_publishable
         })
       end
       channel.ack(delivery_info.delivery_tag, false)
     end
 
-    def request_resource(employer_id)
+    def request_resource(employer_id, benefit_application_id = nil)
       begin
-        di, rprops, resp_body = request({:headers => {:employer_id => employer_id}, :routing_key => "resource.employer"},"", 30)
+        di, rprops, resp_body = request({:headers => {:employer_id => employer_id, benefit_application_id: benefit_application_id}, :routing_key => "resource.employer"},"", 30)
         r_headers = (rprops.headers || {}).to_hash.stringify_keys
         r_code = r_headers['return_status'].to_s
         if r_code == "200"
@@ -52,6 +53,8 @@ module Listeners
       m_headers = (properties.headers || {}).to_hash.stringify_keys
       employer_id = m_headers["employer_id"].to_s
       event_name = delivery_info.routing_key.split("employer.").last
+      trading_partner_publishable = m_headers["is_trading_partner_publishable"].present? ? m_headers["is_trading_partner_publishable"] : true
+      benefit_application_id = m_headers["benefit_application_id"].to_s
       if !event_name.blank?
         if (event_name =~ /nfp\./) || (event_name =~ /nfp_/)
           channel.ack(delivery_info.delivery_tag, false)
@@ -60,10 +63,10 @@ module Listeners
       end
       event_time = get_timestamp(properties)
       if EmployerEvent.newest_event?(employer_id, event_name, event_time)
-        r_code, resource_or_body = request_resource(employer_id)
+        r_code, resource_or_body = request_resource(employer_id, benefit_application_id)
         case r_code.to_s
         when "200"
-          process_retrieved_resource(delivery_info, employer_id, resource_or_body, m_headers, event_name, event_time)
+          process_retrieved_resource(delivery_info, employer_id, resource_or_body, m_headers, event_name, event_time, trading_partner_publishable)
         when "404"
           resource_error_broadcast("resource_not_found", r_code, m_headers, m_headers)
           channel.ack(delivery_info.delivery_tag, false)

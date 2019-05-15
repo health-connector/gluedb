@@ -90,7 +90,17 @@ module ExternalEvents
     def has_bogus_plan_year?
       return false unless is_shop?
       plan_year = find_employer_plan_year(policy_cv)
-      plan_year.nil?
+      return false if plan_year.present?
+
+      if plan_year.nil? && is_termination?
+        employer = find_employer(policy_cv)
+        plan_year = employer.plan_years.to_a.detect do |py|
+          (py.start_date <= subscriber_start) && ((py.start_date + 1.year - 1.day) >= subscriber_start)
+        end
+        plan_year.nil?
+      else
+        true
+      end
     end
 
     def clean_ivars

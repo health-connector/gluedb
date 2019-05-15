@@ -15,7 +15,7 @@ module Parsers
         end
 
         def carrier_fein
-          @loop["L1000B"]["N1"][4]
+          Maybe.new(@loop["L1000B"]["N1"][4]).strip.gsub(/[^0-9]/, "").value
         end
 
         def employer_loop
@@ -23,7 +23,7 @@ module Parsers
         end
 
         def is_shop?
-          !(@loop["L1000A"]["N1"][2] == "DC0")
+          (@loop["L1000A"]["N1"][2] != ExchangeInformation.hbx_id.upcase)
         end
 
         def people
@@ -31,7 +31,7 @@ module Parsers
         end
 
         def cancellation_or_termination?
-          people.any? { |p| p.cancellation_or_termination? }
+          people.any?(&:cancellation_or_termination?)
         end
       end
     end

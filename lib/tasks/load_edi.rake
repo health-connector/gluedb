@@ -1,5 +1,4 @@
 require 'csv'
-#require 'ruby-prof'
 
 namespace :edi do
   namespace :import do
@@ -12,8 +11,9 @@ namespace :edi do
         :format => "%t %a %e |%B| %P%%"
       )
       CSV.foreach(f, :headers => true) do |data|
+        d_length = data.to_s.length
         yield data, pb
-        pb.progress += data.to_s.length
+        pb.progress += d_length
       end
       pb.finish
     end
@@ -116,6 +116,30 @@ namespace :edi do
       #      r_file.close
       Caches::HiosCache.release
       Caches::MongoidCache.release(Plan)
+    end
+
+    desc "Perform Pre-processing of EDI"
+    task :pre_import_transform => :environment do
+      f = File.join(Rails.root, "db", "data", "needs_preprocessing_json.csv")
+      out_csv_path = File.join(Rails.root, "db", "data", "all_json.csv")
+      transform = LegacyEdiTransformations::PreImportEffectuationTransform.new
+      CSV.open(out_csv_path, "w") do |out_csv|
+        out_csv << ["ROWNUM","TRANSTYPE","DOCTYPE","DOCDEF","STATE","PARTNER","TIME","PROTOCOLMESSAGEID","WIREPAYLOADUNPACKED"]
+        with_progress_bar(f, "Eff. Transform") do |row|
+          changed_row = transform.apply(row)
+          out_csv << [
+            changed_row["ROWNUM"],
+            changed_row["TRANSTYPE"],
+            changed_row["DOCTYPE"],
+            changed_row["DOCDEF"],
+            changed_row["STATE"],
+            changed_row["PARTNER"],
+            changed_row["TIME"],
+            changed_row["PROTOCOLMESSAGEID"],
+            changed_row["WIREPAYLOADUNPACKED"]
+          ]
+        end
+      end
     end
   end
 end

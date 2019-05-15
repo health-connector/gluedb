@@ -16,8 +16,8 @@ module Parsers
           is_stop = policy_loop.action == :stop
           if !is_stop
             if(carrier_member_id.blank?)
-              listener.missing_carrier_member_id(person_loop)
-              valid = false
+#              listener.missing_carrier_member_id(person_loop)
+#              valid = false
             else
               listener.found_carrier_member_id(carrier_member_id)
             end

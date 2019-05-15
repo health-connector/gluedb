@@ -102,7 +102,7 @@ Metrics/ClassLength:
   Max: 300
 
 Metrics/CyclomaticComplexity:
-  Max: 8
+  Max: 15
 
 Metrics/BlockLength:
   Enabled: false
@@ -141,10 +141,22 @@ Style/EachWithObject:
 Style/ExpandPathArguments:
   Enabled: false
 
+Style/EmptyLiteral:
+  Enabled: false
+
 Style/HashSyntax:
   Enabled: false
 
+Style/IfUnlessModifier:
+  Enabled: false
+
 Style/NumericPredicate:
+  Enabled: false
+
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
+Style/RedundantSelf:
   Enabled: false
 
 Style/StringLiterals:
@@ -156,10 +168,16 @@ Style/SymbolArray:
 Style/WordArray:
   Enabled: false
 
+Style/YodaCondition:
+  Enabled: false
+
 Bundler/OrderedGems:
   Enabled: false
 
 Gemspec/OrderedDependencies:
+  Enabled: false
+
+Performance/StringReplacement:
   Enabled: false
 
 # Deprecated

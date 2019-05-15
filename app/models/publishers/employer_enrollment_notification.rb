@@ -46,7 +46,8 @@ module Publishers
               :policy => policy,
               :enrollees => policy.enrollees.reject { |e| e.canceled? || e.terminated? },
               :event_type => "urn:openhbx:terms:v1:enrollment#change_member_communication_numbers",
-              :transaction_id => transaction_id
+              :transaction_id => transaction_id,
+              :premium_effective_date => policy.calculated_premium_effective_date
           }
       )
     end

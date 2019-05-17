@@ -1,4 +1,4 @@
-set :application, "DCHBX GlueDB"
+set :application, "CT GlueDB"
 # set :deploy_via, :remote_cache
 # set :sudo, "sudo -u nginx"
 set :scm, :git
@@ -10,6 +10,7 @@ set :deploy_via, :copy
 
 
 set :user, "nginx"
+set :ssh_options, {:forward_agent => true}
 set :use_sudo, false
 set :default_shell, "bash -l"
 
@@ -41,6 +42,12 @@ namespace :deploy do
     run "rm -rf #{release_path}/log"
     run "ln -s #{deploy_to}/shared/log #{release_path}/log"
     run "ln -s #{deploy_to}/shared/eye #{release_path}/eye"
+    run "rm -f #{release_path}/config/initializers/devise.rb"
+    run "ln -s #{deploy_to}/shared/config/initializers/devise.rb #{release_path}/config/initializers/devise.rb"
+    run "rm -f #{release_path}/config/environments/production.rb"
+    run "rm -f #{release_path}/config/unicorn.rb"
+    run "ln -s #{deploy_to}/shared/config/environments/production.rb #{release_path}/config/environments/production.rb"
+    run "ln -s #{deploy_to}/shared/config/unicorn.rb #{release_path}/config/unicorn.rb"
   end
 
   desc "Restart nginx and unicorn"

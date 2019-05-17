@@ -2,8 +2,8 @@ set :application, "DCHBX GlueDB"
 # set :deploy_via, :remote_cache
 # set :sudo, "sudo -u nginx"
 set :scm, :git
-set :repository,  "https://github.com/dchbx/gluedb.git"
-set :branch,      "master"
+set :repository,  "https://github.com/ideacrew/ct_edidb.git"
+set :branch,      "ma_edidb"
 set :rails_env,   "production"
 set :deploy_to,   "/var/www/deployments/gluedb"
 set :deploy_via, :copy
@@ -13,9 +13,9 @@ set :user, "nginx"
 set :use_sudo, false
 set :default_shell, "bash -l"
 
-role :web, "10.83.85.127"
-role :app, "10.83.85.127"
-role :db,  "10.83.85.127", :primary => true        # This is where Rails migrations will run
+role :web, "172.30.1.39"
+role :app, "172.30.1.39"
+role :db,  "172.30.1.39", :primary => true        # This is where Rails migrations will run
 
 default_run_options[:pty] = true  # prompt for sudo password, if needed
 after "deploy:restart", "deploy:cleanup_old"  # keep only last 5 releases

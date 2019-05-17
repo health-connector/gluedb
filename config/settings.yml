@@ -1,16 +1,16 @@
 site:
-  short_name: "Health Connector"
-  long_name: "Health Connector Glue DB"
+  short_name: "Access Health CT"
+  long_name: "Access Health CT DB"
   copyright_period_start: "2017"
 
   social_media:
     facebook_url: ""
 
 contact_center:
-  name: "Massachusetts Health Connector"
+  name: "Access Health Connecticut"
   address: "133 Portland Street"
-  city: "Boston"
-  state_abbreviation: "MA"
+  city: "Hartford"
+  state_abbreviation: "CT"
   postal_code: "02114"
 
 abbrev: "mhc"

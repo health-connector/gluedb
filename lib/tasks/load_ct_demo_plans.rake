@@ -26,7 +26,7 @@ namespace :ct_demo do
   task :load_plans => "ct_demo:load_carriers" do
     import_file_year("2019_ivl", 2019)
     import_file_year("2019_shop", 2019)
-    import_file_year("2020_ivl", 2019)
-    import_file_year("2020_shop", 2019)
+    import_file_year("2020_ivl", 2020)
+    import_file_year("2020_shop", 2020)
   end
 end

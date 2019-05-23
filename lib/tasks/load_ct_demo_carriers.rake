@@ -2,9 +2,13 @@ namespace :ct_demo do
   desc "Load Demo Carrier Profiles"
   task :load_carriers => :environment do
     abcbs_carrier = Carrier.create!({
+      id: Moped::BSON::ObjectId.from_string("5ce6ab2134913261ad000001"),
       hbx_carrier_id: "20014",
       name: "Anthem BlueCross BlueShield",
       abbrev: "ABCBS",
+      shp_hlt: true,
+      shp_dtl: true,
+      ind_dtl: true,
       carrier_profiles: [
         CarrierProfile.new({
           profile_name: "ABCBS_IVL",
@@ -30,9 +34,11 @@ namespace :ct_demo do
       ]
     })
     ccare_carrier = Carrier.create!({
+      id: Moped::BSON::ObjectId.from_string("5ce6abc2349132b47a000001"),
       hbx_carrier_id: "20015",
       name: "ConnectiCare",
       abbrev: "CCARE",
+      shp_hlt: true,
       carrier_profiles: [
         CarrierProfile.new({
           profile_name: "CCARE_IVL",

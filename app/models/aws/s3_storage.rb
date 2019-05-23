@@ -98,11 +98,11 @@ module Aws
     end
 
     def env_bucket_name(bucket_name)
-      "#{Settings.abbrev}-gluedb-#{bucket_name}-#{aws_env}"
+      "ic-gluedb-#{bucket_name}-demo"
     end
 
     def env_bucket_for_glue_report
-      "#{Settings.abbrev}-#{aws_env}-aca-internal-artifact-transport"
+      "ic-demo-aca-internal-artifact-transport"
     end
 
     def setup

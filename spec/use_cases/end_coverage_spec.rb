@@ -349,3 +349,177 @@ describe EndCoverage, :dbclean => :after_each do
 
   end
 end
+
+describe EndCoverage, "on a composite shop enrollment", :dbclean => :after_each do
+  subject(:end_coverage) { EndCoverage.new(action_factory, policy_repo) }
+
+  let(:request) do
+    {
+      policy_id: policy.id,
+      affected_enrollee_ids: affected_enrollee_ids,
+      coverage_end: coverage_end,
+      operation: operation,
+      reason: 'terminate',
+      current_user: current_user,
+      transmit: true
+    }
+  end
+
+  let(:action_request) do
+    {
+      policy_id: policy.id,
+      operation: request[:operation],
+      reason: request[:reason],
+      affected_enrollee_ids: request[:affected_enrollee_ids],
+      include_enrollee_ids: enrollees.map(&:m_id),
+      current_user: current_user
+    }
+  end
+
+  let(:affected_enrollee_ids) { [subscriber.m_id, member.m_id] }
+  let(:coverage_end) { Date.new(2015, 1, 14)}
+  let(:operation) { 'terminate' }
+  let(:current_user) { 'joe.kramer@dc.gov' }
+  let(:policy_repo) { double(find: policy) }
+  let(:policy) { Policy.create!(eg_id: '1', enrollees: enrollees, pre_amt_tot: premium_total, tot_emp_res_amt: employer_contribution, tot_res_amt: total_responsible_amount, plan_id: "1", plan: plan) }
+  let(:plan) { Plan.create!(coverage_type: 'health', year: 2015, premium_tables: []) }
+  let(:premium_total) { 300.00 }
+  let(:employer_contribution) { 100.00 }
+  let(:total_responsible_amount) { 200.00 }
+  let(:enrollees) { [ subscriber, member ]}
+  let(:subscriber) { Enrollee.new(rel_code: 'self', coverage_start: coverage_start, pre_amt: 0.00, coverage_status: 'active', emp_stat: 'active',  m_id: '1') }
+  let(:member) { Enrollee.new(rel_code: 'child', coverage_start: coverage_start, pre_amt: 0.00, coverage_status: 'active', emp_stat: 'active',  m_id: '2') }
+  let(:action_factory) { double(create_for: action) }
+  let(:action) { double(execute: nil) }
+  let(:coverage_start) { Date.new(2015, 1, 2)}
+  let(:premium_start) { Date.new(2000,1,1) }
+  let(:premium_end) { Date.new(2020,1,1) }
+  let(:subscriber_member) { double(dob: Date.new(1955,1,1))}
+  let(:subscriber_rate_amount) { 100 }
+  let(:subscriber_age) { 60 }
+  let(:member_member) { double(dob: Date.new(1975,1,1))}
+  let(:member_rate_amount) { 200 }
+  let(:member_age) { 40 }
+  let(:inactive_member_member) { double(dob: Date.new(1985,1,1)) }
+  let(:inactive_member_rate_amount) { 250 }
+  let(:inactive_member_age) { 30 }
+  let(:expected_employer_contribution) { 100.00 }
+
+  before {
+    allow(subscriber).to receive(:member) { subscriber_member }
+    allow(member).to receive(:member) { member_member }
+  }
+
+  shared_examples_for "coverage ended with correct responsible amount" do
+    describe "when a shop enrollment" do
+      let(:employer) { double(name: "Fakery", fein: 000000000, __bson_dump__: nil) }
+
+      it "leaves the contribution amount alone" do
+        end_coverage.execute(request)
+        expect(policy.employer_contribution).to eql(expected_employer_contribution)
+      end
+
+      it "sets the total responsible amount to the premium total minus the employer contribution" do
+        end_coverage.execute(request)
+        expect(policy.tot_res_amt).to eql(policy.total_premium_amount - expected_employer_contribution)
+      end
+    end
+  end
+
+  context 'when subscriber\'s coverage ends' do
+    let(:affected_enrollee_ids) { [ subscriber.m_id ] }
+
+    before { end_coverage.execute(request) }
+
+    it 'affects all enrollees' do
+      policy.enrollees.each do |e|
+        expect(e.coverage_status).to eq 'inactive'
+        expect(e.employment_status_code).to eq 'terminated'
+        expect(e.coverage_end).to eq request[:coverage_end]
+      end
+    end
+
+    context 'by cancelation' do
+      let(:operation) { 'cancel' }
+      let(:coverage_start) { Date.new(2015, 1, 2)}
+      let(:coverage_end) { coverage_start }
+
+      it 'leaves the premium total alone' do
+        expect(policy.pre_amt_tot.to_f).to eq premium_total.to_f
+      end
+
+      it 'updates policy status' do
+        expect(policy.aasm_state).to eq 'canceled'
+      end
+
+      it_behaves_like "coverage ended with correct responsible amount"
+    end
+
+    context 'by termination' do
+      let(:operation) { 'terminate' }
+      let(:coverage_start) { Date.new(2015, 1, 2)}
+      let(:coverage_end) { Date.new(2015, 1, 14)}
+
+      context 'when member\'s coverage ended previously' do
+        let(:member) { Enrollee.new(rel_code: 'child', pre_amt: 0, coverage_status: 'inactive', coverage_start: Date.new(2015, 1, 2), coverage_end:  Date.new(2015, 1, 2), ben_stat: 'active', emp_stat: 'terminated',  m_id: '2') }
+
+        it 'new policy premium total stays the same' do
+          expect(policy.pre_amt_tot.to_f).to eq premium_total.to_f
+        end
+      end
+
+      it 'updates policy status' do
+        expect(policy.aasm_state).to eq 'terminated'
+      end
+
+      it_behaves_like "coverage ended with correct responsible amount"
+    end
+  end
+
+  context 'when a member\'s coverage is ended' do
+    let(:affected_enrollee_ids) { [member.m_id] }
+
+    it 'doesn\'t end the subscribers coverage' do
+      end_coverage.execute(request)
+      expect(subscriber.coverage_status).to eq 'active'
+      expect(subscriber.employment_status_code).to eq 'active'
+    end
+
+    it 'ends the member\'s coverage' do
+      end_coverage.execute(request)
+      expect(member.coverage_status).to eq 'inactive'
+      expect(member.employment_status_code).to eq 'terminated'
+      expect(member.coverage_end).to eq request[:coverage_end]
+    end
+
+    it 'does not deduct member\'s premium from policy\'s total'  do
+      end_coverage.execute(request)
+      expect(policy.pre_amt_tot.to_f).to eq(premium_total)
+    end
+
+    it_behaves_like "coverage ended with correct responsible amount"
+
+    context 'by cancelation' do
+      let(:operation) { 'cancel' }
+      it 'sets the benefit end date to be equal to benefit begin date' do
+        end_coverage.execute(request)
+        expect(member.coverage_end).to eq member.coverage_start
+      end
+    end
+
+    context 'and the members coverage is already ended' do
+      let(:inactive_member) { Enrollee.new(rel_code: 'child', coverage_status: 'inactive', coverage_start: coverage_start, coverage_end: already_ended_date, pre_amt: 250.00, ben_stat: 'active', emp_stat: 'active',  m_id: '3') }
+      let(:already_ended_date) { request[:coverage_end].prev_year }
+      before do
+        allow(inactive_member).to receive(:member) { inactive_member_member }
+        affected_enrollee_ids << inactive_member.m_id
+        policy.enrollees << inactive_member
+        policy.save
+      end
+
+      it 'does not change their coverage end date' do
+        expect { end_coverage.execute(request) }.not_to change{ inactive_member.coverage_end }
+      end
+    end
+  end
+end

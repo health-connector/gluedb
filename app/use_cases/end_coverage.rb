@@ -88,7 +88,7 @@ class EndCoverage
     subscriber = @policy.subscriber
     start_date  = @policy.subscriber.coverage_start
     plan = @policy.plan
-    skip_recalc = affected_enrollee_ids.include?(subscriber.m_id) && (plan.year >= 2016)
+    skip_recalc = (affected_enrollee_ids.include?(subscriber.m_id) && (plan.year >= 2016)) || is_composite
 
     if @policy.is_shop? && !skip_recalc
       employer = @policy.employer
@@ -110,7 +110,7 @@ class EndCoverage
       enrollees = []
       rejected = @policy.enrollees.select{ |e| e.coverage_status == "inactive" }
       @policy.enrollees.reject!{ |e| e.coverage_status == "inactive" }
-      premium_calculator.apply_calculations(@policy)
+      premium_calculator.apply_calculations(@policy) unless skip_recalc
       active_enrollees = @policy.enrollees.select{ |e| e.coverage_status == "active" }
       enrollees << active_enrollees
       enrollees << rejected
@@ -144,7 +144,9 @@ class EndCoverage
     select_active(enrollees).each do |enrollee|
       end_coverage_for(enrollee, @request[:coverage_end])
 
-      @policy.total_premium_amount -= enrollee.pre_amt
+      if !is_composite
+        @policy.total_premium_amount -= enrollee.pre_amt
+      end
     end
   end
 
@@ -153,6 +155,7 @@ class EndCoverage
   end
 
   def final_premium_total
+    return @policy.pre_amt_tot if is_composite
     new_premium_total = 0
     if(@request[:operation] == 'cancel')
       @policy.enrollees.each { |e| new_premium_total += e.pre_amt }
@@ -173,6 +176,10 @@ class EndCoverage
     else
       enrollee.coverage_end = date
     end
+  end
+
+  def is_composite
+    (@policy.subscriber.pre_amt <= 0.001) && (@policy.total_premium_amount > 0.0)
   end
 
   class PremiumCalcError < StandardError

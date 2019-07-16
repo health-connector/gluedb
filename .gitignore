@@ -34,3 +34,6 @@ spec/vocabularies
 config/settings.local.yml
 config/settings/*.local.yml
 config/environments/*.local.yml
+*.xml
+*.xls
+*.xlsx

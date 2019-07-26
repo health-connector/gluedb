@@ -225,6 +225,11 @@ module ExternalEvents
         :cobra_eligibility_date => @cobra ? extract_cobra_eligibility_date : nil
       }.merge(extract_other_financials).merge(extract_rating_details).merge(responsible_party_attributes))
 
+      # reinstated policy aasm state need to be resubmitted
+      if @policy_node.previous_policy_id.present?
+        policy.aasm_state = "resubmitted"
+      end
+
       build_subscriber(policy)
 
       other_enrollees = @policy_node.enrollees.reject { |en| en.subscriber? }

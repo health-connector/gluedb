@@ -19,7 +19,7 @@
       <dt>Sponsor</dt>
       <dd><%= policy_sponsor(p) %></dd>
       <dt>Status</dt>
-      <dd><%= policy_status(p) %></dd>
+      <dd><%= p.aasm_state.capitalize %></dd>
       <%if can? :edit, @people %>
           <% ben_statuses = [] %>
           <% p.enrollees.each do |enrollee| %>

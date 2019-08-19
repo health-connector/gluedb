@@ -5,78 +5,78 @@
   </h6>
 </div>
 <div class="row">
-	<div class="col-md-10">
-		<dl class="dl-horizontal">
-			<% carrier = Caches::MongoidCache.lookup(Carrier, p.carrier_id) { p.carrier } %>
-			<dt>Coverage</dt>
-			<dd>
-				<%= "#{ p.coverage_type.capitalize } | " %>
-			  <%= link_to carrier.name, carrier_path(carrier) %> |
-				<%= link_to truncate(p.plan.name, length: 50), plan_path(p.plan), title: "Hios ID: " + p.plan.hios_plan_id, rel: 'tooltip' %>
-		  </dd>
-		  <dt>Policy ID</dt>
-	  	<dd><%= p.id %></dd>
-		  <dt>Sponsor</dt>
-		  <dd><%= policy_sponsor(p) %></dd>
-		  <dt>Status</dt>
-		  <dd><%= p.aasm_state.capitalize %></dd>
-		  <%if can? :edit, @people %>
-		  		<% ben_statuses = [] %>
-		  		<% p.enrollees.each do |enrollee| %>
-		  				<% ben_statuses.push(enrollee.ben_stat.upcase) %>
-		  		<% end %>
-		  		<% ben_statuses.uniq! %>
-		  		<% if ben_statuses.any? {|ben_stat| ben_stat != "ACTIVE" } %>
-		  		<dt>Benefit Status</dt>
-		  		<dd><%= ben_statuses.join(",") %></dd>
-		  	<% end %>
-		  <% end %>
-			<% if (policy_market(p) == "Individual") %>
-			  <dt>Carrier to Bill?</dt>
-			  <dd><%= boolean_to_human(p.carrier_to_bill) %></dd>
-			  <%# if p.csr_amt %>
-				  <dt>CSR percent</dt>
-				  <dd><%#= p.csr_amt %></dd>
-				<%# end %>
-				<% if (p.has_responsible_person?) %>
-					<dt>Responsible party</dt>
-					<dd><%= link_to p.responsible_person.name_full, person_path(p.responsible_person) %></dd>
-				<% end %>
-			<% end %>
-	        <% if !p.broker.blank? %>
-		<dt>Broker</dt>
-		<dd><%= p.broker.full_name %></dd>
-		<% end %>
-	        <dt>Created</dt>
-	  	<dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
-	  	<dt>Updated</dt>
-	  	<dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
+  <div class="col-md-10">
+    <dl class="dl-horizontal">
+      <% carrier = Caches::MongoidCache.lookup(Carrier, p.carrier_id) { p.carrier } %>
+      <dt>Coverage</dt>
+      <dd>
+        <%= "#{ p.coverage_type.capitalize } | " %>
+        <%= link_to carrier.name, carrier_path(carrier) %> |
+        <%= link_to truncate(p.plan.name, length: 50), plan_path(p.plan), title: "Hios ID: " + p.plan.hios_plan_id, rel: 'tooltip' %>
+      </dd>
+      <dt>Policy ID</dt>
+      <dd><%= p.id %></dd>
+      <dt>Sponsor</dt>
+      <dd><%= policy_sponsor(p) %></dd>
+      <dt>Status</dt>
+      <dd><%= policy_status(p) %></dd>
+      <%if can? :edit, @people %>
+          <% ben_statuses = [] %>
+          <% p.enrollees.each do |enrollee| %>
+              <% ben_statuses.push(enrollee.ben_stat.upcase) %>
+          <% end %>
+          <% ben_statuses.uniq! %>
+          <% if ben_statuses.any? {|ben_stat| ben_stat != "ACTIVE" } %>
+          <dt>Benefit Status</dt>
+          <dd><%= ben_statuses.join(",") %></dd>
+        <% end %>
+      <% end %>
+      <% if (policy_market(p) == "Individual") %>
+        <dt>Carrier to Bill?</dt>
+        <dd><%= boolean_to_human(p.carrier_to_bill) %></dd>
+        <%# if p.csr_amt %>
+          <dt>CSR percent</dt>
+          <dd><%#= p.csr_amt %></dd>
+        <%# end %>
+        <% if (p.has_responsible_person?) %>
+          <dt>Responsible party</dt>
+          <dd><%= link_to p.responsible_person.name_full, person_path(p.responsible_person) %></dd>
+        <% end %>
+      <% end %>
+          <% if !p.broker.blank? %>
+    <dt>Broker</dt>
+    <dd><%= p.broker.full_name %></dd>
+    <% end %>
+          <dt>Created</dt>
+      <dd><%= p.created_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
+      <dt>Updated</dt>
+      <dd><%= p.updated_at.strftime("%m-%d-%Y %I:%M:%S %p %Z") %></dd>
 
       <% if p.rating_area %>
         <dt>Rating Area</dt>
-	<dd><%= p.rating_area %></dd>
+  <dd><%= p.rating_area %></dd>
       <% end %>
       <% if p.carrier_specific_plan_id %>
         <dt>Carrier Plan ID</dt>
-	<dd><%= p.carrier_specific_plan_id %></dd>
+  <dd><%= p.carrier_specific_plan_id %></dd>
       <% end %>
       <% if p.composite_rating_tier %>
         <dt>Composite Rating Tier </dt>
-	<dd><%= p.composite_rating_tier %></dd>
+  <dd><%= p.composite_rating_tier %></dd>
       <% end %>
-		</dl>
-	</div>
-	<% if can? :edit, @people%>
-	<div class="col-md-2">
-		<%= link_to "Create CV", new_change_vocabulary_path(p, {:change_vocabulary => {:policy_id => p.id}}), :class => "btn btn-primary" %>
-		<p></p>
-		<%= link_to "Cancel / Term", cancelterminate_policy_path(p), :class => "btn btn-inverse" %>
+    </dl>
+  </div>
+  <% if can? :edit, @people%>
+  <div class="col-md-2">
+    <%= link_to "Create CV", new_change_vocabulary_path(p, {:change_vocabulary => {:policy_id => p.id}}), :class => "btn btn-primary" %>
+    <p></p>
+    <%= link_to "Cancel / Term", cancelterminate_policy_path(p), :class => "btn btn-inverse" %>
     <p></p>
     <% if show_1095A_document_button?(p) %>
       <%= link_to "1095A Document", generate_tax_document_form_policy_path(p, {person_id: @person.id}), :class => "btn btn-primary" %>
     <% end %>
   </div>
-	<% end %>
+  <% end %>
 </div>
 
 <h6>Enrollment Group</h6>
@@ -84,26 +84,25 @@
 
   <!-- Transaction pills -->
   <ul class="nav nav-tabs nav-justified" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link nav-link-color" id="edi-transactions-tab" data-toggle="tab" role="tab" aria-controls="edi-transactions" href="#edi_transactions_list" aria-selected="true">EDI Transactions</a>
+    <li class="nav-item active">
+      <a class="nav-link nav-link-color" id="edi-transactions-tab-policy-<%= p.id.to_s %>" data-toggle="tab" role="tab" aria-controls="edi-transactions-<%= p.id.to_s %>" href="#edi_transactions_list_<%= p.id.to_s %>" aria-selected="true">EDI Transactions</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link nav-link-color" id="payment-processor-transactions-tab" data-toggle="tab" role="tab" aria-controls="payment-processor-transactions" href="#payment_processor_transactions_list" aria-selected="false">Payment Processor Transactions</a>
+      <a class="nav-link nav-link-color" id="payment-processor-transactions-tab-<%= p.id.to_s %>" data-toggle="tab" role="tab" aria-controls="payment-processor-transactions-<%= p.id.to_s %>" href="#payment_processor_transactions_list_<%= p.id.to_s %>" aria-selected="false">Payment Processor Transactions</a>
     </li>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content tab-content-bordered">
-    <div id="edi_transactions_list" role="tabpanel" aria-labelledby="edi-transactions-tab" class="container tab-pane active"><br>
+    <div id="edi_transactions_list_<%= p.id.to_s %>" role="tabpanel" aria-labelledby="edi-transactions-tab-<%= p.id.to_s %>" class="container tab-pane active"><br>
       <% t = p.transaction_list %>
       <%= render 'edi_transaction_table', transactions: t %>
     </div>
-    <div id="payment_processor_transactions_list" role="tabpanel" aria-controls="payment-processor-transactions-tab" class="container tab-pane fade"><br>
+    <div id="payment_processor_transactions_list_<%= p.id.to_s %>" role="tabpanel" aria-controls="payment-processor-transactions-tab-<%= p.id.to_s %>" class="container tab-pane fade"><br>
       <% legacy_cv_transactions = p.legacy_cv_transactions.sort_by(&:submitted_at).reverse %>
       <%= render 'legacy_cv_transaction_table', transactions: legacy_cv_transactions %>
     </div>
   </div>
-
 
 <% if can? :read, :all %>
   <h6>Premium Payments</h6>

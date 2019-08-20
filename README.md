@@ -19,6 +19,8 @@ Consult devops for access.
 
 ###Setup Mongodb
 
+You will need mongo <= 3.4.
+
 ```
 brew install mongodb
 ```

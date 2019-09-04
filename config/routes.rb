@@ -11,6 +11,8 @@ Gluedb::Application.routes.draw do
 
   post "policy_forms", :to => 'policies#create'
 
+  resources :legacy_cv_transactions, only: %i[show index]
+
   resources :users
 
   resources :enrollment_action_issues, only: [:index, :show] do

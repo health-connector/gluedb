@@ -66,6 +66,10 @@ class Policy
   belongs_to :employer, counter_cache: true, index: true
   belongs_to :responsible_party
 
+  has_many :legacy_cv_transactions,
+            class_name: "Protocols::LegacyCv::LegacyCvTransaction",
+            order: { submitted_at: :desc }
+
   has_many :transaction_set_enrollments,
               class_name: "Protocols::X12::TransactionSetEnrollment",
               order: { submitted_at: :desc }

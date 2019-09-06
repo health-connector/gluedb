@@ -13,6 +13,7 @@ class Carrier
   field :shp_hlt, as: :shop_market_health, type: Boolean, default: false
   field :shp_dtl, as: :shop_market_dental, type: Boolean, default: false
   field :is_active, type: Boolean, default: true
+  field :requires_reinstate_for_earlier_termination, type: Boolean, default: false
   field :requires_employer_updates_on_enrollments, type: Boolean, default: false
   field :uses_issuer_centric_sponsor_cycles, type: Boolean, default: false
 

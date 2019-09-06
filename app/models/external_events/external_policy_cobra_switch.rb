@@ -59,10 +59,10 @@ module ExternalEvents
     end
 
     def persist
-      update_policy_information
       @policy_node.enrollees.each do |en|
         update_enrollee(en)
       end
+      update_policy_information
       true
     end
   end

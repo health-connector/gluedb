@@ -126,6 +126,7 @@ describe ExternalEvents::ExternalPolicy, "given:
         allow(subject).to receive(:extract_enrollee_start).with(enrollees2).and_return(Date.today)
         allow(subject).to receive(:extract_enrollee_premium).with(enrollees2).and_return("100")
         allow(policy_cv).to receive(:responsible_party).and_return(responsible_party_node)
+        allow(policy_cv).to receive(:previous_policy_id).and_return('')
         subject.instance_variable_set(:@plan,plan)
       end
 
@@ -136,5 +137,53 @@ describe ExternalEvents::ExternalPolicy, "given:
         expect(Policy.where(eg_id: "rspec-eg-id").first.responsible_party_id).to eq responsible_party.id
       end
     end
+  end
+end
+
+describe ExternalEvents::ExternalPolicy, "with reinstated policy cv", dbclean: :after_each  do
+  let(:policy_cv) { instance_double(Openhbx::Cv2::Policy, :policy_enrollment => policy_enrollment, :previous_policy_id => '1', :enrollees =>[enrollees1, enrollees2]) }
+  let!(:plan) {FactoryGirl.create(:plan, carrier_id:'01') }
+  let(:applied_aptc) { {:applied_aptc =>'0.0'} }
+
+  let!(:policy_enrollment) { instance_double(Openhbx::Cv2::PolicyEnrollment) }
+  let(:enrollees1) { instance_double(Openhbx::Cv2::Enrollee, subscriber?: true, member: member1)}
+  let(:member1) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => subscriber_xml_id, :person_relationships => []) }
+  let(:subscriber_xml_id) { "urn:whaTEVER#subscriber_id" }
+  let(:dependent_xml_id) { "urn:whaTEVER#dependent_id" }
+  let(:enrollees2) { instance_double(Openhbx::Cv2::Enrollee, subscriber?: false, member: member2)}
+  let(:member2) { instance_double(Openhbx::Cv2::EnrolleeMember, :id => dependent_xml_id, :person_relationships => [relationship]) }
+  let(:relationship) do
+    instance_double(Openhbx::Cv2::PersonRelationship,
+                    subject_individual: dependent_xml_id,
+                    object_individual: subscriber_xml_id,
+                    relationship_uri: dependent_relationship_uri
+    )
+  end
+  let(:policy_id) {'rspec-eg-id'}
+  let(:dependent_relationship_uri) { "urn:openhbx:terms:v1:individual_relationship#spouse" }
+  subject { ExternalEvents::ExternalPolicy.new(policy_cv, plan) }
+
+  before :each do
+    allow(subject).to receive(:extract_enrollment_group_id).with(policy_cv).and_return(policy_id)
+    allow(subject).to receive(:extract_pre_amt_tot).and_return("0.0")
+    allow(subject).to receive(:extract_tot_res_amt).and_return("0.0")
+    allow(subject).to receive(:extract_other_financials).and_return(applied_aptc)
+    allow(subject).to receive(:extract_rating_details).and_return({})
+    allow(subject).to receive(:extract_enrollee_start).with(enrollees1).and_return(Date.today)
+    allow(subject).to receive(:extract_enrollee_premium).with(enrollees1).and_return("100")
+    allow(subject).to receive(:extract_enrollee_start).with(enrollees2).and_return(Date.today)
+    allow(subject).to receive(:extract_enrollee_premium).with(enrollees2).and_return("100")
+    allow(policy_cv).to receive(:responsible_party).and_return('')
+    subject.instance_variable_set(:@plan,plan)
+  end
+
+  it "should create a new policy for reinstated policy" do
+    subject.persist
+    expect(Policy.where(:eg_id => policy_id).size).to eq(1)
+  end
+
+  it "reinstated policy state should be resubmitted" do
+    subject.persist
+    expect(Policy.where(:eg_id => policy_id).first.aasm_state).to eq("resubmitted")
   end
 end

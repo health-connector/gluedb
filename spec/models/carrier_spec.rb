@@ -1,6 +1,7 @@
 require 'rails_helper'
+require 'spec_helper'
 
-describe Carrier, "given nothing" do
+describe Carrier, "given nothing", :dbclean => :after_each do
   it "does not require simple plan changes" do
     expect(subject.requires_simple_plan_changes?).to be_falsey
   end
@@ -55,9 +56,14 @@ describe Carrier, dbclean: :after_each do
     :premium_payments,
     :brokers,
     :carrier_profiles,
+    :requires_reinstate_for_earlier_termination,
     :uses_issuer_centric_sponsor_cycles
   ].each do |attribute|
     it { should respond_to attribute }
+  end
+
+  it 'should return default value FALSE for attribute requires_reinstate_for_earlier_termination' do
+    expect(subject.requires_reinstate_for_earlier_termination).to eq false
   end
 
   it 'retrieves carriers in individual health market' do

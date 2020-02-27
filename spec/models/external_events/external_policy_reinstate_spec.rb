@@ -1,8 +1,8 @@
 require "rails_helper"
 
-describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
-- a cv policy object
-- an existing policy 
+describe ExternalEvents::ExternalPolicyReinstate, "given:
+- a shop cv policy object
+- an shop existing policy 
 " do
 
   let(:plan_cv) { instance_double(Openhbx::Cv2::PlanLink) }
@@ -29,24 +29,16 @@ describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
   let(:subscriber_id) { "subscriber id" }
   let(:enrollee) { instance_double(Enrollee, :m_id => subscriber_id) }
 
-  subject { ExternalEvents::ExternalPolicyCobraSwitch.new(policy_cv, policy) }
+  subject { ExternalEvents::ExternalPolicyReinstate.new(policy_cv, policy) }
 
   let(:expected_policy_update_args) do
       {
-        :tot_res_amt => BigDecimal.new(tot_res_amt),
-        :pre_amt_tot => BigDecimal.new(pre_amt_tot),
-        :tot_emp_res_amt => BigDecimal.new(tot_emp_res_amt),
-        :cobra_eligibility_date => cobra_start_date,
-        :aasm_state => "submitted"
+        :aasm_state => "resubmitted"
       }
   end
 
   let(:expected_enrollee_update_args) do
       {
-        :tot_res_amt => BigDecimal.new(tot_res_amt),
-        :pre_amt_tot => BigDecimal.new(pre_amt_tot),
-        :tot_emp_res_amt => BigDecimal.new(tot_emp_res_amt),
-        :cobra_eligibility_date => cobra_start_date,
         :aasm_state => "submitted"
       }
   end
@@ -55,12 +47,12 @@ describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
     allow(policy).to receive(:update_attributes!) do |args|
       expect(args).to eq(expected_policy_update_args)
     end
-    allow(enrollee).to receive(:ben_stat=).with("cobra")
+    allow(enrollee).to receive(:ben_stat=).with("active")
     allow(enrollee).to receive(:emp_stat=).with("active")
     allow(enrollee).to receive(:coverage_end=).with(nil)
     allow(enrollee).to receive(:save!)
     allow(hbx_enrollment_ids_field_proxy).to receive(:<<).with(policy_id)
-     allow(policy).to receive(:reload)
+    allow(policy).to receive(:reload)
     allow(policy).to receive(:save!)
   end
 
@@ -72,7 +64,7 @@ describe ExternalEvents::ExternalPolicyCobraSwitch, "given:
   end
 
   it "sets the enrollment as active" do
-    expect(enrollee).to receive(:ben_stat=).with("cobra")
+    expect(enrollee).to receive(:ben_stat=).with("active")
     expect(enrollee).to receive(:emp_stat=).with("active")
     expect(enrollee).to receive(:coverage_end=).with(nil)
     expect(enrollee).to receive(:save!)

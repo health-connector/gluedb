@@ -11,5 +11,13 @@ describe TransactionIdGenerator do
       transaction_id_2 = TransactionIdGenerator.generate_bgn02_compatible_transaction_id
       expect(transaction_id_1 < transaction_id_2).to be_truthy
     end
+
+    it "should generate a transaction with a length of 9" do
+      allow(Time).to receive(:now).and_return(
+        Time.mktime(2017, 5, 10, 0, 0, 0, 789)
+      )
+      transaction_id = TransactionIdGenerator.generate_bgn02_compatible_transaction_id
+      expect(transaction_id.length).to eq 22
+    end
   end
 end

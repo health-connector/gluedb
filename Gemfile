@@ -38,7 +38,7 @@ group :development, :assets, :test do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'less-rails-bootstrap', '3.2.0'
-  gem 'designmodo-flatuipro-rails', git: "https://github.com/dchbx/designmodo-flatuipro-rails.git"
+  gem 'designmodo-flatuipro-rails', git: "git@github.com:dchbx/designmodo-flatuipro-rails.git"
 end
 
 group :development, :assets do
@@ -91,7 +91,7 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "https://github.com/health-connector/edi_codec.git", branch: "ma-0.2.3"
+gem 'edi_codec', git: "git@github.com:health-connector/edi_codec.git", branch: "ma-0.2.3"
 gem 'ibsciss-middleware', git: "https://github.com/dchbx/ruby-middleware.git", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'

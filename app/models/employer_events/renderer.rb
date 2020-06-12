@@ -53,7 +53,7 @@ module EmployerEvents
         end_date = Date.strptime(last_plan_year.xpath("cv:plan_year_end", {:cv => XML_NS}).first.content,"%Y%m%d") rescue nil
         return false if start_date.blank? || end_date.blank?
         if employer_event.event_name == EmployerEvents::EventNames::RENEWAL_CARRIER_CHANGE_EVENT
-          start_date == end_date
+          start_date == end_date || Date.today >= end_date
         else
           start_date != end_date && end_date > Date.today - 1.year
         end

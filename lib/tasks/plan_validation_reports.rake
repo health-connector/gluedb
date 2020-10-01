@@ -22,15 +22,19 @@ namespace :plan_validation do
     active_year = active_date.year
     CSV.open("#{Rails.root}/plan_loading_report1_#{active_year}.csv", "w", force_quotes: true) do |csv|
       csv << %w(Plan_year_ID Carrier_ID Carrier_Name Plan_Type_Code Tier Count)
-      plans = Plan.where(year: active_year)
-      plans.no_timeout.inject([]) do |_dummy, plan|
-        carrier_id = plan.hios_plan_id
-        carrier_name = plan.carrier.abbrev
-        plan_type_code = plan.coverage_type == "health" ? "QHP" : "QDP"
-        tier = plan.metal_level
-        count = Carrier.where(abbrev: carrier_name).first.plans.where(year: active_year, metal_level: tier).count
-        csv << [active_year, carrier_id, carrier_name, plan_type_code, tier, count]
-      end
+        plans = Plan.where(year: active_year)
+        plans.no_timeout.each do |plan|
+          begin
+            carrier_id = plan.hios_plan_id[0..4]
+            carrier_name = plan.carrier.abbrev
+            plan_type_code = plan.coverage_type == "health" ? "QHP" : "QDP"
+            tier = plan.metal_level
+            count = Carrier.where(id: plan.carrier_id).first.plans.where(year: active_year, metal_level: tier).count
+            csv << [active_year, carrier_id, carrier_name, plan_type_code, tier, count]
+          rescue Exception => e
+            puts "#{e.message}, plan_id: #{plan.id}"
+          end
+        end
       puts "Successfully generated Plan validation Report1"
     end
   end
@@ -44,9 +48,9 @@ namespace :plan_validation do
       csv << %w[PlanYearId CarrierId CarrierName Age Sum]
       Carrier.all.each do |carrier|
         begin
-          next if carrier.plans.count < 1
+          next if carrier.plans.where(year: active_year).count < 1
           carrier_name = carrier.name
-          carrier_id = carrier.plans.first.try(:hios_plan_id)[0..4]
+          carrier_id = carrier.plans.first.hios_plan_id[0..4]
           plans = carrier.plans.where(year: active_year)
           premium_tables = plans.map(&:premium_tables).flatten.select do |prem_table|
             start_date = prem_table.rate_start_date.to_date
@@ -54,7 +58,7 @@ namespace :plan_validation do
             (start_date..end_date).cover?(active_date)
           end
           (0..120).each do |age|
-            age_cost = premium_tables.select{|a|a.age == age}.flatten.map(&:amount).sum
+            age_cost = premium_tables.select{|a|a.age == age}.map(&:amount).sum
             csv << [active_year, carrier_id, carrier_name, age, age_cost.round(2)]
           end
         rescue Exception => e

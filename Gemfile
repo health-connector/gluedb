@@ -18,6 +18,7 @@ gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
 gem "interactor", "~> 3.0"
 gem 'interactor-rails', '2.0.2'
 gem "psych", "2.0.5"
+gem "rubyXL", "3.4.6"
 
 group :development do
   gem 'capistrano', '2.15.4'

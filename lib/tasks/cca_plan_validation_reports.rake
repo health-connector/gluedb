@@ -83,6 +83,13 @@ namespace :cca_plan_validation do
     puts "Successfully generated Plan validation Report2"
 
     current_date = Date.today.strftime("%Y_%m_%d")
-    workbook.write("#{Rails.root}/CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx")
+    file_name = "#{Rails.root}/CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx"
+    workbook.write(file_name)
+
+    upload_to_s3 = Aws::S3Storage.new
+    uri = upload_to_s3.save(file_path: filename, options: { internal_artifact: true})
+    upload_to_s3.publish_to_sftp(filename,"Legacy::PushGluePlanValidationReport", uri)
+    timey2 = Time.now
+    puts "Report ended at #{timey2}"
   end
 end

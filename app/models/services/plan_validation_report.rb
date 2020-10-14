@@ -79,7 +79,7 @@ module Services
           end
           (14..64).each do |age|
             age_cost = premium_tables.select{|a|a.age == age}.map(&:amount).sum
-            [active_year, hios_plan_id, carrier_name, age == 14 ? "0-14" : (age == 64 ? "64 and over" : age), age_cost.round(2).to_s]
+            data = [active_year, hios_plan_id, carrier_name, age == 14 ? "0-14" : (age == 64 ? "64 and over" : age), age_cost.round(2).to_s]
             generate_data(worksheet2, data, b)
             b += 1
           end

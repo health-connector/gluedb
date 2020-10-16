@@ -8,7 +8,7 @@ require 'rubyXL/convenience_methods'
 describe 'reports generation after plan loading', :dbclean => :after_each do
 
   let(:current_date) {Date.today.strftime("%Y_%m_%d")}
-  let(:file_name) {"#{Rails.root}/CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx"}
+  let(:file_name) {"CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx"}
 
   before do
     load File.expand_path("#{Rails.root}/lib/tasks/cca_plan_validation_reports.rake", __FILE__)
@@ -18,7 +18,7 @@ describe 'reports generation after plan loading', :dbclean => :after_each do
 
   context 'generation of reports' do
     after :all do
-      File.delete(File.join("#{Rails.root}/", "CCA_PlanLoadValidation_Report_GDB_2001_02_03.xlsx")) if File.file?(File.join("#{Rails.root}/", "CCA_PlanLoadValidation_Report_GDB_2001_02_03.xlsx"))
+      File.delete("CCA_PlanLoadValidation_Report_GDB_2001_02_03.xlsx") if File.file?("CCA_PlanLoadValidation_Report_GDB_2001_02_03.xlsx")
     end
 
     it 'should generate a xlsx when active date is passed' do

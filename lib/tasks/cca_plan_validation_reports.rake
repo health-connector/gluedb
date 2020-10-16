@@ -16,8 +16,8 @@ namespace :cca_plan_validation do
     report.sheet2
 
     current_date = Date.today.strftime("%Y_%m_%d")
-    file_name = "#{Rails.root}/CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx"
-    report.generate_file(file_name)
+    filename = "CCA_PlanLoadValidation_Report_GDB_#{current_date}.xlsx"
+    report.generate_file(filename)
 
     if Rails.env.production?
       upload_to_s3 = Aws::S3Storage.new

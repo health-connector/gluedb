@@ -50,7 +50,7 @@ module Services
             next if plans.count < 1
             carrier_name = plans.first.carrier.abbrev
             plan_type_code = plans.first.coverage_type == "health" ? "QHP" : "QDP"
-            data = [active_year, hios_plan_id, carrier_name, plan_type_code, metal_level, plans.count.to_s]
+            data = [active_year, hios_plan_id, carrier_name == "NHP" ? "AHP" : carrier_name, plan_type_code, metal_level, plans.count.to_s]
             generate_data(worksheet, data, a)
             a += 1
           rescue Exception => e

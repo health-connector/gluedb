@@ -14,7 +14,7 @@ gem 'jquery-ui-rails', '5.0.5'
 gem 'virtus'
 gem 'spreadsheet', '1.0.4'
 gem 'ruby-ole', '1.2.11.7'
-gem 'openhbx_cv2', git: "https://github.com/dchbx/openhbx_cv2.git"
+gem 'openhbx_cv2', git: "https://github.com/ideacrew/openhbx_cv2.git"
 gem "interactor", "~> 3.0"
 gem 'interactor-rails', '2.0.2'
 gem "psych", "2.0.5"
@@ -39,7 +39,7 @@ group :development, :assets, :test do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'less-rails-bootstrap', '3.2.0'
-  gem 'designmodo-flatuipro-rails', git: "https://github.com/dchbx/designmodo-flatuipro-rails.git"
+  gem 'designmodo-flatuipro-rails', git: "https://github.com/ideacrew/designmodo-flatuipro-rails.git", branch: "trunk"
 end
 
 group :development, :assets do

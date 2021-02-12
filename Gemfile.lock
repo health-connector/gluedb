@@ -1,10 +1,4 @@
 GIT
-  remote: https://github.com/dchbx/ruby-middleware.git
-  revision: 8c787fbd14b6c7e6f177a0069762bc1669b6fe5d
-  specs:
-    ibsciss-middleware (0.4.0)
-
-GIT
   remote: https://github.com/health-connector/edi_codec.git
   revision: b891876286bd82b0ecb54140cbe7b1785ec143e4
   branch: ma-0.2.3
@@ -26,10 +20,18 @@ GIT
 GIT
   remote: https://github.com/ideacrew/openhbx_cv2.git
   revision: 6567dd46112982e6a9c90001b617caf313271fc9
+  branch: trunk
   specs:
     openhbx_cv2 (0.0.1)
       activesupport (>= 3.2)
       nokogiri-happymapper (~> 0.5)
+
+GIT
+  remote: https://github.com/ideacrew/ruby-middleware.git
+  revision: 1c324903951337faf2116f20ec0df9ec13ddd781
+  branch: trunk
+  specs:
+    ibsciss-middleware (0.4.0)
 
 GEM
   remote: https://rubygems.org/

@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/health-connector/edi_codec.git
-  revision: 69b66b95c27f98b233b5c782cf75ba42debb5d59
+  revision: ba7fecf4cf700e840c6db9ea96596480a6265084
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)

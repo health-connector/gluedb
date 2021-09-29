@@ -6,7 +6,7 @@ gem 'rails', '3.2.22.5'
 gem "mongoid", "~> 3.1.6"
 gem "origin"
 gem "aasm", "~> 3.0.25"
-gem "nokogiri", "~> 1.6.1"
+gem "nokogiri", "~> 1.12.5"
 gem "bunny", '1.4.1'
 gem 'amq-protocol', '2.0.1'
 gem 'jquery-rails', '3.1.3'
@@ -62,7 +62,7 @@ group :test do
   gem 'factory_girl', '4.5.0'
   gem 'database_cleaner', '1.5.3'
   gem 'ci_reporter', '2.0.0'
-  gem 'savon', '2.7'
+  gem 'savon', '2.7.0'
   gem 'simplecov', :require => false
   gem 'rspec_junit_formatter'
 end
@@ -89,7 +89,7 @@ gem 'cancancan', '~> 1.9'
 gem 'oj'
 gem 'roo', '2.1.0'
 gem 'bh'
-gem 'nokogiri-happymapper', :require => 'happymapper'
+gem 'nokogiri-happymapper', '>= 0.5.9', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
 gem 'edi_codec', git: "https://github.com/health-connector/edi_codec.git"

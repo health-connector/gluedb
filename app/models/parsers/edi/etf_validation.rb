@@ -129,7 +129,7 @@ module Parsers
             eg_id = pol_loop.eg_id
             hios = pol_loop.hios_id
             plan = Maybe.new(Policy.find_for_group_and_hios(eg_id, hios)).plan.value
-            coverage_start = Maybe.new(pol_loop.coverage_start).fmap { |cs| Date.parse(cs) }.value
+            coverage_start = Maybe.new(pol_loop.coverage_start).fmap { |cs| Date.parse(cs) rescue nil }.value
             if !coverage_start.blank?
               if(is_shop?)
                 employer_loop = Etf::EmployerLoop.new(@etf_loop["L1000A"]["N1"])

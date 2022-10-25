@@ -36,8 +36,8 @@ end
 group :development, :assets, :test do
   gem 'libv8'
   gem 'therubyracer', '0.12.2', :platforms => :ruby
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
+  gem 'sass-rails', '~> 3.2.6'
+  gem 'coffee-rails', '~> 3.2.2'
   gem 'less-rails-bootstrap', '3.2.0'
   gem 'designmodo-flatuipro-rails', git: "https://github.com/ideacrew/designmodo-flatuipro-rails.git", branch: "trunk"
 end

@@ -728,7 +728,7 @@ describe "#drop_if_already_processed" do
       allow(subject).to receive(:is_termination?).and_return(true)
       allow(subject).to receive(:hbx_enrollment_id).and_return(hbx_enrollment_id)
       allow(subject).to receive(:enrollment_action).and_return("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-       allow(subject).to receive(:is_reterm_with_earlier_date?).and_return(true)
+       allow(subject).to receive(:is_eligible_term?).and_return(true)
     end
 
     it "returns false" do
@@ -744,7 +744,7 @@ describe "#drop_if_already_processed" do
       allow(subject).to receive('response_with_publisher').and_yield(result_publisher)
       allow(subject).to receive(:hbx_enrollment_id).and_return(hbx_enrollment_id)
       allow(subject).to receive(:enrollment_action).and_return("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-      allow(subject).to receive(:is_reterm_with_earlier_date?).and_return(false)
+      allow(subject).to receive(:is_eligible_term?).and_return(false)
     end
 
     it "returns notify event already processed" do

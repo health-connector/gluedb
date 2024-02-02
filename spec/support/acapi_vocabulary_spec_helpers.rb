@@ -18,6 +18,7 @@ premium.xsd
 verification_services.xsd
 vocabulary.xsd
 verification_services.xsd
+credits.xsd
   )
 
   def download_vocabularies

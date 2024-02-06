@@ -35,8 +35,8 @@ describe EmployerEvents::EventNames, :dbclean => :after_each do
       expect(constant_white_list).to include(benefit_coverage_period_terminated_voluntary)
     end
 
-    it "should not include benefit_coverage_period_reinstated as an event under white_list" do
-      expect(constant_white_list).not_to include(benefit_coverage_period_reinstated)
+    it "should include benefit_coverage_period_reinstated as an event under white_list" do
+      expect(constant_white_list).to include(benefit_coverage_period_reinstated)
     end
   end
 end

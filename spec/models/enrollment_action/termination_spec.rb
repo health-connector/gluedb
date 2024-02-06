@@ -36,7 +36,7 @@ describe EnrollmentAction::Termination, "given a valid enrollment" do
     ) }
 
   before :each do
-    allow(termination_event.existing_policy).to receive(:terminate_as_of).and_return(true)
+    allow(termination_event.existing_policy).to receive_message_chain(:reload, :terminate_as_of).and_return(true)
     allow(termination_event).to receive(:subscriber_end).and_return(false)
   end
 

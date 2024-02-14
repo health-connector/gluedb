@@ -47,6 +47,12 @@ module EnrollmentAction
         ::EnrollmentAction::ReselectionOfExistingCoverage
       ].detect { |kls| kls.qualifies?(chunk) }
 
+      @logger = Logger.new("#{Rails.root}/log/nisanth-reinstate-check.log")
+      @logger.info "--- Selected action #{DateTime.now}: #{selected_action} ----"
+      @logger.info "--- processing #{chunk.map(&:hbx_enrollment_id)}"
+      @logger.info "--- Selected action #{DateTime.now}: #{selected_action} ----"
+      @logger.info " --- finished processing #{chunk.map(&:hbx_enrollment_id)}"
+
       if selected_action
         puts selected_action.inspect
         selected_action.construct(chunk)

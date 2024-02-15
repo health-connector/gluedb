@@ -276,6 +276,10 @@ module ExternalEvents
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end
 
+    def is_reinstate_canceled?
+      extract_is_reinstate_canceled(policy_cv)
+    end
+
     def is_cobra?
       extract_market_kind(enrollment_event_xml) == "cobra"
     end

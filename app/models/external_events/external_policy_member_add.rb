@@ -133,23 +133,39 @@ module ExternalEvents
 
     def build_enrollee(policy, enrollee_node)
       member_id = extract_member_id(enrollee_node)
+      enrollee = policy.enrollees.detect { |en| en.m_id == member_id }
+
       if @added_member_ids.include?(member_id)
-        policy.enrollees << Enrollee.new({
-          :m_id => member_id,
-          :rel_code => extract_rel_code(enrollee_node),
-          :ben_stat => policy.is_cobra? ?  "cobra" : "active",
-          :emp_stat => "active",
-          :coverage_start => extract_enrollee_start(enrollee_node),
-          :pre_amt => extract_enrollee_premium(enrollee_node)
-        })
+        if is_reinstate_canceled_policy && enrollee
+          enrollee.assign_attributes({
+            :ben_stat => policy.is_cobra? ?  "cobra" : "active",
+            :emp_stat => "active",
+            :coverage_start => extract_enrollee_start(enrollee_node),
+            :pre_amt => extract_enrollee_premium(enrollee_node),
+            :coverage_end => nil
+          })
+          enrollee.save!
+        else
+          policy.enrollees << Enrollee.new({
+            :m_id => member_id,
+            :rel_code => extract_rel_code(enrollee_node),
+            :ben_stat => policy.is_cobra? ?  "cobra" : "active",
+            :emp_stat => "active",
+            :coverage_start => extract_enrollee_start(enrollee_node),
+            :pre_amt => extract_enrollee_premium(enrollee_node)
+          })
+        end
       else
-        enrollee = policy.enrollees.detect { |en| en.m_id == member_id }
         if enrollee
           enrollee.pre_amt = extract_enrollee_premium(enrollee_node)
           enrollee.save!
         end
       end
       policy.save!
+    end
+
+    def is_reinstate_canceled_policy
+      @policy_node.is_reinstate_canceled_policy
     end
 
     def subscriber_id

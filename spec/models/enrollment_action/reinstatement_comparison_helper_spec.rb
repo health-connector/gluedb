@@ -116,6 +116,7 @@ describe EnrollmentAction::ReinstatementComparisonHelper do
         with(:policy, :plan, :employer, 1, subscriber_start, false).and_return(true)
       allow(subject).to receive(:shop_reinstatement_candidate?).
         with(:non_eligible_policy, :plan, :employer, 1, subscriber_start, false).and_return(false)
+      allow(policy_cv).to receive(:is_reinstate_canceled_policy).and_return false
     end
     it "sends :shop_reinstatement_candidate? for each policy and returns a candidate if true" do
       expect(subject).to receive(:shop_reinstatement_candidate?).

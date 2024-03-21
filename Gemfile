@@ -14,7 +14,7 @@ gem 'jquery-ui-rails', '5.0.5'
 gem 'virtus'
 gem 'spreadsheet', '1.0.4'
 gem 'ruby-ole', '1.2.11.7'
-gem 'openhbx_cv2', git: "https://github.com/ideacrew/openhbx_cv2.git", branch: "5191116-reinstate-feature"
+gem 'openhbx_cv2', git: "https://github.com/ideacrew/openhbx_cv2.git", branch: "trunk"
 gem "interactor", "~> 3.0"
 gem 'interactor-rails', '2.0.2'
 gem "psych", "2.0.5"
@@ -92,7 +92,7 @@ gem 'bh'
 gem 'nokogiri-happymapper', :require => 'happymapper'
 gem 'prawn', '~> 0.11.1'
 gem 'forkr', '1.0.2'
-gem 'edi_codec', git: "https://github.com/health-connector/edi_codec.git", branch: '5191116-reinstate-feature'
+gem 'edi_codec', git: "https://github.com/health-connector/edi_codec.git"
 gem 'ibsciss-middleware', git: "https://github.com/ideacrew/ruby-middleware.git", branch: "trunk", :require => "middleware"
 gem 'rgl', '0.5.2'
 gem 'aws-sdk'

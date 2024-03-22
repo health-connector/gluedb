@@ -74,12 +74,14 @@ module EnrollmentAction
       plan_year = find_employer_plan_year(policy_cv)
       return [] if subscriber_person.nil?
       plan = extract_plan(policy_cv)
+      is_reinstate_canceled = extract_is_reinstate_canceled(policy_cv)
+
       subscriber_person.policies.select do |pol|
-        shop_reinstatement_candidate?(pol, plan, employer, subscriber_id, subscriber_start)
+        shop_reinstatement_candidate?(pol, plan, employer, subscriber_id, subscriber_start, is_reinstate_canceled)
       end
     end
 
-    def shop_reinstatement_candidate?(pol, plan, employer, subscriber_id, subscriber_start)
+    def shop_reinstatement_candidate?(pol, plan, employer, subscriber_id, subscriber_start, is_reinstate_canceled)
       return false if pol.employer_id.blank?
       return false if pol.subscriber.blank?
       return false if (pol.subscriber.m_id != subscriber_id)
@@ -87,7 +89,8 @@ module EnrollmentAction
       return false unless (pol.employer_id == employer.id)
       return false unless (plan.year == pol.plan.year)
       return false unless (plan.carrier_id == pol.plan.carrier_id) 
-      pol.coverage_period.end == subscriber_start - 1.day
+
+      (pol.coverage_period.end == subscriber_start - 1.day) || is_reinstate_canceled
     end
   end
 end

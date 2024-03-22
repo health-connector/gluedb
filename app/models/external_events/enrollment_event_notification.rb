@@ -65,7 +65,7 @@ module ExternalEvents
         :enrollment_action_uri => enrollment_action
       )
       if found_event.any?
-        if is_reterm_with_earlier_date?
+        if is_eligible_term?
           false
         else
           response_with_publisher do |result_publisher|
@@ -276,6 +276,10 @@ module ExternalEvents
       (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
     end
 
+    def is_reinstate_canceled?
+      extract_is_reinstate_canceled(policy_cv)
+    end
+
     def is_cobra?
       extract_market_kind(enrollment_event_xml) == "cobra"
     end
@@ -289,6 +293,15 @@ module ExternalEvents
       return false unless (enrollment_action == "urn:openhbx:terms:v1:enrollment#terminate_enrollment")
       return false unless extract_enrollee_end(subscriber).present?
       (existing_policy.present? && existing_policy.terminated? && existing_policy.policy_end > extract_enrollee_end(subscriber))
+    end
+
+    def is_eligible_term?
+      return false unless is_termination?
+      return false unless extract_enrollee_end(subscriber).present?
+      return false if existing_policy.blank?
+      return true unless existing_policy.terminated?
+
+      existing_policy.terminated? && existing_policy.policy_end > extract_enrollee_end(subscriber)
     end
 
     def enrollment_action

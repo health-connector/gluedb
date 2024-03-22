@@ -27,62 +27,69 @@ describe EnrollmentAction::ReinstatementComparisonHelper do
                   }
 
     it "returns true for the matching cases" do
-      expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_truthy
+      expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_truthy
     end
 
     context "the policy does not include an employer_id" do
       let(:policy_employer_id) { nil }
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "the policy subscriber is blank" do
       let(:subscriber) { nil }
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "the policy's subscriber member id does not match the new subscriber_id" do
       let(:subscriber) { instance_double(Enrollee, :m_id => 4) }
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "the policy coverage type changed" do
       let(:new_plan) { instance_double(Plan, :year => 2017, :carrier_id => 1, :coverage_type => :new_type)}
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "the employer does not match" do
       let(:policy_employer_id) { 2 }
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "the plan years dont align" do
       let(:new_plan) { instance_double(Plan, :year => 2017, :carrier_id => 1, :coverage_type => :some_type)}
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "carrier changed" do
       let(:new_plan) { instance_double(Plan, :year => 2017, :carrier_id => 2, :coverage_type => :some_type)}
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
       end
     end
 
     context "returns false if there is a gap between coverage end and subscriber_start" do
       let(:old_coverage_period) { double(:end => subscriber_start - 2.day) }
       it "returns false" do
-        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start)).to be_falsey
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, false)).to be_falsey
+      end
+    end
+
+    context "returns true if is_reinstate_canceled and dates does not align" do
+      let(:old_coverage_period) { double(:end => subscriber_start - 2.day) }
+      it "returns true" do
+        expect(subject.shop_reinstatement_candidate?(policy, new_plan, employer, subscriber_id, subscriber_start, true)).to be_truthy
       end
     end
   end
@@ -106,13 +113,14 @@ describe EnrollmentAction::ReinstatementComparisonHelper do
       allow(Person).to receive(:find_by_member_id).with(subscriber_id).and_return(subscriber_person)
       allow(subject).to receive(:extract_plan).with(policy_cv).and_return(:plan)
       allow(subject).to receive(:shop_reinstatement_candidate?).
-        with(:policy, :plan, :employer, 1, subscriber_start).and_return(true)
+        with(:policy, :plan, :employer, 1, subscriber_start, false).and_return(true)
       allow(subject).to receive(:shop_reinstatement_candidate?).
-        with(:non_eligible_policy, :plan, :employer, 1, subscriber_start).and_return(false)
+        with(:non_eligible_policy, :plan, :employer, 1, subscriber_start, false).and_return(false)
+      allow(policy_cv).to receive(:is_reinstate_canceled_policy).and_return false
     end
     it "sends :shop_reinstatement_candidate? for each policy and returns a candidate if true" do
       expect(subject).to receive(:shop_reinstatement_candidate?).
-        with(:policy, :plan, :employer, 1, subscriber_start).once
+        with(:policy, :plan, :employer, 1, subscriber_start, false).once
       expect(subject.shop_reinstatement_candidates(policy_cv)).to eq([:policy])
     end
   end

@@ -9,7 +9,8 @@ describe EnrollmentAction::ActiveRenewal, "given an enrollment event set that:
   let(:member) { double() }
   let(:event) { instance_double(ExternalEvents::EnrollmentEventNotification,
                                   :is_termination? => false,
-                                  :is_passive_renewal? => false
+                                  :is_passive_renewal? => false,
+                                  :is_reinstate_canceled? => false
                                 ) }
 
   subject { EnrollmentAction::ActiveRenewal }
@@ -38,7 +39,8 @@ describe EnrollmentAction::ActiveRenewal, "given an enrollment event set that:
   let(:member) { double() }
   let(:event) { instance_double(ExternalEvents::EnrollmentEventNotification,
                                   :is_termination? => false,
-                                  :is_passive_renewal? => false
+                                  :is_passive_renewal? => false,
+                                  :is_reinstate_canceled? => false
                                 ) }
 
   subject { EnrollmentAction::ActiveRenewal }
@@ -68,7 +70,8 @@ describe EnrollmentAction::ActiveRenewal, "given an enrollment event set that:
   let(:member) { double() }
   let(:event) { instance_double(ExternalEvents::EnrollmentEventNotification,
                                   :is_termination? => false,
-                                  :is_passive_renewal? => false
+                                  :is_passive_renewal? => false,
+                                  :is_reinstate_canceled? => false
                                 ) }
 
   subject { EnrollmentAction::ActiveRenewal }
@@ -97,7 +100,8 @@ describe EnrollmentAction::ActiveRenewal, "given an enrollment event set that:
   let(:member) { double() }
   let(:event) { instance_double(ExternalEvents::EnrollmentEventNotification,
                                   :is_termination? => false,
-                                  :is_passive_renewal? => true
+                                  :is_passive_renewal? => true,
+                                  :is_reinstate_canceled? => false
                                 ) }
 
   subject { EnrollmentAction::ActiveRenewal }

@@ -101,5 +101,9 @@ module Handlers
       end
       extracted_ids.compact
     end
+
+    def extract_is_reinstate_canceled(policy_cv)
+      Maybe.new(policy_cv).is_reinstate_canceled_policy.value
+    end
   end
 end

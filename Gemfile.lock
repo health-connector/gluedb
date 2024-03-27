@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/health-connector/edi_codec.git
-  revision: 4ba4a577429f6ed57929620361e3573c3ae38e68
+  revision: e976cf4f08d99021c99cd8b071299b895a88d731
   specs:
     edi_codec (0.1.2)
       activesupport (>= 3.2)
@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://github.com/ideacrew/openhbx_cv2.git
-  revision: 6567dd46112982e6a9c90001b617caf313271fc9
+  revision: 4b6ace9d5a8202c0a115355e3166cdd6c3bb9bb7
   branch: trunk
   specs:
     openhbx_cv2 (0.0.1)

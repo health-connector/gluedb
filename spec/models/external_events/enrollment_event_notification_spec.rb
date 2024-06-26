@@ -728,7 +728,7 @@ describe "#drop_if_already_processed" do
       allow(subject).to receive(:is_termination?).and_return(true)
       allow(subject).to receive(:hbx_enrollment_id).and_return(hbx_enrollment_id)
       allow(subject).to receive(:enrollment_action).and_return("urn:openhbx:terms:v1:enrollment#terminate_enrollment")
-       allow(subject).to receive(:is_eligible_term?).and_return(true)
+      allow(subject).to receive(:is_eligible_term?).and_return(true)
     end
 
     it "returns false" do
@@ -750,6 +750,34 @@ describe "#drop_if_already_processed" do
     it "returns notify event already processed" do
       expect(result_publisher).to receive(:drop_already_processed!).with(subject)
       subject.drop_if_already_processed!
+    end
+  end
+
+  context '#is_reterm_retro_canceled' do
+    let(:enrollee) { double }
+    let(:existing_policy) { double(policy_start: start_date)}
+    let(:start_date) { Date.today.beginning_of_month }
+
+    before do
+      allow(subject).to receive(:subscriber).and_return(enrollee)
+      allow(subject).to receive(:extract_enrollee_end).with(enrollee).and_return(end_date)
+      allow(subject).to receive(:existing_policy).and_return(existing_policy)
+    end
+
+    context 'when existing policy start date matches with xml end date' do
+      let(:end_date) { start_date }
+
+      it 'returns true' do
+        expect(subject.is_reterm_retro_canceled?).to eq true
+      end
+    end
+
+    context 'when existing policy start date does matches with xml end date' do
+      let(:end_date) { start_date + 5.days }
+
+      it 'returns true' do
+        expect(subject.is_reterm_retro_canceled?).to eq false
+      end
     end
   end
 end

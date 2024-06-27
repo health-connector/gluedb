@@ -299,9 +299,12 @@ module ExternalEvents
       return false unless is_termination?
       return false unless extract_enrollee_end(subscriber).present?
       return false if existing_policy.blank?
-      return true unless existing_policy.terminated?
 
-      existing_policy.terminated? && existing_policy.policy_end > extract_enrollee_end(subscriber)
+      is_reterm_retro_canceled? || (existing_policy.terminated? && existing_policy.policy_end > extract_enrollee_end(subscriber))
+    end
+
+    def is_reterm_retro_canceled?
+      extract_enrollee_end(subscriber) == existing_policy.policy_start
     end
 
     def enrollment_action

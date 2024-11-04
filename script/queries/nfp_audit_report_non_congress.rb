@@ -30,7 +30,7 @@ start_year = Date.today.year - 3
 pols = Policy.where({
     :enrollees => {"$elemMatch" => {
           :rel_code => "self",
-          :coverage_start => {"gt" => Date.new(start_year, 12, 31)},
+          :coverage_start => {"$gt" => Date.new(start_year, 12, 31)},
     }}, :employer_id => { "$in" => emp_ids } })
 
 Caches::MongoidCache.allocate(Plan)

@@ -114,7 +114,7 @@ RUN bundle install
 
 COPY --chown=$USERNAME:$USERNAME . $HOME
 
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/mongoid.yml $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/mongoid.yml $HOME/config
 
 ARG HOSTNAME=localhost
 
@@ -124,8 +124,8 @@ ENV EDIDB_DB_PORT=27017
 ENV EDIDB_DB_NAME=edidb_prod
 ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
 
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
 
 RUN bundle exec rake assets:precompile
 

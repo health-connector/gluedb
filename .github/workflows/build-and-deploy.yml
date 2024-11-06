@@ -1,0 +1,186 @@
+name: Build Image and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RABBITMQ_DEFAULT_USER: "guest"
+  RABBITMQ_DEFAULT_PASS: "guest"
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    outputs:
+      taggedImage: ${{ steps.prep.outputs.tagged_image }}
+      tag: ${{ steps.prep.outputs.tag }}
+      registry_ghcr: ${{ steps.prep.outputs.registry_ghcr }}
+      shortSha: ${{ steps.prep.outputs.short_sha}}
+      branchName: ${{ steps.prep.outputs.branch_name }}
+      latestTag: ${{ steps.prep.outputs.latest_tag }}
+      repositoryName: ${{ steps.prep.outputs.repository_name }}
+    steps:
+      - name: Git branch name
+        id: git-branch-name
+        uses: EthanSK/git-branch-name-action@v1
+      - name: Prepare info
+        id: prep
+        run: |
+          SHORT_SHA=$(echo $GITHUB_SHA | head -c7)
+          REPO=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
+          TAG=${{ env.GIT_BRANCH_NAME }}-$(echo $GITHUB_SHA | head -c7)
+          IMAGE=health-connector/$REPO
+          echo "tagged_image=${IMAGE}:${TAG}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "registry_ghcr=ghcr.io" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "branch_name=${{ env.GIT_BRANCH_NAME }}" >> $GITHUB_OUTPUT
+          echo "repository_name=$REPO" >> $GITHUB_OUTPUT
+          echo "latest_tag=${IMAGE}:latest" >> $GITHUB_OUTPUT
+
+  # Uses buildx to build and push the image
+  build-and-upload-image:
+    needs: [prep]
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:latest
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --name "rabbitmq"
+          --health-cmd "rabbitmqctl node_health_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mongo:
+        image: mongo:4.2
+        ports:
+          - 27017:27017
+        options: >-
+          --name "mongo"
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Add git HEAD info to docker image
+        run: git show --quiet HEAD > release.txt
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          version: v0.9.1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
+
+      # Add vhosts to RabbitMQ
+      - run: |
+          docker exec rabbitmq rabbitmqctl add_vhost /
+          docker exec rabbitmq rabbitmqctl add_vhost event_source
+          docker exec rabbitmq rabbitmqctl set_permissions -p event_source guest ".*" ".*" ".*"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ needs.prep.outputs.registry_ghcr }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: .docker/production/Dockerfile.gha
+          # Set the desired build target here
+          target: deploy
+          # needed to access mongo and rabbit on GHA machine
+          network: host
+          # send to public registry if not a pull request
+          push: ${{ github.event_name != 'pull_request' }}
+          # create local image (for scanning) if it is a pull request
+          load: ${{ github.event_name == 'pull_request' }}
+          tags: |
+            ${{ format('{0}/{1}', needs.prep.outputs.registry_ghcr, needs.prep.outputs.taggedImage) }}
+            ${{ format('{0}/{1}', needs.prep.outputs.registry_ghcr, needs.prep.outputs.latestTag) }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          build-args: |
+            HOSTNAME=172.17.0.1
+            GEM_OAUTH_TOKEN=${{ secrets.dchbx_deployments_token }}
+
+      - name: Scan Docker image
+        if: github.event_name != 'pull_request'
+        id: scan
+        uses: anchore/scan-action@main
+        with:
+          image: ${{ format('{0}/{1}', needs.prep.outputs.registry_ghcr, needs.prep.outputs.taggedImage) }}
+          # acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      # - name: upload Anchore scan SARIF report
+      #  if: github.event_name != 'pull_request'
+      #  uses: github/codeql-action/upload-sarif@v1
+      #  with:
+      #    sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  # notify-slack:
+  #   if: github.event_name != 'pull_request'
+  #   needs: [prep, build-and-upload-image]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       registry: ['ghcr.io']
+  #   steps:
+  #     - name: Post to a Slack channel
+  #       id: slack
+  #       uses: slackapi/slack-github-action@v1.16.0
+  #       with:
+  #         channel-id: "docker-images-${{ needs.prep.outputs.repositoryName }}"
+  #         payload: |
+  #           {
+  #             "blocks": [
+  #               {
+  #                 "type": "section",
+  #                 "text": {
+  #                   "type": "mrkdwn",
+  #                   "text": "*${{ format('{0} image*:\n`{1}/{2}`', matrix.registry, matrix.registry, needs.prep.outputs.taggedImage) }}"
+  #                 }
+  #               },
+  #               {
+  #                 "type": "divider"
+  #               }
+  #             ]
+  #           }
+  #       env:
+  #         SLACK_BOT_TOKEN: ${{ secrets.DC_DEPLOY_SLACK_BOT_TOKEN }}

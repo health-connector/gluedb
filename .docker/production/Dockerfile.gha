@@ -248,6 +248,8 @@ COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/jruby-1.7.27 $HOME/
 
 RUN cd /edidb/ediparser && cabal update && cabal install --dependencies-only && cabal build && cabal configure
 RUN mkdir -p /edidb/scripts
+RUN mkdir -p /edidb/log/
+
 # COPY .docker/config/prepare_dev.js /edidb/scripts/prepare_dev.js
 # COPY .docker/config/prepare_prod.js /edidb/scripts/prepare_prod.js
 # COPY .docker/config/database.rb /edidb/hbx_oracle/config/database.rb

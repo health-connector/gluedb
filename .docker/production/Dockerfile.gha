@@ -160,12 +160,12 @@ COPY --chown=$USERNAME:$USERNAME . $HOME
 COPY --chown=$USERNAME:$USERNAME --from=prod_gems_and_assets $HOME/public $HOME/public
 
 # Copy environment-based config files
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/mongoid.yml $HOME/config
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/production.rb $HOME/config/environments
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/secrets.yml $HOME/config
-COPY --chown=$USERNAME:$USERNAME ./.docker/config/unicorn.rb $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/mongoid.yml $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/production.rb $HOME/config/environments
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/secrets.yml $HOME/config
+# COPY --chown=$USERNAME:$USERNAME ./.docker/config/unicorn.rb $HOME/config
 
 USER $USERNAME
 

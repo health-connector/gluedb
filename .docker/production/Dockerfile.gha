@@ -125,6 +125,8 @@ ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
 # COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
 # COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
 
+RUN mkdir -p /edidb/log/
+
 COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
 COPY --chown=$USERNAME:$USERNAME ./config/exchange_information.rb $HOME/app/models
 

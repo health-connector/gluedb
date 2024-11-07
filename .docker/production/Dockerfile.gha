@@ -53,8 +53,6 @@ ENV LANG=C.UTF-8
 
 ENV PATH=$HOME/bin:$BUNDLE_BIN:$GEM_HOME/gems/bin:$PATH
 
-# rubygems-update requires Ruby version >= 2.3.0.
-# RUN gem update --system
 RUN rm -f /usr/local/bin/ruby/gems/*/specifications/default/bundler-*.gemspec
 RUN gem install bundler -v $BUNDLER_VERSION
 
@@ -126,6 +124,9 @@ ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
 
 # COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
 # COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
+
+COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
+COPY --chown=$USERNAME:$USERNAME ./config/exchange_information.rb $HOME/app/models
 
 RUN bundle exec rake assets:precompile
 
@@ -248,7 +249,6 @@ COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/jruby-1.7.27 $HOME/
 
 RUN cd /edidb/ediparser && cabal update && cabal install --dependencies-only && cabal build && cabal configure
 RUN mkdir -p /edidb/scripts
-RUN mkdir -p /edidb/log/
 
 # COPY .docker/config/prepare_dev.js /edidb/scripts/prepare_dev.js
 # COPY .docker/config/prepare_prod.js /edidb/scripts/prepare_prod.js

@@ -9,7 +9,7 @@ Gluedb::Application.configure do
   config.action_controller.perform_caching = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this)
-  config.serve_static_assets = false
+  config.serve_static_assets = true
 
   # Compress JavaScripts and CSS
   config.assets.compress = false
@@ -52,7 +52,7 @@ Gluedb::Application.configure do
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_url_options = { :host => "10.83.85.127" }
+  config.action_mailer.default_url_options = { :host => "#{ENV['EDIDB_FQDN']}" }
 
   # Enable threaded mode
   # config.threadsafe!

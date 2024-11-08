@@ -1,4 +1,4 @@
-# this file is used to configure the exchange for the production environment
+# this file is used to configure the exchange for Rails "production" mode
 # There, the file will be renamed to config/exchange.yml
 receiver_id: "<%= ENV['RECEIVER_ID'] || '000000001' %>"
 environment: "<%= ENV['ENV_NAME'] || 'dev'  %>"

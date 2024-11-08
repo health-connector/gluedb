@@ -122,13 +122,9 @@ ENV EDIDB_DB_PORT=27017
 ENV EDIDB_DB_NAME=edidb_prod
 ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
 
-# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange_information.rb $HOME/app/models
-# COPY --chown=$USERNAME:$USERNAME ./.docker/config/exchange.yml $HOME/config
+COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
 
 RUN mkdir -p /edidb/log/
-
-COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
-COPY --chown=$USERNAME:$USERNAME ./config/exchange_information.rb $HOME/app/models
 
 RUN bundle exec rake assets:precompile
 

@@ -1,5 +1,5 @@
 # this file is used to configure the exchange for the production environment
-# the filename will be config/exchange.yml
+# There, the file will be renamed to config/exchange.yml
 receiver_id: "<%= ENV['RECEIVER_ID'] || '000000001' %>"
 environment: "<%= ENV['ENV_NAME'] || 'dev'  %>"
 hbx_id: "<%= ENV['HBX_ID'] || 'hx0'  %>"

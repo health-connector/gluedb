@@ -37,6 +37,7 @@ RUN apt-get update -qq \
       vim \
       zip \
       zlibc \
+      libjemalloc2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && truncate -s 0 /var/log/*log
@@ -162,6 +163,8 @@ COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchang
 # COPY --chown=$USERNAME:$USERNAME ./.docker/config/unicorn.rb $HOME/config
 
 USER $USERNAME
+
+ENTRYPOINT ["bin/docker-entrypoint"]
 
 ################################################################
 # Glue update image builder

@@ -3,11 +3,11 @@ name: Build Image and Deploy
 on:
   workflow_dispatch:
   push:
-  #   branches: #temporary to test
-  #     - "master"
-  # pull_request:
-  #   branches:
-  #     - "master"
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
 
 concurrency:
   group: docker-${{ github.ref }}

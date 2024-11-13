@@ -3,10 +3,10 @@ name: Build Base Image
 on:
   workflow_dispatch:
   push:
-    # branches: #temporary to test
-    #   - "main"
-    # paths:
-    #   - ".docker/base/**"
+    branches:
+      - "main"
+    paths:
+      - ".docker/base/**"
 
 concurrency:
   group: base-${{ github.ref }}

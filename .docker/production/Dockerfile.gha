@@ -246,13 +246,13 @@ COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/jruby-1.7.27 $HOME/
 RUN cd /edidb/ediparser && cabal update && cabal install --dependencies-only && cabal build && cabal configure
 RUN mkdir -p /edidb/scripts
 
-# COPY .docker/config/prepare_dev.js /edidb/scripts/prepare_dev.js
-# COPY .docker/config/prepare_prod.js /edidb/scripts/prepare_prod.js
-# COPY .docker/config/database.rb /edidb/hbx_oracle/config/database.rb
-# COPY .docker/config/update_variables.sh /edidb/scripts/update_variables.sh 
-# RUN  chmod 755 /edidb/scripts/update_variables.sh
-# COPY .docker/config/glue_update.sh /edidb/scripts/glue_update.sh 
-# RUN  chmod 755 /edidb/scripts/glue_update.sh
+COPY .docker/config/prepare_dev.js /edidb/scripts/prepare_dev.js
+COPY .docker/config/prepare_prod.js /edidb/scripts/prepare_prod.js
+COPY .docker/config/database.rb /edidb/hbx_oracle/config/database.rb
+COPY .docker/config/update_variables.sh /edidb/scripts/update_variables.sh
+RUN  chmod 755 /edidb/scripts/update_variables.sh
+COPY .docker/config/glue_update.sh /edidb/scripts/glue_update.sh
+RUN  chmod 755 /edidb/scripts/glue_update.sh
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.20.14/bin/linux/amd64/kubectl
 RUN chmod 744 ./kubectl

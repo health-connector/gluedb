@@ -3,7 +3,6 @@ name: Build Update Image
 run-name: Build Update Image 
 
 on:
-  push: #temp to register workflow
   workflow_dispatch:
     inputs:
       branch:

@@ -1,6 +1,7 @@
 name: Tag latest prod image
 
 on:
+  push: #temp to register workflow
   repository_dispatch:
     types:
       - tag-latest-prod-image

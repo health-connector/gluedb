@@ -1,6 +1,7 @@
 name: Build reports image
 
 on:
+  push: #temp to register workflow
   workflow_dispatch:
     inputs:
       branch:

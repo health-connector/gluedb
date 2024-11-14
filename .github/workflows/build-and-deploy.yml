@@ -131,7 +131,7 @@ jobs:
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           build-args: |
             HOSTNAME=172.17.0.1
-            GEM_OAUTH_TOKEN=${{ secrets.dchbx_deployments_token }}
+            GEM_OAUTH_TOKEN=${{ secrets.gem_oauth_token }}
 
       - name: Scan Docker image
         if: github.event_name != 'pull_request'
@@ -183,4 +183,4 @@ jobs:
   #             ]
   #           }
   #       env:
-  #         SLACK_BOT_TOKEN: ${{ secrets.DC_DEPLOY_SLACK_BOT_TOKEN }}
+  #         SLACK_BOT_TOKEN: ${{ secrets.CCA_DEPLOY_SLACK_BOT_TOKEN }}

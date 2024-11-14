@@ -1,0 +1,160 @@
+name: Build Update Image
+
+run-name: Build Update Image 
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        default: "master"
+        description: "Branch to build"
+        required: true
+      commit_sha:
+        description: "Commit sha to build"
+        required: true
+
+  repository_dispatch:
+    types:
+      - build-update-image
+
+concurrency:
+  group: update-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RABBITMQ_DEFAULT_USER: "guest"
+  RABBITMQ_DEFAULT_PASS: "guest"
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    outputs:
+      tagged_image: ${{ steps.prep.outputs.tagged_image }}
+      tagged_images: ${{ steps.prep.outputs.tagged_images }}
+      branch: ${{ steps.prep.outputs.branch }}
+      commit_sha: ${{ steps.prep.outputs.commit_sha }}
+      repository_name: gluedb
+    steps:
+      - name: Set variables from workflow dispatch
+        id: prep
+        run: |
+          repo="ghcr.io/health-connector/gluedb"
+          if [[ "${{github.event_name}}" == "repository_dispatch" ]]; then 
+            echo ::set-output name=client::${{ github.event.client_payload.client }}
+            echo ::set-output name=branch::${{ github.event.client_payload.branch }}
+            echo ::set-output name=commit_sha::${{ github.event.client_payload.commit_sha }}
+            echo ::set-output name=tagged_image::${repo}:${{ github.event.client_payload.branch }}-${{ github.event.client_payload.commit_sha }}-glue-update
+            echo ::set-output name=tagged_images::${repo}:${{ github.event.client_payload.branch }}-${{ github.event.client_payload.commit_sha }}-glue-update,${repo}:latest-prod-glue-update-${{ github.event.client_payload.client }}
+          else
+            echo ::set-output name=client::${{ github.event.inputs.client }}
+            echo ::set-output name=branch::${{ github.event.inputs.branch }}
+            echo ::set-output name=commit_sha::${{ github.event.inputs.commit_sha }}       
+            echo ::set-output name=tagged_image::${repo}:${{ github.event.inputs.branch }}-${{ github.event.inputs.commit_sha }}-glue-update
+            echo ::set-output name=tagged_images::${repo}:${{ github.event.inputs.branch }}-${{ github.event.inputs.commit_sha }}-glue-update
+          fi 
+
+  # Uses buildx to build and push the image
+  build-and-upload-image:
+    needs: [prep]
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:latest
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --name "rabbitmq"
+          --health-cmd "rabbitmqctl node_health_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mongo:
+        image: mongo:4.2
+        ports:
+          - 27017:27017
+        options: >-
+          --name "mongo"
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.prep.outputs.branch }}
+
+      - name: Add git HEAD info to docker image
+        run: git show --quiet HEAD > release.txt
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
+
+      # Add vhosts to RabbitMQ
+      - run: |
+          docker exec rabbitmq rabbitmqctl add_vhost /
+          docker exec rabbitmq rabbitmqctl add_vhost event_source
+          docker exec rabbitmq rabbitmqctl set_permissions -p event_source guest ".*" ".*" ".*"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Glue Update Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: .docker/production/Dockerfile.gha
+          # Set the desired build target here
+          target: update
+          # needed to access mongo and rabbit on GHA machine
+          network: host
+          # send to public registry if not a pull request
+          push: ${{ github.event_name != 'pull_request' }}
+          # create local image (for scanning) if it is a pull request
+          load: ${{ github.event_name == 'pull_request' }}
+          tags: ${{ needs.prep.outputs.tagged_images }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          build-args: |
+            HOSTNAME=172.17.0.1
+            GEM_OAUTH_TOKEN=${{ secrets.gem_oauth_token }}
+            COMMIT_SHA=${{ needs.prep.outputs.commit_sha }}
+            BRANCH=${{ needs.prep.outputs.branch }}
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+#  notify-slack:
+#    if: github.event_name != 'pull_request'
+#    needs: [prep, build-and-upload-image]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Post to a Slack channel
+#        id: slack
+#        uses: slackapi/slack-github-action@v1.16.0
+#        with:
+#          channel-id: "docker-images-${{ needs.prep.outputs.repository_name }}"
+#          slack-message: "New image pushed: ${{ needs.prep.outputs.tagged_image }} built from <https://github.com/health-connector/${{ needs.prep.outputs.repository_name }}/commit/${{ needs.prep.outputs.commit_sha }}|${{ needs.prep.outputs.commit_sha }}> on `${{ needs.prep.outputs.branch }}`"
+#        env:
+#          SLACK_BOT_TOKEN: ${{ secrets.YELLR_BOT_TOKEN }}

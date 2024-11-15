@@ -1,0 +1,304 @@
+ARG COMMIT_SHA
+ARG BRANCH=main
+ARG GEM_OAUTH_TOKEN
+ARG BUNDLE_GITHUB__COM=$GEM_OAUTH_TOKEN
+
+############################################
+### Base image ###
+############################################
+
+FROM ghcr.io/health-connector/gluedb:base as base
+LABEL author="ideacrew"
+
+ENV USERNAME=gluedb
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUNDLER_VERSION=1.17.3
+
+# Must be set as ENV variable to overrride the default
+ENV BUNDLER_VERSION=$BUNDLER_VERSION
+
+# Only add packages that aren't already in the base image
+# https://github.com/docker-library/ruby/blob/99def14400fcd612782367830836dfcbc10c8c50/2.1/slim/Dockerfile
+RUN apt-get update -qq \
+    # && apt-get -yq dist-upgrade \
+    && apt-get install -y \
+      fontconfig \
+      libffi6 \
+      libxext6 \
+      libxml2 \
+      libxrender1 \
+      libyaml-cpp0.5v5 \
+      nano \
+      openssl \
+      p7zip-full \
+      sshpass \
+      unzip \
+      vim \
+      zip \
+      zlibc \
+      libjemalloc1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && truncate -s 0 /var/log/*log
+
+# Configure bundler and PATH, install bundler version
+ENV GEM_HOME=/usr/local/bundle
+ENV BUNDLE_PATH=$GEM_HOME
+ENV BUNDLE_APP_CONFIG=$BUNDLE_PATH
+ENV BUNDLE_BIN=/usr/local/bin
+ENV BUNDLE_JOBS=4
+ENV BUNDLE_RETRY=3
+
+ENV LANG=C.UTF-8
+
+ENV PATH=$HOME/bin:$BUNDLE_BIN:$GEM_HOME/gems/bin:$PATH
+
+RUN rm -f /usr/local/bin/ruby/gems/*/specifications/default/bundler-*.gemspec
+RUN gem install bundler -v $BUNDLER_VERSION
+
+RUN groupadd --gid 1001 $USERNAME \
+  && useradd --uid 1001 --gid $USERNAME --shell /bin/bash --create-home $USERNAME
+
+ENV HOME=/edidb
+RUN mkdir $HOME \
+  && chown -R $USERNAME:$USERNAME $HOME
+
+# Configure app home directory
+WORKDIR $HOME
+
+ENV EDIDB_DEVISE_SECRET_KEY=4949641a374994854c0529feb329a81885867f044eb6c23102892e38bb32da437a94ee27eb4086b196f7273868d4b06c682948f5ced62385c548ba2d96898e20
+
+# unused in Rails 3
+# ENV EDIDB_SECRET_KEY_BASE=c8d2b9b204fbac78081a88a2c29b28cfeb82e6ccd3664b3948b813463b5917b315dbbd3040e8dffcb5b68df427099db0ce03e59e2432dfe5d272923b00755b82
+
+ENV RECEIVER_ID=000000001
+
+ENV RAILS_ENV=production
+ENV NODE_ENV=production
+
+###############################################################################
+## Builder. Adds node and Yarn. Not necessary in production. ###
+##############################################################################
+FROM base as builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG NODE_MAJOR=12
+ENV NODE_MAJOR=$NODE_MAJOR
+
+RUN apt-get update -qq \
+  && apt-get install -yq --no-install-recommends \
+    build-essential \
+    git \
+    libxml2-dev \
+    nodejs \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
+
+########################################################
+# Node and Bundle for production
+########################################################
+FROM builder as prod_gems_and_assets
+
+ARG GEM_OAUTH_TOKEN
+ARG BUNDLE_GITHUB__COM=$GEM_OAUTH_TOKEN
+
+COPY --chown=$USERNAME:$USERNAME ./Gemfile $HOME/Gemfile
+COPY --chown=$USERNAME:$USERNAME ./Gemfile.lock $HOME/Gemfile.lock
+
+RUN gem install libxml-ruby -v '2.9.0' --source 'https://rubygems.org/'
+
+ENV BUNDLE_WITHOUT=development:test
+RUN bundle install
+
+COPY --chown=$USERNAME:$USERNAME . $HOME
+
+ARG HOSTNAME=localhost
+
+# Needed to run client swap script
+ENV EDIDB_DB_HOST=${HOSTNAME}
+ENV EDIDB_DB_PORT=27017
+ENV EDIDB_DB_NAME=edidb_prod
+ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
+
+COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
+
+RUN bundle exec rake assets:precompile
+
+# https://github.com/rubygems/rubygems/issues/3225
+RUN rm -rf $GEM_HOME/bundle/ruby/*/cache
+
+################################################################
+# Deployable image
+################################################################
+
+FROM base as deploy
+
+ARG HOSTNAME=localhost
+
+# Needed to run client swap script
+ENV EDIDB_DB_AUTH=true
+ENV EDIDB_DB_HOST=${HOSTNAME}
+ENV EDIDB_DB_NAME=edidb_prod
+ENV EDIDB_DB_PASSWORD=anything
+ENV EDIDB_DB_PORT=27017
+ENV EDIDB_DB_REPLICA_SET_NAME=anything
+ENV EDIDB_DB_USERNAME=anything
+ENV RABBITMQ_URL=amqp://${HOSTNAME}:5672
+
+# Copy prebuilt gems
+COPY --chown=$USERNAME:$USERNAME --from=prod_gems_and_assets $BUNDLE_PATH $BUNDLE_PATH
+
+# Copy all app code again (sans gems, node_modules, assets)
+COPY --chown=$USERNAME:$USERNAME . $HOME
+
+# Copy prebuilt assets
+COPY --chown=$USERNAME:$USERNAME --from=prod_gems_and_assets $HOME/public $HOME/public
+
+# Copy environment-based config files
+COPY --chown=$USERNAME:$USERNAME ./config/exchange_prod.yml $HOME/config/exchange.yml
+
+USER $USERNAME
+
+ENTRYPOINT ["bin/docker-entrypoint"]
+
+################################################################
+# Glue update image builder
+################################################################
+
+FROM builder as update_builder
+
+RUN apt-get update \
+    && apt-get -yq dist-upgrade \
+    && apt-get install -y \
+       wget \
+       default-jdk 
+
+ARG GEM_OAUTH_TOKEN
+ENV BUNDLE_GITHUB__COM=x-access-token:"$GEM_OAUTH_TOKEN"
+
+RUN git clone https://"$GEM_OAUTH_TOKEN"@github.com/ideacrew/ediparser.git
+RUN git clone https://"$GEM_OAUTH_TOKEN"@github.com/health-connector/hbx_oracle.git
+
+RUN wget https://repo1.maven.org/maven2/org/jruby/jruby-dist/1.7.27/jruby-dist-1.7.27-bin.zip  && unzip jruby-dist-1.7.27-bin.zip
+ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
+WORKDIR $HOME/hbx_oracle
+RUN unset BUNDLE_APP_CONFIG && \
+    unset BUNDLE_BIN && \
+    unset BUNDLE_PATH && \
+    unset BUNDLER_VERSION && \
+    unset GEM_HOME && \
+    unset RUBYGEMS_VERSION && \
+    jruby -S gem install bundler -v 1.17.1 && \
+    jruby -S bundle install
+
+
+################################################################
+# Glue update image builder
+################################################################
+
+FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as update
+
+# Switch back to root to install system libraries
+USER root
+
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
+# Install mongodb shell
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+
+# Install required packages/libraries
+RUN apt-get update \
+    # && apt-get upgrade \
+    # && apt-get -yq dist-upgrade \
+    && apt-get install -y \
+       curl \
+       jq \ 
+       mongodb-org-shell \
+       default-jdk \
+       xz-utils \
+       gcc \
+       build-essential \
+       git \
+       libgmp-dev \
+       python \
+       lftp 
+
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+RUN cd /root && curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb8-linux.tar.xz && tar xf ghc-8.0.2-x86_64-deb8-linux.tar.xz && cd ghc-8.0.2 && ./configure && make install
+RUN cd /root && git clone https://github.com/haskell/cabal.git && cd /root/cabal && git checkout Cabal-v1.24.2.0 && cd cabal-install && ./bootstrap.sh 
+ENV PATH=$PATH:$HOME/.cabal/bin
+#ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
+RUN cabal update
+
+RUN echo '\ngem "rubycritic"' >> Gemfile
+RUN bundle install --jobs 20 --retry 5 --without development test
+
+COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/ediparser $HOME/ediparser
+COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/hbx_oracle $HOME/hbx_oracle
+COPY --chown=$USERNAME:$USERNAME --from=update_builder $HOME/jruby-1.7.27 $HOME/jruby-1.7.27
+
+RUN cd /edidb/ediparser && cabal update && cabal install --dependencies-only && cabal build && cabal configure
+RUN mkdir -p /edidb/scripts
+
+COPY .docker/config/prepare_dev.js /edidb/scripts/prepare_dev.js
+COPY .docker/config/prepare_prod.js /edidb/scripts/prepare_prod.js
+COPY .docker/config/database.rb /edidb/hbx_oracle/config/database.rb
+COPY .docker/config/update_variables.sh /edidb/scripts/update_variables.sh
+RUN  chmod 755 /edidb/scripts/update_variables.sh
+COPY .docker/config/glue_update.sh /edidb/scripts/glue_update.sh
+RUN  chmod 755 /edidb/scripts/glue_update.sh
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.20.14/bin/linux/amd64/kubectl
+RUN chmod 744 ./kubectl
+RUN mv ./kubectl /usr/local/bin/kubectl
+RUN curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install && rm awscliv2.zip
+RUN npm install -g secure-spreadsheet
+RUN chown -R $USERNAME:$USERNAME $HOME
+
+################################################################
+# Glue reports image builder
+################################################################
+
+FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as reports
+
+# Switch back to root to install system libraries
+USER root 
+
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
+# Install mongodb shell
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+  
+# Install required packages/libraries
+RUN apt-get update \
+    # && apt-get upgrade \
+    # && apt-get -yq dist-upgrade \
+    && apt-get install -y \
+       curl \
+       jq \
+       mongodb-org-shell \
+       default-jdk \
+       xz-utils \
+       gcc \
+       build-essential \
+       git \
+       libgmp-dev \
+       python \
+       lftp
+
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+
+RUN echo '\ngem "rubycritic"' >> Gemfile
+RUN bundle install --jobs 20 --retry 5 --without development test
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.20.14/bin/linux/amd64/kubectl
+RUN chmod 744 ./kubectl
+RUN mv ./kubectl /usr/local/bin/kubectl
+RUN curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install && rm awscliv2.zip
+RUN npm install -g secure-spreadsheet
+RUN chown -R $USERNAME:$USERNAME $HOME

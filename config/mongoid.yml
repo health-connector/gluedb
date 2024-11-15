@@ -1,3 +1,27 @@
+production:
+  sessions:
+    default:
+      # Defines the name of the default database that Mongoid can connect to.
+      # (required).
+      database: <%= ENV['EDIDB_DB_NAME'] || 'edidb_prod' %>
+      <% if ENV['EDIDB_DB_AUTH'] %>
+      username: <%= ENV['EDIDB_DB_USERNAME'] %>
+      password: <%= ENV['EDIDB_DB_PASSWORD'] %>
+      <% end %>
+
+      hosts:
+        - <%= ENV['EDIDB_DB_HOST'] || 'localhost' %>:<%= ENV['EDIDB_DB_PORT'] || '27017' %>
+      options:
+        <% if ENV['EDIDB_DB_AUTH'] %>
+        replica_set: <%= ENV['EDIDB_DB_REPLICA_SET_NAME'] %>
+        <% end %> 
+
+        write:
+          w: 1
+          j: true
+
+        skip_version_check: true
+
 development:
   # Configure available database sessions. (required)
   sessions:

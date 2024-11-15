@@ -1,0 +1,12 @@
+use  DB_NAME;
+db.dropDatabase();
+sleep(10000);
+use  DB_NAME;
+db.dropDatabase();
+sleep(20000);
+use  DB_NAME;
+db.dropDatabase();
+sleep(20000);
+use  DB_NAME_dev;
+sleep(10000);
+db.copyDatabase('DB_NAME_dev', 'DB_NAME');

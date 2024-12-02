@@ -124,7 +124,8 @@ fi
 echo "bringing down listeners: "$(date)
 kubectl scale --replicas=0  deployment/edidb-enrollment-validator deployment/edidb-broker-updated-listener \
                             deployment/edidb-policy-id-list-listener deployment/edidb-enrollment-event-listener \
-                            deployment/edidb-enrollment-event-handler deployment/edidb-enrollment-event-batch-processor
+                            deployment/edidb-enrollment-event-handler 
+                            #deployment/edidb-enrollment-event-batch-processor
 sleep 60
 kubectl scale --replicas=0 deployment/edidb-enroll-query-result-handler
 sleep 120

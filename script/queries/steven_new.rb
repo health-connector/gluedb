@@ -70,7 +70,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                 address2_home = home_address.try(:address_2)
                 city_home = home_address.try(:city)
                 county_home = home_address.try(:county)
-                state_home = home_address.try(:location_state_code)
+                state_home = home_address.try(:state)
                 zip_home = home_address.try(:zip)
 
                 # Mailing Address
@@ -79,7 +79,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                 address2_mail = mailing_address.try(:address_2)
                 city_mail = mailing_address.try(:city)
                 county_mail = mailing_address.try(:county)
-                state_mail = mailing_address.try(:location_state_code)
+                state_mail = mailing_address.try(:state)
                 zip_mail = mailing_address.try(:zip)
 
                 csv << [

@@ -22,13 +22,15 @@ filename = fetch_file_format
 Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
 
   CSV.open(filename, 'w') do |csv|
-    csv << ["Subscriber ID", "Member ID" , "Policy ID", "Enrollment Group ID",
-            "First Name", "Last Name","SSN", "DOB", "Gender", "Relationship",
+    csv << ["Subscriber ID", "Member ID", "Policy ID", "Enrollment Group ID",
+            "First Name", "Last Name", "SSN", "DOB", "Gender", "Relationship",
             "Plan Name", "HIOS ID", "Plan Metal Level", "Carrier Name",
             "Premium Amount", "Premium Total", "Policy Employer Contribution",
             "Coverage Start", "Coverage End", "Benefit Status",
             "Employer Name", "Employer DBA", "Employer FEIN", "Employer HBX ID",
-            "Home Address", "Mailing Address","Email","Phone Number","Broker"]
+            "Address1_Home", "Address2_Home", "City_Home", "County_Home", "StateCode_Home", "ZipCode_Home",
+            "Address1_Mail", "Address2_Mail", "City_Mail", "County_Mail", "StateCode_Mail", "ZipCode_Mail",
+            "Email", "Phone Number", "Broker"]
     policies.each do |pol|
       if !bad_eg_id(pol.eg_id)
         if !pol.subscriber.nil?
@@ -61,6 +63,25 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
               #if !en.canceled?
                 per = en.person
                 next if per.blank?
+
+                # Home Address
+                home_address = per.home_address || pol.subscriber.person.home_address
+                address1_home = home_address.try(:address_1)
+                address2_home = home_address.try(:address_2)
+                city_home = home_address.try(:city)
+                county_home = home_address.try(:county)
+                state_home = home_address.try(:state)
+                zip_home = home_address.try(:zip)
+
+                # Mailing Address
+                mailing_address = per.mailing_address || pol.subscriber.person.mailing_address
+                address1_mail = mailing_address.try(:address_1)
+                address2_mail = mailing_address.try(:address_2)
+                city_mail = mailing_address.try(:city)
+                county_mail = mailing_address.try(:county)
+                state_mail = mailing_address.try(:state)
+                zip_mail = mailing_address.try(:zip)
+
                 csv << [
                   subscriber_id, en.m_id, pol._id, pol.eg_id,
                   per.name_first,
@@ -78,8 +99,8 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   pol.employer_id.blank? ? nil : employer.dba,
                   pol.employer_id.blank? ? nil : employer.fein,
                   pol.employer_id.blank? ? nil : employer.hbx_id,
-                  per.home_address.try(:full_address) || pol.subscriber.person.home_address.try(:full_address),
-                  per.mailing_address.try(:full_address) || pol.subscriber.person.mailing_address.try(:full_address),
+                  address1_home, address2_home, city_home, county_home, state_home, zip_home,
+                  address1_mail, address2_mail, city_mail, county_mail, state_mail, zip_mail,
                   per.emails.first.try(:email_address), per.phones.first.try(:phone_number), broker
                 ]
               #end

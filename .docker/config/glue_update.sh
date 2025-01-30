@@ -143,11 +143,12 @@ sleep 10
 cp ${UPDATER_DIRECTORY}/b2b_edi.csv ${PARSER_DIRECTORY}
 cat ${PARSER_DIRECTORY}/b2b_edi.csv | ${PARSER_DIRECTORY}/dist/build/InterchangeTest/InterchangeTest > ${PARSER_DIRECTORY}/all_json.csv
 mkdir -p ${GLUEDB_DIRECTORY}/db/data
-cp ${PARSER_DIRECTORY}/all_json.csv ${GLUEDB_DIRECTORY}/db/data/
+cp ${PARSER_DIRECTORY}/all_json.csv ${GLUEDB_DIRECTORY}/db/data/needs_preprocessing_json.csv
 
 cd ${GLUEDB_DIRECTORY}
 #echo -e '\ngem "rubycritic"' >> Gemfile
 #bundle install
+RAILS_ENV=development bundle exec rake edi:import:pre_import_transform 
 RAILS_ENV=development bundle exec rake edi:import:all
 RAILS_ENV=development rails r script/queries/set_authority_members.rb
 #head -n -1 Gemfile > Gemfile.tmp

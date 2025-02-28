@@ -51,6 +51,8 @@ jobs:
   build-and-upload-image:
     needs: [prep]
     runs-on: ubuntu-latest
+    outputs:
+      didPush: ${{ steps.set_outputs.outputs.did_push }}
     services:
       rabbitmq:
         image: rabbitmq:latest
@@ -154,8 +156,13 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: Set outputs
+        id: set_outputs
+        run: |
+          echo "did_push=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
+
   notify-slack:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && needs.build-and-upload-image.outputs.didPush == 'true'
     needs: [prep, build-and-upload-image]
     runs-on: ubuntu-latest
     strategy:

@@ -43,7 +43,8 @@ module Listeners
         {
           :durable => true,
           :arguments => {
-            "x-dead-letter-exchange" => (self.queue_name + "-retry")
+            "x-dead-letter-exchange" => (self.queue_name + "-retry"),
+            "x-queue-type" => "quorum"
           }
         }
       )
@@ -53,7 +54,8 @@ module Listeners
           :durable => true,
           :arguments => {
             "x-dead-letter-exchange" => (self.queue_name + "-requeue"),
-            "x-message-ttl" => 1000
+            "x-message-ttl" => 1000,
+            "x-queue-type" => "quorum"
           }
         }
       )

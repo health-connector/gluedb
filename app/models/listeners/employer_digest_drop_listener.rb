@@ -57,6 +57,7 @@ module Listeners
         self.queue_name,
         {
           :durable => true,
+          :arguments => {"x-queue-type" => "quorum"}
         }
       )
       q

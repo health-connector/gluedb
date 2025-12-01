@@ -18,21 +18,18 @@ module EmployerEvents
     def has_current_or_future_plan_year?(carrier)
       found_plan_year = false
       carrier_plan_years(carrier).each do |node|
-        node.xpath("cv:plan_year_start", {:cv => XML_NS}).each do |date_node|
-          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
-          if date_value
-            if date_value >= Date.today
-              found_plan_year = true
-            end
-          end
-        end
-        node.xpath("cv:plan_year_end", {:cv => XML_NS}).each do |date_node|
-          date_value = Date.strptime(date_node.content, "%Y%m%d") rescue nil
-          if date_value
-            if date_value >= Date.today
-              found_plan_year = true
-            end
-          end
+        start_date_node = node.at_xpath("cv:plan_year_start", {:cv => XML_NS})
+        end_date_node = node.at_xpath("cv:plan_year_end", {:cv => XML_NS})
+        
+        start_date_value = Date.strptime(start_date_node.content, "%Y%m%d") rescue nil
+        end_date_value = Date.strptime(end_date_node.content, "%Y%m%d") rescue nil
+        
+        # Skip canceled plan years (where start_date == end_date)
+        next if start_date_value.blank? || end_date_value.blank? || start_date_value == end_date_value
+        
+        # Check if plan year is current or future
+        if start_date_value >= Date.today || end_date_value >= Date.today
+          found_plan_year = true
         end
       end
       found_plan_year

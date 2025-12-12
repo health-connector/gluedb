@@ -85,6 +85,12 @@ class Policy
   index({ "enrollees.rel_code" => 1})
   index({ "enrollees.coverage_start" => 1})
   index({ "enrollees.coverage_end" => 1})
+  # Performance indexes for enrollment batch processing and dashboard queries
+  index({:aasm_state => 1, "enrollees.rel_code" => 1})
+  index({"enrollees.m_id" => 1, "enrollees.rel_code" => 1})
+  index({:employer_id => 1, :aasm_state => 1})
+  index({:aasm_state => 1, "enrollees.coverage_start" => 1, "enrollees.coverage_end" => 1})
+  index({:carrier_id => 1, :aasm_state => 1})
 
   before_create :generate_enrollment_group_id
   before_save :invalidate_find_cache

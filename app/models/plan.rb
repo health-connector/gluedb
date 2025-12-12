@@ -25,6 +25,9 @@ class Plan
   index({ "premium_tables.age" => 1 })
   index({ "premium_tables.rate_start_date" => 1 })
   index({ "premium_tables.rate_end_date" => 1 })
+  # Performance indexes for plan lookups during enrollment processing
+  index({ hios_plan_id: 1, year: 1 })
+  index({ carrier_id: 1, year: 1 })
 
   validates_inclusion_of :coverage_type, in: ["health", "dental"]
 #  validates_inclusion_of :market_type, in: ["individual", "shop"]

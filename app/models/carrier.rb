@@ -33,6 +33,9 @@ class Carrier
   index({name: 1})
   index({hbx_carrier_id: 1})
   index({"carrier_profiles.fein" => 1})
+  # Performance indexes for carrier lookups in event processing and batch operations
+  index({is_active: 1})
+  index({hbx_carrier_id: 1, is_active: 1})
 
   scope :by_name, order_by(name: 1)
 

@@ -45,6 +45,10 @@ class Person
   index({name_first: 1, name_last:1, "emails.email_address" => 1})
   index({name_last: 1, name_first:1, "emails.email_address" => 1})
   index({"emails.email_address" => 1})
+  index({"members.hbx_member_id" => 1})
+  index({'members.1' => 1 })
+  # Performance index for family member lookups and active policies queries
+  index({"family_members.person_id" => 1})
 
   #TODO - create authority member index (use Mongo indexing method that expects many empty values)
 

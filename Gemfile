@@ -77,7 +77,7 @@ end
 
 gem 'ruby-progressbar', '~> 1.7'
 gem "haml"
-gem 'kaminari', '0.16.3'
+gem 'kaminari', '1.2.1'
 gem 'bootstrap-kaminari-views', '0.0.5'
 gem "pd_x12"
 gem 'carrierwave-mongoid', '0.7.1', :require => 'carrierwave/mongoid'

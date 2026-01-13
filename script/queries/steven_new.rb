@@ -103,7 +103,7 @@ Caches::MongoidCache.with_cache_for(Carrier, Plan, Employer) do
                   per.name_first,
                   per.name_last,
                   en.member.ssn,
-                  en.member.dob.strftime("%Y%m%d"),
+                  en.member.dob.blank? ? nil : en.member.dob.strftime("%Y%m%d"),
                   en.member.gender,
                   en.rel_code,
                   plan.name, plan.hios_plan_id, plan.metal_level, carrier.name,

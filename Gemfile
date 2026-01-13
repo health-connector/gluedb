@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rake', '10.4.2'
-gem 'rails', '3.2.22.5'
+gem 'rails', '6.0.3.5'
 
 gem "mongoid", "~> 3.1.6"
 gem "origin"
@@ -16,7 +16,7 @@ gem 'spreadsheet', '1.0.4'
 gem 'ruby-ole', '1.2.11.7'
 gem 'openhbx_cv2', git: "https://github.com/ideacrew/openhbx_cv2.git", branch: "trunk"
 gem "interactor", "~> 3.0"
-gem 'interactor-rails', '2.0.2'
+gem 'interactor-rails', '2.2.1'
 gem "psych", "2.0.5"
 gem "rubyXL", "3.4.6"
 

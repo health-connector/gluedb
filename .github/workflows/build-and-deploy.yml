@@ -51,6 +51,8 @@ jobs:
   build-and-upload-image:
     needs: [prep]
     runs-on: ubuntu-latest
+    outputs:
+      didPush: ${{ steps.set_outputs.outputs.did_push }}
     services:
       rabbitmq:
         image: rabbitmq:latest
@@ -154,33 +156,38 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-  # notify-slack:
-  #   if: github.event_name != 'pull_request'
-  #   needs: [prep, build-and-upload-image]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       registry: ['ghcr.io']
-  #   steps:
-  #     - name: Post to a Slack channel
-  #       id: slack
-  #       uses: slackapi/slack-github-action@v1.16.0
-  #       with:
-  #         channel-id: "docker-images-${{ needs.prep.outputs.repositoryName }}"
-  #         payload: |
-  #           {
-  #             "blocks": [
-  #               {
-  #                 "type": "section",
-  #                 "text": {
-  #                   "type": "mrkdwn",
-  #                   "text": "*${{ format('{0} image*:\n`{1}/{2}`', matrix.registry, matrix.registry, needs.prep.outputs.taggedImage) }}"
-  #                 }
-  #               },
-  #               {
-  #                 "type": "divider"
-  #               }
-  #             ]
-  #           }
-  #       env:
-  #         SLACK_BOT_TOKEN: ${{ secrets.CCA_DEPLOY_SLACK_BOT_TOKEN }}
+      - name: Set outputs
+        id: set_outputs
+        run: |
+          echo "did_push=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
+
+  notify-slack:
+    if: github.event_name != 'pull_request' && needs.build-and-upload-image.outputs.didPush == 'true'
+    needs: [prep, build-and-upload-image]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        registry: ['ghcr.io']
+    steps:
+      - name: Post to a Slack channel
+        id: slack
+        uses: slackapi/slack-github-action@v1.16.0
+        with:
+          channel-id: "docker-images-${{ needs.prep.outputs.repositoryName }}"
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*${{ format('{0} image*:\n`{1}/{2}`', matrix.registry, matrix.registry, needs.prep.outputs.taggedImage) }}"
+                  }
+                },
+                {
+                  "type": "divider"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.CCA_DEPLOY_SLACK_BOT_TOKEN }}

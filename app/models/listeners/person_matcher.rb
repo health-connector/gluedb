@@ -28,12 +28,18 @@ module Listeners
       begin
         person, member = PersonMatchStrategies::Finder.find_person_and_member(person_hash)
         if person.blank? || member.blank?
-          channel.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "404","not found"))
+          with_confirmed_channel do |chan|
+            chan.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "404","not found"))
+          end
         else
-          channel.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: person, member: member}),response_properties(reply_to, "200"))
+          with_confirmed_channel do |chan|
+            channel.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: person, member: member}),response_properties(reply_to, "200"))
+          end
         end
       rescue PersonMatchStrategies::AmbiguousMatchError => e
-        channel.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "409",e.message))
+        with_confirmed_channel do |chan|
+          chan.default_exchange.publish(JSON.dump(person_hash),error_properties(reply_to, "409",e.message))
+        end
       end
       channel.ack(delivery_info.delivery_tag, false)
     end

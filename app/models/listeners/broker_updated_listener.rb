@@ -82,15 +82,16 @@ module Listeners
     def log_event(level, event_name, broker_id, message, time_provider)
       e_ex_name = ExchangeInformation.event_publish_exchange
       chan = connection.create_channel
-      e_ex = chan.fanout(e_ex_name, {:durable => true})
-      e_ex.publish(message, {
-        :routing_key => "#{level}.application.gluedb.broker_update_listener.#{event_name}",
-        :timestamp => time_provider.now.to_i,
-        :headers => {
-          :broker_id => broker_id
-        }
-      })
-      chan.close
+      with_confirmed_channel do |chan|
+        e_ex = chan.fanout(e_ex_name, {:durable => true})
+        e_ex.publish(message, {
+          :routing_key => "#{level}.application.gluedb.broker_update_listener.#{event_name}",
+          :timestamp => time_provider.now.to_i,
+          :headers => {
+            :broker_id => broker_id
+          }
+        })
+      end
     end
 
     def self.queue_name

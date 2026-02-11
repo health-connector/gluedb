@@ -8,7 +8,7 @@ class EventPublisher
   def publish(event)
     parsed_event = @event_parser.parse(event)
     event_routes = @route_repository.for_event_uri(parsed_event.event_uri)
-    @channel_repository.with_channel do |chan|
+    @channel_repository.with_confirmed_channel do |chan|
       event_routes.each do |er|
         ex = er.resolve_exchange(chan)
         ex.publish(parsed_event.message_body, parsed_event.message_headers.merge({

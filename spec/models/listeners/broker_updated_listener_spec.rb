@@ -7,8 +7,8 @@ describe Listeners::BrokerUpdatedListener do
   let(:message_properties) { double(:headers => message_headers) }
   let(:message_headers) { { :broker_id => broker_hbx_id } }
   let(:connection) { double }
-  let(:channel) { double(:connection => connection) }
-  let(:queue) { double }
+  let(:channel) { instance_double("Bunny::Channel", :connection => connection, :confirm_select => true, :close => true, :wait_for_confirms => true) }
+  let(:queue) { double(:name => "queue_name", :options => {}) }
   let(:message_tag) { "a message tag" }
   let(:delivery_info) { double(:delivery_tag => message_tag) }
   let(:expected_broker_properties) { {
@@ -30,7 +30,7 @@ describe Listeners::BrokerUpdatedListener do
   subject { Listeners::BrokerUpdatedListener.new(channel, queue) }
 
   before :each do
-    allow(error_channel).to receive(:fanout).with(mock_event_exchange_name, {:durable => true}).and_return(mock_event_exchange)
+    allow(channel).to receive(:fanout).with(mock_event_exchange_name, {:durable => true}).and_return(mock_event_exchange)
     allow(ExchangeInformation).to receive(:event_publish_exchange).and_return(mock_event_exchange_name)
     allow(Amqp::Requestor).to receive(:new).with(connection).and_return(mock_requestor)
     allow(Broker).to receive(:by_npn).with(broker_hbx_id).and_return(matching_brokers)
@@ -38,6 +38,8 @@ describe Listeners::BrokerUpdatedListener do
       {:headers => { :broker_id => broker_hbx_id }, :routing_key => "resource.broker"}, "", 10
     ).and_return([r_di, r_props, resource_body])
     allow(channel).to receive(:acknowledge).with("a message tag", false)
+    allow(connection).to receive(:create_channel).and_return(channel)
+    allow(channel).to receive(:queue).with("queue_name", {}).and_return(queue)
   end
 
   describe "given a broker which doesn't exist" do
@@ -54,7 +56,6 @@ describe Listeners::BrokerUpdatedListener do
       let(:valid_broker_value) { true }
 
       it "should create that broker" do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"info.application.gluedb.broker_update_listener.broker_created", :timestamp=>1, :headers=>{:broker_id=> broker_hbx_id }})
         expect(channel).to receive(:acknowledge).with(message_tag,false)
         subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -72,7 +73,6 @@ describe Listeners::BrokerUpdatedListener do
       }
 
       before(:each) do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         allow(mock_new_broker).to receive(:errors).and_return(mock_errors)
       end
 
@@ -94,7 +94,6 @@ describe Listeners::BrokerUpdatedListener do
       end
 
       it "should update that broker" do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"info.application.gluedb.broker_update_listener.broker_updated", :timestamp=>1, :headers=>{:broker_id=> broker_hbx_id }})
         expect(channel).to receive(:acknowledge).with(message_tag,false)
         subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -111,7 +110,6 @@ describe Listeners::BrokerUpdatedListener do
       }
       before :each do
         allow(broker).to receive(:update_attributes).with(expected_broker_properties).and_return(false)
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         allow(broker).to receive(:errors).and_return(mock_errors)
       end
 
@@ -128,7 +126,6 @@ describe Listeners::BrokerUpdatedListener do
     let(:r_props) { nil }
     let(:matching_brokers) { [] }
     it "should re-queue the message for retry" do
-      allow(connection).to receive(:create_channel).and_return(error_channel)
       expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"error.application.gluedb.broker_update_listener.resource_lookup_timeout", :timestamp=>1, :headers=>{:broker_id=> broker_hbx_id }})
       expect(channel).to receive(:nack).with(message_tag,false,true)
       subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -141,7 +138,6 @@ describe Listeners::BrokerUpdatedListener do
     let(:matching_brokers) { [] }
 
     it "should log the missing resource error to the bus, and ack the message" do
-      allow(connection).to receive(:create_channel).and_return(error_channel)
       expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"error.application.gluedb.broker_update_listener.non_existant_resource", :timestamp=>1, :headers=>{:broker_id=> broker_hbx_id }})
       expect(channel).to receive(:acknowledge).with(message_tag,false)
       subject.on_message(delivery_info, message_properties, message_body, time_provider)

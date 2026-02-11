@@ -17,8 +17,9 @@ end
 describe Listeners::IndividualEventListener do
   let(:timestamp) { Time.mktime(2008,11,13,0,0,0) }
   let(:connection) { double }
-  let(:channel) { double(:connection => connection) }
-  let(:subject) { Listeners::IndividualEventListener.new(channel, nil) }
+  let(:channel) { double(:connection => connection, :confirm_select => true) }
+  let(:queue) { double(:name => "queue_name", :options => {}) }
+  let(:subject) { Listeners::IndividualEventListener.new(channel, queue) }
   let(:individual_id) { "an individual id" }
   let(:props) { double(:headers => { :individual_id => individual_id }) }
   let(:body) { "" }
@@ -29,6 +30,8 @@ describe Listeners::IndividualEventListener do
   before :each do
     allow(Time).to receive(:now).and_return(timestamp)
     allow(::Amqp::EventBroadcaster).to receive(:new).with(connection).and_return(event_broadcaster)
+    allow(connection).to receive(:create_channel).and_return(channel)
+    allow(channel).to receive(:queue).with("queue_name", {}).and_return(queue)
   end
 
   describe "contacting the 'callback' service to get the full individual resource" do

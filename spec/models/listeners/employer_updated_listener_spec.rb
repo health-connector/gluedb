@@ -7,8 +7,8 @@ describe Listeners::EmployerUpdatedListener do
   let(:message_properties) { double(:headers => message_headers) }
   let(:message_headers) { { :employer_id => employer_hbx_id } }
   let(:connection) { double }
-  let(:channel) { double(:connection => connection) }
-  let(:queue) { double }
+  let(:channel) { double(:connection => connection, :confirm_select => true, :close => true, :wait_for_confirms => true) }
+  let(:queue) { double(:name => "queue_name", :options => {}) }
   let(:message_tag) { "a message tag" }
   let(:delivery_info) { double(:delivery_tag => message_tag) }
   let(:expected_employer_properties) { {
@@ -19,7 +19,6 @@ describe Listeners::EmployerUpdatedListener do
   } }
   let(:mock_requestor) { double }
   let(:r_di) { double }
-  let(:error_channel) { double(:close =>  nil) }
   let(:mock_event_exchange_name) { "mock event exchange name" }
   let(:mock_event_exchange) { double }
   let(:time_provider) { double( :now => 1 ) }
@@ -27,7 +26,7 @@ describe Listeners::EmployerUpdatedListener do
   subject { Listeners::EmployerUpdatedListener.new(channel, queue) }
 
   before :each do
-    allow(error_channel).to receive(:fanout).with(mock_event_exchange_name, {:durable => true}).and_return(mock_event_exchange)
+    allow(channel).to receive(:fanout).with(mock_event_exchange_name, {:durable => true}).and_return(mock_event_exchange)
     allow(ExchangeInformation).to receive(:event_publish_exchange).and_return(mock_event_exchange_name)
     allow(Amqp::Requestor).to receive(:new).with(connection).and_return(mock_requestor)
     allow(Employer).to receive(:by_hbx_id).with(employer_hbx_id).and_return(matching_employers)
@@ -35,6 +34,8 @@ describe Listeners::EmployerUpdatedListener do
       {:headers => { :employer_id => employer_hbx_id }, :routing_key => "resource.employer" }, "", 10
     ).and_return([r_di, r_props, resource_body])
     allow(channel).to receive(:acknowledge).with("a message tag", false)
+    allow(connection).to receive(:create_channel).and_return(channel)
+    allow(channel).to receive(:queue).with("queue_name", {}).and_return(queue)
   end
 
   describe "given a employer which doesn't exist" do
@@ -51,7 +52,6 @@ describe Listeners::EmployerUpdatedListener do
       let(:valid_employer_value) { true }
 
       it "should create that employer" do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"info.application.gluedb.employer_update_listener.employer_created", :timestamp=>1, :headers=>{:employer_id=> employer_hbx_id }})
         expect(channel).to receive(:acknowledge).with(message_tag,false)
         subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -69,7 +69,6 @@ describe Listeners::EmployerUpdatedListener do
       }
 
       before(:each) do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         allow(mock_new_employer).to receive(:errors).and_return(mock_errors)
       end
 
@@ -91,7 +90,6 @@ describe Listeners::EmployerUpdatedListener do
       end
 
       it "should update that employer" do
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"info.application.gluedb.employer_update_listener.employer_updated", :timestamp=>1, :headers=>{:employer_id=> employer_hbx_id }})
         expect(channel).to receive(:acknowledge).with(message_tag,false)
         subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -108,7 +106,6 @@ describe Listeners::EmployerUpdatedListener do
       }
       before :each do
         allow(employer).to receive(:update_attributes).with(expected_employer_properties).and_return(false)
-        allow(connection).to receive(:create_channel).and_return(error_channel)
         allow(employer).to receive(:errors).and_return(mock_errors)
       end
 
@@ -125,7 +122,6 @@ describe Listeners::EmployerUpdatedListener do
     let(:r_props) { nil }
     let(:matching_employers) { [] }
     it "should re-queue the message for retry" do
-      allow(connection).to receive(:create_channel).and_return(error_channel)
       expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"error.application.gluedb.employer_update_listener.resource_lookup_timeout", :timestamp=>1, :headers=>{:employer_id=> employer_hbx_id }})
       expect(channel).to receive(:nack).with(message_tag,false,true)
       subject.on_message(delivery_info, message_properties, message_body, time_provider)
@@ -138,7 +134,6 @@ describe Listeners::EmployerUpdatedListener do
     let(:matching_employers) { [] }
 
     it "should log the missing resource error to the bus, and ack the message" do
-      allow(connection).to receive(:create_channel).and_return(error_channel)
       expect(mock_event_exchange).to receive(:publish).with("", {:routing_key=>"error.application.gluedb.employer_update_listener.non_existant_resource", :timestamp=>1, :headers=>{:employer_id=> employer_hbx_id }})
       expect(channel).to receive(:acknowledge).with(message_tag,false)
       subject.on_message(delivery_info, message_properties, message_body, time_provider)

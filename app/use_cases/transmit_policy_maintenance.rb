@@ -17,6 +17,7 @@ class TransmitPolicyMaintenance
     tag = "#{ExchangeInformation.hbx_id}.#{ExchangeInformation.environment}.q.legacy_carrier_encoder"
     conn = AmqpConnectionProvider.start_connection
     ch = conn.create_channel
+    ch.confirm_select
     x = ch.default_exchange
 
     x.publish(
@@ -28,6 +29,7 @@ class TransmitPolicyMaintenance
         :submitted_by => current_user
       }
     )
+    ch.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish maintence CV"))
     conn.close
   end
 end

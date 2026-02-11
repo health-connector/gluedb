@@ -36,26 +36,31 @@ module Listeners
     end
 
     def handle_success(details, policy_ids, canceled_policies)
-      channel.default_exchange.publish(
-        "",
-        {
-          :routing_key => details[:reply_to],
-          :headers => {
-            :return_status => "200"
+      with_confirmed_channel do |chan|
+        chan.default_exchange.publish(
+          "",
+          {
+            :routing_key => details[:reply_to],
+            :headers => {
+              :return_status => "200"
+            }
           }
-        }
-      )
+        )
+      end
     end
 
     def handle_failure(details, errors)
-      channel.default_exchange.publish(
-        JSON.dump(errors),
-        {
-          :routing_key => details[:reply_to],
-          :headers => {
-            :return_status => "422"
+      with_confirmed_channel do |chan|
+        chan.default_exchange.publish(
+          JSON.dump(errors),
+          {
+            :routing_key => details[:reply_to],
+            :headers => {
+              :return_status => "422"
+            }
           }
-        })
+        )
+      end
     end
 
     def self.run

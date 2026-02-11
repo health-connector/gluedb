@@ -20,16 +20,18 @@ module Services
         "policy.maintenance"
       end
       xml_body = serialize(policy, operation, reason)
-      with_channel do |channel|
-        channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
-          :routing_key => routing_key,
-          :reply_to => v_destination,
-          :headers => {
-            :file_name => "#{p_id}.xml",
-            :submitted_by => "trey.evans@dc.gov",
-            :vocabulary_destination => v_destination
-          }
-        })
+      AmqpConnectionProvider.with_connection do |connection|
+        Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |channel|
+          channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
+            :routing_key => routing_key,
+            :reply_to => v_destination,
+            :headers => {
+              :file_name => "#{p_id}.xml",
+              :submitted_by => "trey.evans@dc.gov",
+              :vocabulary_destination => v_destination
+            }
+          })
+        end
       end
     end
 
@@ -43,14 +45,6 @@ module Services
         member_ids
       )
       serializer.serialize
-    end
-
-    def self.with_channel
-      session = AmqpConnectionProvider.start_connection
-      chan = session.create_channel
-      chan.prefetch(1)
-      yield chan
-      session.close
     end
 
     def self.policy_action(policy)

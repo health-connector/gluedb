@@ -15,6 +15,7 @@ module Protocols
           :durable => true,
           :routing_key => event_key
         )
+        @channel.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish event"))
       end
     end
   end

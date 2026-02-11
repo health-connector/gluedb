@@ -1,6 +1,6 @@
 class EdiQueueSetup
   def initialize
-    conn = Bunny.new(ExchangeInformation.amqp_uri)
+    conn = Bunny.new(ExchangeInformation.amqp_connection_settings)
     conn.start
     @ch = conn.create_channel
   end

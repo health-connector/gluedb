@@ -26,7 +26,7 @@ module Services
           }
         }
       )
-      ch.wait_for_confirms
+      ch.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish cv"))
       conn.close
     end
 

@@ -10,16 +10,18 @@ module Workflow
       reason = "termination_of_benefits"
 
       xml_body = serialize(policy, operation, reason)
-      with_channel do |channel|
-        channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
-          :routing_key => routing_key,
-          :reply_to => v_destination,
-          :headers => {
-            :file_name => "#{p_id}.xml",
-            :submitted_by => "trey.evans@dchbx.info",
-            :vocabulary_destination => v_destination
-          }
-        })
+      AmqpConnectionProvider.with_connection do |connection|
+        Amqp::ConfirmedPublisher.with_confirmed_channel(connection) do |channel|
+          channel.direct(ExchangeInformation.request_exchange, :durable => true).publish(xml_body, {
+            :routing_key => routing_key,
+            :reply_to => v_destination,
+            :headers => {
+              :file_name => "#{p_id}.xml",
+              :submitted_by => "trey.evans@dchbx.info",
+              :vocabulary_destination => v_destination
+            }
+          })
+        end
       end
     end
   end

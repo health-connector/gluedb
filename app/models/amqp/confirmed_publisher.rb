@@ -5,7 +5,7 @@ module Amqp
       begin
         chan.confirm_select
         yield chan
-        chan.wait_for_confirms
+        chan.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish message"))
       ensure
         chan.close
       end

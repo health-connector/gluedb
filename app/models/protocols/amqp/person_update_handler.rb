@@ -18,9 +18,11 @@ module Protocols
         transform_key = Protocols::Amqp::Settings.transformation_key
         conn = AmqpConnectionProvider.start_connection
         ch = conn.create_channel
-        ex = ch.send(*transform_exchange)
+        p_chan = conn.create_channel
+        p_chan.confirm_select
+        ex = p_chan.send(*transform_exchange)
         # TODO: send to the right place, with the transformation XSL
-        client = ::Protocols::Amqp::RpcClient.new(ex, chan)
+        client = ::Protocols::Amqp::RpcClient.new(ex, chan, p_chan)
         req_headers = {
                     :durable => true,
                     :routing_key => transform_key,
@@ -32,9 +34,9 @@ module Protocols
         if !(reply_properties.headers["result_code"] == "OK")
           raise reply_properties.headers["result_code"].inspect
         end
-        ev_client = ::Protocols::Amqp::EventClient.new(ch, "individual")
+        ev_client = ::Protocols::Amqp::EventClient.new(p_chan, "individual")
         ev_client.publish("update", reply_result)
-        conn.close 
+        conn.close
       end
     end
   end

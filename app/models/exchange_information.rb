@@ -9,7 +9,6 @@ class ExchangeInformation
   include Singleton
 
   REQUIRED_KEYS = [
-    'amqp_uri',
     'receiver_id',
     'invalid_argument_queue',
     'processing_failure_queue',
@@ -21,13 +20,14 @@ class ExchangeInformation
     'file_storage_uri'
   ]
 
-  attr_reader :config
+  attr_reader :config, :amqp_connection_settings
 
   # TODO: I have a feeling we may be using this pattern
   #       A LOT.  Look into extracting it if we repeat.
   def initialize
     @config = YAML.load(ERB.new(File.read(File.join(Rails.root,'config', 'exchange.yml'))).result)
     ensure_configuration_values(@config)
+    encode_amqp_connection_settings
   end
 
   def ensure_configuration_values(conf)
@@ -51,5 +51,30 @@ class ExchangeInformation
 
   REQUIRED_KEYS.each do |k|
     define_key k
+  end
+
+  def self.amqp_connection_settings
+    self.instance.amqp_connection_settings
+  end
+
+  def encode_amqp_connection_settings
+    raise MissingKeyError.new(":amqp_uri OR :amqp_cluster") if config['amqp_cluster'].blank? && config['amqp_uri'].blank?
+    if config['amqp_cluster']
+      @amqp_connection_settings = config['amqp_cluster'].symbolize_keys.merge({
+        :heartbeat => 10
+      })
+    else
+        uri = URI.parse(config['amqp_uri'])
+        port_value = uri.port.blank? ? 5672 : uri.port
+        user_value = uri.user.blank? ? "guest" : uri.user
+        password_value = uri.password.blank? ? "guest" : uri.password
+        @amqp_connection_settings = {
+          :host => uri.host,
+          :port => port_value,
+          :username => user_value,
+          :password => password_value,
+          :heartbeat => 10
+        }
+    end
   end
 end

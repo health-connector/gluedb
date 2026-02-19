@@ -33,7 +33,7 @@ module Listeners
           end
         else
           with_confirmed_channel do |chan|
-            channel.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: person, member: member}),response_properties(reply_to, "200"))
+            chan.default_exchange.publish(ApplicationController.new.render_to_string(partial: 'shared/v2/person_match', locals: { person: person, member: member}),response_properties(reply_to, "200"))
           end
         end
       rescue PersonMatchStrategies::AmbiguousMatchError => e

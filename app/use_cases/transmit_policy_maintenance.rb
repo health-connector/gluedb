@@ -29,7 +29,7 @@ class TransmitPolicyMaintenance
         :submitted_by => current_user
       }
     )
-    ch.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish maintence CV"))
+    ch.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish maintenance CV"))
     conn.close
   end
 end

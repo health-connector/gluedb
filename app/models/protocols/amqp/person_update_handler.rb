@@ -22,7 +22,7 @@ module Protocols
         p_chan.confirm_select
         ex = p_chan.send(*transform_exchange)
         # TODO: send to the right place, with the transformation XSL
-        client = ::Protocols::Amqp::RpcClient.new(ex, chan, p_chan)
+        client = ::Protocols::Amqp::RpcClient.new(ex, ch, p_chan)
         req_headers = {
                     :durable => true,
                     :routing_key => transform_key,

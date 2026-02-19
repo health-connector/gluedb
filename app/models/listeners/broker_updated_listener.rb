@@ -81,7 +81,6 @@ module Listeners
 
     def log_event(level, event_name, broker_id, message, time_provider)
       e_ex_name = ExchangeInformation.event_publish_exchange
-      chan = connection.create_channel
       with_confirmed_channel do |chan|
         e_ex = chan.fanout(e_ex_name, {:durable => true})
         e_ex.publish(message, {

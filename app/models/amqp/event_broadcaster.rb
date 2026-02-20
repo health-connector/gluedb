@@ -14,7 +14,7 @@ module Amqp
           publish_props["timestamp"] = Time.now.to_i
         end
         out_ex.publish(payload, publish_props)
-        chan.wait_for_confirms
+        chan.wait_for_confirms|| raise(::Amqp::PublishConfirmationError.new("Failed to broadcast event"))
       ensure
         chan.close
       end

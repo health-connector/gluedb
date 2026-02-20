@@ -28,6 +28,7 @@ class VocabularyRequest
     return if Rails.env.test?
     conn = AmqpConnectionProvider.start_connection
     ch = conn.create_channel
+    ch.confirm_select
     x = ch.default_exchange
     x.publish(
       data,
@@ -36,6 +37,7 @@ class VocabularyRequest
         :submitted_by => email
       }
     )
+    ch.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish message"))
     conn.close
   end
 

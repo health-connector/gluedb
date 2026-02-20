@@ -46,7 +46,9 @@ class CarefirstPolicyUpdatesController < ApplicationController
     file = params[:policy_status_file]
 
     connection = AmqpConnectionProvider.start_connection
-    exchange = connection.create_channel.default_exchange
+    chan = connection.create_channel
+    chan.confirm_select
+    exchange = chan.default_exchange
 
     exchange.publish(
       file.read.force_encoding('utf-8'),
@@ -57,6 +59,7 @@ class CarefirstPolicyUpdatesController < ApplicationController
         :submitted_by => current_user.email
       }
     )
+    chan.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish message"))
     connection.close
   end
 

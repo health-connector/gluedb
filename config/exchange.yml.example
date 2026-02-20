@@ -8,3 +8,8 @@ event_exchange: 'ma0.preprod.e.topic.events'
 event_publish_exchange: 'ma0.preprod.e.fanout.events'
 amqp_uri: 'amqp://'
 file_storage_uri: 'http://'
+amqp_cluster:
+  username: some_name
+  password: some_password
+  port: 6572
+  hosts: ["127.0.0.1", "127.0.0.1"]

@@ -5,8 +5,8 @@ describe Listeners::EmployerContactInformationEdiUpdateRequestHandler do
   let(:message_body) { "" }
   let(:message_tag) {"Rspec Channel Delivery info"}
   let(:connection) { double }
-  let(:channel) { double(:connection => connection) }
-  let(:queue) { double }
+  let(:channel) { double(:connection => connection, :confirm_select => true) }
+  let(:queue) { double(:name => "queue_name", :options => {}) }
   let!(:employer) {FactoryGirl.create(:employer, hbx_id:'212344333')}
   let(:delivery_info) { double(:delivery_tag => "Rspec Channel Delivery info")}
   let!(:message_properties) { double("PROPERTIES", headers: message_headers, :timestamp => nil)}
@@ -26,7 +26,8 @@ describe Listeners::EmployerContactInformationEdiUpdateRequestHandler do
     allow(::Amqp::EventBroadcaster).to receive(:new).with(connection).and_return(event_broadcaster)
     allow(event_broadcaster).to receive(:broadcast).and_return(true)
     allow(channel).to receive(:acknowledge).with(message_tag, false)
-
+    allow(connection).to receive(:create_channel).and_return(channel)
+    allow(channel).to receive(:queue).with("queue_name", {}).and_return(queue)
     subject.on_message(delivery_info, message_properties, message_body)
   end
 

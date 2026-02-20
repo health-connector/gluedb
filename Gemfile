@@ -21,7 +21,6 @@ gem "psych", "2.0.5"
 gem "rubyXL", "3.4.6"
 
 group :development do
-  gem 'capistrano', '2.15.4'
   gem 'rubocop', '0.57.2'
   gem 'rubocop-git', '0.1.3'
   gem 'overcommit', '0.44.0'
@@ -69,10 +68,6 @@ end
 
 group :production do
   gem 'unicorn', '4.8.2'
-#  gem 'bluepill', '0.0.68'
-  gem 'eye', '0.10.0'
-  gem 'celluloid', '~> 0.17.3'
-  gem 'nio4r', '1.1.1'
 end
 
 gem 'ruby-progressbar', '~> 1.7'

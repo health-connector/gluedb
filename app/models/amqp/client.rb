@@ -6,9 +6,12 @@ module Amqp
 
     def initialize(chan, q)
       @channel = chan
+      @republish_channel = chan.connection.create_channel
+      @republish_channel.confirm_select
       @queue = q
       @argument_errors = []
       @bad_argument_queue = ExchangeInformation.invalid_argument_queue
+      @republish_queue = @republish_channel.queue(@queue.name, @queue.options)
       @processing_failed_queue = ExchangeInformation.processing_failure_queue
       @exit_after_work = false
     end
@@ -41,7 +44,9 @@ module Amqp
         },
         :original_payload => payload.to_s.encode('UTF-8', undef: :replace, replace: '')
       }
-      @channel.default_exchange.publish(JSON.dump(error_message), error_properties(@processing_failed_queue, delivery_info, properties))
+      with_confirmed_channel do |chan|
+        chan.default_exchange.publish(JSON.dump(error_message), error_properties(@processing_failed_queue, delivery_info, properties))
+      end
       channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
@@ -50,7 +55,9 @@ module Amqp
         :errors => @argument_errors,
         :original_payload => payload
       }
-      @channel.default_exchange.publish(error_message.to_json, error_properties(@bad_argument_queue, delivery_info, properties))
+      with_confirmed_channel do |chan|
+        chan.default_exchange.publish(error_message.to_json, error_properties(@bad_argument_queue, delivery_info, properties))
+      end
       channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
@@ -106,7 +113,8 @@ module Amqp
 
     def redeliver(a_channel, existing_retry_count, delivery_info, properties, payload)
       new_properties = redelivery_properties(existing_retry_count, delivery_info, properties)
-      queue.publish(payload, new_properties)
+      @republish_queue.publish(payload, new_properties)
+      @republish_channel.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to republish message"))
       a_channel.acknowledge(delivery_info.delivery_tag, false)
     end
 
@@ -152,21 +160,6 @@ module Amqp
     def broadcast_event(props, payload)
       broadcaster = ::Amqp::EventBroadcaster.new(connection)
       broadcaster.broadcast(props, payload)
-=begin
-      publish_props = props.dup
-      chan = connection.create_channel
-      begin
-        chan.confirm_select
-        out_ex = chan.fanout(ExchangeInformation.event_publish_exchange, :durable => true)
-        if !(props.has_key?("timestamp") || props.has_key?(:timestamp))
-          publish_props["timestamp"] = Time.now.to_i
-        end
-        out_ex.publish(payload, publish_props)
-        chan.wait_for_confirms
-      ensure
-        chan.close
-      end
-=end
     end
 
     def request(properties, payload, timeout = 15)
@@ -180,7 +173,18 @@ module Amqp
         chan.confirm_select
         publish_exchange = chan.default_exchange
         yield publish_exchange
-        chan.wait_for_confirms
+        chan.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish message"))
+      ensure
+        chan.close
+      end
+    end
+
+    def with_confirmed_channel
+      chan = connection.create_channel
+      begin
+        chan.confirm_select
+        yield chan
+        chan.wait_for_confirms || raise(::Amqp::PublishConfirmationError.new("Failed to publish message"))
       ensure
         chan.close
       end

@@ -228,7 +228,9 @@ RUN apt-get update \
 
 RUN curl -fsSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
 RUN cd /root && curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb8-linux.tar.xz && tar xf ghc-8.0.2-x86_64-deb8-linux.tar.xz && cd ghc-8.0.2 && ./configure && make install
-RUN cd /root && git clone https://github.com/haskell/cabal.git && cd /root/cabal && git checkout Cabal-v1.24.2.0 && cd cabal-install && ./bootstrap.sh 
+RUN mkdir -p $HOME/.cabal/bin && \
+    curl -fsSL https://downloads.haskell.org/~cabal/cabal-install-1.24.0.2/cabal-install-1.24.0.2-x86_64-unknown-linux.tar.gz \
+    | tar -xz -C $HOME/.cabal/bin 
 ENV PATH=$PATH:$HOME/.cabal/bin
 #ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
 RUN cabal update

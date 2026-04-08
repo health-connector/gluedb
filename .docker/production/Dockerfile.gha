@@ -2,6 +2,7 @@ ARG COMMIT_SHA
 ARG BRANCH=main
 ARG GEM_OAUTH_TOKEN
 ARG BUNDLE_GITHUB__COM=$GEM_OAUTH_TOKEN
+ARG NODE_VERSION=18.20.7
 
 ############################################
 ### Base image ###
@@ -227,7 +228,11 @@ RUN apt-get update \
        lftp \
        cabal-install
 
-RUN curl -fsSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
+ARG NODE_VERSION
+# Install Node.js LTS via direct binary (avoids apt repo GPG issues)
+RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
+    && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
+    && rm /tmp/node.tar.xz
 RUN cd /root && curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb8-linux.tar.xz && tar xf ghc-8.0.2-x86_64-deb8-linux.tar.xz && cd ghc-8.0.2 && ./configure && make install
 #ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
 RUN cabal update
@@ -288,7 +293,11 @@ RUN apt-get update \
        python \
        lftp
 
-RUN curl -fsSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
+ARG NODE_VERSION
+# Install Node.js LTS via direct binary (avoids apt repo GPG issues)
+RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
+    && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
+    && rm /tmp/node.tar.xz
 
 RUN echo '\ngem "rubycritic"' >> Gemfile
 RUN bundle install --jobs 20 --retry 5 --without development test

@@ -2,7 +2,7 @@ ARG COMMIT_SHA
 ARG BRANCH=main
 ARG GEM_OAUTH_TOKEN
 ARG BUNDLE_GITHUB__COM=$GEM_OAUTH_TOKEN
-ARG NODE_VERSION=18.20.7
+ARG NODE_MAJOR=14
 
 ############################################
 ### Base image ###
@@ -183,8 +183,9 @@ ENV BUNDLE_GITHUB__COM=x-access-token:"$GEM_OAUTH_TOKEN"
 RUN git clone https://"$GEM_OAUTH_TOKEN"@github.com/ideacrew/ediparser.git
 RUN git clone https://"$GEM_OAUTH_TOKEN"@github.com/health-connector/hbx_oracle.git
 
-RUN wget https://repo1.maven.org/maven2/org/jruby/jruby-dist/1.7.27/jruby-dist-1.7.27-bin.zip  && unzip jruby-dist-1.7.27-bin.zip
+RUN wget https://repo1.maven.org/maven2/org/jruby/jruby-dist/1.7.27/jruby-dist-1.7.27-bin.zip && unzip jruby-dist-1.7.27-bin.zip
 ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
+
 WORKDIR $HOME/hbx_oracle
 RUN unset BUNDLE_APP_CONFIG && \
     unset BUNDLE_BIN && \
@@ -216,7 +217,7 @@ RUN apt-get update \
     # && apt-get -yq dist-upgrade \
     && apt-get install -y \
        curl \
-       jq \ 
+       jq \
        mongodb-org-shell \
        default-jdk \
        xz-utils \
@@ -228,13 +229,15 @@ RUN apt-get update \
        lftp \
        cabal-install
 
-ARG NODE_VERSION
-# Install Node.js LTS via direct binary (avoids apt repo GPG issues)
-RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
-    && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
-    && rm /tmp/node.tar.xz
+ARG NODE_MAJOR
+ENV NODE_MAJOR=$NODE_MAJOR
+
+RUN curl -fsSL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash - \
+ && apt-get install -y nodejs
+
 RUN cd /root && curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb8-linux.tar.xz && tar xf ghc-8.0.2-x86_64-deb8-linux.tar.xz && cd ghc-8.0.2 && ./configure && make install
 #ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
+
 RUN cabal update
 
 RUN echo '\ngem "rubycritic"' >> Gemfile
@@ -269,13 +272,13 @@ RUN chown -R $USERNAME:$USERNAME $HOME
 FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as reports
 
 # Switch back to root to install system libraries
-USER root 
+USER root
 
 RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
 # Install mongodb shell
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-  
+
 # Install required packages/libraries
 RUN apt-get update \
     # && apt-get upgrade \
@@ -293,11 +296,11 @@ RUN apt-get update \
        python \
        lftp
 
-ARG NODE_VERSION
-# Install Node.js LTS via direct binary (avoids apt repo GPG issues)
-RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
-    && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
-    && rm /tmp/node.tar.xz
+ARG NODE_MAJOR
+ENV NODE_MAJOR=$NODE_MAJOR
+
+RUN curl -fsSL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash - \
+ && apt-get install -y nodejs
 
 RUN echo '\ngem "rubycritic"' >> Gemfile
 RUN bundle install --jobs 20 --retry 5 --without development test

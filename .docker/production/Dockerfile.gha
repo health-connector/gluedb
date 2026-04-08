@@ -206,7 +206,7 @@ FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as update
 # Switch back to root to install system libraries
 USER root
 
-RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr apt-transport-https -y
 # Install mongodb shell
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -277,7 +277,7 @@ FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as reports
 # Switch back to root to install system libraries
 USER root
 
-RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr apt-transport-https -y
 # Install mongodb shell
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list

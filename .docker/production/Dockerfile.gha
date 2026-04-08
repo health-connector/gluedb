@@ -2,7 +2,7 @@ ARG COMMIT_SHA
 ARG BRANCH=main
 ARG GEM_OAUTH_TOKEN
 ARG BUNDLE_GITHUB__COM=$GEM_OAUTH_TOKEN
-ARG NODE_MAJOR=14
+ARG NODE_VERSION=14.21.3
 
 ############################################
 ### Base image ###
@@ -206,7 +206,7 @@ FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as update
 # Switch back to root to install system libraries
 USER root
 
-RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr apt-transport-https -y
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
 # Install mongodb shell
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -229,13 +229,11 @@ RUN apt-get update \
        lftp \
        cabal-install
 
-ARG NODE_MAJOR
-ENV NODE_MAJOR=$NODE_MAJOR
+ARG NODE_VERSION
 
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
- && echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x stretch main" > /etc/apt/sources.list.d/nodesource.list \
- && apt-get update \
- && apt-get install -y nodejs
+RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
+ && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
+ && rm /tmp/node.tar.xz
 
 RUN cd /root && curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb8-linux.tar.xz && tar xf ghc-8.0.2-x86_64-deb8-linux.tar.xz && cd ghc-8.0.2 && ./configure && make install
 #ENV PATH=$HOME/jruby-1.7.27/bin:$PATH
@@ -276,7 +274,7 @@ FROM ghcr.io/health-connector/gluedb:${BRANCH}-${COMMIT_SHA} as reports
 # Switch back to root to install system libraries
 USER root
 
-RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr apt-transport-https -y
+RUN apt-get update && apt-get install wget gnupg software-properties-common dirmngr -y
 # Install mongodb shell
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -298,13 +296,11 @@ RUN apt-get update \
        python \
        lftp
 
-ARG NODE_MAJOR
-ENV NODE_MAJOR=$NODE_MAJOR
+ARG NODE_VERSION
 
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
- && echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x stretch main" > /etc/apt/sources.list.d/nodesource.list \
- && apt-get update \
- && apt-get install -y nodejs
+RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
+ && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
+ && rm /tmp/node.tar.xz
 
 RUN echo '\ngem "rubycritic"' >> Gemfile
 RUN bundle install --jobs 20 --retry 5 --without development test

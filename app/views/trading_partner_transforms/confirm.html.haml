@@ -1,10 +1,9 @@
 .page-header
   %h4
     Confirm Data Changes
-  %p.tpt-confirm-warning
-    %strong.text-danger warning:
-    %strong.text-dark
-      &nbsp;These policies will be updated in the database. Review carefully.
+= alert_box context: :danger, dismissible: false do
+  %strong Warning:
+  These policies will be updated in the database. Review carefully.
 %dl.dl-horizontal
   %dt Ticket
   %dd= @transform_request.ticket_number.presence || "(none)"
@@ -13,7 +12,7 @@
     - case @transform_request.end_date_action
     - when "change"
       - if @transform_request.change_mode == "cancel"
-        = "Cancel — end date set automatically to each policy's coverage start date"
+        = "Cancel - end date set automatically to each policy's coverage start date"
       - else
         - if @transform_request.parsed_end_date
           = "Terminate with end date #{@transform_request.parsed_end_date.strftime('%m/%d/%Y')}"
@@ -25,7 +24,7 @@
       = "Remove COBRA eligibility date"
     - else
       = "No data preparation selected"
-%table.tpt-confirm-table.table.table-striped.table-bordered
+%table.table.table-striped.table-bordered
   %thead
     %tr
       %th Policy

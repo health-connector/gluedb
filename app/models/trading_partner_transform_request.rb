@@ -1,7 +1,7 @@
 class TradingPartnerTransformRequest
   include ActiveModel::Validations
   include ActiveModel::Conversion
-  extend ActiveModel::Naming
+  include ActiveModel::Naming
 
   # Reason codes the transform pipeline understands.
   REASON_CODES = [

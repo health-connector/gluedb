@@ -1,21 +1,20 @@
 class TradingPartnerTransformsController < ApplicationController
   before_filter :ensure_feature_enabled
+  load_and_authorize_resource :class => "VocabUpload"
 
   # eg_ids can arrive as a query param after a redirect from one of the
   # other actions, so the policies do not need to be typed in twice.
   def new
-    authorize! :manage, :trading_partner_transforms
     @transform_request = TradingPartnerTransformRequest.new(:eg_ids => params[:eg_ids])
   end
 
   # Generate and Download. Does not change any policy data.
   def create
-    authorize! :manage, :trading_partner_transforms
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
     unless @transform_request.valid?(:generate)
-      flash[:error] = flash_error_list(@transform_request.errors.full_messages)
-      redirect_to new_trading_partner_transform_path(:eg_ids => @transform_request.eg_ids)
+      @transform_request.errors.full_messages.each { |message| flash_message_now(:error, message) }
+      render :new
       return
     end
 
@@ -36,12 +35,11 @@ class TradingPartnerTransformsController < ApplicationController
   # skips the X12 and CV1 step. Useful when the source XML needs review
   # before the transform is produced.
   def generate_source_only
-    authorize! :manage, :trading_partner_transforms
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
     unless @transform_request.valid?(:generate)
-      flash[:error] = flash_error_list(@transform_request.errors.full_messages)
-      redirect_to new_trading_partner_transform_path(:eg_ids => @transform_request.eg_ids)
+      @transform_request.errors.full_messages.each { |message| flash_message_now(:error, message) }
+      render :new
       return
     end
 
@@ -64,19 +62,19 @@ class TradingPartnerTransformsController < ApplicationController
   # runs the X12 and CV1 step on them directly. Does not look up any
   # policy. Only .xml files are accepted, nothing else.
   def transform_uploaded_xmls
-    authorize! :manage, :trading_partner_transforms
+    @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
     uploads = Array(params[:source_xml_files]).reject(&:blank?)
 
     if uploads.empty?
-      flash[:error] = flash_error_list(["Choose one or more .xml source XML files to upload"])
-      redirect_to new_trading_partner_transform_path
+      flash_message_now(:error, "Choose one or more .xml source XML files to upload")
+      render :new
       return
     end
 
     non_xml = uploads.reject { |upload| upload.original_filename.to_s.downcase.end_with?(".xml") }
     if non_xml.any?
-      flash[:error] = flash_error_list(["Only .xml files are accepted: #{non_xml.map(&:original_filename).join(', ')}"])
-      redirect_to new_trading_partner_transform_path
+      flash_message_now(:error, "Only .xml files are accepted: #{non_xml.map(&:original_filename).join(', ')}")
+      render :new
       return
     end
 
@@ -94,12 +92,11 @@ class TradingPartnerTransformsController < ApplicationController
   # Apply Data Changes. Separate from Generate and Download on purpose.
   # This only updates policy records. It never produces a zip.
   def apply_data_changes
-    authorize! :manage, :trading_partner_transforms
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
     unless @transform_request.valid?(:apply_changes)
-      flash[:error] = flash_error_list(@transform_request.errors.full_messages)
-      redirect_to new_trading_partner_transform_path(:eg_ids => @transform_request.eg_ids)
+      @transform_request.errors.full_messages.each { |message| flash_message_now(:error, message) }
+      render :new
       return
     end
 
@@ -115,19 +112,8 @@ class TradingPartnerTransformsController < ApplicationController
 
   private
 
-  # Behaves like the route does not exist when the feature flag is off.
   def ensure_feature_enabled
-    raise ActionController::RoutingError, "Not Found" unless TradingPartnerTransforms.enabled?
-  end
-
-  # Builds one titled, bulleted error message for the shared layout flash
-  # partial to render inside its existing danger alert box. This is the
-  # only place errors for this controller get formatted, so the page
-  # never shows the same error twice in two different styles.
-  def flash_error_list(messages)
-    return if messages.empty?
-    items = messages.map { |message| "<li>#{ERB::Util.html_escape(message)}</li>" }.join
-    %(<p class="tpt-errors-title">Errors</p><ul class="tpt-errors-list">#{items}</ul>).html_safe
+    raise CanCan::AccessDenied unless Settings.trading_partner_transforms.enabled
   end
 
   # Ticket number wins when given, matching the naming used everywhere

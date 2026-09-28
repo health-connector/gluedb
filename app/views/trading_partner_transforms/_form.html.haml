@@ -1,0 +1,102 @@
+= form_for @transform_request, :as => :trading_partner_transform_request, :url => trading_partner_transforms_path, :html => {:autocomplete => "off", :multipart => true, :id => "trading_partner_transforms_form"} do |f|
+  .panel.panel-default
+    .panel-heading
+      %h3.panel-title 1. Policies
+    .panel-body
+      = alert_box context: :warning, dismissible: false do
+        %strong Multiple eg_ids:
+        All eg_ids in one request are processed as a single batch. For Terminate, the one end date you enter is applied to every policy. For Cancel, every policy must share the same policy start date, since Cancel sets each end date automatically. If your policies would not end up with the same result, apply the change to them separately.
+      .row
+        .col-md-6
+          .form-group
+            = f.label :eg_ids, "Policy eg_ids (comma separated)"
+            = f.text_field :eg_ids, :class => "form-control", :placeholder => "814228, 814229"
+
+  .panel.panel-default
+    .panel-heading
+      %h3.panel-title 2. Data Preparation
+    .panel-body
+      = alert_box context: :warning, dismissible: false do
+        %strong Note:
+        Remove End Date, Terminate or Cancel with End Date, and Remove COBRA Eligibility Date all update policy records in the database before any transform is generated. A confirmation screen shows the exact changes before anything is applied.
+      .row
+        .col-md-4
+          .form-group
+            = f.label :end_date_action, "Data Preparation Action"
+            = f.select :end_date_action, [["None - no data changes needed", "none"], ["Remove End Date", "remove"], ["Terminate or Cancel with End Date", "change"], ["Remove COBRA Eligibility Date", "remove_cobra"]], {}, :class => "form-control"
+
+      %p#prep-desc-none.prep-action-desc
+        No data changes needed. Proceed directly to Transform Generation.
+      %p#prep-desc-remove.prep-action-desc
+        Clears enrollee end dates and reactivates coverage. Run before an initial or reinstate transform.
+      %p#prep-desc-change.prep-action-desc
+        Sets an end date on every enrollee. The policy becomes canceled when the end date equals the policy start date and terminated otherwise.
+      %p#prep-desc-remove_cobra.prep-action-desc
+        Clears the cobra eligibility date stored on the policy. There is no rake task for this.
+
+      #remove-fields.row
+        .col-md-3
+          .form-group
+            = f.label :aasm_state, "Restore Policy State To"
+            = f.select :aasm_state, TradingPartnerTransformRequest::REMOVE_AASM_STATES, {}, :class => "form-control"
+        .col-md-3
+          .form-group
+            = f.label :benefit_status, "Benefit Status"
+            = f.select :benefit_status, TradingPartnerTransformRequest::BENEFIT_STATUSES, {}, :class => "form-control"
+
+      #change-mode-fields
+        .radio
+          %label
+            = f.radio_button :change_mode, "terminate"
+            %strong Terminate
+            = " - enter the end date below"
+        .radio
+          %label
+            = f.radio_button :change_mode, "cancel"
+            %strong Cancel
+            = " - end date is set automatically to the policy start date"
+        #terminate-end-date.row
+          .col-md-3
+            .form-group
+              = f.label :end_date, "End Date"
+              .input-group
+                %span.input-group-btn
+                  %button.btn{:type => "button"}
+                    %span.fui-calendar
+                = f.text_field :end_date, :class => "form-control date_picker", :placeholder => "MM/DD/YYYY"
+          .col-md-9
+            %p
+              Must be after the policy start date and no more than one year after it. Use Cancel if the end date should equal the start date.
+
+      = f.submit "Apply Data Changes", :formaction => apply_data_changes_trading_partner_transforms_path, :class => "btn btn-info", :id => "apply-btn"
+
+  .panel.panel-default
+    .panel-heading
+      %h3.panel-title 3. Transform Generation
+    .panel-body
+      .row
+        .col-md-3
+          .form-group
+            = f.label :ticket_number, "Ticket Number (optional)"
+            = f.text_field :ticket_number, :class => "form-control", :placeholder => "CCAOM-297"
+        .col-md-3
+          .form-group
+            = f.label :reason_code, "Reason Code"
+            = f.select :reason_code, TradingPartnerTransformRequest.reason_code_options, {}, :class => "form-control"
+      %p
+        Generate & Download produces source XML, X12 and CV1. Generate Source XML Only produces just the source XML, useful when it needs review before the X12 and CV1 transform is created.
+      = f.submit "Generate & Download", :class => "btn btn-primary", :id => "generate-btn"
+      = f.submit "Generate Source XML Only", :formaction => generate_source_only_trading_partner_transforms_path, :class => "btn btn-info", :id => "generate-source-btn"
+
+  .panel.panel-default
+    .panel-heading
+      %h3.panel-title 4. Transform Uploaded Source XML
+    .panel-body
+      %p
+        Upload one or more source XML files, such as the ones Generate Source XML Only produces, to create their X12 and CV1 transform. This does not look up or change any policy. Only .xml files are accepted.
+      .row
+        .col-md-6
+          .form-group
+            = label_tag :source_xml_files, "Source XML Files (.xml, choose multiple)"
+            = file_field_tag "source_xml_files[]", :multiple => true, :accept => ".xml", :class => "file form-control", :id => "source_xml_files"
+      = f.submit "Transform Uploaded XML", :formaction => transform_uploaded_xmls_trading_partner_transforms_path, :class => "btn btn-info", :id => "transform-upload-btn", :disabled => true

@@ -1,44 +1,13 @@
 require 'rails_helper'
 
 describe TradingPartnerTransformsController, :dbclean => :after_each do
-  login_user
+  include TradingPartnerTransformsSpecHelpers
 
-  around(:each) do |example|
-    original = ENV['TRADING_PARTNER_TRANSFORMS_ENABLED']
-    ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = 'true'
-    begin
-      example.run
-    ensure
-      ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = original
-    end
-  end
+  login_user
 
   let(:carrier) { FactoryGirl.create(:carrier, :hbx_carrier_id => "20002", :abbrev => "BCBS") }
   let(:plan) { FactoryGirl.create(:plan, :carrier => carrier, :year => 2026, :coverage_type => "health") }
   let(:policy) { FactoryGirl.create(:shop_policy, :plan => plan, :composite_rating_tier => "urn:openhbx:terms:v1:composite_rating_tier#employee_only").tap { |p| bridge_person_for(p) } }
-
-  # The enrollment_event partial looks up a real Person per enrollee by
-  # m_id. FactoryGirl's :policy does not create one, so every policy used
-  # to render a real CV needs this bridge, matching the existing pattern
-  # in spec/data_migrations/transform_xmls_spec.rb.
-  def bridge_person_for(policy)
-    # A shop policy needs distinct relationship codes, the cv1 schema
-    # rejects two members both marked self.
-    policy.enrollees.each_with_index do |en, index|
-      en.update_attributes!(:rel_code => "spouse") if index > 0 && en.rel_code == "self"
-    end
-    policy.enrollees.each do |en|
-      person = FactoryGirl.create(:person)
-      # :person's default members can coincidentally share an
-      # hbx_member_id with this enrollee, since both sequences start
-      # at 1. Clear them so authority_member unambiguously resolves
-      # to the one member that actually matches this enrollee.
-      person.members.destroy_all
-      person.members.create!(:hbx_member_id => en.m_id, :gender => "female", :dob => Date.new(1980, 1, 1), :ssn => "123456789")
-      person.update_attributes!(:authority_member_id => en.m_id)
-    end
-    policy.reload
-  end
 
   def zip_entries(body)
     tmp = Tempfile.new("controller_spec_zip")
@@ -115,8 +84,8 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
     describe "with blank eg_ids" do
       before { post :create, :trading_partner_transform_request => { :eg_ids => "", :reason_code => "initial" } }
 
-      it "redirects back to new with an error and produces no zip" do
-        expect(response).to be_redirect
+      it "renders new with an error and produces no zip" do
+        expect(response).to render_template :new
         expect(flash[:error]).to be_present
         expect(response.headers["Content-Disposition"]).to be_nil
       end
@@ -125,16 +94,16 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
     describe "with eg_ids that do not resolve to any policy" do
       before { post :create, :trading_partner_transform_request => { :eg_ids => "bogus_eg_id", :reason_code => "initial" } }
 
-      it "redirects with a message naming the missing eg_id" do
-        expect(flash[:error]).to include("bogus_eg_id")
+      it "renders new with a message naming the missing eg_id" do
+        expect(flash[:error].join).to include("bogus_eg_id")
       end
     end
 
     describe "with an invalid reason code" do
       before { post :create, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :reason_code => "bogus_reason" } }
 
-      it "redirects with a message about the reason code" do
-        expect(flash[:error]).to include("reason code")
+      it "renders new with a message about the reason code" do
+        expect(flash[:error].join).to include("reason code")
       end
     end
   end
@@ -156,8 +125,8 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
     describe "with invalid params" do
       before { post :generate_source_only, :trading_partner_transform_request => { :eg_ids => "", :reason_code => "initial" } }
 
-      it "redirects with an error" do
-        expect(response).to be_redirect
+      it "renders new with an error" do
+        expect(response).to render_template :new
         expect(flash[:error]).to be_present
       end
     end
@@ -214,9 +183,9 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
     describe "with no files chosen" do
       before { post :transform_uploaded_xmls }
 
-      it "redirects with an error asking for a file" do
-        expect(response).to be_redirect
-        expect(flash[:error]).to include("Choose one or more")
+      it "renders new with an error asking for a file" do
+        expect(response).to render_template :new
+        expect(flash[:error].join).to include("Choose one or more")
       end
     end
 
@@ -225,9 +194,9 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
         post :transform_uploaded_xmls, :source_xml_files => [uploaded_file("dep_add_source.xml", real_xml), uploaded_file("notes.txt", "hello", "text/plain")]
       end
 
-      it "redirects with an error naming the rejected file" do
-        expect(response).to be_redirect
-        expect(flash[:error]).to include("notes.txt")
+      it "renders new with an error naming the rejected file" do
+        expect(response).to render_template :new
+        expect(flash[:error].join).to include("notes.txt")
       end
     end
   end
@@ -315,9 +284,9 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
         post :apply_data_changes, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :end_date_action => "remove", :aasm_state => "bogus_state" }
       end
 
-      it "redirects with an error and does not touch the policy" do
+      it "renders new with an error and does not touch the policy" do
         original_state = policy.aasm_state
-        expect(response).to be_redirect
+        expect(response).to render_template :new
         expect(flash[:error]).to be_present
         expect(policy.reload.aasm_state).to eq original_state
       end
@@ -326,42 +295,43 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
     describe "with none selected" do
       before { post :apply_data_changes, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :end_date_action => "none" } }
 
-      it "redirects with an error asking for an action" do
-        expect(flash[:error]).to include("selected")
+      it "renders new with an error asking for an action" do
+        expect(flash[:error].join).to include("selected")
       end
     end
   end
 
   describe "with the feature flag off" do
     before(:each) do
-      ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = 'false'
+      allow(Settings.trading_partner_transforms).to receive(:enabled).and_return(false)
+      bypass_rescue
     end
 
-    it "responds as not found for new" do
-      expect { get :new }.to raise_error(ActionController::RoutingError)
+    it "denies access to new" do
+      expect { get :new }.to raise_error(CanCan::AccessDenied)
     end
 
-    it "responds as not found for create" do
+    it "denies access to create" do
       expect do
         post :create, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :reason_code => "initial" }
-      end.to raise_error(ActionController::RoutingError)
+      end.to raise_error(CanCan::AccessDenied)
     end
 
-    it "responds as not found for generate_source_only" do
+    it "denies access to generate_source_only" do
       expect do
         post :generate_source_only, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :reason_code => "initial" }
-      end.to raise_error(ActionController::RoutingError)
+      end.to raise_error(CanCan::AccessDenied)
     end
 
-    it "responds as not found for transform_uploaded_xmls" do
-      expect { post :transform_uploaded_xmls }.to raise_error(ActionController::RoutingError)
+    it "denies access to transform_uploaded_xmls" do
+      expect { post :transform_uploaded_xmls }.to raise_error(CanCan::AccessDenied)
     end
 
-    it "responds as not found for apply_data_changes without changing the policy" do
+    it "denies access to apply_data_changes without changing the policy" do
       policy.update_attributes!(:cobra_eligibility_date => Date.new(2026, 1, 1))
       expect do
         post :apply_data_changes, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :end_date_action => "remove_cobra" }, :confirmed => "true"
-      end.to raise_error(ActionController::RoutingError)
+      end.to raise_error(CanCan::AccessDenied)
       expect(policy.reload.cobra_eligibility_date).to eq Date.new(2026, 1, 1)
     end
   end

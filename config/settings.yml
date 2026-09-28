@@ -17,3 +17,6 @@ abbrev: "mhc"
 
 aca:
   enrollment_policy_report_name: "CCA_PRODUCTION_ENROLLMENT"
+
+trading_partner_transforms:
+  enabled: true

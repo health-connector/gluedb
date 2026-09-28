@@ -3,6 +3,16 @@ require 'rails_helper'
 describe TradingPartnerTransformsController, :dbclean => :after_each do
   login_user
 
+  around(:each) do |example|
+    original = ENV['TRADING_PARTNER_TRANSFORMS_ENABLED']
+    ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = 'true'
+    begin
+      example.run
+    ensure
+      ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = original
+    end
+  end
+
   let(:carrier) { FactoryGirl.create(:carrier, :hbx_carrier_id => "20002", :abbrev => "BCBS") }
   let(:plan) { FactoryGirl.create(:plan, :carrier => carrier, :year => 2026, :coverage_type => "health") }
   let(:policy) { FactoryGirl.create(:shop_policy, :plan => plan, :composite_rating_tier => "urn:openhbx:terms:v1:composite_rating_tier#employee_only").tap { |p| bridge_person_for(p) } }
@@ -319,6 +329,40 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
       it "redirects with an error asking for an action" do
         expect(flash[:error]).to include("selected")
       end
+    end
+  end
+
+  describe "with the feature flag off" do
+    before(:each) do
+      ENV['TRADING_PARTNER_TRANSFORMS_ENABLED'] = 'false'
+    end
+
+    it "responds as not found for new" do
+      expect { get :new }.to raise_error(ActionController::RoutingError)
+    end
+
+    it "responds as not found for create" do
+      expect do
+        post :create, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :reason_code => "initial" }
+      end.to raise_error(ActionController::RoutingError)
+    end
+
+    it "responds as not found for generate_source_only" do
+      expect do
+        post :generate_source_only, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :reason_code => "initial" }
+      end.to raise_error(ActionController::RoutingError)
+    end
+
+    it "responds as not found for transform_uploaded_xmls" do
+      expect { post :transform_uploaded_xmls }.to raise_error(ActionController::RoutingError)
+    end
+
+    it "responds as not found for apply_data_changes without changing the policy" do
+      policy.update_attributes!(:cobra_eligibility_date => Date.new(2026, 1, 1))
+      expect do
+        post :apply_data_changes, :trading_partner_transform_request => { :eg_ids => policy.eg_id, :end_date_action => "remove_cobra" }, :confirmed => "true"
+      end.to raise_error(ActionController::RoutingError)
+      expect(policy.reload.cobra_eligibility_date).to eq Date.new(2026, 1, 1)
     end
   end
 

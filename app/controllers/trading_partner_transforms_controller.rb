@@ -1,4 +1,5 @@
 class TradingPartnerTransformsController < ApplicationController
+  before_filter :ensure_feature_enabled
 
   # eg_ids can arrive as a query param after a redirect from one of the
   # other actions, so the policies do not need to be typed in twice.
@@ -113,6 +114,11 @@ class TradingPartnerTransformsController < ApplicationController
   end
 
   private
+
+  # Behaves like the route does not exist when the feature flag is off.
+  def ensure_feature_enabled
+    raise ActionController::RoutingError, "Not Found" unless TradingPartnerTransforms.enabled?
+  end
 
   # Builds one titled, bulleted error message for the shared layout flash
   # partial to render inside its existing danger alert box. This is the

@@ -1,8 +1,6 @@
 module TradingPartnerTransforms
-  # Turns a batch of already generated enrollment event XML files into
-  # X12 and CV1 payloads, without looking up any policy. Used when source
-  # XML was generated earlier (for example by PackageBuilder in
-  # source_only mode) and is being uploaded to produce the transform.
+  # Transforms uploaded enrollment event XML into X12 and CV1 payloads.
+  # Does not look up policies.
   class UploadedXmlTransformer
     include BatchEdiTransform
 
@@ -18,9 +16,8 @@ module TradingPartnerTransforms
       @errors = []
     end
 
-    # Returns the path of the generated zip. The caller is responsible for
-    # deleting the file when done. The output includes the uploaded
-    # source XML alongside the transform, same layout as PackageBuilder.
+    # Returns the zip path. The caller deletes the file. The zip includes the
+    # uploaded source XML in the same layout as PackageBuilder.
     def build
       source_files = @source_files.map { |name, xml| [File.join(SOURCE_DIR, File.basename(name)), xml] }
       x12_files = transform_source_files(@source_files, EdiCodec::X12::BenefitEnrollment, X12_DIR, @errors)

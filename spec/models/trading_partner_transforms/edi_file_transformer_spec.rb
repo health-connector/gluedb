@@ -3,12 +3,9 @@ require 'rails_helper'
 describe TradingPartnerTransforms::EdiFileTransformer, :dbclean => :after_each do
   include TradingPartnerTransformsSpecHelpers
 
-  # hbx_carrier_id 20002 (BCBS) is one of the issuers the edi_codec gem
-  # recognizes. Any other id fails the transform, see the negative
-  # examples below.
-  # The edi_codec gem revision pinned here only defines shop market
-  # classes for BCBS health (no individual market equivalent), so every
-  # policy in this spec is a shop policy.
+  # edi_codec only recognizes known hbx_carrier_ids (20002 is BCBS) and only
+  # defines shop market classes for BCBS health, so these specs use shop
+  # policies on carrier 20002.
   let(:carrier) { FactoryGirl.create(:carrier, :hbx_carrier_id => "20002", :abbrev => "BCBS") }
   let(:plan) { FactoryGirl.create(:plan, :carrier => carrier, :year => 2026, :coverage_type => "health") }
   let(:policy) { FactoryGirl.create(:shop_policy, :plan => plan, :composite_rating_tier => "urn:openhbx:terms:v1:composite_rating_tier#employee_only").tap { |p| bridge_person_for(p) } }

@@ -1,9 +1,6 @@
 module TradingPartnerTransforms
-  # Applies the selected data preparation action to each policy in the
-  # request before transforms are generated. The remove and change actions
-  # mirror the migrations rake tasks remove_policy_end_date and
-  # change_policy_end_date. The rake task files are left untouched on purpose.
-  # Every applied change is logged with the acting user and ticket number.
+  # Applies the selected data preparation action to each policy and logs
+  # each change with the user and ticket number.
   class EndDateApplier
 
     def initialize(transform_request, user_email)
@@ -33,9 +30,8 @@ module TradingPartnerTransforms
       end
     end
 
-    # Same behavior as the migrations change_policy_end_date rake task.
-    # The policy is canceled when the end date equals the policy start
-    # and terminated otherwise.
+    # Ends coverage for every enrollee. The policy is canceled when the end
+    # date equals the policy start, terminated otherwise.
     def change_end_date(policy, end_date)
       policy.enrollees.each do |enrollee|
         enrollee.emp_stat = "terminated"
@@ -47,7 +43,7 @@ module TradingPartnerTransforms
       policy.save!
     end
 
-    # Same behavior as the migrations remove_policy_end_date rake task.
+    # Clears enrollee end dates and restores the given policy state and benefit status.
     def remove_end_date(policy, aasm_state, benefit_status)
       policy.enrollees.each do |enrollee|
         enrollee.ben_stat = benefit_status
@@ -60,8 +56,6 @@ module TradingPartnerTransforms
       policy.save!
     end
 
-    # There is no rake task for this fix. Ops normally unsets the cobra
-    # eligibility date in a console session.
     def remove_cobra_date(policy)
       policy.unset(:cobra_eligibility_date)
     end

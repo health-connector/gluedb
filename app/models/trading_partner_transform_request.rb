@@ -13,17 +13,15 @@ class TradingPartnerTransformRequest
     "terminate_enrollment"
   ].freeze
 
-  # Cancel is offered in the UI for cancel tickets. The pipeline has no
-  # cancel reason so it is sent as terminate_enrollment. The zip keeps the
-  # cancel name so the deliverable matches the ticket.
+  # The pipeline has no cancel reason, so cancel is sent as
+  # terminate_enrollment (see transform_reason_code).
   SELECTABLE_REASON_CODES = (REASON_CODES + ["cancel"]).freeze
 
   END_DATE_ACTIONS = ["none", "remove", "change", "remove_cobra"].freeze
   REMOVE_AASM_STATES = ["submitted", "resubmitted", "effectuated"].freeze
   BENEFIT_STATUSES = ["active", "cobra"].freeze
 
-  # Terminate needs a date typed in by the user. Cancel sets the date
-  # automatically, so a policy is never left with the wrong end date.
+  # Terminate uses the entered end date. Cancel uses the policy start date.
   CHANGE_MODES = ["terminate", "cancel"].freeze
   END_DATE_FORMAT = "%m/%d/%Y".freeze
 
@@ -32,17 +30,15 @@ class TradingPartnerTransformRequest
   attr_accessor :ticket_number, :eg_ids, :reason_code
   attr_accessor :end_date_action, :end_date, :change_mode, :aasm_state, :benefit_status
 
-  # Eg_ids and the policy lookups apply no matter which button was used to
-  # submit the form. Ticket number is optional, it is only used to name the
-  # downloaded zip and to label log entries.
+  # Required by every action. Ticket number is optional.
   validates_presence_of :eg_ids
   validate :policies_must_exist
   validate :policy_count_within_limit
 
-  # Generate and Download is its own action. It only needs a reason code.
+  # Required by the generate actions.
   validates_inclusion_of :reason_code, :in => SELECTABLE_REASON_CODES, :message => "is not a valid reason code", :on => :generate
 
-  # Apply Data Changes is its own action. It does not touch the reason code.
+  # Required by Apply Data Changes.
   validates_inclusion_of :end_date_action, :in => END_DATE_ACTIONS, :message => "is not a valid data preparation action", :on => :apply_changes
   validate :action_required_for_apply, :on => :apply_changes
   validate :end_date_action_params, :on => :apply_changes
@@ -76,13 +72,13 @@ class TradingPartnerTransformRequest
     reason_code == "cancel" ? "terminate_enrollment" : reason_code
   end
 
-  # The zip keeps the selected reason so cancel tickets download as cancel.
-  # The ticket prefix is skipped when no ticket number was entered.
+  # Zip name uses the selected reason, so cancel stays cancel, prefixed
+  # with the ticket number when given.
   def zip_file_name
     "#{zip_prefix}#{reason_code}_transform_xmls.zip"
   end
 
-  # Same naming as zip_file_name, but for the source XML only download.
+  # Zip name for the source XML only download.
   def source_zip_file_name
     "#{zip_prefix}#{reason_code}_source_xml.zip"
   end
@@ -95,8 +91,7 @@ class TradingPartnerTransformRequest
     end_date_action != "none"
   end
 
-  # Date.parse reads 3/1/2026 as January 3rd. The date is parsed
-  # explicitly as MM/DD/YYYY so March 1st always means March 1st.
+  # Parsed strictly as MM/DD/YYYY. Date.parse would read 3/1/2026 as January 3.
   def parsed_end_date
     return nil if @end_date.blank?
     @parsed_end_date ||= begin
@@ -106,20 +101,15 @@ class TradingPartnerTransformRequest
     end
   end
 
-  # Terminate uses the date the user typed in. Cancel always uses the
-  # policy start date, which is the coverage start date of the self
-  # relationship enrollee. This guarantees the policy actually lands in
-  # the canceled state instead of terminated.
+  # Terminate uses the entered date. Cancel uses the policy start date, so
+  # the policy becomes canceled rather than terminated.
   def effective_end_date_for(policy)
     change_mode == "cancel" ? policy_start_for(policy) : parsed_end_date
   end
 
-  # Per policy summary of the current state and what the selected action
-  # will change. Shown on the confirmation screen.
+  # Current state and planned changes per policy, for the confirmation screen.
   def policy_previews
     policies.map do |policy|
-      # compute discrete planned values for this policy so the confirm
-      # screen can show explicit columns (state, benefit, end date)
       planned_aasm_state = nil
       planned_benefit_status = nil
       planned_end_date = nil
@@ -135,7 +125,7 @@ class TradingPartnerTransformRequest
         planned_aasm_state = aasm_state
         planned_benefit_status = benefit_status
       end
-      # remove_cobra implies no discrete state or benefit change
+      # remove_cobra does not change state or benefit status
 
       {
         :policy => policy,
@@ -179,9 +169,8 @@ class TradingPartnerTransformRequest
     "enrollee end dates set to #{effective_date.strftime('%m/%d/%Y')} (#{change_mode}), employment status terminated, coverage status inactive, policy state becomes #{new_state}"
   end
 
-  # Policy#policy_start raises instead of returning nil when the policy
-  # has no self relationship enrollee. This wraps it so a data quality
-  # problem on one policy becomes a validation error, not a crash.
+  # Policy#policy_start raises when there is no subscriber. Returns nil
+  # instead so validation can report it.
   def policy_start_for(policy)
     return nil if policy.subscriber.nil?
     policy.policy_start
@@ -240,10 +229,8 @@ class TradingPartnerTransformRequest
     same_end_date_across_policies
   end
 
-  # The typed in end date must fall after the policy started, and no
-  # more than one year after. An end date equal to the start date is a
-  # cancel, not a terminate, so it is rejected here on purpose. Checked
-  # per policy since a batch can mix policies with different start dates.
+  # The terminate end date must be after the policy start and within one
+  # year of it. An end date equal to the start is a cancel, not a terminate.
   def terminate_end_date_range
     policies.each do |policy|
       start_date = policy_start_for(policy)
@@ -260,12 +247,8 @@ class TradingPartnerTransformRequest
     end
   end
 
-  # One transform batch produces one set of source XML for the given
-  # reason code. Every eg_id in the batch must end up with the same end
-  # date, so a mixed batch is rejected before anything is applied. For
-  # terminate this always passes, since one typed in date is shared by
-  # every policy. For cancel this catches policies with different
-  # policy start dates.
+  # Every policy in the batch must resolve to the same end date. Only
+  # cancel can differ, when the policies have different start dates.
   def same_end_date_across_policies
     return if policies.size <= 1
     dates = policies.map { |policy| effective_end_date_for(policy) }.uniq

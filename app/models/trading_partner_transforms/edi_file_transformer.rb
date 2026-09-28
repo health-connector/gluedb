@@ -1,8 +1,6 @@
 module TradingPartnerTransforms
-  # Transforms an enrollment event CV into a trading partner payload using
-  # the given EdiCodec builder (EdiCodec::X12::BenefitEnrollment or
-  # EdiCodec::Cv1::Cv1Builder). File naming matches the legacy
-  # script/transform_edi_files.rb output.
+  # Transforms an enrollment event CV into an X12 or CV1 payload using the
+  # given EdiCodec builder.
   class EdiFileTransformer
     include Handlers::EnrollmentEventXmlHelper
 

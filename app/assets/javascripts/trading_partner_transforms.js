@@ -13,7 +13,7 @@ $(document).ready(function() {
     var action = actionSelect.val();
     var showEndDate = (action == "change") && (changeModeRadios.filter(":checked").val() == "terminate");
 
-    // Show only the description that matches the selected action
+    // Show only the description for the selected action
     $(".prep-action-desc").hide();
     $("#prep-desc-" + action).show();
 
@@ -53,7 +53,7 @@ $(document).ready(function() {
   reasonCodeSelect.on("change", syncGenerateSection);
   fileInput.on("change", syncUploadSection);
 
-  // Downloads do not reload the page, so clear the form once the download has started
+  // Downloads do not reload the page, so reset the form after the download starts
   $("#generate-btn, #generate-source-btn, #transform-upload-btn").on("click", function() {
     setTimeout(resetFormState, 2000);
   });

@@ -1,7 +1,5 @@
 module TradingPartnerTransforms
-  # Renders the enrollment event CV ("source xml") for a policy.
-  # Extracted from the migrations:transform_xmls rake task (GenerateTransforms)
-  # so it can run per-policy without ENV vars or app-root file writes.
+  # Renders the enrollment event CV (source XML) for a policy.
   class SourceXmlGenerator
 
     def initialize(policy, reason_code)

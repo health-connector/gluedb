@@ -2,13 +2,12 @@ class TradingPartnerTransformsController < ApplicationController
   before_filter :ensure_feature_enabled
   load_and_authorize_resource :class => "VocabUpload"
 
-  # eg_ids can arrive as a query param after a redirect from one of the
-  # other actions, so the policies do not need to be typed in twice.
+  # eg_ids can be passed in the query string to pre-fill the form.
   def new
     @transform_request = TradingPartnerTransformRequest.new(:eg_ids => params[:eg_ids])
   end
 
-  # Generate and Download. Does not change any policy data.
+  # Downloads source XML, X12 and CV1 for the policies. Does not change policy data.
   def create
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
@@ -31,9 +30,7 @@ class TradingPartnerTransformsController < ApplicationController
     end
   end
 
-  # Generate Source XML Only. Same inputs as Generate and Download, but
-  # skips the X12 and CV1 step. Useful when the source XML needs review
-  # before the transform is produced.
+  # Downloads the source XML only, without the X12 and CV1 step.
   def generate_source_only
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
@@ -57,10 +54,8 @@ class TradingPartnerTransformsController < ApplicationController
     end
   end
 
-  # Transform Uploaded Source XML. Takes one or more enrollment event XML
-  # files, produced earlier by Generate Source XML Only or by hand, and
-  # runs the X12 and CV1 step on them directly. Does not look up any
-  # policy. Only .xml files are accepted, nothing else.
+  # Builds X12 and CV1 from uploaded source XML files. Accepts only .xml
+  # files and does not look up policies.
   def transform_uploaded_xmls
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
     uploads = Array(params[:source_xml_files]).reject(&:blank?)
@@ -89,8 +84,7 @@ class TradingPartnerTransformsController < ApplicationController
     end
   end
 
-  # Apply Data Changes. Separate from Generate and Download on purpose.
-  # This only updates policy records. It never produces a zip.
+  # Updates policy data once the user confirms the preview. Does not produce a zip.
   def apply_data_changes
     @transform_request = TradingPartnerTransformRequest.new(params[:trading_partner_transform_request])
 
@@ -116,11 +110,8 @@ class TradingPartnerTransformsController < ApplicationController
     raise CanCan::AccessDenied unless Settings.trading_partner_transforms.enabled
   end
 
-  # Ticket number wins when given, matching the naming used everywhere
-  # else in this tool. With no ticket and exactly one file uploaded, the
-  # zip is named after that file, for example dep_add_source.xml
-  # becomes dep_add_source_transform_xmls.zip. With no ticket and more
-  # than one file, fall back to a generic name.
+  # Zip name: the ticket number when given, otherwise the uploaded file's
+  # name when there is one file, otherwise a generic name.
   def uploaded_transform_zip_file_name(uploads)
     ticket_params = params[:trading_partner_transform_request] || {}
     ticket = ticket_params[:ticket_number].to_s.strip

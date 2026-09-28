@@ -1,9 +1,8 @@
 require 'zip'
 
 module TradingPartnerTransforms
-  # Writes a set of in memory files to a temp zip and returns its path.
-  # Adds errors.txt when any errors are passed in. The caller is
-  # responsible for deleting the returned file when done.
+  # Writes in-memory files to a temp zip, adding errors.txt when there are
+  # errors, and returns its path. The caller deletes the file.
   class ZipPackager
     def self.build(file_pairs, errors = [])
       z_file = Tempfile.new("trading_partner_transforms")

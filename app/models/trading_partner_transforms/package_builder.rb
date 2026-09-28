@@ -4,8 +4,7 @@ module TradingPartnerTransforms
   #   transformed_x12s/  - X12 834 payloads
   #   transformed_cv1s/  - CV1 payloads
   #   errors.txt         - per-policy failures (only when any occurred)
-  # Zip layout and file naming match the legacy x12_cv1.sh deliverable.
-  # Pass source_only true to skip the X12/CV1 step and zip source XML only.
+  # With source_only, only the source XML is included.
   class PackageBuilder
     include BatchEdiTransform
 
@@ -22,8 +21,7 @@ module TradingPartnerTransforms
       @errors = []
     end
 
-    # Returns the path of the generated zip. The caller is responsible for
-    # deleting the file when done (see EmployerEventsController#download).
+    # Returns the zip path. The caller deletes the file.
     def build
       allocate_caches
       begin
@@ -52,7 +50,7 @@ module TradingPartnerTransforms
       end
     end
 
-    # Same cache setup as the migrations:transform_xmls rake task.
+    # Carrier and plan caches used when rendering CVs.
     def allocate_caches
       carrier_id_map = {}
       Carrier.all.each do |c|

@@ -113,9 +113,7 @@ class TradingPartnerTransformsController < ApplicationController
   # Zip name: the ticket number when given, otherwise the uploaded file's
   # name when there is one file, otherwise a generic name.
   def uploaded_transform_zip_file_name(uploads)
-    ticket_params = params[:trading_partner_transform_request] || {}
-    ticket = ticket_params[:ticket_number].to_s.strip
-    return "#{ticket.gsub(/[^0-9A-Za-z_\-]/, '_')}_transform_xmls.zip" if ticket.present?
+    return "#{@transform_request.zip_prefix}transform_xmls.zip" if @transform_request.ticket_number.present?
 
     if uploads.size == 1
       base = File.basename(uploads.first.original_filename.to_s, ".*")

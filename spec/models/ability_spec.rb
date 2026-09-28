@@ -17,6 +17,7 @@ describe "User" do
 
       it{ should be_able_to(:manage, :all) }
       it{ should_not be_able_to(:modify, User)}
+      it{ should be_able_to(:manage, :trading_partner_transforms)}
     end
 
     context "when is a user user" do
@@ -26,6 +27,7 @@ describe "User" do
       it{ should be_able_to(:premium_calc, :all)}
       it{ should be_able_to(:manage, Carrier)}
       it{ should should_not be_able_to(:manage, :all)}
+      it{ should_not be_able_to(:manage, :trading_partner_transforms)}
     end
 
     context "when is a service user" do

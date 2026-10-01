@@ -365,8 +365,8 @@ describe EmployerEvents::Renderer, "given an plan year cancelation xml, with an 
 
   describe "with plan years for the specified carrier, with plan year start date == end date" do
     let(:hbx_carrier_id) { "SOME CARRIER ID" }
-    let(:plan_year_start) { Date.today.beginning_of_month }
-    let(:plan_year_end) { Date.today.beginning_of_month }
+    let(:plan_year_start) { Date.today.prev_month.beginning_of_month }
+    let(:plan_year_end) { Date.today.prev_month.beginning_of_month }
 
     it "should return true for carrier drop event with canceled plan year" do
       expect(subject.should_send_retroactive_term_or_cancel?(carrier)).to be_truthy

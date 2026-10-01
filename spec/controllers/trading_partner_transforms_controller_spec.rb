@@ -233,6 +233,25 @@ describe TradingPartnerTransformsController, :dbclean => :after_each do
       end
     end
 
+    describe "confirmed, when a policy fails to save" do
+      before do
+        policy.update_attributes!(:cobra_eligibility_date => Date.new(2026, 1, 1))
+        allow_any_instance_of(Policy).to receive(:save!).and_raise(StandardError, "save failed")
+        post :apply_data_changes, :confirmed => "true", :trading_partner_transform_request => { :eg_ids => policy.eg_id, :end_date_action => "remove_cobra" }
+      end
+
+      it "redirects with an error naming the failed eg_id and no success message" do
+        expect(response).to redirect_to new_trading_partner_transform_path(:eg_ids => policy.eg_id)
+        expect(flash[:error].join).to include(policy.eg_id)
+        expect(flash[:error].join).to include("save failed")
+        expect(flash[:success]).to be_nil
+      end
+
+      it "leaves the policy unchanged" do
+        expect(policy.reload.cobra_eligibility_date).to eq Date.new(2026, 1, 1)
+      end
+    end
+
     describe "confirmed, change / terminate" do
       let(:end_date) { policy.policy_start + 2.months }
 

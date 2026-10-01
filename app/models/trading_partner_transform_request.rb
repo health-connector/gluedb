@@ -229,8 +229,9 @@ class TradingPartnerTransformRequest
     same_end_date_across_policies
   end
 
-  # The terminate end date must be after the policy start and within one
-  # year of it. An end date equal to the start is a cancel, not a terminate.
+  # The terminate end date must be after the policy start and no later than
+  # the last day of its first year (start + 1 year - 1 day). An end date
+  # equal to the start is a cancel, not a terminate.
   def terminate_end_date_range
     policies.each do |policy|
       start_date = policy_start_for(policy)
@@ -239,10 +240,11 @@ class TradingPartnerTransformRequest
         next
       end
 
+      last_end_date = start_date + 1.year - 1.day
       if parsed_end_date <= start_date
         errors.add(:end_date, "must be after the policy start date (#{start_date.strftime('%m/%d/%Y')}) for policy #{policy.eg_id}. Use Cancel if the end date should equal the start date")
-      elsif parsed_end_date > start_date + 1.year
-        errors.add(:end_date, "must be within one year of the policy start date (#{start_date.strftime('%m/%d/%Y')}) for policy #{policy.eg_id}")
+      elsif parsed_end_date > last_end_date
+        errors.add(:end_date, "must be within one year of the policy start date, on or before #{last_end_date.strftime('%m/%d/%Y')}, for policy #{policy.eg_id}")
       end
     end
   end

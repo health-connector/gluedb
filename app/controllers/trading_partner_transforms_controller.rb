@@ -99,8 +99,12 @@ class TradingPartnerTransformsController < ApplicationController
       return
     end
 
-    TradingPartnerTransforms::EndDateApplier.new(@transform_request, current_user.email).apply!
-    flash_message(:success, "Data changes applied for eg_ids: #{@transform_request.eg_id_list.join(', ')}")
+    applier = TradingPartnerTransforms::EndDateApplier.new(@transform_request, current_user.email)
+    applier.apply!
+    flash_message(:success, "Data changes applied for eg_ids: #{applier.applied_eg_ids.join(', ')}") if applier.applied_eg_ids.any?
+    applier.failures.each do |eg_id, message|
+      flash_message(:error, "Data changes failed for eg_id #{eg_id}, it was not changed: #{message}")
+    end
     redirect_to new_trading_partner_transform_path(:eg_ids => @transform_request.eg_ids)
   end
 

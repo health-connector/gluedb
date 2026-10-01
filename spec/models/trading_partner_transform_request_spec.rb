@@ -412,15 +412,16 @@ describe TradingPartnerTransformRequest, :dbclean => :after_each do
         expect(subject.valid?(:apply_changes)).to be_truthy
       end
 
-      it "accepts an end date exactly one year after the policy start date" do
-        subject = described_class.new(:eg_ids => policy.eg_id, :end_date_action => "change", :change_mode => "terminate", :end_date => (policy.policy_start + 1.year).strftime('%m/%d/%Y'))
+      it "accepts the last day of the first year, one day before the one year anniversary" do
+        subject = described_class.new(:eg_ids => policy.eg_id, :end_date_action => "change", :change_mode => "terminate", :end_date => (policy.policy_start + 1.year - 1.day).strftime('%m/%d/%Y'))
         expect(subject.valid?(:apply_changes)).to be_truthy
       end
 
-      it "rejects an end date more than one year after the policy start date" do
-        subject = described_class.new(:eg_ids => policy.eg_id, :end_date_action => "change", :change_mode => "terminate", :end_date => (policy.policy_start + 1.year + 1.day).strftime('%m/%d/%Y'))
+      it "rejects an end date on the one year anniversary" do
+        last_end_date = policy.policy_start + 1.year - 1.day
+        subject = described_class.new(:eg_ids => policy.eg_id, :end_date_action => "change", :change_mode => "terminate", :end_date => (policy.policy_start + 1.year).strftime('%m/%d/%Y'))
         expect(subject.valid?(:apply_changes)).to be_falsey
-        expect(subject.errors[:end_date].first).to include("within one year")
+        expect(subject.errors[:end_date].first).to include("on or before #{last_end_date.strftime('%m/%d/%Y')}")
       end
 
       it "explains itself instead of crashing when the policy has no self relationship enrollee" do

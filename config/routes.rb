@@ -66,6 +66,13 @@ Gluedb::Application.routes.draw do
   resources :effective_date_changes, :only => [:new, :create]
   resources :mass_silent_cancels, :only => [:new, :create]
   resources :bulk_terminates, :only => [:new, :create]
+  resources :trading_partner_transforms, :only => [:new, :create] do
+    collection do
+      post :apply_data_changes
+      post :generate_source_only
+      post :transform_uploaded_xmls
+    end
+  end
 
   resources :enrollment_transmission_updates, :only => :create
 

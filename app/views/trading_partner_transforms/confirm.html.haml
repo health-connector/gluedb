@@ -1,0 +1,63 @@
+.page-header
+  %h4
+    Confirm Data Changes
+= alert_box context: :warning, dismissible: false do
+  %strong Warning:
+  These policies will be updated in the database. Review carefully.
+%dl.dl-horizontal
+  %dt Ticket
+  %dd= @transform_request.ticket_number.presence || "(none)"
+  %dt Action
+  %dd
+    - case @transform_request.end_date_action
+    - when "change"
+      - if @transform_request.change_mode == "cancel"
+        = "Cancel - end date set automatically to each policy's coverage start date"
+      - else
+        - if @transform_request.parsed_end_date
+          = "Terminate with end date #{@transform_request.parsed_end_date.strftime('%m/%d/%Y')}"
+        - else
+          = "Terminate (no end date provided)"
+    - when "remove"
+      = "Remove enrollee end dates; restore policy state to #{@transform_request.aasm_state}; benefit status #{@transform_request.benefit_status}"
+    - when "remove_cobra"
+      = "Remove COBRA eligibility date"
+    - else
+      = "No data preparation selected"
+%table.table.table-striped.table-bordered
+  %thead
+    %tr
+      %th Policy
+      %th Coverage Start
+      %th Plan
+      %th Restore Policy State To
+      %th Benefit Status
+      %th Current State
+      %th Current End Date
+      %th After This Action
+  %tbody
+    - @transform_request.policy_previews.each do |preview|
+      - policy = preview[:policy]
+      %tr
+        %td= policy.eg_id
+        %td= policy.policy_start ? policy.policy_start.strftime('%m/%d/%Y') : "none"
+        %td= "#{policy.plan.coverage_type} - #{policy.plan.name}"
+        %td= preview[:planned_aasm_state].presence || "(no change)"
+        %td= preview[:planned_benefit_status].presence || "(no change)"
+        %td= preview[:current_aasm_state]
+        %td= preview[:current_end_dates].map { |d| d.nil? ? "none" : d.strftime('%m/%d/%Y') }.join(", ")
+        %td= preview[:planned_changes]
+= form_tag(apply_data_changes_trading_partner_transforms_path, :method => :post) do
+  = hidden_field_tag "confirmed", "true"
+  = hidden_field_tag "trading_partner_transform_request[ticket_number]", @transform_request.ticket_number
+  = hidden_field_tag "trading_partner_transform_request[eg_ids]", @transform_request.eg_ids
+  = hidden_field_tag "trading_partner_transform_request[reason_code]", @transform_request.reason_code
+  = hidden_field_tag "trading_partner_transform_request[end_date_action]", @transform_request.end_date_action
+  = hidden_field_tag "trading_partner_transform_request[end_date]", @transform_request.end_date
+  = hidden_field_tag "trading_partner_transform_request[change_mode]", @transform_request.change_mode
+  = hidden_field_tag "trading_partner_transform_request[aasm_state]", @transform_request.aasm_state
+  = hidden_field_tag "trading_partner_transform_request[benefit_status]", @transform_request.benefit_status
+  .row
+    .col-md-4
+      = submit_tag "Confirm & Apply", :class => "btn btn-info"
+      = link_to "Cancel", new_trading_partner_transform_path, :class => "btn btn-danger"
